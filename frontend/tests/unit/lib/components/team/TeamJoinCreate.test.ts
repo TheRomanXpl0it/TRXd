@@ -1,4 +1,5 @@
-import { render, screen, waitFor, within, fireEvent } from '@testing-library/svelte';
+import { screen, waitFor, within, fireEvent } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { toast } from 'svelte-sonner';
@@ -29,7 +30,7 @@ describe('TeamJoinCreate Component', () => {
 	});
 
 	it('renders join and create buttons', () => {
-		render(TeamJoinCreate);
+		renderWithProviders(TeamJoinCreate);
 
 		expect(screen.getByRole('button', { name: /^join team$/i })).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /^create team$/i })).toBeInTheDocument();
@@ -39,7 +40,7 @@ describe('TeamJoinCreate Component', () => {
 		const user = userEvent.setup();
 		vi.mocked(joinTeam).mockResolvedValueOnce({ ok: true } as any);
 
-		render(TeamJoinCreate);
+		renderWithProviders(TeamJoinCreate);
 		await flush();
 
 		await fireEvent.click(screen.getByRole('button', { name: /^join team$/i }));
@@ -66,7 +67,7 @@ describe('TeamJoinCreate Component', () => {
 		const user = userEvent.setup();
 		vi.mocked(joinTeam).mockRejectedValueOnce(new Error('Bad credentials'));
 
-		render(TeamJoinCreate);
+		renderWithProviders(TeamJoinCreate);
 		await flush();
 
 		await fireEvent.click(screen.getByRole('button', { name: /^join team$/i }));
@@ -91,7 +92,7 @@ describe('TeamJoinCreate Component', () => {
 	it('opens create dialog and validates password mismatch', async () => {
 		const user = userEvent.setup();
 
-		render(TeamJoinCreate);
+		renderWithProviders(TeamJoinCreate);
 		await flush();
 
 		await fireEvent.click(screen.getByRole('button', { name: /^create team$/i }));
@@ -120,7 +121,7 @@ describe('TeamJoinCreate Component', () => {
 		const user = userEvent.setup();
 		vi.mocked(createTeam).mockResolvedValueOnce({ ok: true } as any);
 
-		render(TeamJoinCreate);
+		renderWithProviders(TeamJoinCreate);
 		await flush();
 
 		await fireEvent.click(screen.getByRole('button', { name: /^create team$/i }));
@@ -151,7 +152,7 @@ describe('TeamJoinCreate Component', () => {
 			() => new Promise((resolve) => setTimeout(() => resolve({ ok: true } as any), 200))
 		);
 
-		render(TeamJoinCreate);
+		renderWithProviders(TeamJoinCreate);
 		await flush();
 
 		await fireEvent.click(screen.getByRole('button', { name: /^join team$/i }));

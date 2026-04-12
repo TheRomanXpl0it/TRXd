@@ -7,7 +7,13 @@
 	import Solvelist from '$lib/components/account/AccountScoreboard.svelte';
 	import UserUpdate from '$lib/components/account/AccountEdit.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { Edit, Shield, Trophy, Target, Users, Globe, Mail, Medal } from '@lucide/svelte';
+	import {
+		Pencil,
+		Mail,
+		Users,
+		Globe,
+		Medal
+	} from '@lucide/svelte';
 	import ErrorMessage from '$lib/components/ui/error-message.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -19,7 +25,7 @@
 	import countries from '$lib/data/countries.json';
 
 	let editSheetOpen = $state(false);
-	let activeTab = $state<'overview' | 'solves'>('overview');
+	let activeTab = $state<'overview' | 'solves' | 'achievements'>('overview');
 
 	// Derive currentUserId from params/user
 	const currentUserId = $derived.by(() => {
@@ -139,7 +145,7 @@
 			<h2 class="text-3xl font-bold tracking-tight">Profile</h2>
 			{#if isOwnProfile}
 				<Button variant="outline" size="sm" onclick={() => (editSheetOpen = true)} class="gap-2">
-					<Edit class="h-4 w-4" />
+					<Pencil class="h-4 w-4" />
 					Edit Profile
 				</Button>
 			{/if}
@@ -328,24 +334,32 @@
 								>
 							</Card.Header>
 							<Card.Content>
-								{#if userVerboseData?.solves && userVerboseData.solves.length > 0}
+								{#if userVerboseData?.total_category_challenges && userVerboseData.total_category_challenges.length > 0}
 									{@const categories = (() => {
-										const map = new Map();
-										for (const s of userVerboseData.solves) map.set(s.category, (map.get(s.category) ?? 0) + 1);
-										const total = [...map.values()].reduce((a, b) => a + b, 0) || 1;
-										return [...map.entries()]
-											.sort((a, b) => b[1] - a[1])
-											.map(([cat, count]) => ({ cat, count, pct: Math.round((count / total) * 100) }));
+										const solveCounts: Record<string, number> = {};
+										for (const s of userVerboseData.solves || []) {
+											if (s.category) solveCounts[s.category] = (solveCounts[s.category] || 0) + 1;
+										}
+										return userVerboseData.total_category_challenges
+											.map((tc) => ({
+												cat: tc.category,
+												count: solveCounts[tc.category] || 0,
+												total: tc.count || 1,
+												pct: Math.round(((solveCounts[tc.category] || 0) / (tc.count || 1)) * 100)
+											}))
+											.sort((a, b) => b.pct - a.pct || b.count - a.count);
 									})()}
 									<div class="grid gap-4 sm:grid-cols-2">
 										{#each categories as c}
 											<div class="space-y-1">
-												<div class="flex justify-between text-xs font-medium">
-													<span>{c.cat}</span>
-													<span class="text-muted-foreground">{c.count} ({c.pct}%)</span>
+												<div class="flex justify-between text-xs font-semibold">
+													<span class="text-foreground/90">{c.cat}</span>
+													<span class={c.pct === 100 ? "text-primary font-bold" : "text-muted-foreground"}>
+														{c.count} / {c.total} ({c.pct}%)
+													</span>
 												</div>
 												<div class="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-													<div class="bg-primary h-full" style="width: {c.pct}%"></div>
+													<div class="bg-primary h-full transition-all duration-500" style="width: {c.pct}%"></div>
 												</div>
 											</div>
 										{/each}

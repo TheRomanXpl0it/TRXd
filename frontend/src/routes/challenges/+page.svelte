@@ -14,11 +14,30 @@
 	import ChallengeModal from '$lib/components/challenges/ChallengeModal.svelte';
 	import AdminControls from '$lib/components/challenges/AdminControls.svelte';
 	import WaitingPage from '$lib/components/challenges/WaitingPage.svelte';
-	import { Flag, Users } from '@lucide/svelte';
+	import { Flag, Users, ChevronDown, Search, Monitor } from '@lucide/svelte';
+	import { slide } from 'svelte/transition';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { Input } from '$lib/components/ui/input/index.js';
 	import type { Challenge } from '$lib/types';
 
 	import { config } from '$lib/env';
+	import SidebarChallengeView from '$lib/components/challenges/SidebarChallengeView.svelte';
+
+	import { uiStore } from '$lib/stores/ui.svelte';
+
+	// Use uiStore for reactive view preference
+	const challengeView = $derived(uiStore.challengeView);
+
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			document.body.classList.toggle('overflow-hidden', challengeView === 'sidebar');
+		}
+		return () => {
+			if (typeof document !== 'undefined') {
+				document.body.classList.remove('overflow-hidden');
+			}
+		};
+	});
 
 	// 1. Basic Auth Deriveds
 	const isAdmin = $derived(authState.user?.role === 'Admin' || authState.user?.role === 'Author');
@@ -26,7 +45,11 @@
 		if (!authState.ready || !authState.startTime) return false;
 		return new Date(authState.startTime).getTime() > Date.now();
 	});
-	const isMissingTeam = $derived(authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin);
+	const isMissingTeam = $derived(
+		authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin
+	);
+
+	let openSolves = $state(false);
 
 	// 2. Local State
 	let createChallengeOpen = $state(false);
@@ -34,248 +57,57 @@
 	let countdowns: Record<string, number> = $state({});
 	const queryClient = useQueryClient();
 
-	// 3. Lazy-loaded admin component handles
-	let CreateModalCmp: any | null = $state(null);
-	let DeleteDialogCmp: any | null = $state(null);
-	let ChallengeEditSheetCmp: any | null = $state(null);
+	let search = $state('');
+	let debouncedSearch = $state('');
+	let filterCategories = $state<string[]>([]);
+	let filterTags = $state<string[]>([]);
+	let openModal = $state(false);
 
-	async function preloadAdminComponent(
-		load: () => Promise<{ default: any }>,
-		assign: (component: any) => void,
-		isActive: () => boolean
-	) {
-		try {
-			const mod = await load();
-			if (isActive()) {
-				assign(mod.default);
-			}
-		} catch {
-			// Admin preloading is best-effort and should not surface background import failures.
-		}
-	}
-
-	// 4. Queries (Dependent on 1)
+	// 3. Data Fetching
 	const challengesQuery = createQuery(() => ({
 		queryKey: ['challenges'],
 		queryFn: getChallenges,
-		staleTime: 5 * 60 * 1000,
-		enabled: (!upcoming || isAdmin) && !isMissingTeam
+		enabled: authState.ready && !!authState.user
 	}));
 
 	const categoriesQuery = createQuery(() => ({
 		queryKey: ['categories'],
 		queryFn: getCategories,
-		staleTime: 10 * 60 * 1000,
-		enabled: (!upcoming || isAdmin) && !isMissingTeam
+		enabled: authState.ready && !!authState.user
 	}));
 
-	// 5. Query-dependent Deriveds
-	const challenges = $derived(challengesQuery.data ?? []);
-	const loading = $derived(challengesQuery.isLoading || categoriesQuery.isLoading);
-	const error = $derived(challengesQuery.error?.message ?? categoriesQuery.error?.message ?? null);
-	const isNotStarted = $derived(
-		error === 'Not started yet' || 
-		(challengesQuery?.error?.message === 'Not started yet') || 
-		(categoriesQuery?.error?.message === 'Not started yet') || 
-		(upcoming && !isAdmin)
-	);
-
-	// Preload admin components when page loads if user is admin
-	onMount(() => {
-		if (!isAdmin) return;
-
-		let active = true;
-		const isActive = () => active;
-
-		void preloadAdminComponent(
-			() => import('$lib/components/challenges/CreateChallengeModal.svelte'),
-			(component) => {
-				CreateModalCmp = component;
-			},
-			isActive
-		);
-		void preloadAdminComponent(
-			() => import('$lib/components/challenges/DeleteChallengeDialog.svelte'),
-			(component) => {
-				DeleteDialogCmp = component;
-			},
-			isActive
-		);
-		void preloadAdminComponent(
-			() => import('$lib/components/challenges/ChallengeEditSheet.svelte'),
-			(component) => {
-				ChallengeEditSheetCmp = component;
-			},
-			isActive
-		);
-
-		return () => {
-			active = false;
-		};
-	});
-
-	async function openCreate() {
-		if (!CreateModalCmp) {
-			const mod = await import('$lib/components/challenges/CreateChallengeModal.svelte');
-			CreateModalCmp = mod.default;
-		}
-		createChallengeOpen = true;
-	}
-
-	async function requestDelete(ch: any) {
-		toDelete = ch;
-		if (!DeleteDialogCmp) {
-			const mod = await import('$lib/components/challenges/DeleteChallengeDialog.svelte');
-			DeleteDialogCmp = mod.default;
-		}
-		confirmDeleteOpen = true;
-	}
-
-	async function modifyChallenge(ch: any) {
-		if (!ChallengeEditSheetCmp) {
-			const mod = await import('$lib/components/challenges/ChallengeEditSheet.svelte');
-			ChallengeEditSheetCmp = mod.default;
-		}
-		editOpen = true;
-	}
-
-	// Derive the actual selected challenge from the ID - always fresh from challenges array
-	const selected = $derived(
-		selectedId ? (challenges.find((c: any) => c.id === selectedId) ?? null) : null
-	);
-
+	const challenges = $derived((challengesQuery.data as Challenge[]) ?? ([] as Challenge[]));
 	const categories = $derived(
-		(categoriesQuery.data ?? [])
-			.map((c: any) => ({
-				value: typeof c === 'string' ? c : c.name,
-				label: typeof c === 'string' ? c : c.name
-			}))
-			.sort((a: any, b: any) => (a.label || '').localeCompare(b.label || ''))
+		((categoriesQuery.data as string[]) ?? ([] as string[])).map((c: string) => ({
+			value: c,
+			label: c
+		}))
 	);
+	const loading = $derived(challengesQuery.isLoading || categoriesQuery.isLoading);
+	const error = $derived(challengesQuery.error?.message);
 
-	// Filters
-	let filterCategories = $state<string[]>([]);
-	let filterTags = $state<string[]>([]);
-	let search = $state('');
-	let debouncedSearch = $state('');
-	let tagsOpen = $state(false);
-	let categoriesOpen = $state(false);
+	const sortedChallenges = $derived.by(() => {
+		let list = [...challenges];
 
-	// Fuzzy search helpers
-	function norm(s: any) {
-		return String(s ?? '')
-			.trim()
-			.toLowerCase();
-	}
-
-	function fuzzyScore(text: string, query: string) {
-		const t = norm(text),
-			q = norm(query);
-		if (!q) return 1e9;
-		if (t === q) return 1e6;
-		if (t.startsWith(q)) return 5e5;
-		if (t.includes(q)) return 3e5;
-		let ti = 0,
-			qi = 0,
-			penalty = 0;
-		while (ti < t.length && qi < q.length) {
-			if (t[ti] === q[qi]) qi++;
-			else penalty++;
-			ti++;
-		}
-		return qi === q.length ? 1e5 - penalty : -Infinity;
-	}
-
-	// Optimize filtering with early returns and memoization
-	const filteredChallenges = $derived.by(() => {
-		const hasSearch = debouncedSearch.trim().length > 0;
-		const hasCategoryFilter = filterCategories && filterCategories.length > 0;
-		const hasTagsFilter = filterTags && filterTags.length > 0;
-
-		// No filters at all - return all challenges
-		if (!hasSearch && !hasCategoryFilter && !hasTagsFilter) {
-			return challenges ?? [];
+		if (debouncedSearch) {
+			const s = debouncedSearch.toLowerCase();
+			list = list.filter(
+				(c) =>
+					c.name.toLowerCase().includes(s) ||
+					(c.category ?? '').toLowerCase().includes(s) ||
+					(c.tags ?? []).some((t: any) => String(t).toLowerCase().includes(s))
+			);
 		}
 
-		const searchQuery = hasSearch ? norm(debouncedSearch) : '';
-
-		return (challenges ?? []).filter((c: any) => {
-			if (hasCategoryFilter) {
-				const cat = norm(c.category);
-				if (!filterCategories.some((fc: string) => norm(fc) === cat)) {
-					return false;
-				}
-			}
-
-			// Tags filter
-			if (hasTagsFilter) {
-				const tags = (c?.tags ?? []).map((t: any) => String(t));
-				if (!filterTags.every((t: string) => tags.includes(t))) {
-					return false;
-				}
-			}
-
-			if (hasSearch) {
-				const cat = c.category;
-				const tags = (c?.tags ?? []).map((t: any) => String(t));
-				const name = c?.name ?? c?.title ?? '';
-
-				// Quick check: exact name match
-				if (norm(name).includes(searchQuery)) return true;
-				if (norm(cat).includes(searchQuery)) return true;
-				if (tags.some((t: string) => norm(t).includes(searchQuery))) return true;
-
-				// Fallback to fuzzy if simple includes didn't work
-				return (
-					fuzzyScore(name, searchQuery) > -Infinity ||
-					fuzzyScore(cat, searchQuery) > -Infinity ||
-					tags.some((t: string) => fuzzyScore(t, searchQuery) > -Infinity)
-				);
-			}
-
-			return true;
-		});
-	});
-
-	// Sort challenges by points (lowest first), stable sort for equal points
-	const sortedChallenges = $derived(
-		filteredChallenges
-			.map((c: any, i: number) => ({ ...c, _index: i }))
-			.sort((a: any, b: any) => {
-				const pointsDiff = (a.points ?? 0) - (b.points ?? 0);
-				return pointsDiff !== 0 ? pointsDiff : a._index - b._index;
-			})
-	);
-
-	let points: number = $state(500);
-	let category: any = $state(null);
-	let challengeType = $state('Container');
-	let challengeName = $state('');
-	let challengeDescription = $state('');
-	let dynamicScore = $state(false);
-	let createLoading = $state(false);
-
-	let openModal = $state(false);
-	let solvesOpen = $state(false);
-	let editOpen = $state(false);
-	let creatingInstance = $state<Record<number, boolean>>({});
-	let destroyingInstance = $state<Record<number, boolean>>({});
-
-	// Load compact view preference from localStorage
-	let compactView = $state(false);
-
-	onMount(() => {
-		const saved = localStorage.getItem('challenges-compact-view');
-		if (saved !== null) {
-			compactView = saved === 'true';
+		if (filterCategories.length > 0) {
+			list = list.filter((c) => filterCategories.includes(c.category ?? 'Uncategorized'));
 		}
-	});
 
-	// Save to localStorage when compactView changes
-	$effect(() => {
-		if (typeof localStorage !== 'undefined') {
-			localStorage.setItem('challenges-compact-view', String(compactView));
+		if (filterTags.length > 0) {
+			list = list.filter((c) => (c.tags ?? []).some((t: any) => filterTags.includes(String(t))));
 		}
+
+		return list.sort((a, b) => (a.points ?? 0) - (b.points ?? 0));
 	});
 
 	const allTags = $derived(
@@ -300,12 +132,6 @@
 	let confirmDeleteOpen = $state(false);
 	let deleting = $state(false);
 	let toDelete: any = $state(null);
-
-	const challengeTypes = [
-		{ value: 'Container', label: 'Container' },
-		{ value: 'Compose', label: 'Compose' },
-		{ value: 'Normal', label: 'Normal' }
-	];
 
 	// Update countdowns when challenges data changes
 	$effect(() => {
@@ -435,63 +261,45 @@
 	}
 </script>
 
-{#if !upcoming}
-	<div
-		class="from-muted/20 to-background mb-6 mt-6 rounded-xl border-0 bg-gradient-to-br p-6 shadow-sm"
-	>
-		<div class="flex items-center gap-4">
-			<div
-				class="bg-background flex h-16 w-16 shrink-0 items-center justify-center rounded-full shadow-sm"
-			>
-				<Flag class="text-muted-foreground h-8 w-8" />
-			</div>
-			<div>
-				<h1 class="text-3xl font-bold tracking-tight">Challenges</h1>
-			</div>
-		</div>
+{#if (!upcoming || isAdmin) && challengeView !== 'sidebar'}
+	<div class="mb-10 w-full">
+		<ChallengeFilters
+			bind:search
+			bind:filterCategories
+			bind:filterTags
+			{categories}
+			{allTags}
+			{activeFiltersCount}
+		/>
 	</div>
-{/if}
-
-{#if isAdmin}
-	<AdminControls
-		onopen-create={openCreate}
-		oncategory-created={() => {
-			challengesQuery.refetch();
-			categoriesQuery.refetch();
-		}}
-	/>
-{/if}
-
-{#if !upcoming}
-<ChallengeFilters
-	bind:search
-	bind:filterCategories
-	bind:filterTags
-	bind:compactView
-	{categories}
-	{allTags}
-	{activeFiltersCount}
-/>
 {/if}
 
 {#if isMissingTeam}
-	<div class="flex flex-col items-center justify-center py-20 text-center animate-in fade-in slide-in-from-bottom-4 duration-500">
-		<div class="bg-muted/50 rounded-full p-6 mb-6">
-			<Users class="h-12 w-12 text-muted-foreground opacity-50" />
+	<div
+		class="animate-in fade-in slide-in-from-bottom-4 flex flex-col items-center justify-center py-20 text-center duration-500"
+	>
+		<div class="bg-muted/50 mb-6 rounded-full p-6">
+			<Users class="text-muted-foreground h-12 w-12 opacity-50" />
 		</div>
-		<h2 class="text-3xl font-bold tracking-tight mb-3">Team Required</h2>
-		<p class="text-muted-foreground mb-8 max-w-md mx-auto text-lg leading-relaxed">
-			You must join or create a team to participate in the competition and view challenges. 
+		<h2 class="mb-3 text-3xl font-bold tracking-tight">Team Required</h2>
+		<p class="text-muted-foreground mx-auto mb-8 max-w-md text-lg leading-relaxed">
+			You must join or create a team to participate in the competition and view challenges.
 		</p>
 		<div class="flex gap-4">
-			<Button href="/team" class="px-8 h-11 text-base font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95">Go to Team Page</Button>
+			<Button
+				href="/team"
+				class="shadow-primary/20 h-11 px-8 text-base font-semibold shadow-lg transition-all hover:scale-105 active:scale-95"
+				>Go to Team Page</Button
+			>
 		</div>
 	</div>
-{:else if isNotStarted}
+{:else if upcoming && !isAdmin}
 	<WaitingPage startTime={authState.startTime} />
 {:else if loading}
 	<div class="flex flex-col items-center justify-center py-12">
-		<Spinner class="mb-4 h-8 w-8" />
+		<div
+			class="border-primary mb-4 h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
+		></div>
 		<p class="text-gray-600 dark:text-gray-400">Loading challenges...</p>
 	</div>
 {:else if error}
@@ -501,106 +309,61 @@
 		<p class="font-semibold">Error loading challenges</p>
 		<p class="text-sm">{error}</p>
 	</div>
+{:else if challengeView === 'sidebar'}
+	<div class="flex h-[calc(100vh-80px)] -mt-6 -mb-20 flex-col items-center justify-center">
+		<SidebarChallengeView
+			{grouped}
+			onOpenChallenge={openChallenge}
+			{countdowns}
+			onCountdownUpdate={updateCountdown}
+		/>
+	</div>
 {:else}
-	{#each grouped as [category, items]}
-		<section
-			class={compactView ? 'mb-4' : 'mb-10'}
-			aria-labelledby="category-{category.replace(/\s+/g, '-')}"
-		>
-			<div class="{compactView ? 'mb-2' : 'mb-3'} flex items-center gap-3">
-				<h2
-					id="category-{category.replace(/\s+/g, '-')}"
-					class="text-2xl font-bold leading-tight text-gray-900 dark:text-white"
-				>
+	<div class="space-y-10 pb-20">
+		{#each grouped as [category, items]}
+			<div>
+				<h2 class="text-muted-foreground/60 mb-4 text-sm font-black uppercase tracking-widest">
 					{category}
 				</h2>
-				<span class="text-sm text-gray-500 dark:text-gray-400">
-					{items.length} challenge{items.length === 1 ? '' : 's'}
-				</span>
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					{#each items as ch (ch.id)}
+						<ChallengeCard
+							challenge={ch}
+							countdown={countdowns[ch.id] ?? 0}
+							onclick={() => openChallenge(ch)}
+						/>
+					{/each}
+				</div>
 			</div>
-
-			{#if compactView}
-				<div class="space-y-2 px-0.5 py-0.5" role="list" aria-label="{category} challenges">
-					{#each items as ch (ch.id)}
-						<ChallengeCard
-							challenge={ch}
-							{compactView}
-							{isAdmin}
-							countdown={countdowns[ch.id] ?? 0}
-							onclick={() => openChallenge(ch)}
-						/>
-					{/each}
-				</div>
-			{:else}
-				<div
-					class="grid gap-4 px-0.5 sm:grid-cols-2 lg:grid-cols-3"
-					role="list"
-					aria-label="{category} challenges"
-				>
-					{#each items as ch (ch.id)}
-						<ChallengeCard
-							challenge={ch}
-							{compactView}
-							{isAdmin}
-							countdown={countdowns[ch.id] ?? 0}
-							onclick={() => openChallenge(ch)}
-						/>
-					{/each}
-				</div>
-			{/if}
-		</section>
-	{/each}
+		{/each}
+		{#if grouped.length === 0}
+			<div class="flex flex-col items-center justify-center py-20 text-center">
+				<p class="text-muted-foreground">No challenges found.</p>
+			</div>
+		{/if}
+	</div>
 {/if}
 
-<ChallengeModal
-	bind:open={openModal}
-	challenge={selected}
-	countdown={selected?.id ? (countdowns[selected.id] ?? 0) : 0}
-	{isAdmin}
-	onEdit={modifyChallenge}
-	onDelete={requestDelete}
-	onSolved={handleChallengeSolved}
-	onCountdownUpdate={updateCountdown}
-	onOpenSolves={() => (solvesOpen = true)}
-	onInstanceChange={(updatedChallenge) => {
-		if (updatedChallenge) {
-			queryClient.setQueryData(['challenges'], (old: any[]) => {
-				return old?.map((c) => (c.id === updatedChallenge.id ? updatedChallenge : c)) ?? [];
-			});
-		} else {
-			challengesQuery.refetch();
-		}
-	}}
-/>
-
-{#if selected}
-	<SolveListSheet bind:open={solvesOpen} challenge={selected} />
-{/if}
-
-{#if DeleteDialogCmp}
-	<DeleteDialogCmp bind:open={confirmDeleteOpen} {toDelete} {deleting} onconfirm={confirmDelete} />
-{/if}
-
-{#if CreateModalCmp}
-	<CreateModalCmp
-		bind:open={createChallengeOpen}
-		bind:challengeName
-		bind:challengeDescription
-		bind:category
-		bind:challengeType
-		bind:points
-		bind:dynamicScore
-		{categories}
-		{challengeTypes}
-		oncreated={() => challengesQuery.refetch()}
+{#if selectedId}
+	<ChallengeModal
+		challenge={sortedChallenges.find((c) => c.id === selectedId)}
+		bind:open={openModal}
+		onSolved={handleChallengeSolved}
+		onCountdownUpdate={updateCountdown}
+		onOpenSolves={() => (openSolves = true)}
+		countdown={countdowns[selectedId] ?? 0}
 	/>
+	{#if sortedChallenges.find((c) => c.id === selectedId)}
+		<SolveListSheet
+			bind:open={openSolves}
+			challenge={sortedChallenges.find((c) => c.id === selectedId)!}
+		/>
+	{/if}
 {/if}
 
-{#if ChallengeEditSheetCmp}
-	<ChallengeEditSheetCmp
-		bind:open={editOpen}
-		challenge_user={selected}
-		onupdated={() => challengesQuery.refetch()}
-		all_tags={allTags}
-	/>
-{/if}
+<style>
+	:global(body.overflow-hidden) {
+		overflow: hidden !important;
+		padding-right: 0 !important;
+	}
+</style>

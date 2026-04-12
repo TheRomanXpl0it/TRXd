@@ -1,10 +1,11 @@
-import { render, screen } from '@testing-library/svelte';
+import { screen } from '@testing-library/svelte';
+import { renderWithProviders } from '../../render';
 import { describe, expect, it } from 'vitest';
 import RadarChart from '$lib/components/RadarChart.svelte';
 
 describe('RadarChart', () => {
 	it("renders the placeholder message when competition hasn't started (no totalChallenges)", () => {
-		render(RadarChart, {
+		renderWithProviders(RadarChart, {
 			props: {
 				solves: [],
 				totalChallenges: []
@@ -15,7 +16,7 @@ describe('RadarChart', () => {
 	});
 
 	it('prepares to render the chart when totalChallenges are provided', () => {
-		const { container } = render(RadarChart, {
+		const { container } = renderWithProviders(RadarChart, {
 			props: {
 				solves: [],
 				totalChallenges: [

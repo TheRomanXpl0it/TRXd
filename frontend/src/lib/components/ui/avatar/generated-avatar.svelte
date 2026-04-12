@@ -44,8 +44,8 @@
 		const wrap = (h: number) => (h < 0 ? h + 360 : h > 360 ? h - 360 : h);
 
 		return {
-			// Very dark, desaturated version of base hue for background
-			bg: `hsl(${baseHue}, 20%, 8%)`,
+			// Brighter, more neutral background to avoid 'black hole' look
+			bg: `hsl(${baseHue}, 15%, 15%)`,
 			// Bright, punchy main color
 			primary: {
 				start: `hsl(${baseHue}, 75%, 60%)`,
@@ -114,27 +114,27 @@
 			{
 				id: 'l1',
 				type: shapeTypes[Math.floor(rand() * 3)],
-				x: 10 + rand() * 20,
-				y: 10 + rand() * 20,
-				size: 55 + rand() * 20,
+				x: -20 + rand() * 20,
+				y: -20 + rand() * 20,
+				size: 100 + rand() * 40,
 				rotate: rand() * 360,
 				gradient: palette.primary
 			},
 			{
 				id: 'l2',
 				type: shapeTypes[Math.floor(rand() * 3)],
-				x: 35 + rand() * 30,
-				y: 30 + rand() * 30,
-				size: 40 + rand() * 20,
+				x: 10 + rand() * 40,
+				y: 10 + rand() * 40,
+				size: 80 + rand() * 40,
 				rotate: rand() * 360,
 				gradient: palette.secondary
 			},
 			{
 				id: 'l3',
 				type: shapeTypes[Math.floor(rand() * 3)],
-				x: 50 + rand() * 20,
-				y: 50 + rand() * 20,
-				size: 25 + rand() * 15,
+				x: 30 + rand() * 40,
+				y: -10 + rand() * 40,
+				size: 60 + rand() * 40,
 				rotate: rand() * 360,
 				gradient: palette.accent
 			}

@@ -69,10 +69,18 @@ export async function updateUserRole(userId: number, role: string): Promise<any>
 export async function resetUserPassword(userId: number, newPassword?: string): Promise<any> {
 	const body: any = { user_id: userId };
 	if (newPassword) body.new_password = newPassword;
-	
+
 	return api<any>('/users/password', {
 		headers: { 'content-type': 'application/json' },
 		method: 'PATCH',
 		body: JSON.stringify(body)
 	});
+}
+
+export async function getUserByEmail(email: string): Promise<any> {
+	return api<any>(`/users/email?email=${encodeURIComponent(email)}`);
+}
+
+export async function getUserByName(name: string): Promise<any> {
+	return api<any>(`/users/name?name=${encodeURIComponent(name)}`);
 }

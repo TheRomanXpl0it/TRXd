@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { screen, waitFor } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ChallengeModal from '$lib/components/challenges/ChallengeModal.svelte';
@@ -51,68 +52,68 @@ describe('ChallengeModal Component', () => {
 		});
 	});
 
-	it('renders challenge name and description', () => {
+	it('renders challenge name and description', async () => {
 		const challenge = generateRandomChallenge({
 			name: 'Test Challenge',
 			description: 'Test description here'
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		expect(screen.getByText('Test Challenge')).toBeInTheDocument();
-		expect(screen.getByText('Test description here')).toBeInTheDocument();
+		expect(await screen.findByText('Test Challenge')).toBeInTheDocument();
+		expect(await screen.findByText('Test description here')).toBeInTheDocument();
 	});
 
-	it('displays all tags', () => {
+	it('displays all tags', async () => {
 		const challenge = generateRandomChallenge({
 			tags: ['web', 'pwn', 'forensics']
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		expect(screen.getByText('web')).toBeInTheDocument();
-		expect(screen.getByText('pwn')).toBeInTheDocument();
-		expect(screen.getByText('forensics')).toBeInTheDocument();
+		expect(await screen.findByText('web')).toBeInTheDocument();
+		expect(await screen.findByText('pwn')).toBeInTheDocument();
+		expect(await screen.findByText('forensics')).toBeInTheDocument();
 	});
 
-	it('shows blood icon for unsolved challenges', () => {
+	it('shows blood icon for unsolved challenges', async () => {
 		const challenge = generateRandomChallenge({
 			solves: 0
 		});
 
-		const { container } = render(ChallengeModal, {
+		const { container } = renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		expect(screen.getByText('0 solves')).toBeInTheDocument();
+		expect(await screen.findByText('0 solves')).toBeInTheDocument();
 	});
 
-	it('shows solves count as clickable button when solves > 0', () => {
+	it('shows solves count as clickable button when solves > 0', async () => {
 		const challenge = generateRandomChallenge({
 			solves: 5
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		const solvesButton = screen.getByRole('button', { name: /view 5 solves/i });
+		const solvesButton = await screen.findByRole('button', { name: /view 5 solves/i });
 		expect(solvesButton).toBeInTheDocument();
 	});
 
@@ -123,7 +124,7 @@ describe('ChallengeModal Component', () => {
 		const onOpenSolves = vi.fn();
 		const user = userEvent.setup();
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge,
@@ -137,25 +138,25 @@ describe('ChallengeModal Component', () => {
 		expect(onOpenSolves).toHaveBeenCalledTimes(1);
 	});
 
-	it('displays challenge authors', () => {
+	it('displays challenge authors', async () => {
 		const challenge = generateRandomChallenge({
 			authors: ['Alice', 'Bob', 'Charlie']
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		expect(screen.getByText(/by alice, bob, charlie/i)).toBeInTheDocument();
+		expect(await screen.findByText(/by alice, bob, charlie/i)).toBeInTheDocument();
 	});
 
-	it('shows admin controls when isAdmin is true', () => {
+	it('shows admin controls when isAdmin is true', async () => {
 		const challenge = generateRandomChallenge();
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge,
@@ -163,14 +164,14 @@ describe('ChallengeModal Component', () => {
 			}
 		});
 
-		expect(screen.getByRole('button', { name: /edit challenge/i })).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: /delete challenge/i })).toBeInTheDocument();
+		expect(await screen.findByRole('button', { name: /edit challenge/i })).toBeInTheDocument();
+		expect(await screen.findByRole('button', { name: /delete challenge/i })).toBeInTheDocument();
 	});
 
 	it('hides admin controls when isAdmin is false', () => {
 		const challenge = generateRandomChallenge();
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge,
@@ -187,7 +188,7 @@ describe('ChallengeModal Component', () => {
 		const onEdit = vi.fn();
 		const user = userEvent.setup();
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge,
@@ -196,7 +197,7 @@ describe('ChallengeModal Component', () => {
 			}
 		});
 
-		const editButton = screen.getByRole('button', { name: /edit challenge/i });
+		const editButton = await screen.findByRole('button', { name: /edit challenge/i });
 		await user.click(editButton);
 
 		expect(onEdit).toHaveBeenCalledWith(challenge);
@@ -207,7 +208,7 @@ describe('ChallengeModal Component', () => {
 		const onDelete = vi.fn();
 		const user = userEvent.setup();
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge,
@@ -216,27 +217,27 @@ describe('ChallengeModal Component', () => {
 			}
 		});
 
-		const deleteButton = screen.getByRole('button', { name: /delete challenge/i });
+		const deleteButton = await screen.findByRole('button', { name: /delete challenge/i });
 		await user.click(deleteButton);
 
 		expect(onDelete).toHaveBeenCalledWith(challenge);
 	});
 
-	it('displays attachments section when attachments exist', () => {
+	it('displays attachments section when attachments exist', async () => {
 		const challenge = generateRandomChallenge({
 			attachments: ['/files/challenge1.zip', '/files/challenge2.txt']
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		expect(screen.getByText(/attachments/i)).toBeInTheDocument();
-		expect(screen.getByText('challenge1.zip')).toBeInTheDocument();
-		expect(screen.getByText('challenge2.txt')).toBeInTheDocument();
+		expect(await screen.findByText(/attachments/i)).toBeInTheDocument();
+		expect(await screen.findByText('challenge1.zip')).toBeInTheDocument();
+		expect(await screen.findByText('challenge2.txt')).toBeInTheDocument();
 	});
 
 	it('does not display attachments section when no attachments', () => {
@@ -244,7 +245,7 @@ describe('ChallengeModal Component', () => {
 			attachments: []
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
@@ -254,40 +255,40 @@ describe('ChallengeModal Component', () => {
 		expect(screen.queryByText(/attachments/i)).not.toBeInTheDocument();
 	});
 
-	it('attachment links have correct attributes', () => {
+	it('attachment links have correct attributes', async () => {
 		const challenge = generateRandomChallenge({
 			attachments: ['/files/test.zip']
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		const link = screen.getByRole('link', { name: /download test.zip/i });
+		const link = await screen.findByRole('link', { name: /download test.zip/i });
 		expect(link).toHaveAttribute('href', `/attachments/${challenge.id}/files/test.zip`);
 		expect(link).toHaveAttribute('target', '_blank');
 		expect(link).toHaveAttribute('rel', 'noopener noreferrer');
 	});
 
-	it('shows connection string for non-instance challenges with host', () => {
+	it('shows connection string for non-instance challenges with host', async () => {
 		const challenge = generateRandomChallenge({
 			instance: false,
 			host: 'ctf.example.com',
 			port: 1337
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
-
-		expect(screen.getByText(/connection/i)).toBeInTheDocument();
-		expect(screen.getByText('ctf.example.com:1337')).toBeInTheDocument();
+		
+		expect(await screen.findByText(/connection/i)).toBeInTheDocument();
+		expect(await screen.findByText('ctf.example.com:1337')).toBeInTheDocument();
 	});
 
 	it('copies connection string to clipboard when clicked', async () => {
@@ -306,14 +307,14 @@ describe('ChallengeModal Component', () => {
 			configurable: true
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		const connectionButton = screen.getByRole('button', { name: /copy connection string/i });
+		const connectionButton = await screen.findByRole('button', { name: /copy connection string/i });
 		await user.click(connectionButton);
 
 		expect(mockClipboard).toHaveBeenCalledWith('ctf.example.com:8080');
@@ -329,7 +330,7 @@ describe('ChallengeModal Component', () => {
 			port: 1337
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
@@ -342,21 +343,21 @@ describe('ChallengeModal Component', () => {
 		expect(connectionHeadings.length).toBe(0);
 	});
 
-	it('handles connection string without port', () => {
+	it('handles connection string without port', async () => {
 		const challenge = generateRandomChallenge({
 			instance: false,
 			host: 'ctf.example.com',
 			port: null
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		expect(screen.getByText('ctf.example.com')).toBeInTheDocument();
+		expect(await screen.findByText('ctf.example.com')).toBeInTheDocument();
 	});
 
 	it('handles clipboard copy failure gracefully', async () => {
@@ -375,7 +376,7 @@ describe('ChallengeModal Component', () => {
 			configurable: true
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
@@ -390,33 +391,33 @@ describe('ChallengeModal Component', () => {
 		});
 	});
 
-	it('uses singular "solve" for solves count of 1', () => {
+	it('uses singular "solve" for solves count of 1', async () => {
 		const challenge = generateRandomChallenge({
 			solves: 1
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		expect(screen.getByRole('button', { name: /view 1 solve$/i })).toBeInTheDocument();
+		expect(await screen.findByRole('button', { name: /view 1 solve$/i })).toBeInTheDocument();
 	});
 
-	it('uses plural "solves" for solves count > 1', () => {
+	it('uses plural "solves" for solves count > 1', async () => {
 		const challenge = generateRandomChallenge({
 			solves: 10
 		});
 
-		render(ChallengeModal, {
+		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
 				challenge
 			}
 		});
 
-		expect(screen.getByRole('button', { name: /view 10 solves/i })).toBeInTheDocument();
+		expect(await screen.findByRole('button', { name: /view 10 solves/i })).toBeInTheDocument();
 	});
 });

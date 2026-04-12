@@ -14,6 +14,9 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import CountryFlag from '$lib/components/ui/country-flag.svelte';
+	import { Globe } from '@lucide/svelte';
+	import countries from '$lib/data/countries.json';
 
 	let perPage = $state(20);
 	let currentPage = $state(1);
@@ -44,16 +47,6 @@
 	const sorted = $derived(Array.isArray(scoreboardData) ? [...scoreboardData] : []);
 	const count = $derived(isPaginated ? (rawData?.pagination?.total ?? 0) : sorted.length);
 
-	const teamNames = $derived(
-		scoreboardData.reduce(
-			(acc: any, team: any) => {
-				acc[team.id] = team.name;
-				return acc;
-			},
-			{} as Record<string, string>
-		)
-	);
-
 	$effect(() => {
 		if (currentPage > 1) {
 			setTimeout(() => {
@@ -73,15 +66,20 @@
 	function handlePageChange(newPage: number) {
 		currentPage = newPage;
 	}
+
+	function getCountryIso2(iso3: string): string | null {
+		const country = (countries as any[]).find((c) => c.iso3?.toUpperCase() === iso3?.toUpperCase());
+		return country?.iso2?.toUpperCase() ?? null;
+	}
 </script>
 
-<div class="mx-auto max-w-6xl space-y-12 px-4 py-8 sm:px-6 sm:py-12 relative">
+<div class="relative mx-auto max-w-6xl space-y-12 px-4 py-8 sm:px-6 sm:py-12">
 	<!-- Compact Mode Toggle -->
-	<div class="absolute top-4 right-4 sm:top-8 sm:right-8 z-10">
+	<div class="absolute right-4 top-4 z-10 sm:right-8 sm:top-8">
 		<Button
 			variant="ghost"
 			size="icon"
-			class="text-muted-foreground/50 hover:text-foreground transition-colors hover:bg-muted/50 cursor-pointer"
+			class="text-muted-foreground/50 hover:text-foreground hover:bg-muted/50 cursor-pointer transition-colors"
 			onclick={() => (isCompact = !isCompact)}
 			title={isCompact ? 'Full View' : 'Compact View (Hide Legend)'}
 		>
@@ -95,10 +93,7 @@
 
 	<!-- Header Region -->
 	<div class="mb-8 mt-2 text-center">
-		<h1 class="text-5xl font-black tracking-tighter sm:text-6xl text-foreground">Scoreboard</h1>
-		<p class="mt-4 text-lg text-muted-foreground font-medium tracking-tight">
-			Rankings for all competing {authState.userMode ? 'players' : 'teams'}
-		</p>
+		<h1 class="text-foreground text-5xl font-black tracking-tighter sm:text-6xl">Scoreboard</h1>
 	</div>
 
 	{#if error}
@@ -106,9 +101,9 @@
 	{:else}
 		<!-- Graph Container -->
 		<div class="mb-12">
-			<ScoreHistory data={graphData} {teamNames} userMode={authState.userMode} compact={isCompact} />
+			<ScoreHistory data={graphData} userMode={authState.userMode} compact={isCompact} />
 		</div>
-		<Card.Root class="overflow-hidden border-0 shadow-sm mt-8">
+		<Card.Root class="mt-8 overflow-hidden border-0 shadow-sm">
 			<Card.Content class="p-0">
 				<div class="relative mx-4 overflow-auto sm:mx-6">
 					<Table.Root>
@@ -145,9 +140,11 @@
 									</Table.Row>
 								{/each}
 							{:else}
-								{@const pageRows = isPaginated
-									? sorted
-									: sorted.slice((currentPage - 1) * perPage, currentPage * perPage)}
+								{@const pageRows = (
+									isPaginated
+										? sorted
+										: sorted.slice((currentPage - 1) * perPage, currentPage * perPage)
+								).filter((row) => (row.score ?? 0) > 0)}
 
 								{#if pageRows.length === 0}
 									<Table.Row>
@@ -163,15 +160,19 @@
 									{#each pageRows as row, i (row.id)}
 										{@const rank = (currentPage - 1) * perPage + i + 1}
 										<Table.Row
-											class="hover:bg-muted/50 cursor-pointer border-b-0 transition-colors"
-											onclick={() =>
-												goto(authState.userMode ? `/account/${row.id}` : `/team/${row.id}`)}
+											class="hover:bg-muted/50 border-b-0 transition-colors"
 										>
-											<Table.Cell class="font-medium align-middle">
-												<div class="flex items-center gap-3 w-16">
-													<span 
+											<Table.Cell class="align-middle font-medium">
+												<div class="flex w-16 items-center gap-3">
+													<span
 														class={`text-xl font-black tabular-nums tracking-tighter drop-shadow-sm ${rank > 3 ? 'text-muted-foreground' : ''}`}
-														style={rank === 1 ? 'color: #fbbf24; text-shadow: 0 0 10px rgba(251,191,36,0.3);' : rank === 2 ? 'color: #94a3b8; text-shadow: 0 0 10px rgba(148,163,184,0.3);' : rank === 3 ? 'color: #cd7f32; text-shadow: 0 0 10px rgba(205,127,50,0.3);' : ''}
+														style={rank === 1
+															? 'color: #fbbf24; text-shadow: 0 0 10px rgba(251,191,36,0.3);'
+															: rank === 2
+																? 'color: #94a3b8; text-shadow: 0 0 10px rgba(148,163,184,0.3);'
+																: rank === 3
+																	? 'color: #cd7f32; text-shadow: 0 0 10px rgba(205,127,50,0.3);'
+																	: ''}
 													>
 														#{rank}
 													</span>
@@ -179,18 +180,39 @@
 											</Table.Cell>
 
 											<Table.Cell class="py-3">
-												<div class="flex items-center gap-3">
-													<div
-														class="border-border h-8 w-8 shrink-0 overflow-hidden rounded-full border"
-													>
-														<GeneratedAvatar seed={row.name} class="h-full w-full" />
+												<a
+													href={authState.userMode ? `/account/${row.id}` : `/team/${row.id}`}
+													class="flex items-center gap-3 decoration-primary/50 underline-offset-4 hover:underline"
+												>
+													<div class="relative">
+														<div
+															class="border-border h-8 w-8 shrink-0 overflow-hidden rounded-full border"
+														>
+															<GeneratedAvatar seed={row.name} class="h-full w-full" />
+														</div>
+
+														{#if row.country}
+															{@const iso2 = getCountryIso2(row.country)}
+															<div
+																class="bg-background border-border absolute -bottom-1 -left-1 flex h-3.5 w-5 items-center justify-center overflow-hidden rounded-[2px] border-[0.5px] shadow-sm"
+															>
+																{#if iso2}
+																	<CountryFlag
+																		country={iso2}
+																		width={32}
+																		height={32}
+																		class="h-full w-full object-cover"
+																	/>
+																{:else}
+																	<Globe class="text-muted-foreground h-2 w-2" />
+																{/if}
+															</div>
+														{/if}
 													</div>
-													<span
-														class="text-foreground decoration-primary/50 font-medium underline-offset-4 hover:underline"
-													>
+													<span class="text-foreground font-medium">
 														{truncateName(row.name)}
 													</span>
-												</div>
+												</a>
 											</Table.Cell>
 
 											<Table.Cell>
@@ -236,7 +258,14 @@
 
 		<!-- Pagination -->
 		{#if count > perPage}
-			<Pagination.Root {count} {perPage} page={currentPage} onPageChange={handlePageChange} siblingCount={1} class="mt-4">
+			<Pagination.Root
+				{count}
+				{perPage}
+				page={currentPage}
+				onPageChange={handlePageChange}
+				siblingCount={1}
+				class="mt-4"
+			>
 				{#snippet children({ pages, currentPage: pageNum })}
 					<div class="flex w-full justify-center overflow-x-auto py-4" id="pagination-controls">
 						<Pagination.Content class="gap-4">
@@ -254,7 +283,7 @@
 										<Pagination.Link
 											{page}
 											isActive={pageNum === page.value}
-											class="data-[selected]:bg-foreground data-[selected]:text-background h-9 w-9 transition-all data-[selected]:shadow-md cursor-pointer"
+											class="data-[selected]:bg-foreground data-[selected]:text-background h-9 w-9 cursor-pointer transition-all data-[selected]:shadow-md"
 										>
 											{page.value}
 										</Pagination.Link>

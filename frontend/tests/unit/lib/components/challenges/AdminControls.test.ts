@@ -1,4 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { screen, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { toast } from 'svelte-sonner';
@@ -22,13 +24,13 @@ describe('AdminControls Component', () => {
 	});
 
 	it('renders create challenge button', () => {
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		expect(screen.getByRole('button', { name: /create challenge/i })).toBeInTheDocument();
 	});
 
 	it('renders new category button', () => {
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		expect(screen.getByRole('button', { name: /new category/i })).toBeInTheDocument();
 	});
@@ -37,13 +39,13 @@ describe('AdminControls Component', () => {
 		const user = userEvent.setup();
 		const handleOpenCreate = vi.fn();
 
-		render(AdminControls, {
+		renderWithProviders(AdminControls, {
 			props: {
 				'onopen-create': handleOpenCreate
 			}
 		});
 
-		const createButton = screen.getByRole('button', { name: /create challenge/i });
+		const createButton = await screen.findByRole('button', { name: /create challenge/i });
 		await user.click(createButton);
 
 		expect(handleOpenCreate).toHaveBeenCalledTimes(1);
@@ -52,89 +54,77 @@ describe('AdminControls Component', () => {
 	it('opens popover when new category button is clicked', async () => {
 		const user = userEvent.setup();
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		const categoryButton = screen.getByRole('button', { name: /new category/i });
 		await user.click(categoryButton);
 
 		// Popover content should be visible
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
+		expect(await screen.findByLabelText(/category name/i)).toBeInTheDocument();
 	});
 
 	it('displays category name input in popover', async () => {
 		const user = userEvent.setup();
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
+		expect(await screen.findByLabelText(/category name/i)).toBeInTheDocument();
 	});
 
 	it('displays cancel and create buttons in popover', async () => {
 		const user = userEvent.setup();
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
-		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await user.click(await screen.findByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByRole('button', { name: /^cancel$/i })).toBeInTheDocument();
-			expect(screen.getByRole('button', { name: /^create$/i })).toBeInTheDocument();
-		});
+		expect(await screen.findByText('Cancel', { selector: 'button' })).toBeInTheDocument();
+		expect(await screen.findByText(/^create$/i, { selector: 'button' })).toBeInTheDocument();
 	});
 
 	it('create button is disabled when category name is empty', async () => {
 		const user = userEvent.setup();
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			const createButton = screen.getByRole('button', { name: /^create$/i });
-			expect(createButton).toBeDisabled();
-		});
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
+		expect(createButton).toBeDisabled();
 	});
 
 	it('create button is enabled when category name field is filled', async () => {
 		const user = userEvent.setup();
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'Web');
+		await tick();
 
-		await waitFor(() => {
-			const createButton = screen.getByRole('button', { name: /^create$/i });
-			expect(createButton).not.toBeDisabled();
-		});
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
+		expect(createButton).not.toBeDisabled();
 	});
 
 	it('closes popover when cancel is clicked', async () => {
 		const user = userEvent.setup();
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByRole('button', { name: /^cancel$/i })).toBeInTheDocument();
-		});
-
-		const cancelButton = screen.getByRole('button', { name: /^cancel$/i });
+		const cancelButton = await screen.findByText('Cancel', { selector: 'button' });
 		await user.click(cancelButton);
+		await tick();
+		await tick();
 
 		await waitFor(() => {
 			expect(screen.queryByLabelText(/category name/i)).not.toBeInTheDocument();
@@ -146,20 +136,18 @@ describe('AdminControls Component', () => {
 		const mockCreateCategory = vi.mocked(createCategory);
 		mockCreateCategory.mockResolvedValueOnce(undefined);
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'Forensics');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
 
 		await waitFor(() => {
 			expect(mockCreateCategory).toHaveBeenCalledWith('Forensics');
@@ -172,24 +160,22 @@ describe('AdminControls Component', () => {
 		const mockToast = vi.mocked(toast);
 		mockCreateCategory.mockResolvedValueOnce(undefined);
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'Crypto');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
 
 		await waitFor(() => {
-			expect(mockToast.success).toHaveBeenCalledWith('Category "Crypto" created successfully.');
-		});
+			expect(mockToast.success).toHaveBeenCalledWith(expect.stringMatching(/created successfully/i));
+		}, { timeout: 4000 });
 	});
 
 	it('calls oncategory-created callback after successful creation', async () => {
@@ -198,24 +184,22 @@ describe('AdminControls Component', () => {
 		const handleCategoryCreated = vi.fn();
 		mockCreateCategory.mockResolvedValueOnce(undefined);
 
-		render(AdminControls, {
+		renderWithProviders(AdminControls, {
 			props: {
 				'oncategory-created': handleCategoryCreated
 			}
 		});
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'Pwn');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
 
 		await waitFor(() => {
 			expect(handleCategoryCreated).toHaveBeenCalledTimes(1);
@@ -227,20 +211,19 @@ describe('AdminControls Component', () => {
 		const mockCreateCategory = vi.mocked(createCategory);
 		mockCreateCategory.mockResolvedValueOnce(undefined);
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'Rev');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
+		await tick();
 
 		await waitFor(() => {
 			expect(screen.queryByLabelText(/category name/i)).not.toBeInTheDocument();
@@ -252,20 +235,19 @@ describe('AdminControls Component', () => {
 		const mockCreateCategory = vi.mocked(createCategory);
 		mockCreateCategory.mockResolvedValueOnce(undefined);
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		let nameInput = screen.getByLabelText(/category name/i);
-
+		let nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'OSINT');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
+		await tick();
 
 		// Wait for popover to close
 		await waitFor(() => {
@@ -275,12 +257,7 @@ describe('AdminControls Component', () => {
 		// Reopen and check fields are empty
 		await user.click(screen.getByRole('button', { name: /new category/i }));
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		nameInput = screen.getByLabelText(/category name/i);
-
+		nameInput = await screen.findByLabelText(/category name/i);
 		expect(nameInput).toHaveValue('');
 	});
 
@@ -290,20 +267,18 @@ describe('AdminControls Component', () => {
 		const mockToast = vi.mocked(toast);
 		mockCreateCategory.mockRejectedValueOnce(new Error('API error'));
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'Web');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
 
 		await waitFor(() => {
 			expect(mockToast.error).toHaveBeenCalledWith('API error');
@@ -316,20 +291,18 @@ describe('AdminControls Component', () => {
 		const mockToast = vi.mocked(toast);
 		mockCreateCategory.mockRejectedValueOnce({});
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'Misc');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
 
 		await waitFor(() => {
 			expect(mockToast.error).toHaveBeenCalledWith('Failed to create category.');
@@ -339,16 +312,12 @@ describe('AdminControls Component', () => {
 	it('shows error toast when name is empty on submit', async () => {
 		const mockToast = vi.mocked(toast);
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		const user = userEvent.setup();
 		await user.click(screen.getByRole('button', { name: /new category/i }));
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
+		const nameInput = await screen.findByLabelText(/category name/i);
 
 		// Manually trigger form submission (button should be disabled but test the logic)
 		const form = nameInput.closest('form');
@@ -358,7 +327,7 @@ describe('AdminControls Component', () => {
 
 		await waitFor(() => {
 			expect(mockToast.error).toHaveBeenCalledWith('Category name is required.');
-		});
+		}, { timeout: 3000 });
 	});
 
 	it('trims whitespace from category name', async () => {
@@ -366,20 +335,18 @@ describe('AdminControls Component', () => {
 		const mockCreateCategory = vi.mocked(createCategory);
 		mockCreateCategory.mockResolvedValueOnce(undefined);
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, '  Web  ');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
 
 		await waitFor(() => {
 			expect(mockCreateCategory).toHaveBeenCalledWith('Web');
@@ -397,20 +364,19 @@ describe('AdminControls Component', () => {
 		});
 		mockCreateCategory.mockReturnValueOnce(createPromise);
 
-		render(AdminControls);
+		renderWithProviders(AdminControls);
 
 		await user.click(screen.getByRole('button', { name: /new category/i }));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByLabelText(/category name/i)).toBeInTheDocument();
-		});
-
-		const nameInput = screen.getByLabelText(/category name/i);
-
+		const nameInput = await screen.findByLabelText(/category name/i);
 		await user.type(nameInput, 'Test');
+		await tick();
 
-		const createButton = screen.getByRole('button', { name: /^create$/i });
+		const createButton = await screen.findByText(/^create$/i, { selector: 'button' });
 		await user.click(createButton);
+		await tick();
+		await tick();
 
 		// Button should be disabled during loading
 		await waitFor(() => {

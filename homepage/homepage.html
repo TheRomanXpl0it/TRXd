@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TRX CTF 2026 | TheRomanXpl0it</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        :root {
+            --background: #f7f7f8;
+            --foreground: #18181b;
+            --secondary-text: #71717a;
+
+            --alive-cell-light: #34d399;
+            --alive-cell: #10b981;
+            --alive-cell-dark: #065f46;
+
+            --card-bg: rgba(255, 255, 255, 0.72);
+            --card-border: rgba(228, 228, 231, 0.72);
+            --badge-bg: #f4f4f5;
+
+            --overlay-strong: rgba(247, 247, 248, 0.92);
+            --overlay-soft: rgba(247, 247, 248, 0.28);
+
+            --content-shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #050505;
+                --foreground: #fafafa;
+                --secondary-text: #a1a1aa;
+
+                --alive-cell-light: #2dd4bf;
+                --alive-cell: #14b8a6;
+                --alive-cell-dark: #0f766e;
+
+                --card-bg: rgba(10, 10, 12, 0.72);
+                --card-border: rgba(63, 63, 70, 0.42);
+                --badge-bg: #18181b;
+
+                --overlay-strong: rgba(5, 5, 5, 0.84);
+                --overlay-soft: rgba(5, 5, 5, 0.20);
+
+                --content-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background);
+            color: var(--foreground);
+            margin: 0;
+            overflow-x: hidden;
+            transition: color 0.3s ease, background 0.3s ease;
+        }
+
+        #pixel-bg {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            image-rendering: pixelated;
+            pointer-events: none;
+            opacity: 0.34;
+            transform: scale(1.03);
+            filter: blur(4px) saturate(0.9);
+            background: transparent;
+        }
+
+        #bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 50% 9rem,
+                    transparent 0,
+                    transparent 10rem,
+                    var(--overlay-soft) 24rem,
+                    var(--overlay-strong) 44rem),
+                linear-gradient(to bottom,
+                    var(--overlay-strong) 0%,
+                    transparent 22%,
+                    transparent 78%,
+                    var(--overlay-strong) 100%);
+        }
+
+        .container-custom {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-custom {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            box-shadow: var(--content-shadow);
+        }
+
+        .text-zinc-muted {
+            color: var(--secondary-text);
+        }
+
+        .border-zinc-800 {
+            border-color: var(--card-border) !important;
+        }
+
+        header img {
+            filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.16));
+        }
+
+        .hero-title {
+            text-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+        }
+
+        .ambient-button {
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+    <canvas id="pixel-bg"></canvas>
+    <div id="bg-overlay"></div>
+
+    <div class="container-custom">
+        <!-- Full-Screen Hero -->
+        <header class="min-h-screen flex flex-col items-center justify-center text-center space-y-12">
+            <div class="space-y-8 flex flex-col items-center">
+                <img src="/trx.svg" alt="TRX Logo" class="h-32 w-32" />
+                <div>
+                    <h1 class="hero-title text-5xl sm:text-6xl font-black tracking-tighter uppercase mb-3">
+                        TRX CTF 2026
+                    </h1>
+                    <p
+                        class="text-zinc-muted font-bold tracking-widest border-t border-zinc-800 pt-6 mt-4 inline-block px-12 text-xs uppercase opacity-80">
+                        A CTF BY THEROMANXPL0IT
+                    </p>
+                </div>
+            </div>
+
+            <!-- Integrated Actions -->
+            <div class="flex flex-col items-center gap-8 translate-y-4">
+                <a href="#"
+                    class="ambient-button bg-[var(--foreground)] text-[var(--background)] px-14 py-5 rounded-2xl font-black uppercase tracking-tight opacity-90 hover:opacity-100 transition-all active:scale-[0.98]">
+                    Play Now
+                </a>
+                <p class="text-xs text-zinc-muted font-bold tracking-widest uppercase opacity-60">
+                    Join the <a href="#"
+                        class="text-[var(--foreground)] underline underline-offset-8 decoration-2 decoration-[var(--alive-cell)]/30 hover:decoration-[var(--alive-cell)] transition-all">Discord
+                        server</a>
+                </p>
+            </div>
+        </header>
+
+        <!-- Core Event Info -->
+        <main class="space-y-20">
+            <!-- About Section -->
+            <section class="max-w-2xl mx-auto text-center space-y-6 card-custom p-10 rounded-3xl">
+                <h2 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-muted">The CTF</h2>
+                <p class="text-lg text-zinc-muted leading-relaxed">
+                    TheRomanXpl0it invites you to its 2026 edition. A 48-hour global cybersecurity challenge designed to
+                    push your skills across the entire spectrum of binary exploitation, web hacking, and offensive
+                    security.
+                </p>
+            </section>
+
+            <!-- Details Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card-custom p-8 rounded-2xl space-y-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Timeline</span>
+                    <p class="text-lg font-bold">April 24 - 26, 2026</p>
+                    <p class="text-sm text-zinc-muted font-medium">19:00 UTC Start</p>
+                </div>
+                <div class="card-custom p-8 rounded-2xl space-y-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Duration</span>
+                    <p class="text-lg font-bold">48 Hours</p>
+                    <p class="text-sm text-zinc-muted font-medium">Non-stop Hallucinations</p>
+                </div>
+                <div class="card-custom p-8 rounded-2xl space-y-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Format</span>
+                    <p class="text-lg font-bold">Jeopardy CTF</p>
+                    <p class="text-sm text-zinc-muted font-medium">Multiple Skill Categories</p>
+                </div>
+            </div>
+
+            <!-- Prizes Section -->
+            <section class="space-y-10">
+                <div class="text-center space-y-2">
+                    <p class="text-2xl font-black uppercase tracking-tighter">Prizes</p>
+                </div>
+                <!-- Unified Bunker Layout -->
+                <div class="card-custom rounded-3xl overflow-hidden shrink-0">
+                    <div class="grid grid-cols-1 md:grid-cols-3 md:divide-x divide-zinc-800/10 dark:divide-white/5">
+                        <!-- 1st Place Sector -->
+                        <div class="p-10 text-center space-y-6 flex flex-col items-center">
+                            <div class="space-y-1">
+                                <p class="text-3xl font-black tracking-tighter">$2,048</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">First Place
+                                </p>
+                            </div>
+                            <p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">Sbrago</p>
+                        </div>
+
+                        <!-- 2nd Place Sector -->
+                        <div class="p-10 text-center space-y-6 flex flex-col items-center">
+                            <div class="space-y-1">
+                                <p class="text-3xl font-black tracking-tighter">$1,024</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">Second Place
+                                </p>
+                            </div>
+                            <p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">Sbrogo</p>
+                        </div>
+
+                        <!-- 3rd Place Sector -->
+                        <div class="p-10 text-center space-y-6 flex flex-col items-center">
+                            <div class="space-y-1">
+                                <p class="text-3xl font-black tracking-tighter">$512</p>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">Third Place
+                                </p>
+                            </div>
+                            <p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">Sbrugo</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sponsors Section -->
+            <section class="space-y-10">
+                <div class="text-center space-y-2">
+                    <p class="text-2xl font-black uppercase tracking-tighter">Sponsors</p>
+                </div>
+                <div class="space-y-4 max-w-4xl mx-auto">
+                    <!-- Sponsor Item -->
+                    <div class="card-custom p-8 rounded-2xl flex items-center gap-10">
+                        <div
+                            class="h-20 w-20 bg-zinc-800/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
+                            <span class="text-[10px] font-bold text-zinc-500 italic tracking-widest">LOGO</span>
+                        </div>
+                        <div class="h-12 w-px bg-zinc-800/20 dark:bg-white/5"></div>
+                        <div class="space-y-1">
+                            <p class="text-sm font-black uppercase tracking-widest opacity-80">Lorem Ipsum Pallem
+                            </p>
+                            <p class="text-md text-zinc-muted font-medium leading-relaxed italic">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Sponsor Item -->
+                    <div class="card-custom p-8 rounded-2xl flex items-center gap-10">
+                        <div
+                            class="h-20 w-20 bg-zinc-800/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
+                            <span class="text-[10px] font-bold text-zinc-500 italic tracking-widest">LOGO</span>
+                        </div>
+                        <div class="h-12 w-px bg-zinc-800/20 dark:bg-white/5"></div>
+                        <div class="space-y-1">
+                            <p class="text-sm font-black uppercase tracking-widest opacity-80">Lorem Ipsum</p>
+                            <p class="text-md text-zinc-muted font-medium leading-relaxed italic">
+                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+        </main>
+
+        <footer class="text-center pt-20 pb-12 opacity-30">
+            <p class="text-[10px] font-bold uppercase tracking-widest">
+                © 2026 TheRomanXpl0it | Powered by TRXd
+            </p>
+        </footer>
+    </div>
+    <script>
+        const canvas = document.getElementById('pixel-bg');
+        const ctx = canvas.getContext('2d', { alpha: true });
+
+        const TARGET_CELL_SIZE = 16;
+        const FPS = 8;
+        const MAX_AGE = 14;
+
+        let COLS = 0;
+        let ROWS = 0;
+        let grid = [];
+        let recentActivity = [];
+        let lastTime = 0;
+
+        const PATTERNS = [
+            {
+                name: 'glider',
+                weight: 14,
+                cells: [
+                    [0, 1, 0],
+                    [0, 0, 1],
+                    [1, 1, 1]
+                ]
+            },
+            {
+                name: 'lwss',
+                weight: 8,
+                cells: [
+                    [0, 1, 1, 1, 1],
+                    [1, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 1],
+                    [1, 0, 0, 1, 0]
+                ]
+            },
+            {
+                name: 'mwss',
+                weight: 5,
+                cells: [
+                    [0, 0, 1, 1, 1, 1],
+                    [1, 1, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 1, 0],
+                    [0, 1, 0, 0, 0, 0]
+                ]
+            },
+            {
+                name: 'pulsar',
+                weight: 2,
+                cells: [
+                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0],
+                    [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+                    [1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0]
+                ]
+            },
+            {
+                name: 'gosper',
+                weight: 1,
+                cells: [
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                ]
+            }
+        ];
+
+        function getThemeColors() {
+            const styles = getComputedStyle(document.documentElement);
+            return {
+                alive: styles.getPropertyValue('--alive-cell').trim(),
+                aliveLight: styles.getPropertyValue('--alive-cell-light').trim(),
+                aliveDark: styles.getPropertyValue('--alive-cell-dark').trim()
+            };
+        }
+
+        function createCell(state = 0, age = 0, glow = 0) {
+            return { state, age, glow };
+        }
+
+        function randomCell(probability = 0.035) {
+            const alive = Math.random() < probability ? 1 : 0;
+            return createCell(alive, 0, alive ? 1 : 0);
+        }
+
+        function rotatePattern(pattern) {
+            return pattern[0].map((_, x) => pattern.map(row => row[x]).reverse());
+        }
+
+        function transformPattern(pattern) {
+            let p = pattern;
+            const rotations = Math.floor(Math.random() * 4);
+            for (let i = 0; i < rotations; i++) p = rotatePattern(p);
+            if (Math.random() > 0.5) p = p.map(row => [...row].reverse());
+            return p;
+        }
+
+        function pickPattern() {
+            const total = PATTERNS.reduce((sum, p) => sum + p.weight, 0);
+            let r = Math.random() * total;
+
+            for (const pattern of PATTERNS) {
+                r -= pattern.weight;
+                if (r <= 0) return pattern;
+            }
+
+            return PATTERNS[0];
+        }
+
+        function resizeCanvas() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+
+            canvas.style.width = vw + 'px';
+            canvas.style.height = vh + 'px';
+            canvas.width = Math.floor(vw * dpr);
+            canvas.height = Math.floor(vh * dpr);
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+
+            const newCols = Math.ceil(vw / TARGET_CELL_SIZE);
+            const newRows = Math.ceil(vh / TARGET_CELL_SIZE);
+
+            if (newCols === COLS && newRows === ROWS && grid.length) return;
+
+            COLS = newCols;
+            ROWS = newRows;
+
+            grid = Array.from({ length: ROWS }, () =>
+                Array.from({ length: COLS }, () => randomCell(0.03))
+            );
+
+            seedInitialPatterns();
+            recentActivity = [];
+        }
+
+        function seedInitialPatterns() {
+            const travelers = Math.max(10, Math.floor((COLS * ROWS) / 140));
+            const bigPatterns = Math.max(1, Math.floor((COLS * ROWS) / 1200));
+
+            for (let i = 0; i < travelers; i++) {
+                injectSpecificPattern(grid, i % 3 === 0 ? 'lwss' : 'glider', true);
+            }
+
+            for (let i = 0; i < bigPatterns; i++) {
+                if (Math.random() > 0.65) injectSpecificPattern(grid, 'pulsar', true);
+            }
+
+            if (COLS > 60 && ROWS > 35 && Math.random() > 0.45) {
+                injectSpecificPattern(grid, 'gosper', true);
+            }
+        }
+
+        function countNeighbors(x, y) {
+            let sum = 0;
+
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = (x + dx + COLS) % COLS;
+                    const ny = (y + dy + ROWS) % ROWS;
+                    sum += grid[ny][nx].state;
+                }
+            }
+
+            return sum;
+        }
+
+        function nextGeneration() {
+            const next = grid.map(row =>
+                row.map(cell => ({
+                    state: cell.state,
+                    age: cell.age,
+                    glow: Math.max(0, cell.glow * 0.94)
+                }))
+            );
+
+            let flips = 0;
+
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+                    const cell = grid[y][x];
+                    const neighbors = countNeighbors(x, y);
+
+                    if (cell.state === 0 && neighbors === 3) {
+                        next[y][x].state = 1;
+                        next[y][x].age = 0;
+                        next[y][x].glow = 1;
+                        flips++;
+                    } else if (cell.state === 1 && (neighbors < 2 || neighbors > 3)) {
+                        next[y][x].state = 0;
+                        next[y][x].age = 0;
+                        next[y][x].glow = 0.35;
+                        flips++;
+                    } else if (cell.state === 1) {
+                        next[y][x].age = Math.min(MAX_AGE, cell.age + 1);
+                        next[y][x].glow = Math.max(next[y][x].glow, 0.18);
+                    }
+                }
+            }
+
+            recentActivity.push(flips);
+            if (recentActivity.length > 40) recentActivity.shift();
+
+            const avgActivity = recentActivity.length
+                ? recentActivity.reduce((a, b) => a + b, 0) / recentActivity.length
+                : 0;
+
+            if (avgActivity < Math.max(3, (COLS * ROWS) * 0.004)) {
+                if (Math.random() > 0.45) injectSpecificPattern(next, 'glider');
+                if (Math.random() > 0.65) injectSpecificPattern(next, 'lwss');
+                if (Math.random() > 0.88) injectSpecificPattern(next, 'mwss');
+            }
+
+            if (Math.random() > 0.992) {
+                injectWeightedPattern(next);
+            }
+
+            if (Math.random() > 0.997 && COLS > 60 && ROWS > 35) {
+                injectSpecificPattern(next, 'gosper');
+            }
+
+            grid = next;
+        }
+
+        function injectWeightedPattern(targetGrid, gentle = false) {
+            const chosen = pickPattern();
+            injectPatternObject(targetGrid, chosen, gentle);
+        }
+
+        function injectSpecificPattern(targetGrid, name, gentle = false) {
+            const chosen = PATTERNS.find(p => p.name === name);
+            if (chosen) injectPatternObject(targetGrid, chosen, gentle);
+        }
+
+        function injectPatternObject(targetGrid, patternObj, gentle = false) {
+            const pattern = transformPattern(patternObj.cells);
+
+            const ph = pattern.length;
+            const pw = pattern[0].length;
+
+            const startX = Math.floor(Math.random() * Math.max(1, COLS - pw));
+            const startY = Math.floor(Math.random() * Math.max(1, ROWS - ph));
+
+            for (let y = 0; y < ph; y++) {
+                for (let x = 0; x < pw; x++) {
+                    if (!pattern[y][x]) continue;
+
+                    const gx = startX + x;
+                    const gy = startY + y;
+
+                    if (gx >= 0 && gx < COLS && gy >= 0 && gy < ROWS) {
+                        targetGrid[gy][gx].state = 1;
+                        targetGrid[gy][gx].age = gentle ? Math.floor(Math.random() * 5) : 0;
+                        targetGrid[gy][gx].glow = 1;
+                    }
+                }
+            }
+        }
+
+        function drawGrid() {
+            const colors = getThemeColors();
+            const cellW = Math.ceil(window.innerWidth / COLS);
+            const cellH = Math.ceil(window.innerHeight / ROWS);
+
+            ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            for (let y = 0; y < ROWS; y++) {
+                for (let x = 0; x < COLS; x++) {
+                    const cell = grid[y][x];
+                    if (!cell.state && cell.glow < 0.04) continue;
+
+                    let alpha = 0;
+                    let fill = colors.alive;
+
+                    if (cell.state) {
+                        if (cell.age < 2) fill = colors.aliveLight;
+                        else if (cell.age > 8) fill = colors.aliveDark;
+                        else fill = colors.alive;
+
+                        alpha = 0.11 + Math.min(cell.glow * 0.22, 0.22);
+                    } else {
+                        fill = colors.alive;
+                        alpha = cell.glow * 0.06;
+                    }
+
+                    const px = x * cellW;
+                    const py = y * cellH;
+
+                    ctx.fillStyle = hexToRgba(fill, alpha);
+                    ctx.fillRect(px, py, cellW, cellH);
+                }
+            }
+        }
+
+        function hexToRgba(hex, alpha) {
+            const clean = hex.replace('#', '');
+            const full = clean.length === 3
+                ? clean.split('').map(c => c + c).join('')
+                : clean;
+
+            const bigint = parseInt(full, 16);
+            const r = (bigint >> 16) & 255;
+            const g = (bigint >> 8) & 255;
+            const b = bigint & 255;
+
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function animate(time) {
+            const interval = 1000 / FPS;
+            const delta = time - lastTime;
+
+            if (delta >= interval) {
+                drawGrid();
+                nextGeneration();
+                lastTime = time - (delta % interval);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        resizeCanvas();
+        requestAnimationFrame(animate);
+
+        window.addEventListener('resize', resizeCanvas);
+
+        const media = window.matchMedia('(prefers-color-scheme: dark)');
+        if (media.addEventListener) {
+            media.addEventListener('change', () => drawGrid());
+        } else if (media.addListener) {
+            media.addListener(() => drawGrid());
+        }
+
+        // babelo was here
+    </script>
+</body>
+
+</html>

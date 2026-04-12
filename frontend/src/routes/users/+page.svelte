@@ -143,22 +143,6 @@
 </script>
 
 <div class="mx-auto max-w-5xl space-y-8 px-6 py-10">
-	<div
-		class="from-muted/20 to-background mb-6 mt-6 rounded-xl border-0 bg-gradient-to-br p-6 shadow-sm"
-	>
-		<div class="flex items-center gap-4">
-			<div
-				class="bg-background flex h-16 w-16 shrink-0 items-center justify-center rounded-full shadow-sm"
-			>
-				<UserCircle class="text-muted-foreground h-8 w-8" />
-			</div>
-			<div>
-				<h1 class="text-3xl font-bold tracking-tight">Users</h1>
-				<p class="text-muted-foreground mt-2 text-sm">Registered users and their statistics.</p>
-			</div>
-		</div>
-	</div>
-
 	{#if error}
 		<ErrorMessage title="Error loading users" message={error} />
 	{:else}
@@ -222,22 +206,22 @@
 								{:else}
 									{#each pageRows as account, i (account.id)}
 										<Table.Row
-											class="hover:bg-muted/50 cursor-pointer border-b-0 transition-colors"
-											onclick={() => goto(`/account/${account.id}`)}
+											class="hover:bg-muted/50 border-b-0 transition-colors"
 										>
 											<Table.Cell class="py-3">
-												<div class="flex items-center gap-3">
+												<a
+													href={`/account/${account.id}`}
+													class="flex items-center gap-3 decoration-primary/50 underline-offset-4 hover:underline"
+												>
 													<div
 														class="border-border h-8 w-8 shrink-0 overflow-hidden rounded-full border"
 													>
 														<GeneratedAvatar seed={account.name} class="h-full w-full" />
 													</div>
-													<span
-														class="text-foreground decoration-primary/50 font-medium underline-offset-4 hover:underline"
-													>
+													<span class="text-foreground font-medium">
 														{truncateName(account.name)}
 													</span>
-												</div>
+												</a>
 											</Table.Cell>
 
 											<Table.Cell>
@@ -293,7 +277,14 @@
 
 		<!-- Pagination -->
 		{#if count > perPage}
-			<Pagination.Root {count} {perPage} page={currentPage} onPageChange={handlePageChange} siblingCount={1} class="mt-4">
+			<Pagination.Root
+				{count}
+				{perPage}
+				page={currentPage}
+				onPageChange={handlePageChange}
+				siblingCount={1}
+				class="mt-4"
+			>
 				{#snippet children({ pages, currentPage: pageNum })}
 					<div class="flex w-full justify-center overflow-x-auto py-4" id="pagination-controls">
 						<Pagination.Content class="gap-4">

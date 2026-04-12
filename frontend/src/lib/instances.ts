@@ -1,7 +1,7 @@
 import { api } from './api';
 
 export async function startInstance(
-	chall_id: string
+	chall_id: number
 ): Promise<{ host: string; port: number; timeout: number }> {
 	return api<{ host: string; port: number; timeout: number }>(`/instances`, {
 		headers: { 'content-type': 'application/json' },
@@ -10,7 +10,7 @@ export async function startInstance(
 	});
 }
 
-export async function stopInstance(chall_id: string): Promise<void> {
+export async function stopInstance(chall_id: number): Promise<void> {
 	return api<void>(`/instances`, {
 		headers: { 'content-type': 'application/json' },
 		method: 'DELETE',

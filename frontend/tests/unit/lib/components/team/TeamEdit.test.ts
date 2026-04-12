@@ -1,4 +1,5 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/svelte';
+import { screen, waitFor, fireEvent } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TeamEdit from '$lib/components/team/TeamEdit.svelte';
@@ -21,11 +22,15 @@ vi.mock('$lib/team', () => ({
 	updateTeam: vi.fn()
 }));
 
-vi.mock('@tanstack/svelte-query', () => ({
-	useQueryClient: vi.fn(() => ({
-		invalidateQueries: vi.fn()
-	}))
-}));
+vi.mock('@tanstack/svelte-query', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@tanstack/svelte-query')>();
+	return {
+		...actual,
+		useQueryClient: vi.fn(() => ({
+			invalidateQueries: vi.fn()
+		}))
+	};
+});
 
 describe('TeamEdit Component', () => {
 	const baseTeam = {
@@ -40,7 +45,7 @@ describe('TeamEdit Component', () => {
 	});
 
 	it('renders team edit dialog', () => {
-		render(TeamEdit, { props: { open: true, team: baseTeam } });
+		renderWithProviders(TeamEdit, { props: { open: true, team: baseTeam } });
 
 		expect(screen.getByLabelText(/team name/i)).toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /^save$/i })).toBeInTheDocument();
@@ -49,7 +54,7 @@ describe('TeamEdit Component', () => {
 	it('validates empty form submission', async () => {
 		const user = userEvent.setup();
 
-		render(TeamEdit, { props: { open: true, team: { id: 7, name: '', country: '' } } });
+		renderWithProviders(TeamEdit, { props: { open: true, team: { id: 7, name: '', country: '' } } });
 		await flush();
 
 		await user.click(screen.getByRole('button', { name: /^save$/i }));
@@ -62,7 +67,7 @@ describe('TeamEdit Component', () => {
 		const user = userEvent.setup();
 		vi.mocked(updateTeam).mockResolvedValueOnce({ ok: true } as any);
 
-		render(TeamEdit, { props: { open: true, team: baseTeam } });
+		renderWithProviders(TeamEdit, { props: { open: true, team: baseTeam } });
 		await flush();
 
 		const tName = screen.getByLabelText(/team name/i) as HTMLInputElement;
@@ -82,7 +87,7 @@ describe('TeamEdit Component', () => {
 		vi.mocked(updateTeam).mockResolvedValueOnce({ ok: true } as any);
 		vi.mocked(useQueryClient).mockReturnValue({ invalidateQueries: mockInvalidateQueries } as any);
 
-		render(TeamEdit, { props: { open: true, team: baseTeam } });
+		renderWithProviders(TeamEdit, { props: { open: true, team: baseTeam } });
 		await flush();
 
 		const tName2 = screen.getByLabelText(/team name/i) as HTMLInputElement;
@@ -103,7 +108,7 @@ describe('TeamEdit Component', () => {
 		const error = new Error('Update failed');
 		vi.mocked(updateTeam).mockRejectedValueOnce(error);
 
-		render(TeamEdit, { props: { open: true, team: baseTeam } });
+		renderWithProviders(TeamEdit, { props: { open: true, team: baseTeam } });
 		await flush();
 
 		const nm = screen.getByLabelText(/team name/i) as HTMLInputElement;
@@ -123,7 +128,7 @@ describe('TeamEdit Component', () => {
 			() => new Promise((resolve) => setTimeout(() => resolve({ ok: true } as any), 200))
 		);
 
-		render(TeamEdit, { props: { open: true, team: baseTeam } });
+		renderWithProviders(TeamEdit, { props: { open: true, team: baseTeam } });
 		await flush();
 
 		const nameInput = screen.getByLabelText(/team name/i) as HTMLInputElement;

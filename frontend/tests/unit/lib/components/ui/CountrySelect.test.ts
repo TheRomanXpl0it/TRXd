@@ -1,4 +1,5 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import CountrySelect from '$lib/components/ui/country-select.svelte';
@@ -19,7 +20,7 @@ vi.mock('$lib/utils/countries', async (importOriginal) => {
 
 describe('CountrySelect Component', () => {
     it('renders with placeholder', () => {
-        render(CountrySelect, {
+        renderWithProviders(CountrySelect, {
             props: {
                 placeholder: 'Choose a country'
             }
@@ -28,7 +29,7 @@ describe('CountrySelect Component', () => {
     });
 
     it('renders selected country label', () => {
-        render(CountrySelect, {
+        renderWithProviders(CountrySelect, {
             props: {
                 value: 'ITA'
             }
@@ -38,7 +39,7 @@ describe('CountrySelect Component', () => {
 
     it('opens popover on click and shows items', async () => {
         const user = userEvent.setup();
-        render(CountrySelect);
+        renderWithProviders(CountrySelect);
 
         const trigger = screen.getByRole('combobox');
         await user.click(trigger);
@@ -53,7 +54,7 @@ describe('CountrySelect Component', () => {
 
     it('filters countries when searching', async () => {
         const user = userEvent.setup();
-        render(CountrySelect);
+        renderWithProviders(CountrySelect);
 
         await user.click(screen.getByRole('combobox'));
 
@@ -74,7 +75,7 @@ describe('CountrySelect Component', () => {
     it('selects a country and updates value', async () => {
         const user = userEvent.setup();
 
-        render(CountrySelect, {
+        renderWithProviders(CountrySelect, {
             props: {
                 value: ''
             }

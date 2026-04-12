@@ -1,22 +1,28 @@
 <script lang="ts">
-	import { Container, X } from '@lucide/svelte';
-	import { Button } from '@/components/ui/button';
+	import { Container, X, Copy, ExternalLink, RefreshCw } from '@lucide/svelte';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { toast } from 'svelte-sonner';
-	import { startInstance, stopInstance } from '$lib/instances';
+	import { stopInstance, startInstance } from '$lib/instances';
 	import { fmtTimeLeft } from '$lib/utils/time';
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import { Clock } from '@lucide/svelte';
 
 	let {
-		challenge = $bindable(),
+		challenge,
 		countdown = 0,
 		onCountdownUpdate,
-		onInstanceChange
+		onInstanceChange,
+		hideHeader = false,
+		showTimer = true
 	}: {
 		challenge: any;
 		countdown?: number;
 		onCountdownUpdate?: (id: string | number, newCountdown: number) => void;
 		onInstanceChange?: (challenge?: any) => void;
+		hideHeader?: boolean;
+		showTimer?: boolean;
 	} = $props();
+	const queryClient = useQueryClient();
 
 	let creatingInstance = $state(false);
 	let destroyingInstance = $state(false);
@@ -33,18 +39,31 @@
 		if (creatingInstance || !challenge?.id) return;
 		creatingInstance = true;
 		try {
-			const { host, port, timeout } = await startInstance(challenge.id);
-			// Update instance-specific fields
-			challenge = { ...challenge, instance_host: host, instance_port: port, timeout };
+			const { host, port, timeout } = await startInstance(Number(challenge.id));
+			const updated = {
+				...challenge,
+				instance_host: host,
+				instance_port: port,
+				timeout
+			};
+
+			// Update Global Cache
+			queryClient.setQueryData(['challenges'], (old: any) => {
+				if (!old || !old.data) return old;
+				return {
+					...old,
+					data: old.data.map((c: any) => (c.id === challenge.id ? updated : c))
+				};
+			});
+
 			if (typeof timeout === 'number' && onCountdownUpdate) {
 				onCountdownUpdate(challenge.id, Math.max(0, timeout));
 			}
 			toast.success('Instance created!');
-			// Trigger update in parent without refetching
-			onInstanceChange?.(challenge);
+			onInstanceChange?.(updated);
 		} catch (err: any) {
 			console.error(err);
-			toast.error(`Failed to create instance: ${err?.message ?? err}`);
+			toast.error(`Error: ${err?.message ?? err}`);
 		} finally {
 			creatingInstance = false;
 		}
@@ -54,112 +73,143 @@
 		if (destroyingInstance || !challenge?.id) return;
 		destroyingInstance = true;
 		try {
-			await stopInstance(challenge.id);
-			// Clear instance-specific fields
-			challenge = { ...challenge, instance_host: null, instance_port: null, timeout: null };
+			await stopInstance(Number(challenge.id));
+			const updated = {
+				...challenge,
+				instance_host: null,
+				instance_port: null,
+				timeout: null
+			};
+
+			// Update Global Cache
+			queryClient.setQueryData(['challenges'], (old: any) => {
+				if (!old || !old.data) return old;
+				return {
+					...old,
+					data: old.data.map((c: any) => (c.id === challenge.id ? updated : c))
+				};
+			});
+
 			if (onCountdownUpdate) {
 				onCountdownUpdate(challenge.id, 0);
 			}
 			toast.success('Instance stopped!');
-			// Trigger update in parent
-			onInstanceChange?.(challenge);
+			onInstanceChange?.(updated);
 		} catch (err: any) {
 			console.error(err);
-			toast.error(`Failed to stop instance: ${err?.message ?? err}`);
+			toast.error(`Error: ${err?.message ?? err}`);
 		} finally {
 			destroyingInstance = false;
 		}
 	}
 
 	const connectionString = $derived.by(() => {
-		const h = challenge?.instance
+		// Only show connection info if we have an active instance OR it's a static challenge
+		const hasInstance = challenge?.instance || !!challenge?.instance_host;
+		const isDynamic = challenge?.type === 'Container' || challenge?.type === 'Compose';
+
+		// If it's a dynamic challenge and we don't have an instance, show nothing
+		if (isDynamic && !hasInstance) return '';
+
+		const h = hasInstance
 			? (challenge?.instance_host ?? challenge?.host ?? '')
 			: (challenge?.host ?? '');
-		const p = challenge?.instance ? challenge?.instance_port : challenge?.port;
-		
-		let str = p ? `${h}:${p}` : h;
-		if (!str) return '';
+		const p = hasInstance ? challenge?.instance_port : challenge?.port;
 
-		// Use conn_type for accurate protocol prefixing
+		let str = p ? `${h}:${p}` : h;
+		if (!str || ['localhost', '127.0.0.1', '0.0.0.0'].includes(h.toLowerCase().trim())) return '';
+
 		const type = challenge?.conn_type;
 		if (type === 'HTTP' && !str.startsWith('http')) {
 			str = `http://${str}`;
 		} else if (type === 'HTTPS' && !str.startsWith('http')) {
 			str = `https://${str}`;
+		} else if (type === 'TCP' || type === 'TCP_TLS') {
+			if (type === 'TCP') {
+				str = p ? `nc ${h} ${p}` : `nc ${h}`;
+			} else {
+				str = p ? `ncat --ssl ${h} ${p}` : `ncat --ssl ${h}`;
+			}
 		}
-		
+
 		return str;
 	});
 
-	const isTLS = $derived(challenge?.conn_type === 'TCP_TLS' || challenge?.conn_type === 'HTTPS');
+	function formatCountdown(seconds: number) {
+		const h = Math.floor(seconds / 3600);
+		const m = Math.floor((seconds % 3600) / 60);
+		const s = seconds % 60;
+
+		if (h > 0) {
+			return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+		}
+		return `${m}:${s.toString().padStart(2, '0')}`;
+	}
 </script>
 
-<div class="mb-6">
-	<h3 class="mb-3 text-sm font-semibold opacity-70">Instance</h3>
-	<div class="flex w-full flex-row items-center gap-2 sm:gap-3">
+<div class={hideHeader ? '' : 'mb-6'}>
+	{#if !hideHeader}
+		<h3 class="text-muted-foreground/70 mb-3 text-xs font-bold uppercase tracking-tight">
+			Instance
+		</h3>
+	{/if}
+
+	<div class="w-full">
 		{#if countdown > 0}
-			<button
-				type="button"
-				onclick={() => copyToClipboard(connectionString)}
-				class="flex h-11 flex-1 cursor-pointer items-center justify-between gap-2 rounded-md bg-green-600 px-3 text-sm font-semibold text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:gap-3 sm:px-4"
-				aria-label="Copy instance connection: {connectionString}"
-			>
-				<div class="flex items-center gap-2">
-					<Container class="h-5 w-5 shrink-0" aria-hidden="true" />
-					<span class="hidden sm:inline">Running</span>
-					{#if isTLS}
-						<span
-							class="bg-blue-400/20 text-blue-100 flex items-center rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
-						>
-							TLS
-						</span>
-					{/if}
+			<div class="flex items-center gap-3">
+				<!-- Primary Action Row -->
+				<div class="flex flex-1 items-center gap-2">
+					<!-- Connection Info (Green) -->
+					<button
+						class="flex h-11 flex-1 items-center justify-center gap-3 overflow-hidden rounded-lg bg-green-600 px-4 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.99]"
+						onclick={() => copyToClipboard(connectionString)}
+						title="Click to copy connection address"
+						aria-label="Copy instance connection address"
+					>
+						<Container class="size-4 shrink-0" />
+						<code class="truncate font-mono text-sm font-bold tracking-tight">{connectionString}</code>
+					</button>
+
+					<!-- Terminate (Red) -->
+					<button
+						onclick={destroyInstance}
+						disabled={destroyingInstance}
+						class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.95] disabled:opacity-50"
+						title="Stop Instance"
+					>
+						{#if destroyingInstance}
+							<Spinner class="h-4 w-4" />
+						{:else}
+							<X class="h-4 w-4" />
+						{/if}
+					</button>
 				</div>
-				<span class="truncate font-mono text-xs sm:text-sm">{connectionString}</span>
-				<span class="shrink-0 text-xs sm:text-sm" aria-label="Expires in {fmtTimeLeft(countdown)}">
-					{fmtTimeLeft(countdown)}
-				</span>
-			</button>
-			{#if connectionString.startsWith('http')}
-				<a
-					href={connectionString}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="bg-secondary/80 hover:bg-secondary flex h-11 shrink-0 items-center justify-center rounded-md px-4 text-sm font-semibold transition-colors focus:outline-none"
-				>
-					Open
-				</a>
-			{/if}
-			<Button
-				variant="destructive"
-				onclick={destroyInstance}
-				disabled={destroyingInstance}
-				class="h-11 shrink-0 cursor-pointer px-4 font-semibold"
-				aria-label="Stop instance"
-			>
-				{#if destroyingInstance}
-					<Spinner class="h-4 w-4" />
-					<span class="sr-only">Stopping instance...</span>
-				{:else}
-					<X class="h-5 w-5" aria-hidden="true" />
-					<span class="sr-only">Stop</span>
+
+				<!-- Horizontal Timer -->
+				{#if showTimer}
+					<div
+						class="flex shrink-0 items-center gap-1.5 border-l pl-3 font-mono text-sm font-black tabular-nums text-green-600 dark:text-green-500"
+					>
+						<Clock class="h-4 w-4" />
+						<span>{formatCountdown(countdown)}</span>
+					</div>
 				{/if}
-			</Button>
+			</div>
 		{:else}
-			<Button
+			<!-- Idle State: Start Instance (Blue) -->
+			<button
 				onclick={createInstance}
 				disabled={creatingInstance}
-				class="h-11 flex-1 cursor-pointer bg-blue-600 font-semibold text-white hover:bg-blue-700"
-				aria-label="Start challenge instance"
+				class="flex h-12 w-full items-center justify-center gap-3 rounded-lg bg-blue-600 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"
 			>
 				{#if creatingInstance}
-					<Spinner class="mr-2 h-5 w-5" />
-					Starting...
+					<Spinner class="h-4 w-4" />
+					<span>Starting...</span>
 				{:else}
-					<Container class="mr-2 h-5 w-5" aria-hidden="true" />
-					Start Instance
+					<Container class="h-4 w-4" />
+					<span>Start Instance</span>
 				{/if}
-			</Button>
+			</button>
 		{/if}
 	</div>
 </div>

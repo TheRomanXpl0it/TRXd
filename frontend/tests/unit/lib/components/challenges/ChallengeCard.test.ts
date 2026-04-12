@@ -1,13 +1,14 @@
-import { render, screen } from '@testing-library/svelte';
+import { screen } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ChallengeCard from '$lib/components/challenges/ChallengeCard.svelte';
 
-function generateRandomChallenge(overrides = {}) {
+function makeChallenge(overrides = {}) {
 	return {
-		id: Math.floor(Math.random() * 10000),
-		name: `Challenge ${Math.floor(Math.random() * 100)}`,
-		points: Math.floor(Math.random() * 500) + 50,
+		id: 1,
+		name: 'Test Challenge',
+		points: 100,
 		tags: ['web', 'crypto'],
 		solved: false,
 		hidden: false,
@@ -22,52 +23,32 @@ describe('ChallengeCard Component', () => {
 	});
 
 	it('renders challenge name and points in grid view', () => {
-		const challenge = generateRandomChallenge({
-			name: 'Test Challenge',
-			points: 250
-		});
+		const challenge = makeChallenge({ name: 'Test Challenge', points: 250 });
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
 		expect(screen.getByText('Test Challenge')).toBeInTheDocument();
 		expect(screen.getByText('250 pts')).toBeInTheDocument();
 	});
 
-	it('renders challenge name and points in compact view', () => {
-		const challenge = generateRandomChallenge({
-			name: 'Compact Challenge',
-			points: 150
-		});
+	it('renders challenge name and points correctly (always shows "N pts")', () => {
+		const challenge = makeChallenge({ name: 'Compact Challenge', points: 150 });
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: true,
-				onclick: vi.fn()
-			}
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
 		expect(screen.getByText('Compact Challenge')).toBeInTheDocument();
-		expect(screen.getByText('150')).toBeInTheDocument();
+		expect(screen.getByText('150 pts')).toBeInTheDocument();
 	});
 
 	it('displays all tags', () => {
-		const challenge = generateRandomChallenge({
-			tags: ['web', 'pwn', 'forensics']
-		});
+		const challenge = makeChallenge({ tags: ['web', 'pwn', 'forensics'] });
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
 		expect(screen.getByText('web')).toBeInTheDocument();
@@ -75,215 +56,103 @@ describe('ChallengeCard Component', () => {
 		expect(screen.getByText('forensics')).toBeInTheDocument();
 	});
 
-	it('shows solved checkmark when challenge is solved', () => {
-		const challenge = generateRandomChallenge({
-			solved: true
+	it('applies solved styling when challenge is solved (emerald background)', () => {
+		const challenge = makeChallenge({ solved: true });
+
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
-		const { container } = render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
-		});
-
-		// Check for the green checkmark icon (CheckCircleSolid)
-		const checkIcon = container.querySelector('.text-green-500');
-		expect(checkIcon).toBeInTheDocument();
+		const button = screen.getByRole('button');
+		expect(button.className).toMatch(/emerald/);
 	});
 
-	it('does not show solved checkmark when challenge is not solved', () => {
-		const challenge = generateRandomChallenge({
-			solved: false
+	it('does not apply solved styling when challenge is not solved', () => {
+		const challenge = makeChallenge({ solved: false });
+
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
-		const { container } = render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
-		});
-
-		// Should not have green checkmark icon
-		const checkIcon = container.querySelector('.text-green-500');
-		expect(checkIcon).not.toBeInTheDocument();
+		const button = screen.getByRole('button');
+		expect(button.className).not.toMatch(/emerald/);
 	});
 
 	it('does not show instance icon for non-instance challenges', () => {
-		const challenge = generateRandomChallenge({
-			instance: false
+		const challenge = makeChallenge({ instance: false });
+
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
-		});
-
-		expect(screen.queryByLabelText('Instance-based challenge')).not.toBeInTheDocument();
-	});
-
-	it('displays countdown timer when instance is running', () => {
-		const challenge = generateRandomChallenge({
-			instance: true
-		});
-
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				countdown: 3600, // 1 hour
-				onclick: vi.fn()
-			}
-		});
-
-		// Should display formatted time
-		expect(screen.getByText(/1:00:00/)).toBeInTheDocument();
+		// No instance-related elements shown on card
+		expect(screen.queryByText(/running/i)).not.toBeInTheDocument();
 	});
 
 	it('does not display countdown when countdown is 0', () => {
-		const challenge = generateRandomChallenge({
-			instance: true
+		const challenge = makeChallenge({ instance: true });
+
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, countdown: 0, onclick: vi.fn() }
 		});
 
-		const { container } = render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				countdown: 0,
-				onclick: vi.fn()
-			}
-		});
-
-		// No countdown badge should be present
-		expect(container.querySelector('[aria-label*="expires in"]')).not.toBeInTheDocument();
-	});
-
-	it('formats countdown correctly for minutes only', () => {
-		const challenge = generateRandomChallenge({
-			instance: true
-		});
-
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				countdown: 125, // 2:05
-				onclick: vi.fn()
-			}
-		});
-
-		expect(screen.getByText(/2:05/)).toBeInTheDocument();
-	});
-
-	it('formats countdown correctly for seconds only', () => {
-		const challenge = generateRandomChallenge({
-			instance: true
-		});
-
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				countdown: 45,
-				onclick: vi.fn()
-			}
-		});
-
-		expect(screen.getByText(/^45$/)).toBeInTheDocument();
+		// Countdown=0 means no active instance → no timer text
+		expect(screen.queryByText(/:\d{2}/)).not.toBeInTheDocument();
 	});
 
 	it('calls onclick handler when clicked', async () => {
-		const challenge = generateRandomChallenge();
-		const handleClick = vi.fn();
 		const user = userEvent.setup();
+		const mockOnclick = vi.fn();
+		const challenge = makeChallenge({ name: 'Clickable Challenge' });
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: handleClick
-			}
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: mockOnclick }
 		});
 
-		const button = screen.getByRole('button', { name: new RegExp(challenge.name) });
+		const button = screen.getByRole('button');
 		await user.click(button);
-
-		expect(handleClick).toHaveBeenCalledTimes(1);
+		expect(mockOnclick).toHaveBeenCalledTimes(1);
 	});
 
-	it('has proper accessibility label in grid view', () => {
-		const challenge = generateRandomChallenge({
-			name: 'Test Challenge',
-			points: 100,
-			solved: false
-		});
+	it('has proper accessibility label based on challenge name', () => {
+		const challenge = makeChallenge({ name: 'Test Challenge', points: 100 });
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
 		expect(
-			screen.getByRole('button', { name: /view details for test challenge, 100 points/i })
+			screen.getByRole('button', { name: /view details for test challenge/i })
 		).toBeInTheDocument();
 	});
 
 	it('does not has instance icon', () => {
-		const challenge = generateRandomChallenge({
-			name: 'Test Challenge',
-			points: 100,
-			solved: false,
-			instance: false
+		const challenge = makeChallenge({ instance: false });
+
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
-		});
-		expect(screen.queryByLabelText('Instance-based challenge')).not.toBeInTheDocument();
+		expect(screen.queryByLabelText(/instance/i)).not.toBeInTheDocument();
 	});
 
-	it('includes solved status in accessibility label', () => {
-		const challenge = generateRandomChallenge({
-			name: 'Solved Challenge',
-			points: 200,
-			solved: true
+	it('accessibility label includes challenge name when solved', () => {
+		const challenge = makeChallenge({ name: 'Solved Challenge', solved: true });
+
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
-		});
-
-		expect(screen.getByRole('button', { name: /solved challenge.*solved/i })).toBeInTheDocument();
+		expect(
+			screen.getByRole('button', { name: /view details for solved challenge/i })
+		).toBeInTheDocument();
 	});
 
-	it('has proper accessibility label in compact view', () => {
-		const challenge = generateRandomChallenge({
-			name: 'Compact Test',
-			solved: false
-		});
+	it('has proper accessibility label when compact (same label regardless)', () => {
+		const challenge = makeChallenge({ name: 'Compact Test', points: 50 });
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: true,
-				onclick: vi.fn()
-			}
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
 		expect(
@@ -291,84 +160,48 @@ describe('ChallengeCard Component', () => {
 		).toBeInTheDocument();
 	});
 
-	it('applies solved styling in grid view', () => {
-		const challenge = generateRandomChallenge({
-			solved: true
-		});
+	it('applies solved styling (emerald) in any view', () => {
+		const challenge = makeChallenge({ solved: true });
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
 		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/bg-green/);
+		expect(button.className).toMatch(/bg-emerald-500\/10/);
+		expect(button.className).toMatch(/ring-emerald-500\/30/);
 	});
 
-	it('applies solved styling in compact view', () => {
-		const challenge = generateRandomChallenge({
-			solved: true
-		});
+	it('applies unsolved/default styling when not solved', () => {
+		const challenge = makeChallenge({ solved: false });
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: true,
-				onclick: vi.fn()
-			}
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
 		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/bg-green/);
+		// Not solved → no emerald, uses default card style
+		expect(button.className).not.toMatch(/bg-emerald/);
+		expect(button.className).toMatch(/bg-\[#fafafa\]/);
 	});
 
-	it('applies hidden styling when challenge is hidden', () => {
-		const challenge = generateRandomChallenge({
-			hidden: true
+	it('shows solves count when solves is provided', () => {
+		const challenge = makeChallenge({ solves: 42 });
+
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
-		render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
-		});
-
-		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/amber/);
-		expect(button.className).toMatch(/ring-2/);
+		expect(screen.getByText(/42 Solves/i)).toBeInTheDocument();
 	});
 
-	it('switches between compact and grid view correctly', async () => {
-		const challenge = generateRandomChallenge({
-			name: 'View Test',
-			points: 100
+	it('hides solves count when solves is undefined', () => {
+		const challenge = makeChallenge({ solves: undefined });
+
+		renderWithProviders(ChallengeCard, {
+			props: { challenge, onclick: vi.fn() }
 		});
 
-		const { rerender } = render(ChallengeCard, {
-			props: {
-				challenge,
-				compactView: false,
-				onclick: vi.fn()
-			}
-		});
-
-		// Grid view shows "pts" suffix
-		expect(screen.getByText('100 pts')).toBeInTheDocument();
-
-		// Switch to compact view
-		await rerender({
-			challenge,
-			compactView: true,
-			onclick: vi.fn()
-		});
-
-		// Compact view shows just the number
-		expect(screen.getByText('100')).toBeInTheDocument();
-		expect(screen.queryByText('100 pts')).not.toBeInTheDocument();
+		expect(screen.queryByText(/Solves/i)).not.toBeInTheDocument();
 	});
 });

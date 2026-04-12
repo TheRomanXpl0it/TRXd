@@ -125,7 +125,9 @@
 						<Table.Header class="bg-transparent [&_tr]:border-b-0">
 							<Table.Row class="hover:bg-transparent">
 								<Table.Head class="text-muted-foreground/70 w-[60px] bg-transparent text-[10px] font-bold uppercase tracking-wider">ID</Table.Head>
-								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">User</Table.Head>
+								{#if !authState.userMode}
+									<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">User</Table.Head>
+								{/if}
 								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Team</Table.Head>
 								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Challenge</Table.Head>
 								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Flag</Table.Head>
@@ -138,13 +140,19 @@
 							{#each submissions as sub (sub.id)}
 								<Table.Row class="hover:bg-muted/50 cursor-pointer border-b-0 transition-colors">
 									<Table.Cell class="font-mono text-xs">{sub.id}</Table.Cell>
+									{#if !authState.userMode}
+										<Table.Cell class="max-w-[120px]">
+											<a href={`/account/${sub.user_id}`} class="hover:underline font-medium text-primary block truncate" title={sub.user_name}>
+												{sub.user_name}
+											</a>
+										</Table.Cell>
+									{/if}
 									<Table.Cell class="max-w-[120px]">
-										<a href={`/account/${sub.user_id}`} class="hover:underline font-medium text-primary block truncate" title={sub.user_name}>
-											{sub.user_name}
-										</a>
-									</Table.Cell>
-									<Table.Cell class="max-w-[120px]">
-										<a href={`/team/${sub.team_id}`} class="hover:underline text-muted-foreground block truncate" title={sub.team_name}>
+										<a
+											href={authState.userMode ? `/account/${sub.team_id}` : `/team/${sub.team_id}`}
+											class="hover:underline text-muted-foreground block truncate"
+											title={sub.team_name}
+										>
 											{sub.team_name}
 										</a>
 									</Table.Cell>

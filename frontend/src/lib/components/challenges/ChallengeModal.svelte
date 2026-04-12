@@ -1,12 +1,13 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Button } from '@/components/ui/button';
-	import { Download, Droplet, Pen, Trash2, UserCog } from '@lucide/svelte';
+	import { Download, Droplet, Pen, Trash2, UserCog, Clock } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import InstanceControls from './InstanceControls.svelte';
 	import FlagSubmission from './FlagSubmission.svelte';
 	import Markdown from '$lib/components/Markdown.svelte';
 	import { config } from '$lib/env';
+	import { fmtTimeLeft } from '$lib/utils/time';
 
 	let {
 		open = $bindable(false),
@@ -40,12 +41,31 @@
 			.catch(() => toast.error('Failed to copy to clipboard.'));
 	}
 
+	const isDynamicType = $derived(
+		challenge?.type === 'Container' ||
+			challenge?.type === 'Compose' ||
+			!!challenge?.image ||
+			!!challenge?.compose ||
+			!!challenge?.ghost
+	);
+
 	const connectionString = $derived.by(() => {
-		const h = challenge?.instance
-			? (challenge?.instance_host ?? challenge?.host ?? '')
-			: (challenge?.host ?? '');
-		const p = challenge?.instance ? challenge?.instance_port : challenge?.port;
+		const h = challenge?.host || '';
+		const p = challenge?.port;
+		const isLocal = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(
+			h.toLowerCase().trim()
+		);
+
+		if ((isDynamicType || challenge?.instance) && (!challenge?.instance_host || isLocal)) {
+			return '';
+		}
+
+		if (challenge?.connection_info && (!challenge.instance || !challenge.connection_info.includes('localhost'))) {
+			return challenge.connection_info;
+		}
+
 		let str = p ? `${h}:${p}` : h;
+
 		if (str && challenge?.conn_type === 'TCP') {
 			str = p ? `nc ${h} ${p}` : `nc ${h}`;
 		} else if (str && challenge?.conn_type === 'HTTP' && !str.startsWith('http')) {
@@ -98,6 +118,13 @@
 							{challenge.solves}
 							{challenge.solves === 1 ? 'solve' : 'solves'}
 						</button>
+					{/if}
+					{#if challenge?.solved}
+						<span
+							class="inline-flex items-center rounded-md bg-green-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-green-500"
+						>
+							Solved
+						</span>
 					{/if}
 				</div>
 
@@ -176,8 +203,9 @@
 			</section>
 		{/if}
 
-		<!-- Connection Info (only for non-instance challenges) -->
-		{#if challenge?.host && !challenge.instance}
+		<!-- Connection Info (only for non-instance/static challenges) -->
+		<!-- Connection Info (only for non-instance/static challenges) -->
+		{#if !isDynamicType && challenge?.host && !challenge.instance && connectionString}
 			<section class="mb-6" aria-labelledby="connection-heading">
 				<h3 id="connection-heading" class="mb-3 text-sm font-semibold opacity-70">Connection</h3>
 				<div class="flex items-center gap-3">
@@ -204,11 +232,33 @@
 		{/if}
 
 		<!-- Instance Controls -->
-		{#if challenge?.instance}
-			<InstanceControls bind:challenge {countdown} {onCountdownUpdate} {onInstanceChange} />
+		{#if challenge?.instance || isDynamicType}
+			<section class="mb-4">
+				<h3 class="mb-3 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest opacity-60">
+					<span class="shrink-0">Instance Management</span>
+					<div class="bg-border h-px flex-1"></div>
+				</h3>
+				<InstanceControls
+					challenge={challenge}
+					{countdown}
+					{onCountdownUpdate}
+					onInstanceChange={(updated) => {
+						if (updated) challenge = updated;
+						if (onInstanceChange) onInstanceChange(updated);
+					}}
+					hideHeader={true}
+					showTimer={false}
+				/>
+			</section>
 		{/if}
 
 		<!-- Submit Flag -->
-		<FlagSubmission {challenge} {onSolved} />
+		<FlagSubmission
+			{challenge}
+			onSolved={() => {
+				if (challenge) challenge.solved = true;
+				if (onSolved) onSolved();
+			}}
+		/>
 	</Dialog.Content>
 </Dialog.Root>

@@ -1,4 +1,5 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/svelte';
+import { screen, waitFor, fireEvent } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import { tick } from 'svelte';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import DeleteChallengeDialog from '$lib/components/challenges/DeleteChallengeDialog.svelte';
@@ -6,46 +7,38 @@ import DeleteChallengeDialog from '$lib/components/challenges/DeleteChallengeDia
 describe('DeleteChallengeDialog Component', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.useFakeTimers();
 	});
 
-	afterEach(() => {
-		vi.runAllTimers();
-		vi.useRealTimers();
-	});
-
-	it('renders dialog title', () => {
-		render(DeleteChallengeDialog, {
+	it('renders dialog title', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test Challenge' },
 				deleting: false
 			}
 		});
-
-		expect(screen.getByText('Delete challenge?')).toBeInTheDocument();
+		expect(await screen.findByText('Delete challenge?')).toBeInTheDocument();
 	});
 
-	it('displays challenge name in description', () => {
-		render(DeleteChallengeDialog, {
+	it('displays challenge name in description', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'My Test Challenge' },
 				deleting: false
 			}
 		});
-
 		// The name appears in a <b> tag within the description
-		const descriptionText = screen.getByText(/you're about to permanently delete/i);
+		const descriptionText = await screen.findByText(/you're about to permanently delete/i);
 		expect(descriptionText).toBeInTheDocument();
 
 		// Check that the challenge name is in the document
-		const challengeName = screen.getAllByText(/my test challenge/i)[0];
+		const challengeName = (await screen.findAllByText(/my test challenge/i))[0];
 		expect(challengeName).toBeInTheDocument();
 	});
 
-	it('shows warning text about permanent deletion', () => {
-		render(DeleteChallengeDialog, {
+	it('shows warning text about permanent deletion', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -53,11 +46,11 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		expect(screen.getByText(/this action cannot be undone/i)).toBeInTheDocument();
+		expect(await screen.findByText(/this action cannot be undone/i)).toBeInTheDocument();
 	});
 
-	it('shows warning about related data removal', () => {
-		render(DeleteChallengeDialog, {
+	it('shows warning about related data removal', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -65,11 +58,11 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		expect(screen.getByText(/all related data.*may be removed/i)).toBeInTheDocument();
+		expect(await screen.findByText(/all related data.*may be removed/i)).toBeInTheDocument();
 	});
 
-	it('displays confirmation prompt text', () => {
-		render(DeleteChallengeDialog, {
+	it('displays confirmation prompt text', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -77,23 +70,22 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		expect(screen.getByText(/to confirm, type the following text/i)).toBeInTheDocument();
+		expect(await screen.findByText(/to confirm, type the following text/i)).toBeInTheDocument();
 	});
 
-	it('shows expected confirmation text', () => {
-		render(DeleteChallengeDialog, {
+	it('shows expected confirmation text', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Web Challenge' },
 				deleting: false
 			}
 		});
-
-		expect(screen.getByText("Yes, I want to delete 'Web Challenge'")).toBeInTheDocument();
+		expect(await screen.findByText("Yes, I want to delete 'Web Challenge'")).toBeInTheDocument();
 	});
 
-	it('renders confirmation input field', () => {
-		render(DeleteChallengeDialog, {
+	it('renders confirmation input field', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -101,11 +93,11 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		expect(screen.getByLabelText(/confirmation/i)).toBeInTheDocument();
+		expect(await screen.findByLabelText(/confirmation/i)).toBeInTheDocument();
 	});
 
-	it('renders cancel button', () => {
-		render(DeleteChallengeDialog, {
+	it('renders cancel button', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -113,13 +105,13 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const cancelButtons = screen.getAllByRole('button', { name: /cancel/i });
+		const cancelButtons = await screen.findAllByRole('button', { name: /cancel/i });
 		// There might be multiple due to Dialog.Close wrapper
 		expect(cancelButtons.length).toBeGreaterThan(0);
 	});
 
-	it('renders delete button', () => {
-		render(DeleteChallengeDialog, {
+	it('renders delete button', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -127,11 +119,11 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		expect(screen.getByRole('button', { name: /^delete$/i })).toBeInTheDocument();
+		expect(await screen.findByRole('button', { name: /^delete$/i })).toBeInTheDocument();
 	});
 
-	it('delete button is disabled initially', () => {
-		render(DeleteChallengeDialog, {
+	it('delete button is disabled initially', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test Challenge' },
@@ -139,12 +131,12 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const deleteButton = screen.getByRole('button', { name: /^delete$/i });
+		const deleteButton = await screen.findByRole('button', { name: /^delete$/i });
 		expect(deleteButton).toBeDisabled();
 	});
 
 	it('delete button is disabled when confirmation text is incorrect', async () => {
-		render(DeleteChallengeDialog, {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -152,15 +144,15 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const input = screen.getByLabelText(/confirmation/i);
+		const input = await screen.findByLabelText(/confirmation/i);
 		await fireEvent.input(input, { target: { value: 'wrong text' } });
 
-		const deleteButton = screen.getByRole('button', { name: /^delete$/i });
+		const deleteButton = await screen.findByRole('button', { name: /^delete$/i });
 		expect(deleteButton).toBeDisabled();
 	});
 
 	it('delete button is enabled when confirmation text matches exactly', async () => {
-		render(DeleteChallengeDialog, {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test Challenge' },
@@ -174,7 +166,7 @@ describe('DeleteChallengeDialog Component', () => {
 		await tick();
 
 		// Wait for the button to become enabled
-		const deleteButton = screen.getByRole('button', { name: /^delete$/i });
+		const deleteButton = await screen.findByRole('button', { name: /^delete$/i });
 		await waitFor(() => {
 			expect(deleteButton).not.toBeDisabled();
 		});
@@ -183,7 +175,7 @@ describe('DeleteChallengeDialog Component', () => {
 	it('calls onconfirm when delete button clicked with correct text', async () => {
 		const handleConfirm = vi.fn();
 
-		render(DeleteChallengeDialog, {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -192,11 +184,11 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const input = screen.getByLabelText(/confirmation/i);
+		const input = await screen.findByLabelText(/confirmation/i);
 		await fireEvent.input(input, { target: { value: "Yes, I want to delete 'Test'" } });
 		await tick();
 
-		const deleteButton = screen.getByRole('button', { name: /^delete$/i });
+		const deleteButton = await screen.findByRole('button', { name: /^delete$/i });
 		await waitFor(() => {
 			expect(deleteButton).not.toBeDisabled();
 		});
@@ -209,8 +201,8 @@ describe('DeleteChallengeDialog Component', () => {
 		});
 	});
 
-	it('shows spinner and "Deleting..." text when deleting is true', () => {
-		render(DeleteChallengeDialog, {
+	it('shows spinner and "Deleting..." text when deleting is true', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -218,11 +210,11 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		expect(screen.getByText(/deleting/i)).toBeInTheDocument();
+		expect(await screen.findByText(/deleting/i)).toBeInTheDocument();
 	});
 
-	it('disables input when deleting is true', () => {
-		render(DeleteChallengeDialog, {
+	it('disables input when deleting is true', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -230,12 +222,12 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const input = screen.getByLabelText(/confirmation/i);
+		const input = await screen.findByLabelText(/confirmation/i);
 		expect(input).toBeDisabled();
 	});
 
-	it('disables cancel button when deleting is true', () => {
-		render(DeleteChallengeDialog, {
+	it('disables cancel button when deleting is true', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -243,14 +235,14 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const cancelButtons = screen.getAllByRole('button', { name: /cancel/i });
+		const cancelButtons = await screen.findAllByRole('button', { name: /cancel/i });
 		// At least one cancel button should be disabled
 		const disabledButton = cancelButtons.find((btn) => btn.hasAttribute('disabled'));
 		expect(disabledButton).toBeDefined();
 	});
 
-	it('disables delete button when deleting is true', () => {
-		render(DeleteChallengeDialog, {
+	it('disables delete button when deleting is true', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -258,12 +250,12 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const deleteButton = screen.getByRole('button', { name: /deleting/i });
+		const deleteButton = await screen.findByRole('button', { name: /deleting/i });
 		expect(deleteButton).toBeDisabled();
 	});
 
 	it('confirmation text is case-sensitive', async () => {
-		render(DeleteChallengeDialog, {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -271,16 +263,16 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const input = screen.getByLabelText(/confirmation/i);
+		const input = await screen.findByLabelText(/confirmation/i);
 		// Wrong case
 		await fireEvent.input(input, { target: { value: "yes, i want to delete 'Test'" } });
 
-		const deleteButton = screen.getByRole('button', { name: /^delete$/i });
+		const deleteButton = await screen.findByRole('button', { name: /^delete$/i });
 		expect(deleteButton).toBeDisabled();
 	});
 
 	it('confirmation requires exact punctuation', async () => {
-		render(DeleteChallengeDialog, {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -288,16 +280,16 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		const input = screen.getByLabelText(/confirmation/i);
+		const input = await screen.findByLabelText(/confirmation/i);
 		// Missing comma
 		await fireEvent.input(input, { target: { value: "Yes I want to delete 'Test'" } });
 
-		const deleteButton = screen.getByRole('button', { name: /^delete$/i });
+		const deleteButton = await screen.findByRole('button', { name: /^delete$/i });
 		expect(deleteButton).toBeDisabled();
 	});
 
-	it('handles challenge name with special characters in confirmation', () => {
-		render(DeleteChallengeDialog, {
+	it('handles challenge name with special characters in confirmation', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test\'s "Challenge" & More' },
@@ -306,12 +298,12 @@ describe('DeleteChallengeDialog Component', () => {
 		});
 
 		expect(
-			screen.getByText("Yes, I want to delete 'Test's \"Challenge\" & More'")
+			await screen.findByText("Yes, I want to delete 'Test's \"Challenge\" & More'")
 		).toBeInTheDocument();
 	});
 
-	it('shows placeholder text in input field', () => {
-		render(DeleteChallengeDialog, {
+	it('shows placeholder text in input field', async () => {
+		renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -319,11 +311,11 @@ describe('DeleteChallengeDialog Component', () => {
 			}
 		});
 
-		expect(screen.getByPlaceholderText(/type here to confirm/i)).toBeInTheDocument();
+		expect(await screen.findByPlaceholderText(/type here to confirm/i)).toBeInTheDocument();
 	});
 
 	it('clears confirmation text when dialog is closed and reopened', async () => {
-		const { rerender } = render(DeleteChallengeDialog, {
+		const { rerender } = renderWithProviders(DeleteChallengeDialog, {
 			props: {
 				open: true,
 				toDelete: { name: 'Test' },
@@ -335,26 +327,21 @@ describe('DeleteChallengeDialog Component', () => {
 			expect(screen.getByRole('dialog')).toBeInTheDocument();
 		});
 
-		const input = screen.getByLabelText(/confirmation/i);
+		const input = await screen.findByLabelText(/confirmation/i);
 		await fireEvent.input(input, { target: { value: 'some text' } });
 
 		expect(input).toHaveValue('some text');
 
 		// Close dialog
-		await rerender({
-			open: false,
-			toDelete: { name: 'Test' },
-			deleting: false
-		});
+		await rerender({ open: false, toDelete: { name: 'Test' }, deleting: false });
 
 		// Reopen dialog
-		await rerender({
-			open: true,
-			toDelete: { name: 'Test' },
-			deleting: false
-		});
+		await rerender({ open: true, toDelete: { name: 'Test' }, deleting: false });
 
-		const newInput = screen.getByLabelText(/confirmation/i);
-		expect(newInput).toHaveValue('');
+		// Should now be empty
+		await waitFor(async () => {
+			const newInput = await screen.findByLabelText(/confirmation/i);
+			expect(newInput).toHaveValue('');
+		}, { timeout: 3000 });
 	});
 });

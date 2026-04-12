@@ -19,6 +19,7 @@ export interface Badge {
 export interface User {
 	id: number;
 	name: string;
+	username?: string;
 	email?: string;
 	image?: string;
 	profileImage?: string;
@@ -58,7 +59,7 @@ export interface Challenge {
 	description: string;
 	category: string;
 	type: 'Container' | 'Compose' | 'Normal';
-	score_type: 'static' | 'dynamic';
+	score_type: 'Static' | 'Dynamic';
 	points: number;
 	max_points?: number;
 	min_points?: number;
@@ -75,7 +76,7 @@ export interface Challenge {
 	// Host and connection info
 	host?: string;
 	port?: number;
-	conn_type?: 'NONE' | 'TCP' | 'TCP_TLS' | 'HTTP' | 'HTTPS';
+	conn_type?: 'NONE' | 'TCP' | 'HTTP' | 'HTTPS';
 	connection_info?: string;
 
 	// Instance info
@@ -84,6 +85,8 @@ export interface Challenge {
 	instance_port?: number | null;
 	hash_domain?: boolean;
 	timeout?: number | null;
+	image?: string;
+	compose?: string;
 
 	// Solve state
 	solved?: boolean;

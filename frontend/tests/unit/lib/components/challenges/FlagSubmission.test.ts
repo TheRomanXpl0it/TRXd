@@ -1,7 +1,8 @@
 import { submitFlag } from '$lib/challenges';
 import { toast } from 'svelte-sonner';
 
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { screen, waitFor } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import FlagSubmission from '$lib/components/challenges/FlagSubmission.svelte';
@@ -44,7 +45,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: false });
 
 		const onSolved = vi.fn();
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved
@@ -81,7 +82,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const mockSubmit = vi.mocked(submitFlag);
 		mockSubmit.mockResolvedValueOnce({ status: 'Wrong' });
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -118,7 +119,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -142,7 +143,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const mockSubmit = vi.mocked(submitFlag);
 		mockSubmit.mockRejectedValueOnce(new Error('Network error'));
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -172,7 +173,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -221,7 +222,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -255,7 +256,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const mockSubmit = vi.mocked(submitFlag);
 		const mockToast = vi.mocked(toast);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -294,7 +295,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const mockSubmit = vi.mocked(submitFlag);
 		const mockToast = vi.mocked(toast);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -331,7 +332,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const mockSubmit = vi.mocked(submitFlag);
 		const mockToast = vi.mocked(toast);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -370,7 +371,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const mockSubmit = vi.mocked(submitFlag);
 		const mockToast = vi.mocked(toast);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -408,7 +409,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
@@ -443,7 +444,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
 
-		render(FlagSubmission, {
+		renderWithProviders(FlagSubmission, {
 			props: {
 				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()

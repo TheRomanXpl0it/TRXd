@@ -15,10 +15,20 @@
 		onSolved?: () => void;
 	} = $props();
 
+	let locallySolved = $state(false);
+	const solved = $derived(challenge?.solved || locallySolved);
+
 	let flag = $state('');
 	let submittingFlag = $state(false);
 	let flagError = $state(false);
 	let flagInputElement = $state<any>();
+
+	$effect(() => {
+		if (challenge?.id) {
+			flag = '';
+			flagError = false;
+		}
+	});
 
 	async function onSubmitFlag(ev: SubmitEvent) {
 		ev.preventDefault();
@@ -43,7 +53,7 @@
 				toast.success('Correct flag!');
 			}
 			flag = '';
-			challenge.solved = true;
+			locallySolved = true;
 			if (onSolved) onSolved();
 		} catch (e: any) {
 			flagError = true;
@@ -54,13 +64,13 @@
 	}
 </script>
 
-<div class="border-t border-black/10 pt-6 dark:border-white/10">
+<div class="pt-6">
 	<form
 		class="flex w-full items-center gap-2 sm:gap-3"
-		class:justify-center={challenge?.solved}
+		class:justify-center={solved}
 		onsubmit={onSubmitFlag}
 	>
-		{#if !challenge?.solved}
+		{#if !solved}
 			<div class="relative flex-1">
 				{#if flagError}
 					<AlertCircle

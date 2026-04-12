@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/svelte';
+import { screen, fireEvent } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import { tick } from 'svelte';
 import { describe, it, expect } from 'vitest';
 import AccountScoreboard from '$lib/components/account/AccountScoreboard.svelte';
@@ -10,7 +11,7 @@ const solves = [
 
 describe('AccountScoreboard', () => {
 	it('sorts by clicking headers', async () => {
-		render(AccountScoreboard, { props: { solves } });
+		renderWithProviders(AccountScoreboard, { props: { solves } });
 
 		await tick();
 
@@ -27,7 +28,7 @@ describe('AccountScoreboard', () => {
 		await fireEvent.click(categoryHeader);
 		await tick();
 
-		expect(screen.getByText('X')).toBeInTheDocument();
-		expect(screen.getByText('Y')).toBeInTheDocument();
+		expect(await screen.findByText('X')).toBeInTheDocument();
+		expect(await screen.findByText('Y')).toBeInTheDocument();
 	});
 });

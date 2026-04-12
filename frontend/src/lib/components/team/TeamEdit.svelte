@@ -1,5 +1,6 @@
 <script lang="ts">
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
+	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import Label from '$lib/components/ui/label/label.svelte';
@@ -33,11 +34,11 @@
 	let tags = $state<string[]>([]);
 	let newTag = $state('');
 	let saving = $state(false);
-	
+
 	let newPassword = $state('');
 	let generatedPassword = $state('');
 	let resetting = $state(false);
-
+	let confirmResetOpen = $state(false);
 	const isAdmin = $derived(authState.user?.role === 'Admin');
 
 	$effect(() => {
@@ -90,12 +91,12 @@
 	function removeTag(tag: string) {
 		tags = tags.filter((t) => t !== tag);
 	}
-	
+
 	async function handleResetPassword() {
 		if (resetting || !team?.id) return;
 		resetting = true;
 		generatedPassword = '';
-		
+
 		try {
 			const res = await resetTeamPassword(team.id, isAdmin ? undefined : newPassword.trim());
 			if (isAdmin && res?.new_password) {
@@ -155,18 +156,50 @@
 						</p>
 					{/if}
 				</div>
-				
+
 				<div class="border-t pt-4">
 					<h4 class="mb-2 text-sm font-semibold">Security</h4>
 					<div class="space-y-2">
 						<Label for="pf-password" class="mb-1 block">Reset Password</Label>
 						{#if isAdmin}
 							<div class="flex items-center gap-2">
-								<Button type="button" variant="outline" onclick={handleResetPassword} disabled={resetting}>
-									{#if resetting}Resetting...{:else}Generate New Password{/if}
-								</Button>
+								<Dialog.Root bind:open={confirmResetOpen}>
+									<Dialog.Trigger>
+										{#snippet child({ props })}
+											<Button {...props} type="button" variant="outline" disabled={resetting}>
+												{#if resetting}Resetting...{:else}Generate New Password{/if}
+											</Button>
+										{/snippet}
+									</Dialog.Trigger>
+									<Dialog.Content>
+										<Dialog.Header>
+											<Dialog.Title>Confirm Team Password Reset</Dialog.Title>
+											<Dialog.Description>
+												Are you sure you want to reset the password for team <strong
+													>{team?.name}</strong
+												>? This will generate a new random join code and the current one will no
+												longer work.
+											</Dialog.Description>
+										</Dialog.Header>
+										<Dialog.Footer>
+											<Button variant="ghost" onclick={() => (confirmResetOpen = false)}
+												>Cancel</Button
+											>
+											<Button
+												variant="destructive"
+												onclick={() => {
+													confirmResetOpen = false;
+													handleResetPassword();
+												}}>Confirm Reset</Button
+											>
+										</Dialog.Footer>
+									</Dialog.Content>
+								</Dialog.Root>
+
 								{#if generatedPassword}
-									<p class="text-sm font-mono bg-muted px-2 py-1 rounded select-all cursor-text">{generatedPassword}</p>
+									<p class="bg-muted cursor-text select-all rounded px-2 py-1 font-mono text-sm">
+										{generatedPassword}
+									</p>
 								{/if}
 							</div>
 							<p class="text-muted-foreground mt-1 text-xs">
@@ -174,8 +207,19 @@
 							</p>
 						{:else}
 							<div class="flex flex-col gap-2">
-								<Input id="pf-password" type="password" bind:value={newPassword} placeholder="Enter new password" />
-								<Button type="button" variant="outline" class="w-fit" onclick={handleResetPassword} disabled={resetting || !newPassword.trim()}>
+								<Input
+									id="pf-password"
+									type="password"
+									bind:value={newPassword}
+									placeholder="Enter new password"
+								/>
+								<Button
+									type="button"
+									variant="outline"
+									class="w-fit"
+									onclick={handleResetPassword}
+									disabled={resetting || !newPassword.trim()}
+								>
 									{#if resetting}Resetting...{:else}Update Password{/if}
 								</Button>
 							</div>

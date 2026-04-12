@@ -1,4 +1,5 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/svelte';
+import { screen, waitFor, fireEvent } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import AccountEdit from '$lib/components/account/AccountEdit.svelte';
@@ -36,7 +37,7 @@ describe('AccountEdit Component', () => {
 	});
 
 	it('renders account edit dialog', () => {
-		render(AccountEdit, {
+		renderWithProviders(AccountEdit, {
 			props: {
 				open: true,
 				user: baseUser
@@ -51,7 +52,7 @@ describe('AccountEdit Component', () => {
 	it('validates empty form submission', async () => {
 		const user = userEvent.setup();
 
-		render(AccountEdit, {
+		renderWithProviders(AccountEdit, {
 			props: {
 				open: true,
 				user: { id: 5, name: '', country: '' }
@@ -70,7 +71,7 @@ describe('AccountEdit Component', () => {
 		const user = userEvent.setup();
 		vi.mocked(updateUser).mockResolvedValueOnce({ ok: true } as any);
 
-		render(AccountEdit, {
+		renderWithProviders(AccountEdit, {
 			props: {
 				open: true,
 				user: baseUser
@@ -94,7 +95,7 @@ describe('AccountEdit Component', () => {
 		const user = userEvent.setup();
 		vi.mocked(updateUser).mockResolvedValueOnce({ ok: true } as any);
 
-		render(AccountEdit, {
+		renderWithProviders(AccountEdit, {
 			props: {
 				open: true,
 				user: baseUser
@@ -122,7 +123,7 @@ describe('AccountEdit Component', () => {
 		const error = new Error('Update failed');
 		vi.mocked(updateUser).mockRejectedValueOnce(error);
 
-		render(AccountEdit, {
+		renderWithProviders(AccountEdit, {
 			props: {
 				open: true,
 				user: baseUser
@@ -148,7 +149,7 @@ describe('AccountEdit Component', () => {
 			() => new Promise((resolve) => setTimeout(() => resolve({ ok: true } as any), 200))
 		);
 
-		render(AccountEdit, {
+		renderWithProviders(AccountEdit, {
 			props: {
 				open: true,
 				user: baseUser

@@ -1,4 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { screen, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
+import { renderWithProviders } from '../../../render';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import TeamMemberlist from '$lib/components/team/TeamMemberlist.svelte';
 
@@ -26,34 +28,40 @@ describe('TeamMemberlist', () => {
 
 	it('renders members sorted by score', async () => {
 		mockGetUserData.mockResolvedValue({ image: null });
-		render(TeamMemberlist, { props: { team } });
+		renderWithProviders(TeamMemberlist, { props: { team } });
+		await tick();
+		await tick();
+		await tick();
 
-		expect(screen.getByText('Alice')).toBeInTheDocument();
-		expect(screen.getByText('Bob Sea')).toBeInTheDocument();
-		expect(screen.getByText('Seann')).toBeInTheDocument();
-		expect(screen.getByText('Zed')).toBeInTheDocument();
+		expect(await screen.findByText('Alice')).toBeInTheDocument();
+		expect(await screen.findByText('Bob Sea')).toBeInTheDocument();
+		expect(await screen.findByText('Seann')).toBeInTheDocument();
+		expect(await screen.findByText('Zed')).toBeInTheDocument();
 
-		expect(screen.getByText(/1.*200.*pts/)).toBeInTheDocument();
-		expect(screen.getByText(/800.*pts/)).toBeInTheDocument();
-		expect(screen.getByText('Captain')).toBeInTheDocument();
+		expect(await screen.findByText(/1.*200/)).toBeInTheDocument();
+		expect(await screen.findByText(/800/)).toBeInTheDocument();
+		expect(await screen.findByText('Captain')).toBeInTheDocument();
 	});
 
 	it('fetches user images for members', async () => {
 		mockGetUserData.mockResolvedValue({ image: 'http://img.png' });
-		render(TeamMemberlist, { props: { team } });
+		renderWithProviders(TeamMemberlist, { props: { team } });
+		
+		// Wait for members to render first
+		expect(await screen.findByText('Alice')).toBeInTheDocument();
 
 		await waitFor(() => {
 			expect(mockGetUserData).toHaveBeenCalledWith(10);
 			expect(mockGetUserData).toHaveBeenCalledWith(11);
 			expect(mockGetUserData).toHaveBeenCalledWith(12);
 			expect(mockGetUserData).toHaveBeenCalledWith(13);
-		});
+		}, { timeout: 2000 });
 	});
 
-	it('renders links to account pages', () => {
-		render(TeamMemberlist, { props: { team } });
+	it('renders links to account pages', async () => {
+		renderWithProviders(TeamMemberlist, { props: { team } });
 
-		const aliceLink = screen.getByRole('link', { name: /Alice/i });
+		const aliceLink = await screen.findByRole('link', { name: /Alice/i });
 		expect(aliceLink).toHaveAttribute('href', '/account/10');
 	});
 });

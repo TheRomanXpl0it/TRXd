@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/svelte';
+import { screen } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Page from '../../../../../src/routes/account/[[id]]/+page.svelte';
 import { authState } from '$lib/stores/auth';
@@ -16,13 +17,17 @@ vi.mock('$lib/stores/auth', () => ({
 	loadUser: vi.fn()
 }));
 
-vi.mock('@tanstack/svelte-query', () => ({
-	createQuery: vi.fn(),
-	useQueryClient: vi.fn(() => ({
-		setQueryData: vi.fn(),
-		refetchQueries: vi.fn()
-	}))
-}));
+vi.mock('@tanstack/svelte-query', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('@tanstack/svelte-query')>();
+	return {
+		...actual,
+		createQuery: vi.fn(),
+		useQueryClient: vi.fn(() => ({
+			setQueryData: vi.fn(),
+			refetchQueries: vi.fn()
+		}))
+	};
+});
 
 vi.mock('$app/stores', () => ({
 	page: {
@@ -65,7 +70,7 @@ describe('Account Profile Page', () => {
 		authState.ready = true;
 		authState.startTime = new Date(Date.now() + 100000).toISOString();
 
-		render(Page);
+		renderWithProviders(Page);
 
 		// Cards that should be HIDDEN
 		expect(screen.queryByText('Category Breakdown')).not.toBeInTheDocument();
@@ -80,7 +85,7 @@ describe('Account Profile Page', () => {
 		authState.ready = true;
 		authState.startTime = new Date(Date.now() - 100000).toISOString();
 
-		render(Page);
+		renderWithProviders(Page);
 
 		// Cards that should be VISIBLE
 		expect(screen.getByText('Category Breakdown')).toBeInTheDocument();

@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/svelte';
+import { screen, fireEvent } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import { describe, it, expect } from 'vitest';
 import TeamScoreboard from '$lib/components/team/TeamScoreboard.svelte';
 
@@ -30,7 +31,7 @@ const team = {
 
 describe('TeamScoreboard', () => {
 	it('renders rows and total points', () => {
-		render(TeamScoreboard, { props: { team } });
+		renderWithProviders(TeamScoreboard, { props: { team } });
 		expect(screen.queryByText('No solves yet.')).not.toBeInTheDocument();
 		expect(screen.getByText(/300 pts total/)).toBeInTheDocument();
 		expect(screen.getByText('Alice')).toBeInTheDocument();
@@ -38,7 +39,7 @@ describe('TeamScoreboard', () => {
 	});
 
 	it('sorts by clicking table headers', async () => {
-		render(TeamScoreboard, { props: { team } });
+		renderWithProviders(TeamScoreboard, { props: { team } });
 
 		// Default sort by timestamp desc => A (newer) first
 		const rowsBefore = screen.getAllByRole('row');

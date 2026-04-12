@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { browser } from '$app/environment';
+	import { mode } from 'mode-watcher';
 
 	interface CategoryTotal {
 		category: string;
@@ -16,6 +17,9 @@
 
 	let chartEl = $state<HTMLDivElement>();
 	let chart = $state<any>();
+
+	// Use mode-watcher's reactive state
+	const isDark = $derived(mode.current === 'dark');
 
 	// Process data for the radar chart
 	const processedData = $derived.by(() => {
@@ -38,14 +42,51 @@
 		return { labels, series: seriesData };
 	});
 
+	// Update chart when theme or data changes
+	$effect(() => {
+		if (chart && browser && isDark !== undefined) {
+			const color = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.5)';
+			chart.updateOptions({
+				colors: [color],
+				plotOptions: {
+					radar: {
+						polygons: {
+							strokeColors: isDark ? '#404040' : '#d1d5db',
+							connectorColors: isDark ? '#404040' : '#d1d5db',
+							fill: {
+								colors: isDark ? ['#171717', '#262626'] : ['#f9fafb', '#f3f4f6']
+							}
+						}
+					}
+				},
+				fill: {
+					opacity: isDark ? 0.1 : 0.15
+				},
+				markers: {
+					strokeColors: color
+				}
+			});
+		}
+	});
+
+	$effect(() => {
+		if (chart && browser && processedData.series.length > 0) {
+			chart.updateSeries([
+				{
+					name: 'Completion',
+					data: processedData.series
+				}
+			]);
+		}
+	});
+
 	$effect(() => {
 		if (!browser || !chartEl || processedData.labels.length === 0) return;
 
 		import('apexcharts').then((mod) => {
 			const ApexCharts = mod.default;
 
-			const isDark = document.documentElement.classList.contains('dark');
-			const primaryColor = 'hsl(217.2 91.2% 59.8%)'; // Standard blue, adjust if needed
+			const primaryColor = isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.5)';
 
 			const options = {
 				series: [
@@ -72,27 +113,28 @@
 					radar: {
 						size: 110,
 						polygons: {
-							strokeColors: isDark ? '#334155' : '#e2e8f0',
+							strokeColors: isDark ? '#404040' : '#d1d5db',
 							strokeWidth: '1px',
-							connectorColors: isDark ? '#334155' : '#e2e8f0',
+							connectorColors: isDark ? '#404040' : '#d1d5db',
 							fill: {
-								colors: isDark ? ['#1e293b', '#0f172a'] : ['#f8fafc', '#fff']
+								colors: isDark ? ['#171717', '#262626'] : ['#f9fafb', '#f3f4f6']
 							}
 						}
 					}
 				},
 				stroke: {
-					width: 3,
+					width: 2,
 					curve: 'smooth'
 				},
 				fill: {
-					opacity: 0.4
+					type: 'solid',
+					opacity: isDark ? 0.1 : 0.15
 				},
 				markers: {
-					size: 5,
-					colors: ['#fff'],
+					size: 4,
+					colors: isDark ? ['#fff'] : [primaryColor],
 					strokeColors: primaryColor,
-					strokeWidth: 3
+					strokeWidth: 2
 				},
 				labels: processedData.labels,
 				xaxis: {

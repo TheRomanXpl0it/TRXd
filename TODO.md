@@ -13,9 +13,6 @@
     - default chall creation, make the points dynamic by default, make the type Normal by default and the types in order (Normal, Container, Compose)
 
 ## Frontend
- - [x] Make countdown timer more efficient
- - [x] Lazy load monaco editor
- - [x] Virtualize country select
  - [/] Extra:
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 

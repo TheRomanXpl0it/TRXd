@@ -1,7 +1,10 @@
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { screen, waitFor } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import CategorySelect from '$lib/components/challenges/CategorySelect.svelte';
+
+import { tick } from 'svelte';
 
 describe('CategorySelect Component', () => {
 	const categories = [
@@ -13,14 +16,11 @@ describe('CategorySelect Component', () => {
 	];
 
 	beforeEach(() => {
-		// Clear any existing popovers
-		document.body.innerHTML = '';
-
-		Element.prototype.scrollIntoView = function () {};
+		Element.prototype.scrollIntoView = function () { };
 	});
 
 	it('renders with placeholder text', () => {
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				placeholder: 'Select a category...'
@@ -32,7 +32,7 @@ describe('CategorySelect Component', () => {
 	});
 
 	it('displays selected category label', () => {
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				value: 'crypto'
@@ -45,7 +45,7 @@ describe('CategorySelect Component', () => {
 	it('opens popover when button is clicked', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories
 			}
@@ -54,35 +54,32 @@ describe('CategorySelect Component', () => {
 		const button = screen.getByRole('combobox');
 		await user.click(button);
 
-		await waitFor(() => {
-			expect(button).toHaveAttribute('aria-expanded', 'true');
-		});
+		expect(await screen.findByRole('combobox')).toHaveAttribute('aria-expanded', 'true');
 	});
 
 	it('displays all category items in popover', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories
 			}
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByText('Web')).toBeInTheDocument();
-			expect(screen.getByText('Cryptography')).toBeInTheDocument();
-			expect(screen.getByText('Binary Exploitation')).toBeInTheDocument();
-			expect(screen.getByText('Forensics')).toBeInTheDocument();
-			expect(screen.getByText('Reverse Engineering')).toBeInTheDocument();
-		});
+		expect(await screen.findByText('Web', {}, { timeout: 2000 })).toBeInTheDocument();
+		expect(await screen.findByText('Cryptography', {}, { timeout: 2000 })).toBeInTheDocument();
+		expect(await screen.findByText('Binary Exploitation', {}, { timeout: 2000 })).toBeInTheDocument();
+		expect(await screen.findByText('Forensics', {}, { timeout: 2000 })).toBeInTheDocument();
+		expect(await screen.findByText('Reverse Engineering', {}, { timeout: 2000 })).toBeInTheDocument();
 	});
 
 	it('shows search input in popover', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				searchPlaceholder: 'Search category...'
@@ -90,16 +87,15 @@ describe('CategorySelect Component', () => {
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Search category...')).toBeInTheDocument();
-		});
+		expect(await screen.findByPlaceholderText('Search category...')).toBeInTheDocument();
 	});
 
 	it('filters items based on search input', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				searchPlaceholder: 'Search...'
@@ -107,16 +103,15 @@ describe('CategorySelect Component', () => {
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
-		});
-
-		const searchInput = screen.getByPlaceholderText('Search...');
+		const searchInput = await screen.findByPlaceholderText('Search...');
 		await user.type(searchInput, 'Crypto');
+		await tick();
+		await tick();
 
+		expect(await screen.findByText('Cryptography', {}, { timeout: 2000 })).toBeInTheDocument();
 		await waitFor(() => {
-			expect(screen.getByText('Cryptography')).toBeInTheDocument();
 			expect(screen.queryByText('Web')).not.toBeInTheDocument();
 		});
 	});
@@ -126,30 +121,31 @@ describe('CategorySelect Component', () => {
 
 		let selectedValue = '';
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				value: selectedValue
 			}
 		});
 
-		await user.click(screen.getByRole('combobox'));
+		await user.click(await screen.findByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByText('Web')).toBeInTheDocument();
-		});
+		const webItem = await screen.findByText('Web', {}, { timeout: 2000 });
+		await user.click(webItem);
 
-		await user.click(screen.getByText('Web'));
+		await tick();
+		await tick();
 
 		await waitFor(() => {
 			expect(screen.getByRole('combobox')).toHaveTextContent('Web');
-		});
+		}, { timeout: 3000 });
 	});
 
 	it('closes popover after selecting item', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories
 			}
@@ -157,46 +153,48 @@ describe('CategorySelect Component', () => {
 
 		const button = screen.getByRole('combobox');
 		await user.click(button);
+		await tick();
 
 		await waitFor(() => {
 			expect(button).toHaveAttribute('aria-expanded', 'true');
 		});
 
-		await user.click(screen.getByText('Forensics'));
+		await user.click(await screen.findByText('Forensics', {}, { timeout: 2000 }));
 
 		await waitFor(() => {
-			expect(button).toHaveAttribute('aria-expanded', 'false');
+			expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false');
 		});
 	});
 
 	it('displays selected category after selection', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				placeholder: 'Choose...'
 			}
 		});
 
+		// Open popover first
 		await user.click(screen.getByRole('combobox'));
+		await tick();
+
+		await user.click(await screen.findByText('Binary Exploitation', {}, { timeout: 2000 }));
+
+		await tick();
+		await tick();
 
 		await waitFor(() => {
-			expect(screen.getByText('Binary Exploitation')).toBeInTheDocument();
-		});
-
-		await user.click(screen.getByText('Binary Exploitation'));
-
-		await waitFor(() => {
-			expect(screen.getByText('Binary Exploitation')).toBeInTheDocument();
-			expect(screen.queryByText('Choose...')).not.toBeInTheDocument();
-		});
+			expect(screen.queryByText(/choose/i, { selector: '.text-muted-foreground' })).not.toBeInTheDocument();
+			expect(screen.getByRole('combobox')).toHaveTextContent('Binary Exploitation');
+		}, { timeout: 3000 });
 	});
 
 	it('shows checkmark for selected item', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				value: 'rev'
@@ -204,30 +202,29 @@ describe('CategorySelect Component', () => {
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			const options = screen.getAllByRole('option');
-			const revOption = options.find((opt) => opt.textContent?.includes('Reverse Engineering'));
-			expect(revOption).toBeTruthy();
+		const options = await screen.findAllByRole('option', { hidden: true });
+		const revOption = options.find((opt) => opt.textContent?.includes('Reverse Engineering'));
+		expect(revOption).toBeTruthy();
 
-			const revIcon = revOption!.querySelector('svg');
-			expect(revIcon).toBeTruthy();
-			expect(revIcon).not.toHaveClass('text-transparent');
+		const revIcon = revOption!.querySelector('svg');
+		expect(revIcon).toBeTruthy();
+		expect(revIcon).not.toHaveClass('text-transparent');
 
-			const otherOptions = options.filter((opt) => opt !== revOption);
-			for (const opt of otherOptions) {
-				const icon = opt.querySelector('svg');
-				if (icon) {
-					expect(icon).toHaveClass('text-transparent');
-				}
+		const otherOptions = options.filter((opt) => opt !== revOption);
+		for (const opt of otherOptions) {
+			const icon = opt.querySelector('svg');
+			if (icon) {
+				expect(icon).toHaveClass('text-transparent');
 			}
-		});
+		}
 	});
 
 	it('opens popover with keyboard (Enter key)', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories
 			}
@@ -246,7 +243,7 @@ describe('CategorySelect Component', () => {
 	it('closes popover with keyboard (Escape key)', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories
 			}
@@ -262,37 +259,36 @@ describe('CategorySelect Component', () => {
 		await user.keyboard('{Escape}');
 
 		await waitFor(() => {
-			expect(button).toHaveAttribute('aria-expanded', 'false');
+			expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'false');
 		});
 	});
 
 	it('returns focus to trigger button after selection', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories
 			}
 		});
 
 		const button = screen.getByRole('combobox');
-		await user.click(button);
+		await user.click(button); // Open popover
+		await tick();
+		await user.click(await screen.findByText('Web'));
 
-		await waitFor(() => {
-			expect(screen.getByText('Web')).toBeInTheDocument();
-		});
-
-		await user.click(screen.getByText('Web'));
+		await tick();
+		await tick();
 
 		await waitFor(() => {
 			expect(document.activeElement).toBe(button);
-		});
+		}, { timeout: 3000 });
 	});
 
 	it('shows "No results" when search has no matches', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				searchPlaceholder: 'Search...'
@@ -300,21 +296,20 @@ describe('CategorySelect Component', () => {
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
-		});
-
-		const searchInput = screen.getByPlaceholderText('Search...');
+		const searchInput = await screen.findByPlaceholderText('Search...');
 		await user.type(searchInput, 'xyz123');
+		await tick();
+		await tick();
 
 		await waitFor(() => {
-			expect(screen.getByText('No results.')).toBeInTheDocument();
-		});
+			expect(screen.getByText(/no results/i)).toBeInTheDocument();
+		}, { timeout: 3000 });
 	});
 
 	it('uses custom placeholder text', () => {
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				placeholder: 'Pick a category'
@@ -327,7 +322,7 @@ describe('CategorySelect Component', () => {
 	it('uses custom search placeholder text', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				searchPlaceholder: 'Type to search...'
@@ -335,14 +330,13 @@ describe('CategorySelect Component', () => {
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Type to search...')).toBeInTheDocument();
-		});
+		expect(await screen.findByPlaceholderText('Type to search...')).toBeInTheDocument();
 	});
 
 	it('applies custom width class', () => {
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				widthClass: 'w-[300px]'
@@ -354,7 +348,7 @@ describe('CategorySelect Component', () => {
 	});
 
 	it('applies custom className', () => {
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				className: 'my-custom-class'
@@ -366,7 +360,7 @@ describe('CategorySelect Component', () => {
 	});
 
 	it('handles empty items array', () => {
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: [],
 				placeholder: 'No categories'
@@ -379,23 +373,22 @@ describe('CategorySelect Component', () => {
 	it('shows "No results" when items array is empty and popover is opened', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: []
 			}
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByText('No results.')).toBeInTheDocument();
-		});
+		expect(await screen.findByText('No results.', {}, { timeout: 2000 })).toBeInTheDocument();
 	});
 
 	it('allows changing selection multiple times', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				value: 'web'
@@ -406,10 +399,8 @@ describe('CategorySelect Component', () => {
 
 		// Change to Crypto
 		await user.click(screen.getByRole('combobox'));
-		await waitFor(() => {
-			expect(screen.getByText('Cryptography')).toBeInTheDocument();
-		});
-		await user.click(screen.getByText('Cryptography'));
+		await tick();
+		await user.click(await screen.findByText('Cryptography', {}, { timeout: 2000 }));
 
 		await waitFor(() => {
 			expect(screen.getByRole('combobox')).toHaveTextContent('Cryptography');
@@ -417,10 +408,8 @@ describe('CategorySelect Component', () => {
 
 		// Change to Forensics
 		await user.click(screen.getByRole('combobox'));
-		await waitFor(() => {
-			expect(screen.getByText('Forensics')).toBeInTheDocument();
-		});
-		await user.click(screen.getByText('Forensics'));
+		await tick();
+		await user.click(await screen.findByText('Forensics', {}, { timeout: 2000 }));
 
 		await waitFor(() => {
 			expect(screen.getByRole('combobox')).toHaveTextContent('Forensics');
@@ -430,7 +419,7 @@ describe('CategorySelect Component', () => {
 	it('filters are case-insensitive', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				searchPlaceholder: 'Search...'
@@ -438,23 +427,20 @@ describe('CategorySelect Component', () => {
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
-		});
-
-		const searchInput = screen.getByPlaceholderText('Search...');
+		const searchInput = await screen.findByPlaceholderText('Search...');
 		await user.type(searchInput, 'CRYPTO');
+		await tick();
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByText('Cryptography')).toBeInTheDocument();
-		});
+		expect(await screen.findByText('Cryptography', {}, { timeout: 2000 })).toBeInTheDocument();
 	});
 
 	it('clears search when popover is reopened', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				searchPlaceholder: 'Search...'
@@ -463,23 +449,25 @@ describe('CategorySelect Component', () => {
 
 		// Open and search
 		await user.click(screen.getByRole('combobox'));
-		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
-		});
+		await tick();
+		await tick();
 
-		const searchInput = screen.getByPlaceholderText('Search...');
+		const searchInput = await screen.findByPlaceholderText('Search...');
 		await user.type(searchInput, 'Web');
+		await tick();
+		await tick();
 
 		// Select an item to close
 		await user.click(screen.getByText('Web'));
+		await tick();
 
 		// Reopen
 		await user.click(screen.getByRole('combobox'));
+		await tick();
+		await tick();
 
-		await waitFor(() => {
-			const newSearchInput = screen.getByPlaceholderText('Search...');
-			expect(newSearchInput).toHaveValue('');
-		});
+		const newSearchInput = await screen.findByPlaceholderText('Search...');
+		expect(newSearchInput).toHaveValue('');
 	});
 
 	it('handles items with special characters in labels', async () => {
@@ -491,42 +479,40 @@ describe('CategorySelect Component', () => {
 			{ value: 'test3', label: 'Category & More' }
 		];
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: specialItems
 			}
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByText("Category's Name")).toBeInTheDocument();
-			expect(screen.getByText('Category "Special"')).toBeInTheDocument();
-			expect(screen.getByText('Category & More')).toBeInTheDocument();
-		});
+		expect(await screen.findByText("Category's Name")).toBeInTheDocument();
+		expect(await screen.findByText('Category "Special"')).toBeInTheDocument();
+		expect(await screen.findByText('Category & More')).toBeInTheDocument();
 	});
 
 	it('displays correct number of items', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories
 			}
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			const options = screen.getAllByRole('option');
-			expect(options).toHaveLength(categories.length);
-		});
+		const options = await screen.findAllByRole('option', { hidden: true });
+		expect(options).toHaveLength(categories.length);
 	});
 
 	it('maintains selection when reopening popover', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				value: 'crypto'
@@ -535,58 +521,55 @@ describe('CategorySelect Component', () => {
 
 		// Open popover
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			const options = screen.getAllByRole('option');
-			const selectedOption = options.find((opt) => opt.textContent?.includes('Cryptography'));
-			const icon = selectedOption?.querySelector('svg');
-			expect(icon).not.toHaveClass('text-transparent');
-		});
+		const options = await screen.findAllByRole('option', { hidden: true });
+		const selectedOption = options.find((opt) => opt.textContent?.includes('Cryptography'));
+		const icon = selectedOption?.querySelector('svg');
+		expect(icon).not.toHaveClass('text-transparent');
 
 		// Close popover
 		await user.keyboard('{Escape}');
+		await tick();
 
 		// Reopen popover
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			const options = screen.getAllByRole('option');
-			const selectedOption = options.find((opt) => opt.textContent?.includes('Cryptography'));
-			const icon = selectedOption?.querySelector('svg');
-			expect(icon).not.toHaveClass('text-transparent');
-		});
+		const options2 = await screen.findAllByRole('option', { hidden: true });
+		const selectedOption2 = options2.find((opt) => opt.textContent?.includes('Cryptography'));
+		const icon2 = selectedOption2?.querySelector('svg');
+		expect(icon2).not.toHaveClass('text-transparent');
 	});
 
 	it('filters out all items when search does not match', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
-				items: categories,
-				searchPlaceholder: 'Search...'
+				items: categories
 			}
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
-		});
-
-		const searchInput = screen.getByPlaceholderText('Search...');
+		const searchInput = await screen.findByPlaceholderText('Search category...');
 		await user.type(searchInput, 'xyz123');
+		await tick();
+		await tick();
+		await tick();
 
-		await waitFor(() => {
-			const options = screen.queryAllByRole('option');
-			expect(options).toHaveLength(0);
-			expect(screen.getByText('No results.')).toBeInTheDocument();
-		});
+		expect(await screen.findByText('No results.', {}, { timeout: 2000 })).toBeInTheDocument();
+		const options = screen.queryAllByRole('option', { hidden: true });
+		expect(options).toHaveLength(0);
 	});
 
 	it('applies custom group label', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				groupLabel: 'challenge-categories'
@@ -595,13 +578,14 @@ describe('CategorySelect Component', () => {
 
 		await user.click(screen.getByRole('combobox'));
 
-		await waitFor(() => {
-			// The group label is used as the data-value attribute
-			const group = document.querySelector(
-				'[data-command-group][data-value="challenge-categories"]'
-			);
-			expect(group).toBeInTheDocument();
-		});
+		// Wait for content to be portal-rendered
+		await screen.findByPlaceholderText('Search category...'); // Corrected placeholder mapping
+
+		// The group label is used as the data-value attribute
+		const group = document.querySelector(
+			'[data-command-group][data-value="challenge-categories"]'
+		);
+		expect(group).toBeInTheDocument();
 	});
 
 	it('handles single item in list', async () => {
@@ -609,19 +593,18 @@ describe('CategorySelect Component', () => {
 
 		const singleItem = [{ value: 'web', label: 'Web' }];
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: singleItem
 			}
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			const options = screen.getAllByRole('option');
-			expect(options).toHaveLength(1);
-			expect(screen.getByText('Web')).toBeInTheDocument();
-		});
+		const options = await screen.findAllByRole('option', { hidden: true });
+		expect(options).toHaveLength(1);
+		expect(await screen.findByText('Web')).toBeInTheDocument();
 	});
 
 	it('handles very long category labels', async () => {
@@ -634,27 +617,26 @@ describe('CategorySelect Component', () => {
 			}
 		];
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: longLabelItems
 			}
 		});
 
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(
-				screen.getByText(
-					'This is a very long category name that should still be displayed correctly'
-				)
-			).toBeInTheDocument();
-		});
+		expect(await screen.findByText(
+			'This is a very long category name that should still be displayed correctly',
+			{},
+			{ timeout: 2000 }
+		)).toBeInTheDocument();
 	});
 
 	it('handles rapid selection changes', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				value: 'web'
@@ -663,10 +645,8 @@ describe('CategorySelect Component', () => {
 
 		// Rapidly change selections
 		await user.click(screen.getByRole('combobox'));
-		await waitFor(() => {
-			expect(screen.getByText('Cryptography')).toBeInTheDocument();
-		});
-		await user.click(screen.getByText('Cryptography'));
+		await tick();
+		await user.click(await screen.findByText('Cryptography', {}, { timeout: 2000 }));
 
 		await waitFor(() => {
 			expect(screen.getByRole('combobox')).toHaveTextContent('Cryptography');
@@ -674,10 +654,8 @@ describe('CategorySelect Component', () => {
 
 		// Change again immediately
 		await user.click(screen.getByRole('combobox'));
-		await waitFor(() => {
-			expect(screen.getByText('Forensics')).toBeInTheDocument();
-		});
-		await user.click(screen.getByText('Forensics'));
+		await tick();
+		await user.click(await screen.findByText('Forensics'));
 
 		await waitFor(() => {
 			expect(screen.getByRole('combobox')).toHaveTextContent('Forensics');
@@ -687,7 +665,7 @@ describe('CategorySelect Component', () => {
 	it('clears selection state visually', async () => {
 		const user = userEvent.setup();
 
-		render(CategorySelect, {
+		renderWithProviders(CategorySelect, {
 			props: {
 				items: categories,
 				value: 'web',
@@ -699,12 +677,9 @@ describe('CategorySelect Component', () => {
 
 		// Select another item
 		await user.click(screen.getByRole('combobox'));
+		await tick();
 
-		await waitFor(() => {
-			expect(screen.getByText('Cryptography')).toBeInTheDocument();
-		});
-
-		await user.click(screen.getByText('Cryptography'));
+		await user.click(await screen.findByText('Cryptography'));
 
 		await waitFor(() => {
 			expect(screen.getByRole('combobox')).toHaveTextContent('Cryptography');

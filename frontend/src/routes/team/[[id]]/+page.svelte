@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
-	import { Globe, Users, Edit, Award, LayoutGrid, List, Mail, Medal } from '@lucide/svelte';
+	import { Globe, Users, Pencil, Award, LayoutGrid, List, Mail, Medal } from '@lucide/svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 
 	import SolveListTable from '$lib/components/team/TeamScoreboard.svelte';
@@ -97,7 +97,7 @@
 			<h2 class="text-3xl font-bold tracking-tight">Team Profile</h2>
 			{#if isOwnTeam}
 				<Button variant="outline" size="sm" onclick={() => (teamEditOpen = true)} class="gap-2">
-					<Edit class="h-4 w-4" />
+					<Pencil class="h-4 w-4" />
 					Edit Team
 				</Button>
 			{/if}
@@ -254,24 +254,32 @@
 								>
 							</Card.Header>
 							<Card.Content>
-								{#if team?.solves && team.solves.length > 0}
+								{#if team?.total_category_challenges && team.total_category_challenges.length > 0}
 									{@const categories = (() => {
-										const map = new Map();
-										for (const s of team.solves) map.set(s.category, (map.get(s.category) ?? 0) + 1);
-										const total = [...map.values()].reduce((a, b) => a + b, 0) || 1;
-										return [...map.entries()]
-											.sort((a, b) => b[1] - a[1])
-											.map(([cat, count]) => ({ cat, count, pct: Math.round((count / total) * 100) }));
+										const solveCounts: Record<string, number> = {};
+										for (const s of team.solves || []) {
+											if (s.category) solveCounts[s.category] = (solveCounts[s.category] || 0) + 1;
+										}
+										return team.total_category_challenges
+											.map((tc: any) => ({
+												cat: tc.category,
+												count: solveCounts[tc.category] || 0,
+												total: tc.count || 1,
+												pct: Math.round(((solveCounts[tc.category] || 0) / (tc.count || 1)) * 100)
+											}))
+											.sort((a: any, b: any) => b.pct - a.pct || b.count - a.count);
 									})()}
 									<div class="grid gap-4 sm:grid-cols-2">
 										{#each categories as c}
 											<div class="space-y-1">
-												<div class="flex justify-between text-xs font-medium">
-													<span>{c.cat}</span>
-													<span class="text-muted-foreground">{c.count} ({c.pct}%)</span>
+												<div class="flex justify-between text-xs font-semibold">
+													<span class="text-foreground/90">{c.cat}</span>
+													<span class={c.pct === 100 ? "text-primary font-bold" : "text-muted-foreground"}>
+														{c.count} / {c.total} ({c.pct}%)
+													</span>
 												</div>
 												<div class="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-													<div class="bg-primary h-full" style="width: {c.pct}%"></div>
+													<div class="bg-primary h-full transition-all duration-500" style="width: {c.pct}%"></div>
 												</div>
 											</div>
 										{/each}

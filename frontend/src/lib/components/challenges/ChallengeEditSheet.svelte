@@ -254,10 +254,7 @@
 			const n = Number(x);
 			return Number.isFinite(n) ? n : undefined;
 		};
-		const str = (x: any) => {
-			const s = String(x ?? '').trim();
-			return s;
-		};
+		const str = (x: any) => String(x ?? '').trim();
 
 		// build the fields exactly as backend expects (snake_case)
 		const fields: any = {
@@ -265,7 +262,6 @@
 			name: name.trim(),
 			category: category.trim(),
 			description: str(description),
-			difficulty: 'Easy',
 			authors: (authorsCsv || '')
 				.split(',')
 				.map((a) => a.trim())
@@ -284,10 +280,10 @@
 
 			// performance / limits
 			max_points: toInt(maxPoints) ?? 500,
-			lifetime: toInt(lifetime) ?? 0,
-			max_memory: toInt(maxRam) ?? 0,
+			lifetime: toInt(lifetime) ?? 1800,
+			max_memory: toInt(maxRam) && (toInt(maxRam) as number) > 0 ? (toInt(maxRam) as number) : 512,
 
-			// misc docker
+			// envs as JSON string
 			envs: (() => {
 				const obj: Record<string, string> = {};
 				for (const ev of envVars) {
@@ -296,16 +292,10 @@
 				return Object.keys(obj).length > 0 ? JSON.stringify(obj) : undefined;
 			})(),
 			tags,
-			max_cpu: toNum(maxCPU) && (toNum(maxCPU) as number) > 0 ? String(toNum(maxCPU)) : ''
+			max_cpu: toNum(maxCPU) && (toNum(maxCPU) as number) > 0 ? String(toNum(maxCPU)) : '0.5'
 		};
 
-		// strip empty arrays
-		if (Array.isArray(fields.authors) && fields.authors.length === 0) delete fields.authors;
-
 		saving = true;
-
-		// tags diffs
-		// tags diffs (removed separate logic, now handled in updateChallenge)
 
 		// flags diffs
 		const prevFlags = Array.from(flags_og ?? []);
@@ -318,67 +308,20 @@
 		);
 
 		try {
-			// ---- Build FormData (multipart) ----
-			const fd = new FormData();
-
-			// Append chall_id first, explicitly (Svelte 5 value guard)
-			fd.append('chall_id', String(challenge_user?.id ?? ''));
-
-			// 1) Append scalar + array fields (EXCLUDING chall_id)
-			const entries: Record<string, any> = {
-				name: fields.name,
-				category: fields.category,
-				description: fields.description,
-				difficulty: fields.difficulty,
-				type: fields.type,
-				hidden: fields.hidden ? 'true' : 'false',
-				score_type: fields.score_type,
-				host: fields.host,
-				port: fields.port,
-				image: fields.image,
-				compose: fields.compose,
-				hash_domain: fields.hash_domain ? 'true' : 'false',
-				max_points: fields.max_points,
-				lifetime: fields.lifetime,
-				max_memory: fields.max_memory,
-				envs: fields.envs,
-				max_cpu: fields.max_cpu
-			};
-
-			// Send authors as indexed array for Go form decoder
-			if (Array.isArray(fields.authors)) {
-				fields.authors.forEach((author: string, index: number) => {
-					fd.append(`authors[${index}]`, author);
-				});
-			}
-
-			if (Array.isArray(fields.tags)) {
-				fields.tags.forEach((tag: string, index: number) => {
-					fd.append(`tags[${index}]`, tag);
-				});
-			}
-
-			for (const [k, v] of Object.entries(entries)) {
-				if (v !== undefined && v !== null) {
-					fd.append(k, String(v));
-				}
-			}
-
-			// 4) Update Metadata (JSON)
+			// 1) Update Metadata (JSON)
 			await updateChallenge(fields);
 
-			// 5) Upload New Attachments (if any)
+			// 2) Upload New Attachments
 			if (newFiles.length > 0) {
 				const fd = new FormData();
 				fd.append('chall_id', String(challenge_user?.id));
 				for (const f of newFiles) {
-					// Backend iterates multipartForm.File, so Key 'attachments' is standard
 					fd.append('attachments', f, f.name);
 				}
 				await uploadAttachments(fd);
 			}
 
-			// 6) Delete Attachments (if any)
+			// 3) Delete Removed Attachments
 			if (removedAttachmentNames.size > 0) {
 				const namesToDelete = Array.from(removedAttachmentNames).map(
 					(n) => n.split('/').pop() || n
@@ -386,12 +329,13 @@
 				await deleteAttachments(challenge_user.id, namesToDelete);
 			}
 
-			await createFlags(newFlags, challenge_user?.id);
-			await deleteFlags(deletedFlags, challenge_user?.id);
+			// 4) Update Flags
+			if (newFlags.length > 0) await createFlags(newFlags, challenge_user?.id);
+			if (deletedFlags.length > 0) await deleteFlags(deletedFlags, challenge_user?.id);
 
 			onupdated?.({ id: challenge_user.id });
 			open = false;
-			toast.success('Challenge updated.');
+			toast.success('Challenge updated successfully');
 		} catch (err: any) {
 			toast.error(err?.message ?? 'Failed to update challenge.');
 		} finally {
@@ -949,17 +893,35 @@
 								</div>
 							{:else}
 								<!-- Container Challenge Deployment -->
-								<div class="space-y-4">
-									<h4 class="mb-4 text-sm font-semibold">Container Configuration</h4>
-									<div>
-										<Label for="ho-host" class="mb-2 block text-sm font-medium"
-											>Container Image Name</Label
+								<div class="space-y-6">
+									<div class="bg-muted/20 rounded-xl border-0 p-5">
+										<h4
+											class="text-muted-foreground mb-4 text-sm font-semibold uppercase tracking-wider"
 										>
-										<Input id="ho-host" bind:value={imageName} placeholder="TRX-Chall-1" />
-									</div>
-									<div class="flex items-center gap-3">
-										<Checkbox id="ho-hashdomain" bind:checked={hashDomain} />
-										<Label for="ho-hashdomain" class="cursor-pointer">Hash domain</Label>
+											Container Configuration
+										</h4>
+										<div class="space-y-4">
+											<div>
+												<Label for="ch-image-name" class="mb-2 block text-sm font-semibold"
+													>Docker Image</Label
+												>
+												<Input
+													id="ch-image-name"
+													bind:value={imageName}
+													placeholder="e.g. nginx:latest, my-app:v1"
+													class="bg-background font-mono text-sm"
+												/>
+												<p class="text-muted-foreground mt-1.5 text-[11px] italic">
+													Ensure this image is available on the deployment server's Docker daemon.
+												</p>
+											</div>
+											<div class="flex items-center gap-3 pt-2">
+												<Checkbox id="ho-hashdomain" bind:checked={hashDomain} />
+												<Label for="ho-hashdomain" class="cursor-pointer text-sm font-medium"
+													>Use Hash Domain Mapping</Label
+												>
+											</div>
+										</div>
 									</div>
 								</div>
 

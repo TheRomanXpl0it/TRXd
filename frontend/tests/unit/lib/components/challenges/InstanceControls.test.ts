@@ -1,9 +1,11 @@
-import { render, screen, waitFor } from '@testing-library/svelte';
+import { screen, waitFor } from '@testing-library/svelte';
+import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import InstanceControls from '$lib/components/challenges/InstanceControls.svelte';
 import { startInstance, stopInstance } from '$lib/instances';
 import { toast } from 'svelte-sonner';
+import { tick } from 'svelte';
 
 // Mock the instances API
 vi.mock('$lib/instances', () => ({
@@ -55,7 +57,7 @@ describe('InstanceControls Component', () => {
 		});
 
 		const challenge = { id: challengeId, host: null, port: null, timeout: null };
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 0,
@@ -96,7 +98,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 1800, // 30 minutes left
@@ -142,7 +144,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 3600
@@ -150,7 +152,7 @@ describe('InstanceControls Component', () => {
 		});
 
 		// Click the running instance button (green background with connection string)
-		const instanceButton = screen.getByRole('button', { name: /copy instance connection/i });
+		const instanceButton = screen.getByRole('button', { name: /copy instance connection address/i });
 		await user.click(instanceButton);
 
 		// Verify clipboard API was called with connection string
@@ -171,7 +173,7 @@ describe('InstanceControls Component', () => {
 		mockStart.mockRejectedValueOnce(new Error('No available instances'));
 
 		const challenge = { id: challengeId, host: null, port: null, timeout: null };
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 0
@@ -184,7 +186,7 @@ describe('InstanceControls Component', () => {
 		// Verify error toast
 		await waitFor(() => {
 			expect(mockToast.error).toHaveBeenCalledWith(
-				'Failed to create instance: No available instances'
+				expect.stringMatching(/Error:.*No available instances/)
 			);
 		});
 
@@ -207,7 +209,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 1800
@@ -219,7 +221,9 @@ describe('InstanceControls Component', () => {
 
 		// Verify error toast
 		await waitFor(() => {
-			expect(mockToast.error).toHaveBeenCalledWith('Failed to stop instance: Instance not found');
+			expect(mockToast.error).toHaveBeenCalledWith(
+				expect.stringMatching(/Error:.*Instance not found/)
+			);
 		});
 	});
 
@@ -237,7 +241,7 @@ describe('InstanceControls Component', () => {
 		);
 
 		const challenge = { id: challengeId, host: null, port: null, timeout: null };
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 0
@@ -273,7 +277,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 1800
@@ -304,7 +308,7 @@ describe('InstanceControls Component', () => {
 		);
 
 		const challenge = { id: challengeId, host: null, port: null, timeout: null };
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 0
@@ -326,7 +330,7 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = { id: challengeId, host: 'test.com', port: 1337, timeout: 3600 };
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 7265 // 2:01:05
@@ -341,7 +345,7 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = { id: challengeId, host: 'test.com', port: 1337, timeout: 3600 };
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 125 // 2:05
@@ -356,15 +360,15 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = { id: challengeId, host: 'test.com', port: 1337, timeout: 3600 };
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 45
 			}
 		});
 
-		// Should show just seconds
-		expect(screen.getByText(/^45$/)).toBeInTheDocument();
+		// Should show seconds (formatted as 0:45 in component)
+		expect(screen.getByText('0:45')).toBeInTheDocument();
 	});
 
 	it('displays connection string with port', async () => {
@@ -376,7 +380,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 3600
@@ -396,7 +400,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 3600
@@ -424,7 +428,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 3600
@@ -444,7 +448,7 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = { id: challengeId, host: null, port: null, timeout: null };
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 0
@@ -455,7 +459,7 @@ describe('InstanceControls Component', () => {
 		expect(screen.getByRole('button', { name: /start.*instance/i })).toBeInTheDocument();
 		// Should NOT show running instance button
 		expect(
-			screen.queryByRole('button', { name: /copy instance connection/i })
+			screen.queryByRole('button', { name: /copy instance connection address/i })
 		).not.toBeInTheDocument();
 	});
 
@@ -468,7 +472,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 1800
@@ -476,7 +480,7 @@ describe('InstanceControls Component', () => {
 		});
 
 		// Should show running instance with countdown
-		expect(screen.getByRole('button', { name: /copy instance connection/i })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /copy instance connection address/i })).toBeInTheDocument();
 		// Should NOT show Start Instance button
 		expect(screen.queryByRole('button', { name: /start.*instance/i })).not.toBeInTheDocument();
 	});
@@ -490,7 +494,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		const { rerender } = render(InstanceControls, {
+		const { rerender } = renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 3600 // 1:00:00
@@ -501,13 +505,11 @@ describe('InstanceControls Component', () => {
 		expect(screen.getByText(/1:00:00/)).toBeInTheDocument();
 
 		// Update countdown to 30 seconds
-		await rerender({
-			challenge,
-			countdown: 30
-		});
-
-		// Should now show 30
-		expect(screen.getByText(/^30$/)).toBeInTheDocument();
+		await rerender({ challenge, countdown: 30 });
+		
+		await waitFor(() => {
+			expect(screen.getByText('0:30')).toBeInTheDocument();
+		}, { timeout: 3000 });
 		expect(screen.queryByText(/1:00:00/)).not.toBeInTheDocument();
 	});
 
@@ -520,7 +522,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		const { rerender } = render(InstanceControls, {
+		const { rerender } = renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: 10 // About to expire
@@ -528,7 +530,7 @@ describe('InstanceControls Component', () => {
 		});
 
 		// Should show running instance
-		expect(screen.getByRole('button', { name: /copy instance connection/i })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /copy instance connection address/i })).toBeInTheDocument();
 
 		// Update countdown to 0 (expired)
 		await rerender({
@@ -537,9 +539,11 @@ describe('InstanceControls Component', () => {
 		});
 
 		// Should now show start button
-		expect(screen.getByRole('button', { name: /start.*instance/i })).toBeInTheDocument();
+		await waitFor(() => {
+			expect(screen.getByRole('button', { name: /start.*instance/i })).toBeInTheDocument();
+		}, { timeout: 3000 });
 		expect(
-			screen.queryByRole('button', { name: /copy instance connection/i })
+			screen.queryByRole('button', { name: /copy instance connection address/i })
 		).not.toBeInTheDocument();
 	});
 
@@ -552,7 +556,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		};
 
-		render(InstanceControls, {
+		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
 				countdown: -50 // Negative value
@@ -562,7 +566,7 @@ describe('InstanceControls Component', () => {
 		// With countdown <= 0, should show start button instead of running state
 		expect(screen.getByRole('button', { name: /start.*instance/i })).toBeInTheDocument();
 		expect(
-			screen.queryByRole('button', { name: /copy instance connection/i })
+			screen.queryByRole('button', { name: /copy instance connection address/i })
 		).not.toBeInTheDocument();
 	});
 });

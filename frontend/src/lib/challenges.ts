@@ -2,8 +2,8 @@ import { api } from '$lib/api';
 import type { Challenge, Category, Solve } from '$lib/types';
 
 export async function getSolves(chall_id: string | number): Promise<Solve[]> {
-	const challenge = await getChallenge(chall_id);
-	return Array.isArray(challenge?.solves_list) ? challenge.solves_list : [];
+	const ch = await api<any>(`/challenges/${chall_id}`);
+	return ch.solves_list || [];
 }
 
 export async function getChallenges(): Promise<Challenge[]> {
@@ -88,4 +88,24 @@ export async function deleteAttachments(chall_id: number, names: string[]): Prom
 		method: 'DELETE',
 		body: JSON.stringify({ chall_id, names })
 	});
+}
+
+export async function toggleChallengesHidden(challIds: number[]): Promise<void> {
+	return api<void>('/challenges/hidden', {
+		headers: { 'content-type': 'application/json' },
+		method: 'PATCH',
+		body: JSON.stringify({ chall_ids: challIds })
+	});
+}
+
+export async function getAdminStats(): Promise<{
+	total_users: number;
+	total_players: number;
+	total_teams: number;
+	total_challenges: number;
+	total_released_challenges: number;
+	total_submissions: number;
+	total_correct_submissions: number;
+}> {
+	return api('/stats');
 }
