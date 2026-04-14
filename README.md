@@ -1,2 +1,2 @@
 # TRXd
-A cutting edge CTF hosting platform.
+A CTF hosting platform.

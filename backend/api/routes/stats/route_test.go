@@ -1,4 +1,4 @@
-package admin_stats_test
+package stats_test
 
 import (
 	"net/http"

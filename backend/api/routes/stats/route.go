@@ -1,4 +1,4 @@
-package admin_stats
+package stats
 
 import (
 	"trxd/utils"

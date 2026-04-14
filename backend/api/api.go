@@ -5,7 +5,6 @@ import (
 	"strings"
 	"time"
 	"trxd/api/middlewares"
-	"trxd/api/routes/admin_stats"
 	"trxd/api/routes/attachments_create"
 	"trxd/api/routes/attachments_delete"
 	"trxd/api/routes/categories_create"
@@ -27,6 +26,7 @@ import (
 	"trxd/api/routes/instances_delete"
 	"trxd/api/routes/instances_get"
 	"trxd/api/routes/instances_update"
+	"trxd/api/routes/stats"
 	"trxd/api/routes/submissions_create"
 	"trxd/api/routes/submissions_delete"
 	"trxd/api/routes/submissions_get"
@@ -225,5 +225,5 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 	api.Get("/configs", admin, configs_get.Route)
 	api.Patch("/configs", admin, configs_update.Route)
 
-	api.Get("/stats", admin, admin_stats.Route)
+	api.Get("/stats", author, stats.Route)
 }

@@ -23,7 +23,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"allow-register": {
 		Name:        "Allow Register",
 		Value:       false,
-		Type:        "bool",
+		Type:        "boolean",
 		Category:    "",
 		Description: "whether to allow user registration",
 		Secret:      false,
@@ -31,7 +31,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"chall-min-points": {
 		Name:        "Challenge Min Points",
 		Value:       50,
-		Type:        "int",
+		Type:        "integer",
 		Category:    "",
 		Description: "the minimum points a challenge can award",
 		Secret:      false,
@@ -39,7 +39,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"chall-points-decay": {
 		Name:        "Challenge Points Decay",
 		Value:       15,
-		Type:        "int",
+		Type:        "integer",
 		Category:    "",
 		Description: "the rate at which challenge points decay",
 		Secret:      false,
@@ -63,7 +63,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"instance-max-memory": {
 		Name:        "Instance Max Memory",
 		Value:       512,
-		Type:        "int",
+		Type:        "integer",
 		Category:    "instances",
 		Description: "the maximum memory allocation for each instance in MB",
 		Secret:      false,
@@ -95,7 +95,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"hash-len": {
 		Name:        "Hash Domain Length",
 		Value:       12,
-		Type:        "int",
+		Type:        "integer",
 		Category:    "instances",
 		Description: "the length of the random hash used into the instance domain (e.g. abcdef123456.domain.com)",
 		Secret:      false,
@@ -103,7 +103,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"domain": {
 		Name:        "Domain",
 		Value:       "",
-		Type:        "url",
+		Type:        "remote",
 		Category:    "instances",
 		Description: "the domain used for the instances (e.g. domain.com)",
 		Secret:      false,
@@ -111,15 +111,15 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"discord-webhook": {
 		Name:        "Discord Webhook",
 		Value:       "",
-		Type:        "url",
+		Type:        "remote",
 		Category:    "",
-		Description: "the Discord webhook URL for first blood notifications",
+		Description: "the Discord webhook url for first blood notifications",
 		Secret:      false,
 	},
 	"user-mode": {
 		Name:        "Single User Mode",
 		Value:       false,
-		Type:        "bool",
+		Type:        "boolean",
 		Category:    "",
 		Description: "if enabled there will be no teams, but only users, like a single player mode",
 		Secret:      false,
@@ -127,7 +127,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"scoreboard-top": {
 		Name:        "Scoreboard Top Teams",
 		Value:       10,
-		Type:        "int",
+		Type:        "integer",
 		Category:    "",
 		Description: "the number of the top teams to show on the scoreboard graph",
 		Secret:      false,
@@ -151,7 +151,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"email-verification": {
 		Name:        "Email Verification",
 		Value:       false,
-		Type:        "bool",
+		Type:        "boolean",
 		Category:    "email",
 		Description: "enables all the email related features",
 		Secret:      false,
@@ -167,7 +167,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"email-server": {
 		Name:        "Email Server",
 		Value:       "",
-		Type:        "url",
+		Type:        "remote",
 		Category:    "email",
 		Description: "the SMTP server address for sending verification emails (e.g. smtp.example.com)",
 		Secret:      false,
@@ -183,7 +183,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"email-addr": {
 		Name:        "Email Address",
 		Value:       "",
-		Type:        "string",
+		Type:        "email",
 		Category:    "email",
 		Description: "the email address for sending verification emails (e.g. no-reply@example.com)",
 		Secret:      false,
@@ -197,31 +197,6 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Secret:      true,
 	},
 }
-
-// var DefaultConfigs = map[string]any{
-// 	"allow-register":            false,
-// 	"chall-min-points":          50,
-// 	"chall-points-decay":        15,
-// 	"instance-lifetime":         30 * 60, // 30 minutes
-// 	"reclaim-instance-interval": 5 * 60,  // 5 minutes
-// 	"instance-max-memory":       512,
-// 	"instance-max-cpu":          1.0,
-// 	"min-port":                  10000,
-// 	"max-port":                  20000,
-// 	"hash-len":                  12,
-// 	"domain":                    "",
-// 	"discord-webhook":           "",
-// 	"user-mode":                 false,
-// 	"scoreboard-top":            10,
-// 	"start-time":                "",
-// 	"end-time":                  "",
-// 	"jwt-secret":                "",
-// 	"email-verification":        false,
-// 	"email-server":              "",
-// 	"email-port":                587,
-// 	"email-addr":                "",
-// 	"email-passwd":              "",
-// }
 
 func LoadEnvConfigs() {
 	if os.Getenv("DISABLE_ANTI_PANIC") != "" {

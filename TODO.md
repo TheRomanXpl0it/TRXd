@@ -2,15 +2,10 @@
  - resolve TODOs left into the code
  - tests:
    - integration tests (for generic behaviour)
-   - tests for distributed functioning
+   - tests for distributed functioning (already live testing & hand tested)
  - utility:
    - better names for binary flags
    - DOCUMENTATION
-  - backender frontend ideas: (i'm not a pro frontender, so these may not be good ideas)
-    - make the `[overview, solves]` the same between the team and user page
-    - put the category breakdown in the user page when in User Mode
-    - change the url of users from /account to /users
-    - default chall creation, make the points dynamic by default, make the type Normal by default and the types in order (Normal, Container, Compose)
 
 ## Frontend
  - [/] Extra:
@@ -19,9 +14,6 @@
 ## Ideas / Features
  - rename "hash domain" (not an hash anymore, only rand bytes)
  - make retries on registration with email
- - put descriptions on configs
- - divide configs by section (secrets, instances, something like this...)
- - dropdown menu for containers (for container instances)
  - editable homepage & theme
  - submissions page filers (first bloods, only wrong, group filter [correct, repeated])
  - extract data for ctftime
@@ -36,7 +28,7 @@
  - flag submit that checks for all challenges and mark solved the one of the correct flag (credits to: midnightsun)
  - writeups for challs into the platform (visible after ctf ends)
  - signed flags (AES ECB or hmac with team id (4 byte) and chall id (4 byte))
- - tls instances: https://github.com/inconshreveable/slt
+ - hook system for team based attachments (a different/unique attachment for each team)
  - likes and dislikes for challs (only for who actually solved)
  - kick user from team
  - endpoint to store image files (like badges and pfp)
