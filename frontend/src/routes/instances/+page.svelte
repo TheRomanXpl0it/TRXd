@@ -8,6 +8,7 @@
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { formatConnectionString } from '$lib/utils/connection';
 
 	import * as Table from '$lib/components/ui/table';
 
@@ -57,15 +58,12 @@
 	}
 
 	function formatConn(inst: any) {
-		const h = inst.host || '';
-		const p = inst.port || '';
-		const str = p ? `${h}:${p}` : h;
-		if (inst.conn_type === 'TCP') {
-			return p ? `nc ${h} ${p}` : `nc ${h}`;
-		}
-		if (inst.conn_type === 'HTTP' && !str.startsWith('http')) return `http://${str}`;
-		if (inst.conn_type === 'HTTPS' && !str.startsWith('http')) return `https://${str}`;
-		return str;
+		return formatConnectionString({
+			host: inst.host,
+			port: inst.port,
+			connType: inst.conn_type,
+			sslWithoutPort: true
+		});
 	}
 </script>
 
@@ -117,19 +115,23 @@
 							<Table.Row class="hover:bg-transparent">
 								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Team (ID)</Table.Head>
 								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Challenge (ID)</Table.Head>
+								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Docker ID</Table.Head>
 								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Connection</Table.Head>
 								<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Expires</Table.Head>
 								<Table.Head class="text-muted-foreground/70 w-[100px] bg-transparent text-right text-[10px] font-bold uppercase tracking-wider">Actions</Table.Head>
 							</Table.Row>
 						</Table.Header>
 						<Table.Body>
-							{#each instances as inst (inst.docker_id)}
+							{#each instances as inst (`${inst.team_id}-${inst.chall_id}`)}
 								<Table.Row class="hover:bg-muted/50 transition-colors border-b-0">
 									<Table.Cell class="font-medium max-w-[150px] truncate" title={inst.team_name}>
 										{inst.team_name} <span class="text-muted-foreground text-xs">({inst.team_id})</span>
 									</Table.Cell>
 									<Table.Cell class="max-w-[150px] truncate" title={inst.chall_name}>
 										{inst.chall_name} <span class="text-muted-foreground text-xs">({inst.chall_id})</span>
+									</Table.Cell>
+									<Table.Cell class="max-w-[180px] truncate" title={inst.docker_id || ''}>
+										<span class="font-mono text-xs">{inst.docker_id || '-'}</span>
 									</Table.Cell>
 									<Table.Cell>
 										<span class="font-mono text-xs">{formatConn(inst)}</span>

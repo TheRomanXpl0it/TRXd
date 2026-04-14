@@ -1,24 +1,41 @@
 <script lang="ts">
 	import { getConfigs, updateConfigs } from '$lib/config';
-	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Label } from '$lib/components/ui/label';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Input } from '$lib/components/ui/input';
+	import DateTimePicker from '$lib/components/ui/date-time-picker.svelte';
 	import { authState } from '$lib/stores/auth';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { showSuccess, showError } from '$lib/utils/toast';
-	import { Settings } from '@lucide/svelte';
 	import * as Card from '$lib/components/ui/card';
 
-	type ConfigType = 'bool' | 'int' | 'string' | (string & {});
+	type ConfigType =
+		| 'bool'
+		| 'int'
+		| 'float'
+		| 'string'
+		| 'date'
+		| 'url'
+		| 'port'
+		| 'duration'
+		| (string & {});
 
 	interface Config {
 		key: string;
 		type?: ConfigType | null;
 		value?: string | number | boolean | null;
 		description?: string;
+		category?: string | null;
+		name?: string | null;
+		secret?: boolean | null;
 		[key: string]: unknown;
+	}
+
+	interface ConfigGroup {
+		key: string;
+		label: string;
+		configs: Config[];
 	}
 
 	type FormValue = string | boolean;
@@ -28,10 +45,14 @@
 
 	let configs = $state<Config[]>([]);
 	let form = $state<Record<string, FormValue>>({});
+	let activeTab = $state('');
+	let fetchedOnce = $state(false);
 
 	let saving = $state(false);
 
+	const isReady = $derived(authState.ready);
 	const isAdmin = $derived(authState.user?.role === 'Admin');
+	const groupedConfigs = $derived.by(() => groupConfigs(configs));
 
 	const hasChanges = $derived(
 		configs.some((config) => {
@@ -43,26 +64,198 @@
 		})
 	);
 
+	const hasInvalidValues = $derived(
+		configs.some((config) => isInvalidFormValue(config, form[config.key]))
+	);
+
 	function normalizeType(type: Config['type']): ConfigType {
-		if (type === 'bool' || type === 'int' || type === 'string') return type;
+		if (type === 'float64') return 'float';
+		if (
+			type === 'bool' ||
+			type === 'int' ||
+			type === 'float' ||
+			type === 'string' ||
+			type === 'date' ||
+			type === 'url' ||
+			type === 'port' ||
+			type === 'duration'
+		) {
+			return type;
+		}
 		return 'string';
+	}
+
+	function getCategoryLabel(category: Config['category']): string {
+		const value = String(category ?? '').trim();
+		if (!value) return 'General';
+		return value
+			.split(/[-_\s]+/)
+			.filter(Boolean)
+			.map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
+			.join(' ');
+	}
+
+	function getCategoryKey(category: Config['category']): string {
+		const value = String(category ?? '').trim().toLowerCase();
+		if (!value) return 'general';
+		return value.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'general';
+	}
+
+	function getDisplayName(config: Config): string {
+		const name = String(config.name ?? '').trim();
+		return name || config.key;
+	}
+
+	function groupConfigs(list: Config[]): ConfigGroup[] {
+		const groups = new Map<string, ConfigGroup>();
+
+		for (const config of [...list].sort((a, b) => {
+			const nameCompare = getDisplayName(a).localeCompare(getDisplayName(b));
+			if (nameCompare !== 0) return nameCompare;
+			return a.key.localeCompare(b.key);
+		})) {
+			const key = getCategoryKey(config.category);
+			const label = getCategoryLabel(config.category);
+			const group = groups.get(key);
+
+			if (group) {
+				group.configs.push(config);
+				continue;
+			}
+
+			groups.set(key, {
+				key,
+				label,
+				configs: [config]
+			});
+		}
+
+		return [...groups.values()].sort((a, b) => {
+			if (a.key === 'general') return -1;
+			if (b.key === 'general') return 1;
+			return a.label.localeCompare(b.label);
+		});
+	}
+
+	function toDateTimeInputValue(raw: unknown): string {
+		const value = String(raw ?? '').trim();
+		if (!value) return '';
+
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) return '';
+
+		const year = String(date.getFullYear());
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		const hours = String(date.getHours()).padStart(2, '0');
+		const minutes = String(date.getMinutes()).padStart(2, '0');
+
+		return `${year}-${month}-${day}T${hours}:${minutes}`;
+	}
+
+	function fromDateTimeInputValue(formValue: FormValue | undefined): string {
+		const value = String(formValue ?? '').trim();
+		if (!value) return '';
+
+		const date = new Date(value);
+		if (Number.isNaN(date.getTime())) return '';
+
+		return date.toISOString();
 	}
 
 	function toFormValue(config: Config): FormValue {
 		const t = normalizeType(config.type);
 		const raw = config.value;
 		if (t === 'bool') return String(raw) === 'true';
+		if (t === 'date') return toDateTimeInputValue(raw);
 		return raw != null ? String(raw) : '';
 	}
 
 	function toConfigValue(config: Config, formValue: FormValue | undefined): string {
 		const t = normalizeType(config.type);
 		if (t === 'bool') return formValue ? 'true' : 'false';
-		if (t === 'int') {
-			const n = Number(formValue ?? 0);
-			return Number.isFinite(n) ? String(n) : '0';
+		if (t === 'date') return fromDateTimeInputValue(formValue);
+		if (t === 'int' || t === 'port' || t === 'duration') {
+			const value = String(formValue ?? '').trim();
+			if (!value) return '';
+			const n = Number(value);
+			return Number.isFinite(n) ? String(Math.trunc(n)) : '';
+		}
+		if (t === 'float') {
+			const value = String(formValue ?? '').trim();
+			if (!value) return '';
+			const n = Number(value);
+			return Number.isFinite(n) ? String(n) : '';
 		}
 		return String(formValue ?? '');
+	}
+
+	function isNumericType(type: ConfigType): boolean {
+		return type === 'int' || type === 'float' || type === 'port' || type === 'duration';
+	}
+
+	function isInvalidFormValue(config: Config, formValue: FormValue | undefined): boolean {
+		const t = normalizeType(config.type);
+		if (t === 'bool') return false;
+
+		const value = String(formValue ?? '').trim();
+		if (!value) return false;
+
+		if (t === 'date') {
+			return Number.isNaN(new Date(value).getTime());
+		}
+
+		if (isNumericType(t)) {
+			const number = Number(value);
+			if (!Number.isFinite(number)) return true;
+			if (t !== 'float' && !Number.isInteger(number)) return true;
+			if (t === 'port' && (number < 1 || number > 65535)) return true;
+		}
+
+		return false;
+	}
+
+	function getInputType(config: Config):
+		| 'text'
+		| 'number'
+		| 'url'
+		| 'password' {
+		const t = normalizeType(config.type);
+		if (t === 'url') return 'url';
+		if (isNumericType(t)) return 'number';
+		if (config.secret) return 'password';
+		return 'text';
+	}
+
+	function getStep(config: Config): string | undefined {
+		const t = normalizeType(config.type);
+		if (t === 'float') return 'any';
+		if (t === 'int' || t === 'port' || t === 'duration') return '1';
+		return undefined;
+	}
+
+	function getMin(config: Config): number | undefined {
+		const t = normalizeType(config.type);
+		if (t === 'port') return 1;
+		if (t === 'int' || t === 'duration' || t === 'float') return 0;
+		return undefined;
+	}
+
+	function getInputMode(config: Config): 'text' | 'numeric' | 'decimal' | 'url' {
+		const t = normalizeType(config.type);
+		if (t === 'float') return 'decimal';
+		if (t === 'int' || t === 'port' || t === 'duration') return 'numeric';
+		if (t === 'url') return 'url';
+		return 'text';
+	}
+
+	function getValidationMessage(config: Config): string {
+		const t = normalizeType(config.type);
+		if (t === 'date') return 'Enter a valid date and time.';
+		if (t === 'port') return 'Enter a valid port between 1 and 65535.';
+		if (t === 'float') return 'Enter a valid number.';
+		if (t === 'int' || t === 'duration') return 'Enter a whole number.';
+		return 'Invalid value.';
 	}
 
 	async function loadConfigs() {
@@ -86,10 +279,30 @@
 		}
 	}
 
-	onMount(loadConfigs);
+	$effect(() => {
+		if (!isReady) return;
+		if (!isAdmin) {
+			loading = false;
+			return;
+		}
+		if (fetchedOnce) return;
+		fetchedOnce = true;
+		loadConfigs();
+	});
+
+	$effect(() => {
+		if (!groupedConfigs.length) {
+			activeTab = '';
+			return;
+		}
+
+		if (!groupedConfigs.some((group) => group.key === activeTab)) {
+			activeTab = groupedConfigs[0].key;
+		}
+	});
 
 	async function save() {
-		if (saving || !hasChanges) return;
+		if (saving || !hasChanges || hasInvalidValues) return;
 		saving = true;
 		try {
 			const changes: Config[] = [];
@@ -118,7 +331,7 @@
 			<h1 class="text-3xl font-bold tracking-tight">Configuration</h1>
 			<p class="text-muted-foreground mt-1">Manage global platform settings</p>
 		</div>
-		<Button onclick={save} disabled={saving || !hasChanges}>
+		<Button onclick={save} disabled={saving || !hasChanges || hasInvalidValues}>
 			{#if saving}
 				<Spinner class="mr-2 h-4 w-4" />
 				Saving...
@@ -133,56 +346,120 @@
 			<Spinner class="mb-4 h-8 w-8" />
 			<p class="text-muted-foreground">Loading configuration...</p>
 		</div>
+	{:else if isReady && !isAdmin}
+		<div class="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive">
+			<p class="font-semibold">Access denied</p>
+			<p class="text-sm">Administrator access is required to edit configuration.</p>
+		</div>
 	{:else if error}
 		<div class="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive">
 			<p class="font-semibold">Error loading configuration</p>
 			<p class="text-sm">{error}</p>
 		</div>
+	{:else if groupedConfigs.length === 0}
+		<div class="rounded-lg border p-6">
+			<p class="font-semibold">No configuration entries found</p>
+			<p class="text-muted-foreground mt-1 text-sm">The server did not return any editable settings.</p>
+		</div>
 	{:else}
-		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pb-20">
-			{#each configs as c (c.key)}
-				<Card.Root class="p-5 flex flex-col gap-4">
-					<div class="flex items-start justify-between gap-3">
-						<div class="min-w-0 flex-1">
-							<Label class="font-bold text-sm truncate block">{c.key}</Label>
-							{#if c.description}
-								<p class="text-muted-foreground text-xs line-clamp-2 mt-1">{c.description}</p>
-							{/if}
-						</div>
-						<div class="bg-primary/10 text-primary text-[10px] uppercase font-bold px-1.5 py-0.5 rounded">
-							{c.type}
-						</div>
+		<div class="space-y-6 pb-20">
+			<div class="overflow-x-auto">
+				<div class="flex justify-center">
+					<div
+						class="bg-muted text-muted-foreground inline-flex h-10 min-w-max items-center justify-center gap-1 rounded-lg p-1"
+					>
+						{#each groupedConfigs as group}
+							<button
+								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
+								group.key
+									? 'bg-background text-foreground shadow-sm'
+									: 'hover:bg-background/50 hover:text-foreground'}"
+								onclick={() => (activeTab = group.key)}
+								type="button"
+							>
+								{group.label}
+								<span class="text-muted-foreground text-xs">{group.configs.length}</span>
+							</button>
+						{/each}
 					</div>
+				</div>
+			</div>
 
-					<div class="mt-auto pt-2">
-						{#if c.type === 'bool'}
-							<div class="flex items-center gap-3">
-								<Checkbox
-									checked={form[c.key] === true}
-									onCheckedChange={(v) => { form[c.key] = !!v; }}
-									id={c.key}
-								/>
-								<Label for={c.key} class="cursor-pointer text-sm">
-									{form[c.key] ? 'Enabled' : 'Disabled'}
-								</Label>
-							</div>
-						{:else if c.type === 'int'}
-							<Input
-								type="number"
-								bind:value={form[c.key]}
-								placeholder="0"
-								class="h-9"
-							/>
-						{:else}
-							<Input
-								type="text"
-								bind:value={form[c.key]}
-								placeholder="Value"
-								class="h-9"
-							/>
-						{/if}
+			{#each groupedConfigs as group (group.key)}
+				{#if activeTab === group.key}
+					<div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+						{#each group.configs as c (c.key)}
+							{@const normalizedType = normalizeType(c.type)}
+							{@const invalid = isInvalidFormValue(c, form[c.key])}
+							<Card.Root class="flex flex-col gap-4 p-5">
+								<div class="flex items-start justify-between gap-3">
+									<div class="min-w-0 flex-1">
+										<Label class="block truncate text-sm font-bold">{getDisplayName(c)}</Label>
+										<p class="text-muted-foreground mt-1 font-mono text-[11px]">{c.key}</p>
+										{#if c.description}
+											<p class="text-muted-foreground mt-2 text-xs leading-relaxed">{c.description}</p>
+										{/if}
+									</div>
+									<div class="flex shrink-0 items-center gap-2">
+										<div
+											class="bg-primary/10 text-primary rounded px-1.5 py-0.5 text-[10px] font-bold uppercase"
+										>
+											{normalizedType}
+										</div>
+										{#if c.secret}
+											<div
+												class="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px] font-bold uppercase"
+											>
+												secret
+											</div>
+										{/if}
+									</div>
+								</div>
+
+								<div class="mt-auto space-y-2 pt-2">
+									{#if normalizedType === 'bool'}
+										<div class="flex items-center gap-3">
+											<Checkbox
+												checked={form[c.key] === true}
+												onCheckedChange={(value) => {
+													form[c.key] = !!value;
+												}}
+												id={c.key}
+											/>
+											<Label for={c.key} class="cursor-pointer text-sm">
+												{form[c.key] ? 'Enabled' : 'Disabled'}
+											</Label>
+										</div>
+									{:else if normalizedType === 'date'}
+										<DateTimePicker
+											bind:value={form[c.key]}
+											invalid={invalid}
+											class="h-9"
+											placeholder="Select date and time"
+										/>
+										{#if invalid}
+											<p class="text-destructive text-xs">{getValidationMessage(c)}</p>
+										{/if}
+									{:else}
+										<Input
+											type={getInputType(c)}
+											bind:value={form[c.key]}
+											class="h-9"
+											min={getMin(c)}
+											step={getStep(c)}
+											inputmode={getInputMode(c)}
+											placeholder={normalizedType === 'date' ? 'Select date and time' : 'Value'}
+											aria-invalid={invalid}
+										/>
+										{#if invalid}
+											<p class="text-destructive text-xs">{getValidationMessage(c)}</p>
+										{/if}
+									{/if}
+								</div>
+							</Card.Root>
+						{/each}
 					</div>
-				</Card.Root>
+				{/if}
 			{/each}
 		</div>
 	{/if}

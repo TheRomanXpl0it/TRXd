@@ -10,13 +10,12 @@
 	import { createQuery } from '@tanstack/svelte-query';
 	import countries from '$lib/data/countries.json';
 	import { authState } from '$lib/stores/auth';
-	import { onMount } from 'svelte';
 	import EmptyState from '$lib/components/ui/empty-state.svelte';
 	import { Users, Globe } from '@lucide/svelte';
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
 
-	onMount(() => {
+	$effect(() => {
 		if (authState.userMode) {
 			goto('/users');
 		}

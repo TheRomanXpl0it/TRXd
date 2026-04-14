@@ -14,7 +14,8 @@
 	import ChallengeModal from '$lib/components/challenges/ChallengeModal.svelte';
 	import AdminControls from '$lib/components/challenges/AdminControls.svelte';
 	import WaitingPage from '$lib/components/challenges/WaitingPage.svelte';
-	import { Flag, Users, ChevronDown, Search, Monitor } from '@lucide/svelte';
+	import EndPage from '$lib/components/challenges/EndPage.svelte';
+	import { Flag, Users, Trophy, ChevronDown, Search, Monitor } from '@lucide/svelte';
 	import { slide } from 'svelte/transition';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
@@ -28,9 +29,24 @@
 	// Use uiStore for reactive view preference
 	const challengeView = $derived(uiStore.challengeView);
 
+	// 1. Basic Auth Deriveds
+	const isAdmin = $derived(authState.user?.role === 'Admin' || authState.user?.role === 'Author');
+	const upcoming = $derived.by(() => {
+		if (!authState.ready || !authState.startTime) return false;
+		return new Date(authState.startTime).getTime() > Date.now();
+	});
+	const ended = $derived.by(() => {
+		if (!authState.ready || !authState.endTime) return false;
+		return new Date(authState.endTime).getTime() < Date.now();
+	});
+	const isMissingTeam = $derived(
+		authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin
+	);
+
 	$effect(() => {
 		if (typeof document !== 'undefined') {
-			document.body.classList.toggle('overflow-hidden', challengeView === 'sidebar');
+			const shouldHideScroll = challengeView === 'sidebar' || ((upcoming || ended) && !isAdmin);
+			document.body.classList.toggle('overflow-hidden', shouldHideScroll);
 		}
 		return () => {
 			if (typeof document !== 'undefined') {
@@ -38,16 +54,6 @@
 			}
 		};
 	});
-
-	// 1. Basic Auth Deriveds
-	const isAdmin = $derived(authState.user?.role === 'Admin' || authState.user?.role === 'Author');
-	const upcoming = $derived.by(() => {
-		if (!authState.ready || !authState.startTime) return false;
-		return new Date(authState.startTime).getTime() > Date.now();
-	});
-	const isMissingTeam = $derived(
-		authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin
-	);
 
 	let openSolves = $state(false);
 
@@ -261,7 +267,7 @@
 	}
 </script>
 
-{#if (!upcoming || isAdmin) && challengeView !== 'sidebar'}
+{#if (!upcoming && !ended || isAdmin) && challengeView !== 'sidebar'}
 	<div class="mb-10 w-full">
 		<ChallengeFilters
 			bind:search
@@ -295,6 +301,8 @@
 	</div>
 {:else if upcoming && !isAdmin}
 	<WaitingPage startTime={authState.startTime} />
+{:else if ended && !isAdmin}
+	<EndPage endTime={authState.endTime} />
 {:else if loading}
 	<div class="flex flex-col items-center justify-center py-12">
 		<div

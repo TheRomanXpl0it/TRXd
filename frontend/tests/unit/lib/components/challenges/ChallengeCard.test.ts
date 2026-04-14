@@ -168,8 +168,8 @@ describe('ChallengeCard Component', () => {
 		});
 
 		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/bg-emerald-500\/10/);
-		expect(button.className).toMatch(/ring-emerald-500\/30/);
+		expect(button.className).toMatch(/bg-emerald-500\/30/);
+		expect(button.className).toMatch(/dark:bg-emerald-600\/40/);
 	});
 
 	it('applies unsolved/default styling when not solved', () => {

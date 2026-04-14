@@ -3,11 +3,13 @@
 	import { Toaster } from '$lib/components/ui/sonner/index.js';
 	import { ModeWatcher } from 'mode-watcher';
 	import Layout from '$lib/components/Layout.svelte';
+	import { siteContent } from '$lib/site-content';
 	import { authState, loadUser } from '$lib/stores/auth';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import { addCollection } from '@iconify/svelte';
 	import circleFlagsData from '@iconify-json/circle-flags/icons.json';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
+	import { page } from '$app/state';
 
 	addCollection(circleFlagsData);
 
@@ -25,7 +27,12 @@
 	});
 
 	loadUser(false);
+	void siteContent.load();
 </script>
+
+<svelte:head>
+	<title>{$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 <QueryClientProvider client={queryClient}>
 	<Tooltip.Provider delayDuration={400}>
@@ -40,7 +47,7 @@
 				></div>
 			</div>
 		{:else}
-			<Layout user={authState.user} userMode={authState.userMode ?? false}>
+			<Layout user={authState.user} userMode={authState.userMode ?? false} isLandingPage={page.url.pathname === '/'}>
 				{@render children()}
 			</Layout>
 		{/if}

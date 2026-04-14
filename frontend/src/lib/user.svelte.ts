@@ -1,5 +1,6 @@
 import { api } from '$lib/api';
 import type { User, PaginatedResponse } from '$lib/types';
+import { getTeamByEmail, getTeamByName } from '$lib/team';
 
 import { authState } from '$lib/stores/auth';
 
@@ -78,9 +79,19 @@ export async function resetUserPassword(userId: number, newPassword?: string): P
 }
 
 export async function getUserByEmail(email: string): Promise<any> {
-	return api<any>(`/users/email?email=${encodeURIComponent(email)}`);
+	if (authState.userMode) {
+		const team = await getTeamByEmail(email);
+		return team ? { ...team, role: team.role || 'User' } : null;
+	}
+
+	return api<any>(`/users/search?email=${encodeURIComponent(email)}`);
 }
 
 export async function getUserByName(name: string): Promise<any> {
-	return api<any>(`/users/name?name=${encodeURIComponent(name)}`);
+	if (authState.userMode) {
+		const team = await getTeamByName(name);
+		return team ? { ...team, role: team.role || 'User' } : null;
+	}
+
+	return api<any>(`/users/search?name=${encodeURIComponent(name)}`);
 }

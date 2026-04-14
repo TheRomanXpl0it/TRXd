@@ -8,8 +8,8 @@ export function createCategory(name: string): Promise<any> {
 	});
 }
 
-export function getCategories(): Promise<any[]> {
-	return api<any[]>(`/categories`, {
+export function getCategories(): Promise<string[]> {
+	return api<string[]>(`/categories`, {
 		method: 'GET'
 	});
 }
@@ -19,5 +19,13 @@ export function deleteCategory(name: string): Promise<any> {
 		headers: { 'content-type': 'application/json' },
 		method: 'DELETE',
 		body: JSON.stringify({ name })
+	});
+}
+
+export function updateCategory(name: string, new_name: string): Promise<any> {
+	return api<any>(`/categories`, {
+		headers: { 'content-type': 'application/json' },
+		method: 'PATCH',
+		body: JSON.stringify({ name, new_name })
 	});
 }

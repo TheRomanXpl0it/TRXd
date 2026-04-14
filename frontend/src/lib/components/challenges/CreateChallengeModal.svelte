@@ -255,7 +255,7 @@
 										id="description"
 										bind:value={challengeDescription}
 										class="min-h-32"
-										placeholder="Write the challenge prompt..."
+										placeholder="Write the challenge prompt (optional)..."
 									/>
 								</div>
 							</div>

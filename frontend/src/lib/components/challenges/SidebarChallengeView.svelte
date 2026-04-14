@@ -28,6 +28,7 @@
 	import { getSolves } from '$lib/challenges';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { fmtTimeLeft } from '$lib/utils/time';
+	import { formatConnectionString } from '$lib/utils/connection';
 
 	let {
 		grouped,
@@ -139,23 +140,12 @@
 			return ch.connection_info;
 		}
 
-		let str = p ? `${h}:${p}` : h;
-
-		// Use conn_type for accurate protocol prefixing
-		const type = ch.conn_type as string;
-		if (type === 'HTTP' && !str.startsWith('http')) {
-			str = `http://${str}`;
-		} else if (type === 'HTTPS' && !str.startsWith('http')) {
-			str = `https://${str}`;
-		} else if (type === 'TCP' || type === 'TCP_TLS') {
-			if (type === 'TCP') {
-				str = p ? `nc ${h} ${p}` : `nc ${h}`;
-			} else {
-				str = p ? `ncat --ssl ${h} ${p}` : `ncat --ssl ${h}`;
-			}
-		}
-
-		return str;
+		return formatConnectionString({
+			host: h,
+			port: p,
+			connType: ch.conn_type,
+			sslWithoutPort: isDynamicType || ch.instance || !!ch.instance_host
+		});
 	});
 
 	const isDynamicType = $derived(
@@ -217,15 +207,15 @@
 								{#each items as ch (ch.id)}
 									<button
 										onclick={() => selectChallenge(ch)}
-										class={cn(
-											'group flex w-full flex-col gap-1.5 rounded-xl px-4 py-3 text-left transition-colors duration-0',
-											activeChallenge?.id === ch.id
-												? 'bg-primary/10 text-foreground shadow-[inset_3px_0_0_0_hsl(var(--primary))]'
-												: ch.solved
-													? 'bg-emerald-600/20 dark:bg-emerald-600/30 text-muted-foreground hover:bg-emerald-600/30'
-													: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
-										)}
-									>
+											class={cn(
+												'group flex w-full flex-col gap-1.5 rounded-xl px-4 py-3 text-left transition-colors duration-0',
+												activeChallenge?.id === ch.id
+													? 'bg-primary/10 text-foreground shadow-[inset_3px_0_0_0_hsl(var(--primary))]'
+													: ch.solved
+														? 'bg-emerald-500/[0.16] text-muted-foreground hover:bg-emerald-500/[0.20] dark:bg-emerald-400/[0.18] dark:hover:bg-emerald-400/[0.22]'
+														: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
+											)}
+										>
 										<div class="flex items-start justify-between gap-3">
 											<span
 												class={cn(
@@ -235,7 +225,7 @@
 												{ch.name}
 											</span>
 											{#if ch.solved}
-												<CheckCircle class="h-4 w-4 shrink-0 text-green-500" />
+												<CheckCircle class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
 											{/if}
 										</div>
 
@@ -459,7 +449,7 @@
 												<InstanceControls
 													challenge={activeChallenge}
 													hideHeader={true}
-													showTimer={false}
+													showTimer={true}
 													countdown={countdowns[activeChallenge.id] ?? 0}
 													{onCountdownUpdate}
 													onInstanceChange={(updated) => {

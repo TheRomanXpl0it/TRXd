@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { getUsers, resetUserPassword, getUserByEmail, getUserByName } from '$lib/user';
+	import { resetUserPassword, getUserByEmail, getUserByName } from '$lib/user';
 	import { Button } from '$lib/components/ui/button';
+	import { authState } from '$lib/stores/auth';
+	import { goto } from '$app/navigation';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Card from '$lib/components/ui/card';
@@ -20,6 +22,32 @@
 	let newPassword = $state('');
 	let showResetDialog = $state(false);
 	let resetting = $state(false);
+
+	const userMode = $derived(authState.userMode);
+	const lookupSubject = $derived(userMode ? 'team name' : 'name');
+	const pageDescription = $derived(
+		userMode ? 'Search users through their team records and manage account security' : 'Search users and manage account security'
+	);
+	const searchDescription = $derived(
+		userMode
+			? 'Look up a user by the exact team name or by the linked email address'
+			: 'Look up a user by their exact name or email address'
+	);
+	const namePlaceholder = $derived(
+		userMode ? 'Exact team name (e.g. team rocket)' : 'Exact username (e.g. alice)'
+	);
+	const identityHeader = $derived(userMode ? 'Team / Email' : 'Name / Username');
+	const emptyStateLabel = $derived(userMode ? 'team-backed user' : 'user');
+	const resetTargetId = $derived(
+		selectedUser ? (userMode ? selectedUser.user_id ?? null : selectedUser.id) : null
+	);
+
+	$effect(() => {
+		if (!authState.ready) return;
+		if (authState.user?.role !== 'Admin') {
+			goto('/admin');
+		}
+	});
 
 	// Debounced auto-search: fires 400ms after the user stops typing
 	$effect(() => {
@@ -65,13 +93,13 @@
 	}
 
 	async function handleReset() {
-		if (!selectedUser || !newPassword.trim()) return;
+		if (!selectedUser || !newPassword.trim() || resetTargetId === null) return;
 
 		if (!confirm(`Are you sure you want to change the password for ${selectedUser.name}?`)) return;
 
 		resetting = true;
 		try {
-			await resetUserPassword(selectedUser.id, newPassword);
+			await resetUserPassword(resetTargetId, newPassword);
 			showSuccess(`Password for ${selectedUser.name} updated.`);
 			showResetDialog = false;
 		} catch (err: any) {
@@ -85,13 +113,13 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">User Management</h1>
-		<p class="text-muted-foreground mt-1">Search users and manage account security</p>
+		<p class="text-muted-foreground mt-1">{pageDescription}</p>
 	</div>
 
 	<Card.Root>
 		<Card.Header>
 			<Card.Title class="text-lg">Search Users</Card.Title>
-			<Card.Description>Look up a user by their exact name or email address</Card.Description>
+			<Card.Description>{searchDescription}</Card.Description>
 		</Card.Header>
 		<Card.Content>
 			<form
@@ -118,7 +146,7 @@
 							searched = false;
 						}}
 					>
-						Name
+						{userMode ? 'Team' : 'Name'}
 					</button>
 					<button
 						type="button"
@@ -148,7 +176,7 @@
 					<Input
 						bind:value={query}
 						placeholder={searchType === 'name'
-							? 'Exact username (e.g. alice)'
+							? namePlaceholder
 							: 'Email address (e.g. alice@ctf.io)'}
 						class="pl-9"
 					/>
@@ -171,7 +199,7 @@
 								>
 								<Table.Head
 									class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
-									>Name / Username</Table.Head
+									>{identityHeader}</Table.Head
 								>
 								<Table.Head
 									class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
@@ -190,9 +218,15 @@
 									<Table.Cell>
 										<div class="flex flex-col">
 											<span class="text-sm font-medium">{user.name}</span>
-											<span class="text-muted-foreground text-xs"
-												>@{user.username || user.name}</span
-											>
+											{#if userMode}
+												<span class="text-muted-foreground text-xs">
+													{user.email || 'No email set'}
+												</span>
+											{:else}
+												<span class="text-muted-foreground text-xs"
+													>@{user.username || user.name}</span
+												>
+											{/if}
 										</div>
 									</Table.Cell>
 									<Table.Cell>
@@ -213,15 +247,17 @@
 												<ExternalLink class="h-3.5 w-3.5" />
 												Profile
 											</a>
-											<Button
-												variant="ghost"
-												size="sm"
-												class="text-muted-foreground hover:text-foreground h-8 gap-2 transition-colors"
-												onclick={() => openReset(user)}
-											>
-												<KeyRound class="h-3.5 w-3.5" />
-												Reset
-											</Button>
+											{#if !userMode || user.user_id}
+												<Button
+													variant="ghost"
+													size="sm"
+													class="text-muted-foreground hover:text-foreground h-8 gap-2 transition-colors"
+													onclick={() => openReset(user)}
+												>
+													<KeyRound class="h-3.5 w-3.5" />
+													Reset
+												</Button>
+											{/if}
 										</div>
 									</Table.Cell>
 								</Table.Row>
@@ -237,7 +273,9 @@
 		>
 			<UserIcon class="text-muted-foreground mb-2 h-10 w-10 opacity-20" />
 			<p class="text-muted-foreground text-sm">
-				No user found with {searchType} <span class="text-foreground font-medium">"{query}"</span>
+				No {emptyStateLabel} found with {searchType === 'name' ? lookupSubject : 'email'} <span class="text-foreground font-medium"
+					>"{query}"</span
+				>
 			</p>
 		</div>
 	{/if}
@@ -266,7 +304,7 @@
 			<Button
 				variant="destructive"
 				onclick={handleReset}
-				disabled={resetting || !newPassword.trim()}
+				disabled={resetting || !newPassword.trim() || resetTargetId === null}
 			>
 				{#if resetting}
 					<Spinner class="mr-2 h-4 w-4" />

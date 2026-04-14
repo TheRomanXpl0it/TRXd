@@ -4,6 +4,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Label } from '$lib/components/ui/label';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
+	import { siteContent } from '$lib/site-content';
 	import { setMode, mode } from 'mode-watcher';
 	import { onMount } from 'svelte';
 	import {
@@ -94,7 +95,7 @@
 					</div>
 					Appearance
 				</Card.Title>
-				<Card.Description>Customize how TRXd looks for you.</Card.Description>
+				<Card.Description>{$siteContent.settings.appearanceDescription}</Card.Description>
 			</Card.Header>
 			<Card.Content class="space-y-6">
 				<div class="space-y-4">

@@ -17,6 +17,7 @@
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
 	import { Globe } from '@lucide/svelte';
 	import countries from '$lib/data/countries.json';
+	import PixelBackground from '$lib/components/ui/PixelBackground.svelte';
 
 	let perPage = $state(20);
 	let currentPage = $state(1);
@@ -73,7 +74,9 @@
 	}
 </script>
 
-<div class="relative mx-auto max-w-6xl space-y-12 px-4 py-8 sm:px-6 sm:py-12">
+<PixelBackground theme="mixed" opacity={0.15} overlayOpacity={0.6} />
+
+<div class="relative z-10 mx-auto max-w-6xl space-y-12 px-4 py-8 sm:px-6 sm:py-12">
 	<!-- Compact Mode Toggle -->
 	<div class="absolute right-4 top-4 z-10 sm:right-8 sm:top-8">
 		<Button
@@ -144,7 +147,7 @@
 									isPaginated
 										? sorted
 										: sorted.slice((currentPage - 1) * perPage, currentPage * perPage)
-								).filter((row) => (row.score ?? 0) > 0)}
+								).filter((row) => (row.score ?? 0) >= 0)}
 
 								{#if pageRows.length === 0}
 									<Table.Row>

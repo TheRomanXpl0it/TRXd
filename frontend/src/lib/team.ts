@@ -61,3 +61,19 @@ export async function resetTeamPassword(teamId: number, newPassword?: string): P
 		body: JSON.stringify(body)
 	});
 }
+
+export async function getTeamInviteToken(): Promise<{ token: string }> {
+	return api<{ token: string }>('/teams/join');
+}
+
+export async function joinTeamWithToken(token: string): Promise<any> {
+	return api<any>(`/teams/join?token=${token}`);
+}
+
+export async function getTeamByEmail(email: string): Promise<any> {
+	return api<any>(`/teams/search?email=${encodeURIComponent(email)}`);
+}
+
+export async function getTeamByName(name: string): Promise<any> {
+	return api<any>(`/teams/search?name=${encodeURIComponent(name)}`);
+}

@@ -799,7 +799,6 @@
 											>
 												<option value="NONE">None</option>
 												<option value="TCP">TCP</option>
-												<option value="TCP_TLS">TCP + TLS</option>
 												<option value="HTTP">HTTP</option>
 												<option value="HTTPS">HTTPS</option>
 											</select>
@@ -826,6 +825,10 @@
 									<div>
 										<Label for="ch-host" class="mb-2 block text-sm font-medium">Host</Label>
 										<Input id="ch-host" bind:value={host} placeholder="e.g. challenge.trxd.cc" />
+									</div>
+									<div>
+										<Label for="com-port" class="mb-2 block text-sm font-medium">Port</Label>
+										<Input id="com-port" bind:value={portStr} placeholder="e.g. 31337" />
 									</div>
 									<div>
 										<div class="mb-2 flex items-center justify-between">
@@ -885,7 +888,6 @@
 										>
 											<option value="NONE">None</option>
 											<option value="TCP">TCP</option>
-											<option value="TCP_TLS">TCP + TLS</option>
 											<option value="HTTP">HTTP</option>
 											<option value="HTTPS">HTTPS</option>
 										</select>
@@ -946,7 +948,6 @@
 										>
 											<option value="NONE">None</option>
 											<option value="TCP">TCP</option>
-											<option value="TCP_TLS">TCP + TLS</option>
 											<option value="HTTP">HTTP</option>
 											<option value="HTTPS">HTTPS</option>
 										</select>

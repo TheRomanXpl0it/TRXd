@@ -2,10 +2,12 @@
 	import { Container, X, Copy, ExternalLink, RefreshCw } from '@lucide/svelte';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { toast } from 'svelte-sonner';
-	import { stopInstance, startInstance } from '$lib/instances';
+	import { stopInstance, startInstance, renewInstance } from '$lib/instances';
 	import { fmtTimeLeft } from '$lib/utils/time';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { Clock } from '@lucide/svelte';
+	import { formatConnectionString } from '$lib/utils/connection';
+	import { updateChallengeCache } from '$lib/utils/challenge-cache';
 
 	let {
 		challenge,
@@ -26,6 +28,7 @@
 
 	let creatingInstance = $state(false);
 	let destroyingInstance = $state(false);
+	let renewingInstance = $state(false);
 
 	function copyToClipboard(text: string) {
 		if (typeof navigator === 'undefined') return;
@@ -35,26 +38,23 @@
 			.catch(() => toast.error('Failed to copy to clipboard.'));
 	}
 
+	function updateChallengeQueryCache(patch: Record<string, any>) {
+		queryClient.setQueryData(['challenges'], (old: any) => updateChallengeCache(old, challenge.id, patch));
+	}
+
 	async function createInstance() {
 		if (creatingInstance || !challenge?.id) return;
 		creatingInstance = true;
 		try {
 			const { host, port, timeout } = await startInstance(Number(challenge.id));
-			const updated = {
-				...challenge,
+			const patch = {
 				instance_host: host,
 				instance_port: port,
 				timeout
 			};
+			const updated = { ...challenge, ...patch };
 
-			// Update Global Cache
-			queryClient.setQueryData(['challenges'], (old: any) => {
-				if (!old || !old.data) return old;
-				return {
-					...old,
-					data: old.data.map((c: any) => (c.id === challenge.id ? updated : c))
-				};
-			});
+			updateChallengeQueryCache(patch);
 
 			if (typeof timeout === 'number' && onCountdownUpdate) {
 				onCountdownUpdate(challenge.id, Math.max(0, timeout));
@@ -74,21 +74,14 @@
 		destroyingInstance = true;
 		try {
 			await stopInstance(Number(challenge.id));
-			const updated = {
-				...challenge,
+			const patch = {
 				instance_host: null,
 				instance_port: null,
 				timeout: null
 			};
+			const updated = { ...challenge, ...patch };
 
-			// Update Global Cache
-			queryClient.setQueryData(['challenges'], (old: any) => {
-				if (!old || !old.data) return old;
-				return {
-					...old,
-					data: old.data.map((c: any) => (c.id === challenge.id ? updated : c))
-				};
-			});
+			updateChallengeQueryCache(patch);
 
 			if (onCountdownUpdate) {
 				onCountdownUpdate(challenge.id, 0);
@@ -100,6 +93,32 @@
 			toast.error(`Error: ${err?.message ?? err}`);
 		} finally {
 			destroyingInstance = false;
+		}
+	}
+
+	async function renew() {
+		if (renewingInstance || !challenge?.id) return;
+		renewingInstance = true;
+		try {
+			const { timeout } = await renewInstance(Number(challenge.id));
+			const patch = {
+				timeout
+			};
+			const updated = { ...challenge, ...patch };
+
+			updateChallengeQueryCache(patch);
+
+			if (typeof timeout === 'number' && onCountdownUpdate) {
+				onCountdownUpdate(challenge.id, Math.max(0, timeout));
+			}
+			toast.success('Instance renewed!');
+			onInstanceChange?.(updated);
+		} catch (err: any) {
+			console.error(err);
+			const msg = err && typeof err === 'object' && 'message' in err ? err.message : String(err);
+			toast.error(`Error: ${msg}`);
+		} finally {
+			renewingInstance = false;
 		}
 	}
 
@@ -116,23 +135,14 @@
 			: (challenge?.host ?? '');
 		const p = hasInstance ? challenge?.instance_port : challenge?.port;
 
-		let str = p ? `${h}:${p}` : h;
-		if (!str || ['localhost', '127.0.0.1', '0.0.0.0'].includes(h.toLowerCase().trim())) return '';
+		if (!h || ['localhost', '127.0.0.1', '0.0.0.0'].includes(h.toLowerCase().trim())) return '';
 
-		const type = challenge?.conn_type;
-		if (type === 'HTTP' && !str.startsWith('http')) {
-			str = `http://${str}`;
-		} else if (type === 'HTTPS' && !str.startsWith('http')) {
-			str = `https://${str}`;
-		} else if (type === 'TCP' || type === 'TCP_TLS') {
-			if (type === 'TCP') {
-				str = p ? `nc ${h} ${p}` : `nc ${h}`;
-			} else {
-				str = p ? `ncat --ssl ${h} ${p}` : `ncat --ssl ${h}`;
-			}
-		}
-
-		return str;
+		return formatConnectionString({
+			host: h,
+			port: p,
+			connType: challenge?.conn_type,
+			sslWithoutPort: isDynamic || hasInstance
+		});
 	});
 
 	function formatCountdown(seconds: number) {
@@ -156,44 +166,53 @@
 
 	<div class="w-full">
 		{#if countdown > 0}
-			<div class="flex items-center gap-3">
-				<!-- Primary Action Row -->
-				<div class="flex flex-1 items-center gap-2">
-					<!-- Connection Info (Green) -->
-					<button
-						class="flex h-11 flex-1 items-center justify-center gap-3 overflow-hidden rounded-lg bg-green-600 px-4 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.99]"
-						onclick={() => copyToClipboard(connectionString)}
-						title="Click to copy connection address"
-						aria-label="Copy instance connection address"
-					>
-						<Container class="size-4 shrink-0" />
-						<code class="truncate font-mono text-sm font-bold tracking-tight">{connectionString}</code>
-					</button>
+			<div class="flex items-center gap-2">
+				<button
+					class="flex h-11 min-w-0 flex-1 items-center justify-center gap-3 overflow-hidden rounded-lg bg-green-600 px-4 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.99]"
+					onclick={() => copyToClipboard(connectionString)}
+					title="Click to copy connection address"
+					aria-label="Copy instance connection address"
+				>
+					<Container class="size-4 shrink-0" />
+					<code class="truncate font-mono text-sm font-bold tracking-tight">{connectionString}</code>
+				</button>
 
-					<!-- Terminate (Red) -->
-					<button
-						onclick={destroyInstance}
-						disabled={destroyingInstance}
-						class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.95] disabled:opacity-50"
-						title="Stop Instance"
-					>
-						{#if destroyingInstance}
-							<Spinner class="h-4 w-4" />
-						{:else}
-							<X class="h-4 w-4" />
-						{/if}
-					</button>
-				</div>
-
-				<!-- Horizontal Timer -->
 				{#if showTimer}
 					<div
-						class="flex shrink-0 items-center gap-1.5 border-l pl-3 font-mono text-sm font-black tabular-nums text-green-600 dark:text-green-500"
+						class="bg-muted/40 border-border/60 flex h-11 shrink-0 items-center gap-2 rounded-lg border px-3 text-green-600 dark:text-green-500"
 					>
-						<Clock class="h-4 w-4" />
-						<span>{formatCountdown(countdown)}</span>
+						<button
+							onclick={renew}
+							disabled={renewingInstance}
+							class="hover:text-green-700 disabled:opacity-50 dark:hover:text-green-400"
+							title="Renew Instance"
+						>
+							{#if renewingInstance}
+								<Spinner class="h-4 w-4" />
+							{:else}
+								<RefreshCw class="h-4 w-4" />
+							{/if}
+						</button>
+						<div class="bg-border/70 h-5 w-px"></div>
+						<div class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums">
+							<Clock class="h-4 w-4" />
+							<span>{formatCountdown(countdown)}</span>
+						</div>
 					</div>
 				{/if}
+
+				<button
+					onclick={destroyInstance}
+					disabled={destroyingInstance}
+					class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.95] disabled:opacity-50"
+					title="Stop Instance"
+				>
+					{#if destroyingInstance}
+						<Spinner class="h-4 w-4" />
+					{:else}
+						<X class="h-4 w-4" />
+					{/if}
+				</button>
 			</div>
 		{:else}
 			<!-- Idle State: Start Instance (Blue) -->

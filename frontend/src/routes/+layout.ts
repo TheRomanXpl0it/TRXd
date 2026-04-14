@@ -9,7 +9,7 @@ export async function load({ url }: { url: URL }) {
 	await loadUser(false);
 
 	// Public routes
-	const publicRoutes = ['/signIn', '/signUp'];
+	const publicRoutes = ['/signIn', '/signUp', '/forgot'];
 	const isPublicRoute = publicRoutes.some((r) => url.pathname.startsWith(r));
 
 	if (!authState.user && !isPublicRoute) {

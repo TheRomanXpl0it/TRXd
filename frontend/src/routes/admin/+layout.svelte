@@ -37,13 +37,13 @@
 		{
 			title: 'Dashboard',
 			items: [
-				{ title: 'Overview', href: '/admin', icon: LayoutDashboard, adminOnly: true }
+				{ title: 'Overview', href: '/admin', icon: LayoutDashboard, adminOnly: false }
 			]
 		},
 		{
 			title: 'Authors',
 			items: [
-				{ title: 'Categories', href: '/admin/categories', icon: FolderTree, adminOnly: true },
+				{ title: 'Categories', href: '/admin/categories', icon: FolderTree, adminOnly: false },
 				{ title: 'Manage Challenges', href: '/admin/challenges', icon: Joystick, adminOnly: false },
 				{ title: 'Create Challenge', href: '/admin/challenges/create', icon: PlusCircle, adminOnly: false }
 			]
@@ -54,12 +54,21 @@
 				{ title: 'Instances', href: '/admin/instances', icon: Cpu, adminOnly: true },
 				{ title: 'Submissions', href: '/admin/submissions', icon: Flag, adminOnly: true },
 				{ title: 'Users Control', href: '/admin/users', icon: UsersIcon, adminOnly: true },
+				{
+					title: 'Teams Control',
+					href: '/admin/teams',
+					icon: UsersIcon,
+					adminOnly: true,
+					hideInUserMode: true
+				},
 				{ title: 'Configs', href: '/admin/configs', icon: Settings, adminOnly: true }
 			]
 		}
 	].map(section => ({
 		...section,
-		items: section.items.filter(item => !item.adminOnly || isAdmin)
+		items: section.items.filter(
+			(item) => (!item.adminOnly || isAdmin) && !(item.hideInUserMode && authState.userMode)
+		)
 	})).filter(section => section.items.length > 0));
 
 	const currentPath = $derived(page.url.pathname);

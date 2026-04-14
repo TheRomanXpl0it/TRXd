@@ -5,19 +5,32 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
-	import * as Tabs from '$lib/components/ui/tabs';
 	import * as Card from '$lib/components/ui/card';
 	import { toast } from 'svelte-sonner';
-	import { createChallenge, updateChallenge } from '$lib/challenges';
+	import {
+		createChallenge,
+		getChallenges,
+		updateChallenge,
+		uploadAttachments
+	} from '$lib/challenges';
 	import { createFlags } from '$lib/flags';
 	import { goto } from '$app/navigation';
-	import { PlusCircle, Flag, Cpu, Info, Save, X, Paperclip, Tags as TagsIcon, UserCog, Plus } from '@lucide/svelte';
+	import {
+		PlusCircle,
+		Flag,
+		Cpu,
+		Info,
+		Save,
+		X,
+		Paperclip,
+		Tags as TagsIcon,
+		Plus
+	} from '@lucide/svelte';
 	import CategorySelect from '$lib/components/challenges/CategorySelect.svelte';
 	import TagMultiSelect from '$lib/components/challenges/TagMultiselect.svelte';
 	import MonacoEditor from '$lib/components/MonacoEditor.svelte';
 	import { getCategories } from '$lib/categories';
-	import { getChallenges, uploadAttachments } from '$lib/challenges';
-	import { onMount, tick } from 'svelte';
+	import { onMount } from 'svelte';
 
 	// Form State
 	let name = $state('');
@@ -35,7 +48,6 @@
 	const connTypes = [
 		{ value: 'NONE', label: 'None' },
 		{ value: 'TCP', label: 'TCP' },
-		{ value: 'TCP_TLS', label: 'TCP (TLS)' },
 		{ value: 'HTTP', label: 'HTTP' },
 		{ value: 'HTTPS', label: 'HTTPS' }
 	];
@@ -92,7 +104,6 @@
 	async function handleSubmit() {
 		if (!name.trim()) return toast.error('Name is required');
 		if (!category) return toast.error('Category is required');
-		if (!description.trim()) return toast.error('Description is required');
 		if (points <= 0) return toast.error('Points must be greater than 0');
 
 		loading = true;
@@ -134,9 +145,9 @@
 				max_points: points,
 				image: type === 'Container' ? imageName : undefined,
 				compose: type === 'Compose' ? composeFile : undefined,
-				host: type === 'Normal' && host.trim() ? host.trim() : undefined,
-				port: type === 'Normal' && port ? port : undefined,
-				conn_type: type === 'Normal' && connType !== 'NONE' ? connType : undefined,
+				host: host.trim() ? host.trim() : undefined,
+				port: port ? port : undefined,
+				conn_type: connType,
 				lifetime: lifetime || 1800,
 				max_memory: maxMemory || 512,
 				max_cpu: maxCpu || '0.5',
@@ -208,7 +219,7 @@
 			<button
 				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 				'info'
-					? 'bg-background text-foreground shadow-sm px-6 py-1.5'
+					? 'bg-background text-foreground px-6 py-1.5 shadow-sm'
 					: 'hover:bg-background/50 hover:text-foreground'}"
 				onclick={() => (activeTab = 'info')}
 			>
@@ -273,7 +284,7 @@
 						</div>
 
 						<div class="space-y-2">
-							<Label for="description">Description</Label>
+							<Label for="description">Description (optional)</Label>
 							<Textarea
 								id="description"
 								bind:value={description}
@@ -296,11 +307,7 @@
 							<div class="space-y-4">
 								<div class="space-y-2">
 									<Label for="authors">Authors (comma separated)</Label>
-									<Input
-										id="authors"
-										bind:value={authorsCsv}
-										placeholder="e.g. author1, author2"
-									/>
+									<Input id="authors" bind:value={authorsCsv} placeholder="e.g. author1, author2" />
 								</div>
 								<div class="flex flex-col justify-end gap-3 pt-3">
 									<div class="flex items-center gap-3">
@@ -373,24 +380,7 @@
 						>
 					</Card.Header>
 					<Card.Content class="space-y-6">
-						{#if type === 'Normal'}
-							<div class="animate-in fade-in slide-in-from-top-2 space-y-4">
-								<div class="space-y-2">
-									<Label for="host">Connecting Host (optional)</Label>
-									<Input id="host" bind:value={host} placeholder="e.g. chal.myctf.com" />
-								</div>
-								<div class="grid gap-6 sm:grid-cols-2">
-									<div class="space-y-2">
-										<Label for="port">Port</Label>
-										<Input id="port" type="number" bind:value={port} placeholder="1337" />
-									</div>
-									<div class="space-y-2">
-										<Label for="connType">Connection Type</Label>
-										<CategorySelect items={connTypes} bind:value={connType} />
-									</div>
-								</div>
-							</div>
-						{:else}
+						{#if type !== 'Normal'}
 							<div class="animate-in fade-in slide-in-from-top-2 space-y-4">
 								{#if type === 'Container'}
 									<div class="space-y-2">
@@ -404,7 +394,7 @@
 								{:else}
 									<div class="space-y-4">
 										<Label for="compose">Docker Compose YAML</Label>
-										<div class="h-[400px] border rounded-md overflow-hidden">
+										<div class="h-[400px] overflow-hidden rounded-md border">
 											<MonacoEditor bind:value={composeFile} language="yaml" class="h-full" />
 										</div>
 									</div>
@@ -461,7 +451,7 @@
 													type="button"
 													variant="ghost"
 													size="icon"
-													class="h-8 w-8 text-destructive"
+													class="text-destructive h-8 w-8"
 													onclick={() => (envVars = envVars.filter((_, idx) => idx !== i))}
 												>
 													<X class="h-4 w-4" />
@@ -472,6 +462,25 @@
 								</div>
 							</div>
 						{/if}
+
+						<div
+							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${type !== 'Normal' ? 'border-t pt-6' : ''}`}
+						>
+							<div class="space-y-2">
+								<Label for="host">Connecting Host (optional)</Label>
+								<Input id="host" bind:value={host} placeholder="e.g. chal.myctf.com" />
+							</div>
+							<div class="grid gap-6 sm:grid-cols-2">
+								<div class="space-y-2">
+									<Label for="port">Port</Label>
+									<Input id="port" type="number" bind:value={port} placeholder="1337" />
+								</div>
+								<div class="space-y-2">
+									<Label for="connType">Connection Type</Label>
+									<CategorySelect items={connTypes} bind:value={connType} />
+								</div>
+							</div>
+						</div>
 					</Card.Content>
 				</Card.Root>
 			</div>
@@ -503,10 +512,10 @@
 								onchange={(e) => addFiles(e.currentTarget.files)}
 							/>
 							<div
-								class="bg-muted mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full transition-colors group-hover:bg-primary/10"
+								class="bg-muted group-hover:bg-primary/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full transition-colors"
 							>
 								<Paperclip
-									class="text-muted-foreground h-8 w-8 transition-colors group-hover:text-primary"
+									class="text-muted-foreground group-hover:text-primary h-8 w-8 transition-colors"
 								/>
 							</div>
 							<h4 class="mb-1 text-lg font-bold">Drop files here</h4>

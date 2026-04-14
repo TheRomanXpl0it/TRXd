@@ -13,7 +13,7 @@
 <button
 	type="button"
 	class="relative flex min-h-[136px] w-full cursor-pointer flex-col overflow-hidden rounded-[10px] p-5 text-left shadow-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 {challenge.solved
-		? 'bg-emerald-500/10 ring-1 ring-emerald-500/30'
+		? 'bg-emerald-500/30 dark:bg-emerald-600/40'
 		: 'border border-transparent bg-[#fafafa] dark:bg-zinc-900'}"
 	{onclick}
 	aria-label="View details for {challenge.name}"

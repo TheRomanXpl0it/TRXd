@@ -31,3 +31,13 @@ export async function adminStopInstance(teamId: number, challId: number): Promis
 		body: JSON.stringify({ team_id: teamId, chall_id: challId })
 	});
 }
+
+export async function renewInstance(
+	chall_id: number
+): Promise<{ timeout: number }> {
+	return api<{ timeout: number }>(`/instances`, {
+		headers: { 'content-type': 'application/json' },
+		method: 'PATCH',
+		body: JSON.stringify({ chall_id })
+	});
+}

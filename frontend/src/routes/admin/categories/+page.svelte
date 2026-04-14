@@ -6,11 +6,12 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import { toast } from 'svelte-sonner';
-	import { getCategories, createCategory, deleteCategory } from '$lib/categories';
+	import { getCategories, createCategory, deleteCategory, updateCategory } from '$lib/categories';
+	import { siteContent } from '$lib/site-content';
 	import { onMount } from 'svelte';
-	import { Plus, Trash2, FolderTree } from '@lucide/svelte';
+	import { Plus, Trash2, FolderTree, Pencil } from '@lucide/svelte';
 
-	let categories = $state<any[]>([]);
+	let categories = $state<string[]>([]);
 	let loading = $state(true);
 	let creating = $state(false);
 	let categoryName = $state('');
@@ -19,7 +20,7 @@
 		loading = true;
 		try {
 			const res = await getCategories();
-			categories = res.map((c: any) => (typeof c === 'string' ? { name: c } : c));
+			categories = [...res].sort((a, b) => a.localeCompare(b));
 		} catch (err: any) {
 			toast.error(err?.message ?? 'Failed to load categories');
 		} finally {
@@ -56,11 +57,24 @@
 		}
 	}
 
+	async function handleRename(name: string) {
+		const newName = prompt(`Enter new name for category "${name}":`, name);
+		if (!newName || !newName.trim() || newName === name) return;
+
+		try {
+			await updateCategory(name, newName.trim());
+			toast.success(`Category renamed to "${newName}"`);
+			await loadCategories();
+		} catch (err: any) {
+			toast.error(err?.message ?? 'Failed to rename category');
+		}
+	}
+
 	onMount(loadCategories);
 </script>
 
 <svelte:head>
-	<title>Category Management | TRXd Admin</title>
+	<title>Category Management | {$siteContent.brand.adminTitleSuffix}</title>
 </svelte:head>
 
 <div class="space-y-8">
@@ -75,7 +89,7 @@
 			<Card.Description>Create a new category for challenges.</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<form onsubmit={handleCreate} class="flex items-end gap-4 max-w-md">
+			<form onsubmit={handleCreate} class="flex max-w-md items-end gap-4">
 				<div class="grid w-full gap-1.5">
 					<Label for="name">Name</Label>
 					<Input
@@ -109,28 +123,42 @@
 					<Spinner class="h-8 w-8" />
 				</div>
 			{:else if categories.length === 0}
-				<div class="flex h-32 flex-col items-center justify-center gap-2 text-muted-foreground">
+				<div class="text-muted-foreground flex h-32 flex-col items-center justify-center gap-2">
 					<FolderTree class="h-10 w-10 opacity-20" />
 					<p>No categories found.</p>
 				</div>
 			{:else}
 				<Table.Root>
 					<Table.Header class="bg-transparent [&_tr]:border-b-0">
-						<Table.Row class="hover:bg-transparent border-none">
-							<Table.Head class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider">Name</Table.Head>
-							<Table.Head class="text-muted-foreground/70 bg-transparent text-right text-[10px] font-bold uppercase tracking-wider">Actions</Table.Head>
+						<Table.Row class="border-none hover:bg-transparent">
+							<Table.Head
+								class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
+								>Name</Table.Head
+							>
+							<Table.Head
+								class="text-muted-foreground/70 bg-transparent text-right text-[10px] font-bold uppercase tracking-wider"
+								>Actions</Table.Head
+							>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
-						{#each categories as cat}
-							<Table.Row class="group border-none transition-colors hover:bg-muted/50">
-								<Table.Cell class="font-medium truncate max-w-[200px]">{cat.name}</Table.Cell>
-								<Table.Cell class="text-right">
+						{#each categories as name (name)}
+							<Table.Row class="hover:bg-muted/50 group border-none transition-colors">
+								<Table.Cell class="max-w-[200px] truncate font-medium">{name}</Table.Cell>
+								<Table.Cell class="flex items-center justify-end gap-1 text-right">
 									<Button
 										variant="ghost"
 										size="icon"
-										class="text-muted-foreground hover:text-destructive transition-colors h-8 w-8"
-										onclick={() => handleDelete(cat.name)}
+										class="text-muted-foreground hover:text-primary h-8 w-8 transition-colors"
+										onclick={() => handleRename(name)}
+									>
+										<Pencil class="h-4 w-4" />
+									</Button>
+									<Button
+										variant="ghost"
+										size="icon"
+										class="text-muted-foreground hover:text-destructive h-8 w-8 transition-colors"
+										onclick={() => handleDelete(name)}
 									>
 										<Trash2 class="h-4 w-4" />
 									</Button>

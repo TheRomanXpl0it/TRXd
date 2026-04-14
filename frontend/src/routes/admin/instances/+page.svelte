@@ -8,6 +8,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
+	import { formatConnectionString } from '$lib/utils/connection';
 
 	let instances = $state<any[]>([]);
 	let loading = $state(true);
@@ -67,15 +68,12 @@
 	}
 
 	function formatConn(inst: any) {
-		const h = inst.host || '';
-		const p = inst.port || '';
-		const str = p ? `${h}:${p}` : h;
-		if (inst.conn_type === 'TCP') {
-			return p ? `nc ${h} ${p}` : `nc ${h}`;
-		}
-		if (inst.conn_type === 'HTTP' && !str.startsWith('http')) return `http://${str}`;
-		if (inst.conn_type === 'HTTPS' && !str.startsWith('http')) return `https://${str}`;
-		return str;
+		return formatConnectionString({
+			host: inst.host,
+			port: inst.port,
+			connType: inst.conn_type,
+			sslWithoutPort: true
+		});
 	}
 </script>
 
@@ -120,6 +118,10 @@
 								>
 								<Table.Head
 									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
+									>Docker ID</Table.Head
+								>
+								<Table.Head
+									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
 									>Connection</Table.Head
 								>
 								<Table.Head
@@ -133,7 +135,7 @@
 							</Table.Row>
 						</Table.Header>
 						<Table.Body>
-							{#each instances as inst (inst.docker_id)}
+							{#each instances as inst (`${inst.team_id}-${inst.chall_id}`)}
 								<Table.Row class="group border-none transition-colors">
 									<Table.Cell class="font-medium">
 										{inst.team_name}
@@ -142,6 +144,9 @@
 									<Table.Cell>
 										{inst.chall_name}
 										<span class="text-muted-foreground text-xs">({inst.chall_id})</span>
+									</Table.Cell>
+									<Table.Cell class="max-w-[180px] truncate" title={inst.docker_id || ''}>
+										<code class="bg-muted rounded px-1.5 py-0.5 text-xs">{inst.docker_id || '-'}</code>
 									</Table.Cell>
 									<Table.Cell>
 										<code class="bg-muted rounded px-1.5 py-0.5 text-xs">{formatConn(inst)}</code>

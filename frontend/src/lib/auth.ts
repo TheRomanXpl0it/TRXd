@@ -1,5 +1,4 @@
 import { api } from '$lib/api';
-import type { User } from '$lib/types';
 
 export async function getInfo(): Promise<any | null> {
 	try {
@@ -17,11 +16,31 @@ export async function login(email: string, password: string): Promise<any> {
 	});
 }
 
-export async function register(email: string, password: string, name: string): Promise<User> {
-	return api<User>('/register', {
+export async function register(email: string, password: string, name: string): Promise<void> {
+	await api<void>('/register', {
 		headers: { 'content-type': 'application/json' },
 		method: 'POST',
 		body: JSON.stringify({ email, password, name })
+	});
+}
+
+export async function requestRegistrationVerification(email: string): Promise<void> {
+	await api<void>('/register', {
+		headers: { 'content-type': 'application/json' },
+		method: 'POST',
+		body: JSON.stringify({ email })
+	});
+}
+
+export async function completeVerifiedRegistration(
+	token: string,
+	name: string,
+	password: string
+): Promise<void> {
+	await api<void>('/register', {
+		headers: { 'content-type': 'application/json' },
+		method: 'POST',
+		body: JSON.stringify({ token, name, password })
 	});
 }
 

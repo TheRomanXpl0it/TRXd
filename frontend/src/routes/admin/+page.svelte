@@ -57,36 +57,50 @@
 		}
 	]);
 
-	const quickLinks = [
-		{
-			title: 'Instances',
-			href: '/admin/instances',
-			icon: Cpu,
-			desc: 'Manage containerized challenges',
-			adminOnly: true
-		},
-		{
-			title: 'Submissions',
-			href: '/admin/submissions',
-			icon: Flag,
-			desc: 'Review recent flag submits',
-			adminOnly: true
-		},
-		{
-			title: 'Users',
-			href: '/admin/users',
-			icon: UsersIcon,
-			desc: 'Manage user accounts and passwords',
-			adminOnly: true
-		},
-		{
-			title: 'Create Challenge',
-			href: '/admin/challenges/create',
-			icon: PlusCircle,
-			desc: 'Unified creation flow',
-			adminOnly: false
-		}
-	].filter((link) => !link.adminOnly || isAdmin);
+	const quickLinks = $derived(
+		[
+			{
+				title: 'Instances',
+				href: '/admin/instances',
+				icon: Cpu,
+				desc: 'Manage containerized challenges',
+				adminOnly: true
+			},
+			{
+				title: 'Submissions',
+				href: '/admin/submissions',
+				icon: Flag,
+				desc: 'Review recent flag submits',
+				adminOnly: true
+			},
+			{
+				title: 'Users',
+				href: '/admin/users',
+				icon: UsersIcon,
+				desc: authState.userMode
+					? 'Manage team-backed user accounts and passwords'
+					: 'Manage user accounts and passwords',
+				adminOnly: true
+			},
+			{
+				title: 'Teams Control',
+				href: '/admin/teams',
+				icon: UsersIcon,
+				desc: 'Manage teams and regenerate join passwords',
+				adminOnly: true,
+				hideInUserMode: true
+			},
+			{
+				title: 'Create Challenge',
+				href: '/admin/challenges/create',
+				icon: PlusCircle,
+				desc: 'Unified creation flow',
+				adminOnly: false
+			}
+		].filter(
+			(link) => (!link.adminOnly || isAdmin) && !(link.hideInUserMode && authState.userMode)
+		)
+	);
 </script>
 
 <div class="space-y-8">

@@ -8,6 +8,7 @@
 	import Markdown from '$lib/components/Markdown.svelte';
 	import { config } from '$lib/env';
 	import { fmtTimeLeft } from '$lib/utils/time';
+	import { formatConnectionString } from '$lib/utils/connection';
 
 	let {
 		open = $bindable(false),
@@ -64,16 +65,12 @@
 			return challenge.connection_info;
 		}
 
-		let str = p ? `${h}:${p}` : h;
-
-		if (str && challenge?.conn_type === 'TCP') {
-			str = p ? `nc ${h} ${p}` : `nc ${h}`;
-		} else if (str && challenge?.conn_type === 'HTTP' && !str.startsWith('http')) {
-			str = `http://${str}`;
-		} else if (str && challenge?.conn_type === 'HTTPS' && !str.startsWith('http')) {
-			str = `https://${str}`;
-		}
-		return str;
+		return formatConnectionString({
+			host: h,
+			port: p,
+			connType: challenge?.conn_type,
+			sslWithoutPort: isDynamicType || challenge?.instance || !!challenge?.instance_host
+		});
 	});
 </script>
 
@@ -247,7 +244,7 @@
 						if (onInstanceChange) onInstanceChange(updated);
 					}}
 					hideHeader={true}
-					showTimer={false}
+					showTimer={true}
 				/>
 			</section>
 		{/if}

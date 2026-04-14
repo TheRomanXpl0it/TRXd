@@ -48,5 +48,5 @@ afterEach(async () => {
 	cleanup();
 	// Allow any asynchronous cleanups (like bits-ui body-scroll-lock) to complete
 	// before the JSDOM environment is torn down.
-	await new Promise((resolve) => setTimeout(resolve, 0));
+	await new Promise((resolve) => setTimeout(resolve, 50));
 });

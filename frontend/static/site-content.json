@@ -1,0 +1,27 @@
+{
+  "brand": {
+    "shortName": "TRXd",
+    "browserTitle": "TRXD",
+    "footerText": "TRXd Platform \u00a9 2026",
+    "logoAlt": "TRXD Logo",
+    "adminTitleSuffix": "TRXd Admin"
+  },
+  "home": {
+    "heroTitle": "Welcome to TRXD",
+    "heroDescription": "A platform for hackers and cybersecurity enthusiasts",
+    "primaryCtaLabel": "View Challenges",
+    "primaryCtaHref": "/challenges",
+    "secondaryCtaLabel": "Scoreboard",
+    "secondaryCtaHref": "/scoreboard",
+    "rulesTitle": "",
+    "rulesMarkdown": "",
+    "sponsorsTitle": "",
+    "sponsors": []
+  },
+  "auth": {
+    "signUpDescription": "Join TRXD and start hacking"
+  },
+  "settings": {
+    "appearanceDescription": "Customize how TRXd looks for you."
+  }
+}

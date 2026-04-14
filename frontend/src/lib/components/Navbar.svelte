@@ -16,6 +16,7 @@
 	import * as Sheet from '$lib/components/ui/sheet';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
+	import { siteContent } from '$lib/site-content';
 	import { authState } from '$lib/stores/auth';
 
 	interface Props {
@@ -70,8 +71,10 @@
 							<div class="bg-background/80 flex h-full flex-col">
 								<div class="border-muted/20 border-b px-6 py-8">
 									<div class="flex items-center gap-4">
-										<img src="/trx.svg" alt="TRX Logo" class="h-10 w-10" />
-										<span class="text-2xl font-black tracking-tighter">TRXd</span>
+										<img src="/trx.svg" alt={$siteContent.brand.logoAlt} class="h-10 w-10" />
+										<span class="text-2xl font-black tracking-tighter"
+											>{$siteContent.brand.shortName}</span
+										>
 									</div>
 								</div>
 
@@ -91,18 +94,24 @@
 								<div
 									class="border-muted/20 text-muted-foreground/40 border-t p-6 text-[10px] font-black uppercase tracking-widest"
 								>
-									TRXd Platform &copy; 2026
+									{$siteContent.brand.footerText}
 								</div>
 							</div>
 						</Sheet.Content>
 					</Sheet.Root>
 				</div>
 
-				<a href="/" class="flex items-center gap-4">
+				<a href="/home" class="flex items-center gap-4">
 					<div class="relative">
-						<img src="/trx.svg" alt="TRX Logo" class="relative h-12 w-12 drop-shadow-sm" />
+						<img
+							src="/trx.svg"
+							alt={$siteContent.brand.logoAlt}
+							class="relative h-12 w-12 drop-shadow-sm"
+						/>
 					</div>
-					<span class="text-foreground text-3xl font-black tracking-tighter">TRXd</span>
+					<span class="text-foreground text-3xl font-black tracking-tighter"
+						>{$siteContent.brand.shortName}</span
+					>
 				</a>
 
 				<div class="hidden items-center gap-1 md:flex">
@@ -210,7 +219,7 @@
 									<span>Settings</span>
 								</DropdownMenu.Item>
 
-								{#if isAdmin}
+								{#if isAuthor}
 									<DropdownMenu.Item
 										onclick={() => goto('/admin')}
 										class="cursor-pointer gap-3 rounded-md px-3 py-2.5 text-sm font-semibold opacity-80 hover:opacity-100"

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <!-- babelo was here -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TRX CTF 2026 | TheRomanXpl0it</title>
@@ -20,14 +21,14 @@
             --alive-cell: #10b981;
             --alive-cell-dark: #065f46;
 
-            --card-bg: rgba(255, 255, 255, 0.72);
-            --card-border: rgba(228, 228, 231, 0.72);
+            --card-bg: #ffffffb8;
+            --card-border: #e4e4e7b8;
             --badge-bg: #f4f4f5;
 
-            --overlay-strong: rgba(247, 247, 248, 0.92);
-            --overlay-soft: rgba(247, 247, 248, 0.28);
+            --overlay-strong: #f7f7f8eb;
+            --overlay-soft: #f7f7f847;
 
-            --content-shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+            --content-shadow: 0 24px 80px #00000014;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -40,14 +41,14 @@
                 --alive-cell: #14b8a6;
                 --alive-cell-dark: #0f766e;
 
-                --card-bg: rgba(10, 10, 12, 0.72);
-                --card-border: rgba(63, 63, 70, 0.42);
+                --card-bg: #0a0a0cb8;
+                --card-border: #3f3f466b;
                 --badge-bg: #18181b;
 
-                --overlay-strong: rgba(5, 5, 5, 0.84);
-                --overlay-soft: rgba(5, 5, 5, 0.20);
+                --overlay-strong: #050505d6;
+                --overlay-soft: #05050533;
 
-                --content-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+                --content-shadow: 0 24px 80px #0000006b;
             }
         }
 
@@ -126,15 +127,165 @@
         }
 
         header img {
-            filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.16));
+            filter: drop-shadow(0 10px 28px #00000029);
         }
 
         .hero-title {
-            text-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+            text-shadow: 0 8px 30px #0000001a;
         }
 
         .ambient-button {
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+            box-shadow: 0 16px 36px #00000029;
+        }
+
+        .hero-shell {
+            position: relative;
+            min-height: 100vh;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 3rem;
+            padding: 4rem 0 9.5rem;
+        }
+
+        .hero-footer-row {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            pointer-events: none;
+        }
+
+        .hero-sponsor {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            width: 100%;
+            max-width: 15rem;
+            padding: 1rem 1.15rem;
+            border-radius: 1.5rem;
+            text-align: left;
+            pointer-events: auto;
+        }
+
+        .hero-sponsor--left {
+            justify-self: start;
+        }
+
+        .hero-sponsor--right {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        .sponsor-logo-chip {
+            height: 3.25rem;
+            width: 3.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 1rem;
+            background: var(--badge-bg);
+            font-size: 0.56rem;
+            font-weight: 800;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--secondary-text);
+        }
+
+        .sponsor-name {
+            font-size: 0.7rem;
+            font-weight: 900;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            line-height: 1.35;
+        }
+
+        @media (max-width: 767px) {
+            .hero-shell {
+                min-height: 100svh;
+                margin-bottom: 1.5rem;
+                justify-content: flex-start;
+                gap: 2rem;
+                padding-top: 4rem;
+                padding-bottom: 10.2rem;
+            }
+
+            .hero-footer-row {
+                bottom: 2.5rem;
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-items: stretch;
+                gap: 0.75rem;
+            }
+
+            .hero-sponsor {
+                width: 100%;
+                min-width: 0;
+                gap: 0.7rem;
+                margin-top: 0.5rem;
+                padding: 0.75rem 0.8rem;
+                border-radius: 1.2rem;
+            }
+
+            .hero-footer-row > .hero-sponsor:nth-child(3) {
+                grid-column: 1 / -1;
+                justify-self: center;
+                max-width: 15rem;
+                flex-direction: row;
+                text-align: left;
+            }
+
+            .hero-sponsor .sponsor-logo-chip {
+                margin-top: 0.1rem;
+            }
+
+            .sponsor-logo-chip {
+                height: 2.7rem;
+                width: 2.7rem;
+                border-radius: 0.85rem;
+                font-size: 0.5rem;
+            }
+
+            .sponsor-name {
+                font-size: 0.56rem;
+                letter-spacing: 0.11em;
+            }
+        }
+
+        @media (max-width: 460px) {
+            .container-custom {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .hero-shell {
+                padding-top: 4rem;
+                padding-bottom: 10.8rem;
+            }
+
+            .hero-footer-row {
+                bottom: 2rem;
+                gap: 0.6rem;
+            }
+
+            .hero-sponsor {
+                gap: 0.6rem;
+            }
+
+            .sponsor-logo-chip {
+                height: 2.45rem;
+                width: 2.45rem;
+                font-size: 0.44rem;
+                letter-spacing: 0.16em;
+            }
         }
     </style>
 </head>
@@ -145,7 +296,7 @@
 
     <div class="container-custom">
         <!-- Full-Screen Hero -->
-        <header class="min-h-screen flex flex-col items-center justify-center text-center space-y-12">
+        <header class="hero-shell">
             <div class="space-y-8 flex flex-col items-center">
                 <img src="/trx.svg" alt="TRX Logo" class="h-32 w-32" />
                 <div>
@@ -170,6 +321,22 @@
                         class="text-[var(--foreground)] underline underline-offset-8 decoration-2 decoration-[var(--alive-cell)]/30 hover:decoration-[var(--alive-cell)] transition-all">Discord
                         server</a>
                 </p>
+            </div>
+
+            <div class="hero-footer-row" aria-label="Sponsors">
+                <div class="hero-sponsor hero-sponsor--left">
+                    <div class="sponsor-logo-chip" aria-hidden="true">Logo</div>
+                    <div class="min-w-0">
+                        <p class="sponsor-name">Lorem Ipsum Pallem</p>
+                    </div>
+                </div>
+
+                <div class="hero-sponsor hero-sponsor--right">
+                    <div class="sponsor-logo-chip" aria-hidden="true">Logo</div>
+                    <div class="min-w-0">
+                        <p class="sponsor-name">Lorem Ipsum</p>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -251,7 +418,6 @@
                     <p class="text-2xl font-black uppercase tracking-tighter">Sponsors</p>
                 </div>
                 <div class="space-y-4 max-w-4xl mx-auto">
-                    <!-- Sponsor Item -->
                     <div class="card-custom p-8 rounded-2xl flex items-center gap-10">
                         <div
                             class="h-20 w-20 bg-zinc-800/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
@@ -259,15 +425,13 @@
                         </div>
                         <div class="h-12 w-px bg-zinc-800/20 dark:bg-white/5"></div>
                         <div class="space-y-1">
-                            <p class="text-sm font-black uppercase tracking-widest opacity-80">Lorem Ipsum Pallem
-                            </p>
+                            <p class="text-sm font-black uppercase tracking-widest opacity-80">Lorem Ipsum Pallem</p>
                             <p class="text-md text-zinc-muted font-medium leading-relaxed italic">
                                 Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.
                             </p>
                         </div>
                     </div>
 
-                    <!-- Sponsor Item -->
                     <div class="card-custom p-8 rounded-2xl flex items-center gap-10">
                         <div
                             class="h-20 w-20 bg-zinc-800/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
@@ -283,7 +447,6 @@
                     </div>
                 </div>
             </section>
-
 
         </main>
 
@@ -643,7 +806,6 @@
             media.addListener(() => drawGrid());
         }
 
-        // babelo was here
     </script>
 </body>
 
