@@ -1,5 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { siteContent } from '$lib/site-content';
+
+	// Reactive counts for conditional layout adjustment
+	$: activeDetailsCount = [
+		$siteContent.home.eventTimelineValue,
+		$siteContent.home.eventDurationValue,
+		$siteContent.home.eventFormatValue
+	].filter(Boolean).length;
+
+	$: activePrizesCount = [
+		$siteContent.home.prize1Amount,
+		$siteContent.home.prize2Amount,
+		$siteContent.home.prize3Amount
+	].filter(Boolean).length;
 
 	onMount(() => {
 		const canvas = document.getElementById('pixel-bg') as HTMLCanvasElement;
@@ -366,44 +380,54 @@
 		<div class="space-y-8 flex flex-col items-center">
 			<img src="/trx.svg" alt="TRX Logo" class="h-32 w-32" />
 			<div>
-				<h1 class="hero-title text-5xl sm:text-6xl font-black tracking-tighter uppercase mb-3">
-					TRX CTF 2026
+				<h1 class="hero-title text-5xl sm:text-6xl font-black tracking-tighter uppercase mb-3 text-center">
+					{$siteContent.home.heroTitle}
 				</h1>
-				<p
-					class="text-zinc-muted font-bold tracking-widest border-t border-zinc-800 pt-6 mt-4 inline-block px-12 text-xs uppercase opacity-80">
-					A CTF BY THEROMANXPL0IT
-				</p>
+				{#if $siteContent.brand.heroSubtitle}
+					<p
+						class="text-zinc-muted font-bold tracking-widest border-t border-zinc-800 pt-6 mt-4 inline-block px-12 text-xs uppercase opacity-80 text-center">
+						{$siteContent.brand.heroSubtitle}
+					</p>
+				{/if}
 			</div>
 		</div>
 
 		<!-- Integrated Actions -->
 		<div class="flex flex-col items-center gap-8 translate-y-4">
-			<a href="/home"
+			<a href={$siteContent.home.primaryCtaHref}
 				class="ambient-button bg-[var(--foreground)] text-[var(--background)] px-14 py-5 rounded-2xl font-black uppercase tracking-tight opacity-90 hover:opacity-100 transition-all active:scale-[0.98]">
-				Play Now
+				{$siteContent.home.primaryCtaLabel}
 			</a>
-			<p class="text-xs text-zinc-muted font-bold tracking-widest uppercase opacity-60">
-				Join the <a href="https://discord.gg/trx"
-					class="text-[var(--foreground)] underline underline-offset-8 decoration-2 decoration-[var(--alive-cell)]/30 hover:decoration-[var(--alive-cell)] transition-all">Discord
-					server</a>
-			</p>
+			{#if $siteContent.brand.discordUrl}
+				<p class="text-xs text-zinc-muted font-bold tracking-widest uppercase opacity-60">
+					Join the <a href={$siteContent.brand.discordUrl}
+						class="text-[var(--foreground)] underline underline-offset-8 decoration-2 decoration-[var(--alive-cell)]/30 hover:decoration-[var(--alive-cell)] transition-all">
+						Discord server
+					</a>
+				</p>
+			{/if}
 		</div>
 
-		<div class="hero-footer-row" aria-label="Sponsors">
-			<div class="hero-sponsor hero-sponsor--left">
-				<div class="sponsor-logo-chip" aria-hidden="true">Logo</div>
-				<div class="min-w-0">
-					<p class="sponsor-name">Lorem Ipsum Pallem</p>
-				</div>
+		{#if $siteContent.home.sponsors.length > 0}
+			<div class="hero-footer-row" aria-label="Sponsors">
+				{#each $siteContent.home.sponsors.slice(0, 2) as sponsor, i}
+					<div class="hero-sponsor {i === 0 ? 'hero-sponsor--left' : 'hero-sponsor--right'}">
+						<div class="sponsor-logo-chip" aria-hidden="true">
+							{#if sponsor.logo}
+								<img src={sponsor.logo} alt="" class="h-full w-full object-contain" />
+							{:else}
+								Logo
+							{/if}
+						</div>
+						<div class="min-w-0">
+							<a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="sponsor-name hover:text-[var(--alive-cell)] transition-colors">
+								{sponsor.name}
+							</a>
+						</div>
+					</div>
+				{/each}
 			</div>
-
-			<div class="hero-sponsor hero-sponsor--right">
-				<div class="sponsor-logo-chip" aria-hidden="true">Logo</div>
-				<div class="min-w-0">
-					<p class="sponsor-name">Lorem Ipsum</p>
-				</div>
-			</div>
-		</div>
+		{/if}
 	</header>
 
 	<!-- Core Event Info -->
@@ -412,113 +436,129 @@
 		<section class="max-w-2xl mx-auto text-center space-y-6 card-custom p-10 rounded-3xl">
 			<h2 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-muted">The CTF</h2>
 			<p class="text-lg text-zinc-muted leading-relaxed">
-				TheRomanXpl0it invites you to its 2026 edition. A 48-hour global cybersecurity challenge designed to
-				push your skills across the entire spectrum of binary exploitation, web hacking, and offensive
-				security.
+				{$siteContent.home.heroDescription}
 			</p>
 		</section>
 
-		<!-- Details Grid -->
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-			<div class="card-custom p-8 rounded-2xl space-y-3">
-				<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Timeline</span>
-				<p class="text-lg font-bold">April 24 - 26, 2026</p>
-				<p class="text-sm text-zinc-muted font-medium">19:00 UTC Start</p>
-			</div>
-			<div class="card-custom p-8 rounded-2xl space-y-3">
-				<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Duration</span>
-				<p class="text-lg font-bold">48 Hours</p>
-				<p class="text-sm text-zinc-muted font-medium">Non-stop Hallucinations</p>
-			</div>
-			<div class="card-custom p-8 rounded-2xl space-y-3">
-				<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Format</span>
-				<p class="text-lg font-bold">Jeopardy CTF</p>
-				<p class="text-sm text-zinc-muted font-medium">Multiple Skill Categories</p>
-			</div>
-		</div>
-
-		<!-- Prizes Section -->
-		<section class="space-y-10">
-			<div class="text-center space-y-2">
-				<p class="text-2xl font-black uppercase tracking-tighter">Prizes</p>
-			</div>
-			<!-- Unified Bunker Layout -->
-			<div class="card-custom rounded-3xl overflow-hidden shrink-0">
-				<div class="grid grid-cols-1 md:grid-cols-3 md:divide-x divide-zinc-800/10 dark:divide-white/5">
-					<!-- 1st Place Sector -->
-					<div class="p-10 text-center space-y-6 flex flex-col items-center">
-						<div class="space-y-1">
-							<p class="text-3xl font-black tracking-tighter">$2,048</p>
-							<p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">First Place
-							</p>
-						</div>
-						<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">Sbrago</p>
+		{#if activeDetailsCount > 0}
+			<!-- Details Grid -->
+			<div class="grid grid-cols-1 {activeDetailsCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-8">
+				{#if $siteContent.home.eventTimelineValue}
+					<div class="card-custom p-8 rounded-2xl space-y-3">
+						<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Timeline</span>
+						<p class="text-lg font-bold">{$siteContent.home.eventTimelineValue}</p>
+						<p class="text-sm text-zinc-muted font-medium">{$siteContent.home.eventTimelineLabel}</p>
 					</div>
-
-					<!-- 2nd Place Sector -->
-					<div class="p-10 text-center space-y-6 flex flex-col items-center">
-						<div class="space-y-1">
-							<p class="text-3xl font-black tracking-tighter">$1,024</p>
-							<p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">Second Place
-							</p>
-						</div>
-						<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">Sbrogo</p>
+				{/if}
+				{#if $siteContent.home.eventDurationValue}
+					<div class="card-custom p-8 rounded-2xl space-y-3">
+						<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Duration</span>
+						<p class="text-lg font-bold">{$siteContent.home.eventDurationValue}</p>
+						<p class="text-sm text-zinc-muted font-medium">{$siteContent.home.eventDurationLabel}</p>
 					</div>
+				{/if}
+				{#if $siteContent.home.eventFormatValue}
+					<div class="card-custom p-8 rounded-2xl space-y-3">
+						<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Format</span>
+						<p class="text-lg font-bold">{$siteContent.home.eventFormatValue}</p>
+						<p class="text-sm text-zinc-muted font-medium">{$siteContent.home.eventFormatLabel}</p>
+					</div>
+				{/if}
+			</div>
+		{/if}
 
-					<!-- 3rd Place Sector -->
-					<div class="p-10 text-center space-y-6 flex flex-col items-center">
-						<div class="space-y-1">
-							<p class="text-3xl font-black tracking-tighter">$512</p>
-							<p class="text-[10px) font-bold uppercase tracking-widest text-zinc-muted">Third Place
-							</p>
-						</div>
-						<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">Sbrugo</p>
+		{#if activePrizesCount > 0}
+			<!-- Prizes Section -->
+			<section class="space-y-10">
+				<div class="text-center space-y-2">
+					<p class="text-2xl font-black uppercase tracking-tighter">Prizes</p>
+				</div>
+				<!-- Unified Bunker Layout -->
+				<div class="card-custom rounded-3xl overflow-hidden shrink-0">
+					<div class="grid grid-cols-1 {activePrizesCount === 3 ? 'md:grid-cols-3 md:divide-x' : activePrizesCount === 2 ? 'md:grid-cols-2 md:divide-x' : 'md:grid-cols-1'} divide-zinc-800/10 dark:divide-white/5">
+						
+						{#if $siteContent.home.prize1Amount}
+							<!-- 1st Place Sector -->
+							<div class="p-10 text-center space-y-6 flex flex-col items-center">
+								<div class="space-y-1">
+									<p class="text-3xl font-black tracking-tighter">{$siteContent.home.prize1Amount}</p>
+									<p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">
+										{$siteContent.home.prize1Label}
+									</p>
+								</div>
+								<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">{$siteContent.home.prize1Desc}</p>
+							</div>
+						{/if}
+
+						{#if $siteContent.home.prize2Amount}
+							<!-- 2nd Place Sector -->
+							<div class="p-10 text-center space-y-6 flex flex-col items-center">
+								<div class="space-y-1">
+									<p class="text-3xl font-black tracking-tighter">{$siteContent.home.prize2Amount}</p>
+									<p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">
+										{$siteContent.home.prize2Label}
+									</p>
+								</div>
+								<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">{$siteContent.home.prize2Desc}</p>
+							</div>
+						{/if}
+
+						{#if $siteContent.home.prize3Amount}
+							<!-- 3rd Place Sector -->
+							<div class="p-10 text-center space-y-6 flex flex-col items-center">
+								<div class="space-y-1">
+									<p class="text-3xl font-black tracking-tighter">{$siteContent.home.prize3Amount}</p>
+									<p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">
+										{$siteContent.home.prize3Label}
+									</p>
+								</div>
+								<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">{$siteContent.home.prize3Desc}</p>
+							</div>
+						{/if}
 					</div>
 				</div>
-			</div>
-		</section>
+			</section>
+		{/if}
 
-		<!-- Sponsors Section -->
-		<section class="space-y-10">
-			<div class="text-center space-y-2">
-				<p class="text-2xl font-black uppercase tracking-tighter">Sponsors</p>
-			</div>
-			<div class="space-y-4 max-w-4xl mx-auto">
-				<div class="card-custom p-8 rounded-2xl flex items-center gap-10">
-					<div
-						class="h-20 w-20 bg-zinc-800/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
-						<span class="text-[10px] font-bold text-zinc-500 italic tracking-widest">LOGO</span>
-					</div>
-					<div class="h-12 w-px bg-zinc-800/20 dark:bg-white/5"></div>
-					<div class="space-y-1">
-						<p class="text-sm font-black uppercase tracking-widest opacity-80">Lorem Ipsum Pallem</p>
-						<p class="text-md text-zinc-muted font-medium leading-relaxed italic">
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.
-						</p>
-					</div>
+		{#if $siteContent.home.sponsors.length > 0}
+			<!-- Sponsors Section -->
+			<section class="space-y-10">
+				<div class="text-center space-y-2">
+					<p class="text-2xl font-black uppercase tracking-tighter">{$siteContent.home.sponsorsTitle || 'Sponsors'}</p>
 				</div>
-
-				<div class="card-custom p-8 rounded-2xl flex items-center gap-10">
-					<div
-						class="h-20 w-20 bg-zinc-800/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
-						<span class="text-[10px] font-bold text-zinc-500 italic tracking-widest">LOGO</span>
-					</div>
-					<div class="h-12 w-px bg-zinc-800/20 dark:bg-white/5"></div>
-					<div class="space-y-1">
-						<p class="text-sm font-black uppercase tracking-widest opacity-80">Lorem Ipsum</p>
-						<p class="text-md text-zinc-muted font-medium leading-relaxed italic">
-							Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam, quod.
-						</p>
-					</div>
+				<div class="space-y-4 max-w-4xl mx-auto">
+					{#each $siteContent.home.sponsors as sponsor}
+						<div class="card-custom p-8 rounded-2xl flex items-center gap-10">
+							<div
+								class="h-20 w-20 bg-zinc-800/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
+								{#if sponsor.logo}
+									<img src={sponsor.logo} alt={sponsor.name} class="h-12 w-12 object-contain" />
+								{:else}
+									<span class="text-[10px] font-bold text-zinc-500 italic tracking-widest">LOGO</span>
+								{/if}
+							</div>
+							<div class="h-12 w-px bg-zinc-800/20 dark:bg-white/5"></div>
+							<div class="space-y-1">
+								<a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="text-sm font-black uppercase tracking-widest opacity-80 hover:text-[var(--alive-cell)] transition-colors">
+									{sponsor.name}
+								</a>
+								{#if sponsor.description}
+									<p class="text-md text-zinc-muted font-medium leading-relaxed italic">
+										{sponsor.description}
+									</p>
+								{/if}
+							</div>
+						</div>
+					{/each}
 				</div>
-			</div>
-		</section>
+			</section>
+		{/if}
 
 	</main>
 
 	<footer class="text-center pt-20 pb-12 opacity-30">
 		<p class="text-[10px] font-bold uppercase tracking-widest">
-			© 2026 TheRomanXpl0it | Powered by TRXd
+			{$siteContent.brand.footerText}
 		</p>
 	</footer>
 </div>

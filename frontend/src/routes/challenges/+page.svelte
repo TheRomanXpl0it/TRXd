@@ -13,6 +13,7 @@
 	import ChallengeCard from '$lib/components/challenges/ChallengeCard.svelte';
 	import ChallengeModal from '$lib/components/challenges/ChallengeModal.svelte';
 	import AdminControls from '$lib/components/challenges/AdminControls.svelte';
+	import CreateChallengeModal from '$lib/components/challenges/CreateChallengeModal.svelte';
 	import WaitingPage from '$lib/components/challenges/WaitingPage.svelte';
 	import EndPage from '$lib/components/challenges/EndPage.svelte';
 	import { Flag, Users, Trophy, ChevronDown, Search, Monitor } from '@lucide/svelte';
@@ -62,6 +63,12 @@
 	let selectedId = $state<number | null>(null);
 	let countdowns: Record<string, number> = $state({});
 	const queryClient = useQueryClient();
+
+	const challengeTypes = [
+		{ value: 'Normal', label: 'Normal' },
+		{ value: 'Container', label: 'Container' },
+		{ value: 'Compose', label: 'Compose' }
+	];
 
 	let search = $state('');
 	let debouncedSearch = $state('');
@@ -267,6 +274,13 @@
 	}
 </script>
 
+{#if isAdmin}
+	<AdminControls
+		onopen-create={() => (createChallengeOpen = true)}
+		oncategory-created={() => categoriesQuery.refetch()}
+	/>
+{/if}
+
 {#if (!upcoming && !ended || isAdmin) && challengeView !== 'sidebar'}
 	<div class="mb-10 w-full">
 		<ChallengeFilters
@@ -318,7 +332,7 @@
 		<p class="text-sm">{error}</p>
 	</div>
 {:else if challengeView === 'sidebar'}
-	<div class="flex h-[calc(100vh-80px)] -mt-6 -mb-20 flex-col items-center justify-center">
+	<div class="flex h-[calc(100vh-80px)] w-full flex-col items-center justify-center">
 		<SidebarChallengeView
 			{grouped}
 			onOpenChallenge={openChallenge}
@@ -368,6 +382,16 @@
 		/>
 	{/if}
 {/if}
+
+<CreateChallengeModal
+	bind:open={createChallengeOpen}
+	{categories}
+	{challengeTypes}
+	oncreated={() => {
+		challengesQuery.refetch();
+		categoriesQuery.refetch();
+	}}
+/>
 
 <style>
 	:global(body.overflow-hidden) {

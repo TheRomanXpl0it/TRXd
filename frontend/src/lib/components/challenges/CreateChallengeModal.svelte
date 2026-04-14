@@ -43,12 +43,12 @@
 		oncreated
 	} = $props<{
 		open: boolean;
-		challengeName: string;
-		challengeDescription: string;
-		category: string;
-		challengeType: string;
-		points: number;
-		dynamicScore: boolean;
+		challengeName?: string;
+		challengeDescription?: string;
+		category?: string;
+		challengeType?: string;
+		points?: number;
+		dynamicScore?: boolean;
 		categories: Array<{ value: string; label: string }>;
 		challengeTypes: Array<{ value: string; label: string }>;
 		oncreated?: () => void;
@@ -126,7 +126,7 @@
 					host,
 					port,
 					conn_type: connType,
-					hidden: false // Visible by default on creation
+					hidden: true // Hidden by default on creation
 				};
 
 				if (challengeType === 'Container' || challengeType === 'Compose') {

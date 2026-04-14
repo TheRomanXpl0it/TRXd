@@ -25,333 +25,410 @@ EDITOR_HTML = """<!doctype html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Site Editor</title>
+  <title>Site Editor | TRXd</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0b1020;
-      --panel: #121932;
-      --panel-2: #17203d;
-      --border: rgba(255, 255, 255, 0.12);
-      --text: #eef2ff;
-      --muted: #a9b3d9;
-      --accent: #66d9c6;
-      --accent-2: #8ab4ff;
-      --danger: #ff7b8b;
-      --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      --bg: #09090b;
+      --card: rgba(24, 24, 27, 0.6);
+      --card-hover: rgba(30, 30, 35, 0.8);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(255, 255, 255, 0.2);
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --primary: #fafafa;
+      --primary-foreground: #09090b;
+      --accent: #10b981; /* Emerald-500 */
+      --danger: #ef4444;
+      --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+      
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     * { box-sizing: border-box; }
+    
     body {
       margin: 0;
-      background:
-        radial-gradient(circle at top left, rgba(102, 217, 198, 0.12), transparent 26rem),
-        radial-gradient(circle at top right, rgba(138, 180, 255, 0.14), transparent 26rem),
-        linear-gradient(180deg, #0a0f1d, #0d1326 50%, #101938);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
       color: var(--text);
       min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .shell {
-      max-width: 1440px;
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(9, 9, 11, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 0;
+    }
+
+    .container {
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 2rem;
+      padding: 0 2rem;
     }
 
-    .topbar {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 1rem;
-      align-items: start;
-      margin-bottom: 1.5rem;
-    }
-
-    .hero {
-      background: rgba(18, 25, 50, 0.82);
-      border: 1px solid var(--border);
-      border-radius: 1.5rem;
-      padding: 1.5rem;
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(16px);
-    }
-
-    .hero h1 {
-      margin: 0 0 0.35rem;
-      font-size: clamp(2rem, 4vw, 3rem);
-      line-height: 1;
-    }
-
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      max-width: 62rem;
-      line-height: 1.6;
-    }
-
-    .toolbar {
+    .nav-content {
       display: flex;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 900;
+      letter-spacing: -0.025em;
+      text-transform: uppercase;
+    }
+
+    .brand p {
+      margin: 0;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 0.2rem;
+    }
+
+    .actions {
+      display: flex;
       gap: 0.75rem;
-      justify-content: end;
-      align-self: stretch;
     }
 
-    button {
-      border: 0;
-      border-radius: 999px;
-      padding: 0.8rem 1.15rem;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 120ms ease, opacity 120ms ease, background 120ms ease;
-    }
-
-    button:hover { transform: translateY(-1px); }
-    button:active { transform: translateY(0); }
-    button.secondary {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    button.primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #08111f;
-    }
-    button.danger {
-      background: rgba(255, 123, 139, 0.12);
-      color: #ffd9df;
-      border: 1px solid rgba(255, 123, 139, 0.25);
+    main {
+      padding: 2.5rem 0;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(320px, 0.9fr);
-      gap: 1.25rem;
+      grid-template-columns: 1fr 400px;
+      gap: 2rem;
+      align-items: start;
     }
 
     .panel {
-      background: rgba(18, 25, 50, 0.82);
+      background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 1.5rem;
+      border-radius: 1rem;
+      backdrop-filter: blur(8px);
       box-shadow: var(--shadow);
       overflow: hidden;
-      backdrop-filter: blur(16px);
     }
 
     .panel-header {
-      padding: 1rem 1.25rem;
+      padding: 1.25rem 1.5rem;
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
+      background: rgba(255, 255, 255, 0.02);
     }
 
     .panel-title {
-      font-size: 0.95rem;
+      font-size: 0.75rem;
       font-weight: 800;
-      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .status {
-      font-size: 0.92rem;
+      letter-spacing: 0.1em;
       color: var(--muted);
     }
 
     .sections {
-      padding: 1.25rem;
-      display: grid;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .section-group {
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
     }
 
-    .section-card {
-      border: 1px solid var(--border);
-      border-radius: 1.25rem;
-      background: rgba(23, 32, 61, 0.68);
-      padding: 1.1rem;
-    }
-
-    .section-card h2 {
+    .section-group h2 {
       margin: 0;
-      font-size: 1.2rem;
-    }
-
-    .section-card p.section-description {
-      margin: 0.4rem 0 0;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    .field-grid {
-      display: grid;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .field {
-      display: grid;
-      gap: 0.45rem;
-    }
-
-    .field label {
+      font-size: 1.5rem;
       font-weight: 700;
-      font-size: 0.95rem;
+      letter-spacing: -0.01em;
     }
 
-    .field small {
+    .section-description {
+      margin: -0.5rem 0 0.5rem;
+      font-size: 0.875rem;
       color: var(--muted);
       line-height: 1.5;
     }
 
+    /* Form Fields */
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.02);
+      padding: 1.25rem;
+      border-radius: 0.75rem;
+      border: 1px solid var(--border);
+      transition: all 0.2s ease;
+    }
+
+    .field:focus-within {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--border-focus);
+    }
+
+    .field label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .field small {
+      font-size: 0.75rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
     input, textarea {
       width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 0.95rem;
-      background: rgba(9, 13, 28, 0.6);
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
       color: var(--text);
-      padding: 0.9rem 1rem;
-      font: inherit;
+      padding: 0.75rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 0 1px var(--accent);
     }
 
     textarea {
-      min-height: 6.5rem;
+      min-height: 100px;
       resize: vertical;
     }
 
     .markdown textarea {
-      min-height: 12rem;
-      font-family: "IBM Plex Mono", "SFMono-Regular", monospace;
-      font-size: 0.92rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.875rem;
+      min-height: 200px;
     }
 
-    .array-list {
-      display: grid;
-      gap: 0.85rem;
-    }
-
-    .array-toolbar {
-      display: flex;
-      justify-content: space-between;
+    /* Buttons */
+    button {
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+      gap: 0.5rem;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    button.primary {
+      background: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    button.primary:hover:not(:disabled) {
+      background: #ffffff;
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-focus);
+    }
+
+    button.danger {
+      background: rgba(239, 68, 68, 0.1);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.2);
+    }
+
+    button.danger:hover:not(:disabled) {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .mini-button {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    /* List / Array Editor */
+    .array-list {
+      display: flex;
+      flex-direction: column;
       gap: 1rem;
-      margin-bottom: 0.75rem;
+      margin-top: 1rem;
     }
 
     .array-item {
-      border: 1px solid var(--border);
-      border-radius: 1rem;
-      padding: 1rem;
-      background: rgba(9, 13, 28, 0.45);
-      display: grid;
-      gap: 0.9rem;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px dashed var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
     }
 
     .array-item-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 0.75rem;
+    }
+
+    .array-item-header strong {
+       font-size: 0.75rem;
+       text-transform: uppercase;
+       letter-spacing: 0.05em;
+       color: var(--accent);
     }
 
     .array-actions {
       display: flex;
-      gap: 0.45rem;
-      flex-wrap: wrap;
+      gap: 0.5rem;
     }
 
-    .array-actions button,
-    .mini-button {
-      padding: 0.55rem 0.8rem;
-      border-radius: 0.8rem;
-      font-size: 0.9rem;
-    }
-
-    .hint {
-      color: var(--muted);
-      line-height: 1.6;
-      margin: 0;
+    /* Preview Sidebar */
+    .sticky-preview {
+      position: sticky;
+      top: 6rem;
     }
 
     pre {
       margin: 0;
-      padding: 1.25rem;
+      padding: 1.5rem;
+      background: #000;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      color: #8ab4ff;
       overflow: auto;
-      max-height: calc(100vh - 14rem);
-      color: #cfe0ff;
-      font: 0.87rem/1.6 "IBM Plex Mono", "SFMono-Regular", monospace;
+      max-height: 70vh;
     }
 
     .preview-note {
-      padding: 0 1.25rem 1.15rem;
+      padding: 1.25rem;
+      font-size: 0.75rem;
       color: var(--muted);
-      line-height: 1.6;
-      font-size: 0.92rem;
+      line-height: 1.5;
+      background: rgba(255, 255, 255, 0.02);
+      border-top: 1px solid var(--border);
     }
 
     .error-banner {
-      margin-bottom: 1rem;
-      border: 1px solid rgba(255, 123, 139, 0.3);
-      background: rgba(255, 123, 139, 0.12);
-      color: #ffe2e7;
-      border-radius: 1rem;
-      padding: 1rem 1.1rem;
+      background: var(--danger);
+      color: white;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      margin-bottom: 2rem;
+      font-weight: 600;
+      font-size: 0.875rem;
       display: none;
-      line-height: 1.5;
+      animation: slideIn 0.3s ease-out;
     }
 
-    @media (max-width: 1080px) {
+    @keyframes slideIn {
+      from { transform: translateY(-10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 1024px) {
       .layout { grid-template-columns: 1fr; }
-      pre { max-height: 24rem; }
+      .sticky-preview { position: static; }
     }
-
-    @media (max-width: 700px) {
-      .shell { padding: 1rem; }
-      .topbar { grid-template-columns: 1fr; }
-      .toolbar { justify-content: start; }
-      .array-toolbar, .array-item-header { align-items: start; flex-direction: column; }
+    
+    @media (max-width: 640px) {
+      .container { padding: 0 1rem; }
+      header .nav-content { flex-direction: column; text-align: center; }
     }
   </style>
 </head>
 <body>
-  <div class="shell">
-    <div id="error-banner" class="error-banner"></div>
-
-    <div class="topbar">
-      <div class="hero">
-        <h1 id="editor-title">Site Editor</h1>
-        <p id="editor-description">Loading schema...</p>
-      </div>
-      <div class="toolbar">
-        <button id="reload-button" class="secondary" type="button">Reload</button>
-        <button id="reset-button" class="danger" type="button">Reset To Defaults</button>
-        <button id="save-button" class="primary" type="button">Save</button>
+  <header>
+    <div class="container">
+      <div class="nav-content">
+        <div class="brand">
+          <h1 id="editor-title">Site Editor</h1>
+          <p id="editor-description">Loading schema...</p>
+        </div>
+        <div class="actions">
+          <button id="reload-button" class="secondary" title="Reload from disk">
+            Reload
+          </button>
+          <button id="reset-button" class="danger">
+            Reset
+          </button>
+          <button id="save-button" class="primary">
+            Save Changes
+          </button>
+        </div>
       </div>
     </div>
+  </header>
 
-    <div class="layout">
-      <section class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Editable Fields</div>
-          <div id="status" class="status">Loading...</div>
-        </div>
-        <div id="sections" class="sections"></div>
-      </section>
+  <div class="container">
+    <main>
+      <div id="error-banner" class="error-banner"></div>
 
-      <aside class="panel">
-        <div class="panel-header">
-          <div class="panel-title">JSON Preview</div>
-          <div class="status">Generated from the schema-driven form</div>
-        </div>
-        <pre id="json-preview">{}</pre>
-        <div class="preview-note">
-          The file on disk is <code>frontend/static/site-content.json</code>. Save here, then build or
-          deploy as usual.
-        </div>
-      </aside>
-    </div>
+      <div class="layout">
+        <section class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Configuration Fields</div>
+          </div>
+          <div id="sections" class="sections"></div>
+          <div id="status" style="padding: 1rem 1.5rem; font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border);">
+            Ready
+          </div>
+        </section>
+
+        <aside class="sticky-preview">
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">JSON Preview</div>
+            </div>
+            <pre id="json-preview">{}</pre>
+            <div class="preview-note">
+              Config saved to <code>frontend/static/site-content.json</code>.
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
   </div>
 
   <script>

@@ -43,12 +43,12 @@ vi.mock('$lib/env', () => ({
 	}
 }));
 
-// Mock the admin-only modal to prevent async RPC error from dynamic import
+// Mock the admin-only modal and controls to prevent errors from dynamic imports or missing aliases
 vi.mock('$lib/components/challenges/CreateChallengeModal.svelte', () => ({
-	default: {
-		name: 'CreateChallengeModal',
-		render: () => ({ html: '', css: { code: '', map: null }, head: '' })
-	}
+	default: () => null
+}));
+vi.mock('$lib/components/challenges/AdminControls.svelte', () => ({
+	default: () => null
 }));
 
 describe('Challenges Page', () => {
@@ -95,8 +95,9 @@ describe('Challenges Page', () => {
 		// Wait for dynamic imports of admin-only components
 		await new Promise((resolve) => setTimeout(resolve, 0));
 
-		const header = screen.queryByText('Challenges');
-		expect(header).not.toBeInTheDocument();
-
+		// Should show the admin challenge
+		expect(await screen.findByText('Admin Chall')).toBeInTheDocument();
+		// Should NOT show WaitingPage
+		expect(screen.queryByText(/Prepare your horses/i)).not.toBeInTheDocument();
 	});
 });

@@ -88,87 +88,78 @@
 
 	const chartData = $derived.by(() => {
 		const arr = Array.isArray(data) ? data : [];
-
-		const ranked = [...arr]
-			.map((e: any) => {
-				const solves = normalizeTeam(e);
-				const total =
-					solves.length > 0 ? Math.max(...solves.map((s) => Number(s?.points ?? 0))) : 0;
-				const lastSolve =
-					solves.length > 0 ? Math.max(...solves.map((s) => s.date?.getTime() || 0)) : 0;
-				return { ...e, total, lastSolve };
-			})
-			.sort(
-				(a: any, b: any) =>
-					b.total - a.total ||
-					a.lastSolve - b.lastSolve ||
-					(a.id || a.team_id || 0) - (b.id || b.team_id || 0)
-			);
-
-		let minTime = Date.now();
-		let hasData = false;
-		ranked.forEach((team: any) => {
-			const solves = normalizeTeam(team).filter((s: any) => s.date !== null);
-			if (solves.length > 0 && solves[0].date) {
-				hasData = true;
-				minTime = Math.min(minTime, solves[0].date.getTime() - 60000);
-			}
-		});
+		if (arr.length === 0) return [];
 
 		const nowMs = Date.now();
-
-		const series: Array<{
-			id: string | number;
-			name: string;
-			data: Array<{ date: Date; value: number; name?: string; color?: string }>;
-			color: string;
-		}> = [];
-
-		ranked.forEach((team: any, index: number) => {
-			if (team.total === 0) return;
-
-			const name = nameForTeam(team);
-			const color = index < 3 ? top3Colors[index] : colors[(index - 3) % colors.length];
-			const solves = normalizeTeam(team)
+		
+		// Single pass to normalize and pre-calculate scores/times
+		const processedTeams = arr.map((team: any) => {
+			const rawSolves = normalizeTeam(team);
+			const solves = rawSolves
 				.filter((s: any) => s.date !== null)
-				.sort((a: any, b: any) => a.date!.getTime() - b.date!.getTime());
+				.sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
 
-			if (solves.length === 0) return;
+			const total = solves.length > 0 ? solves[solves.length - 1].points : 0;
+			const lastSolve = solves.length > 0 ? solves[solves.length - 1].date.getTime() : 0;
 
-			// Use only actual solve data points — step function via curveStepAfter
-			const points: Array<{ date: Date; value: number; name: string; color: string }> = [];
-
-			// Start from 0 at the first solve time (to show the jump)
-			if (solves.length > 0) {
-				points.push({
-					date: solves[0].date,
-					value: 0,
-					name,
-					color
-				});
-			}
-
-			for (const s of solves) {
-				points.push({
-					date: s.date,
-					value: Number(s.points ?? 0),
-					name,
-					color
-				});
-			}
-
-			// Extend to now
-			points.push({
-				date: new Date(nowMs),
-				value: points.length > 0 ? points[points.length - 1].value : 0,
-				name,
-				color
-			});
-
-			series.push({ id: team.team_id || team.id, name, data: points, color });
+			return {
+				...team,
+				solves,
+				total,
+				lastSolve,
+				name: nameForTeam(team)
+			};
 		});
 
-		return series;
+		// Rank optimized teams
+		const ranked = processedTeams
+			.filter(t => t.total > 0)
+			.sort((a, b) => 
+				b.total - a.total || 
+				a.lastSolve - b.lastSolve || 
+				(a.id || a.team_id || 0) - (b.id || b.team_id || 0)
+			);
+
+		// Build series
+		return ranked.map((team, index) => {
+			const color = index < 3 ? top3Colors[index] : colors[(index - 3) % colors.length];
+			const points: Array<{ date: Date; value: number; name: string; color: string }> = [];
+
+			if (team.solves.length > 0) {
+				// Start from 0 at the first solve time
+				points.push({
+					date: team.solves[0].date,
+					value: 0,
+					name: team.name,
+					color
+				});
+
+				// Add all solve points
+				for (const s of team.solves) {
+					points.push({
+						date: s.date,
+						value: s.points,
+						name: team.name,
+						color
+					});
+				}
+
+				// Extend to now
+				points.push({
+					date: new Date(nowMs),
+					value: team.solves[team.solves.length - 1].points,
+					name: team.name,
+					color
+				});
+			}
+
+			return {
+				id: team.team_id || team.id,
+				name: team.name,
+				data: points,
+				color
+			};
+		});
 	});
 
 	const textColor = $derived('hsl(var(--muted-foreground))');

@@ -135,7 +135,10 @@
 			: (challenge?.host ?? '');
 		const p = hasInstance ? challenge?.instance_port : challenge?.port;
 
-		if (!h || ['localhost', '127.0.0.1', '0.0.0.0'].includes(h.toLowerCase().trim())) return '';
+		const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(h.toLowerCase().trim());
+
+		// Only hide for dynamic challenges if we DON'T have a real instance host
+		if (!h || (isDynamic && !challenge?.instance_host && isLocal)) return '';
 
 		return formatConnectionString({
 			host: h,
@@ -166,53 +169,57 @@
 
 	<div class="w-full">
 		{#if countdown > 0}
-			<div class="flex items-center gap-2">
+			<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
 				<button
-					class="flex h-11 min-w-0 flex-1 items-center justify-center gap-3 overflow-hidden rounded-lg bg-green-600 px-4 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.99]"
+					class="bg-green-600 hover:bg-green-700 active:scale-[0.99] flex h-11 min-w-0 w-full items-center justify-center gap-3 overflow-hidden rounded-lg px-4 text-xs font-bold text-white shadow-sm transition-all sm:flex-1"
 					onclick={() => copyToClipboard(connectionString)}
 					title="Click to copy connection address"
 					aria-label="Copy instance connection address"
 				>
 					<Container class="size-4 shrink-0" />
-					<code class="truncate font-mono text-sm font-bold tracking-tight">{connectionString}</code>
-				</button>
-
-				{#if showTimer}
-					<div
-						class="bg-muted/40 border-border/60 flex h-11 shrink-0 items-center gap-2 rounded-lg border px-3 text-green-600 dark:text-green-500"
+					<code class="block max-w-full truncate font-mono text-sm font-bold tracking-tight"
+						>{connectionString}</code
 					>
-						<button
-							onclick={renew}
-							disabled={renewingInstance}
-							class="hover:text-green-700 disabled:opacity-50 dark:hover:text-green-400"
-							title="Renew Instance"
-						>
-							{#if renewingInstance}
-								<Spinner class="h-4 w-4" />
-							{:else}
-								<RefreshCw class="h-4 w-4" />
-							{/if}
-						</button>
-						<div class="bg-border/70 h-5 w-px"></div>
-						<div class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums">
-							<Clock class="h-4 w-4" />
-							<span>{formatCountdown(countdown)}</span>
-						</div>
-					</div>
-				{/if}
-
-				<button
-					onclick={destroyInstance}
-					disabled={destroyingInstance}
-					class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.95] disabled:opacity-50"
-					title="Stop Instance"
-				>
-					{#if destroyingInstance}
-						<Spinner class="h-4 w-4" />
-					{:else}
-						<X class="h-4 w-4" />
-					{/if}
 				</button>
+
+				<div class="flex shrink-0 items-center gap-2">
+					{#if showTimer}
+						<div
+							class="bg-muted/40 border-border/60 flex h-11 flex-1 shrink-0 items-center gap-2 rounded-lg border px-3 text-green-600 sm:flex-none dark:text-green-500"
+						>
+							<button
+								onclick={renew}
+								disabled={renewingInstance}
+								class="hover:text-green-700 disabled:opacity-50 dark:hover:text-green-400"
+								title="Renew Instance"
+							>
+								{#if renewingInstance}
+									<Spinner class="h-4 w-4" />
+								{:else}
+									<RefreshCw class="h-4 w-4" />
+								{/if}
+							</button>
+							<div class="bg-border/70 h-5 w-px"></div>
+							<div class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums">
+								<Clock class="h-4 w-4" />
+								<span>{formatCountdown(countdown)}</span>
+							</div>
+						</div>
+					{/if}
+
+					<button
+						onclick={destroyInstance}
+						disabled={destroyingInstance}
+						class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.95] disabled:opacity-50"
+						title="Stop Instance"
+					>
+						{#if destroyingInstance}
+							<Spinner class="h-4 w-4" />
+						{:else}
+							<X class="h-4 w-4" />
+						{/if}
+					</button>
+				</div>
 			</div>
 		{:else}
 			<!-- Idle State: Start Instance (Blue) -->

@@ -64,7 +64,7 @@ describe('ChallengeCard Component', () => {
 		});
 
 		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/emerald/);
+		expect(button.className).toMatch(/bg-\[#05100a\]/);
 	});
 
 	it('does not apply solved styling when challenge is not solved', () => {
@@ -168,8 +168,8 @@ describe('ChallengeCard Component', () => {
 		});
 
 		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/bg-emerald-500\/30/);
-		expect(button.className).toMatch(/dark:bg-emerald-600\/40/);
+		expect(button.className).toMatch(/bg-\[#05100a\]/);
+		expect(button.className).toMatch(/dark:bg-\[#05100a\]/);
 	});
 
 	it('applies unsolved/default styling when not solved', () => {

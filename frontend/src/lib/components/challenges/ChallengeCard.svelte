@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { authState } from '$lib/stores/auth';
+	import { EyeOff } from '@lucide/svelte';
+
 	let {
 		challenge,
 		countdown = 0,
@@ -8,19 +11,32 @@
 		countdown?: number;
 		onclick: () => void;
 	} = $props();
+
+	const isPrivileged = $derived(
+		authState.user?.role === 'Admin' || authState.user?.role === 'Author'
+	);
 </script>
 
 <button
 	type="button"
 	class="relative flex min-h-[136px] w-full cursor-pointer flex-col overflow-hidden rounded-[10px] p-5 text-left shadow-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 {challenge.solved
-		? 'bg-emerald-500/30 dark:bg-emerald-600/40'
-		: 'border border-transparent bg-[#fafafa] dark:bg-zinc-900'}"
+		? 'bg-[#05100a] dark:bg-[#05100a]'
+		: 'border border-transparent bg-[#fafafa] dark:bg-zinc-900'} {challenge.hidden && isPrivileged ? 'opacity-75' : ''}"
 	{onclick}
 	aria-label="View details for {challenge.name}"
 >
+	{#if challenge.hidden && isPrivileged}
+		<div
+			class="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:bg-zinc-400/10 dark:text-zinc-400"
+		>
+			<EyeOff class="h-3 w-3" />
+			Hidden
+		</div>
+	{/if}
+
 	<!-- Title -->
 	<h3
-		class="mb-2 w-full truncate text-[18px] font-semibold leading-snug tracking-tight text-zinc-900 dark:text-zinc-100"
+		class="mb-2 w-full truncate pr-16 text-[18px] font-semibold leading-snug tracking-tight text-zinc-900 dark:text-zinc-100"
 	>
 		{challenge.name}
 	</h3>

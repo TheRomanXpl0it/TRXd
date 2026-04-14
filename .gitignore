@@ -41,3 +41,4 @@ tmp/
 *.bashrc
 *.pyc
 __pycache__/
+site-schema.json

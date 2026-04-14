@@ -1,5 +1,5 @@
-import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
+import rawContent from '../../static/site-content.json';
 
 export interface SponsorContent {
 	name: string;
@@ -15,6 +15,8 @@ export interface SiteContent {
 		footerText: string;
 		logoAlt: string;
 		adminTitleSuffix: string;
+		heroSubtitle: string;
+		discordUrl: string;
 	};
 	home: {
 		heroTitle: string;
@@ -27,6 +29,21 @@ export interface SiteContent {
 		rulesMarkdown: string;
 		sponsorsTitle: string;
 		sponsors: SponsorContent[];
+		eventTimelineValue: string;
+		eventTimelineLabel: string;
+		eventDurationValue: string;
+		eventDurationLabel: string;
+		eventFormatValue: string;
+		eventFormatLabel: string;
+		prize1Amount: string;
+		prize1Label: string;
+		prize1Desc: string;
+		prize2Amount: string;
+		prize2Label: string;
+		prize2Desc: string;
+		prize3Amount: string;
+		prize3Label: string;
+		prize3Desc: string;
 	};
 	auth: {
 		signUpDescription: string;
@@ -42,7 +59,9 @@ const defaultSiteContent: SiteContent = {
 		browserTitle: 'TRXD',
 		footerText: 'TRXd Platform © 2026',
 		logoAlt: 'TRXD Logo',
-		adminTitleSuffix: 'TRXd Admin'
+		adminTitleSuffix: 'TRXd Admin',
+		heroSubtitle: 'A CTF BY THEROMANXPL0IT',
+		discordUrl: 'https://discord.gg/trx'
 	},
 	home: {
 		heroTitle: 'Welcome to TRXD',
@@ -54,7 +73,22 @@ const defaultSiteContent: SiteContent = {
 		rulesTitle: '',
 		rulesMarkdown: '',
 		sponsorsTitle: '',
-		sponsors: []
+		sponsors: [],
+		eventTimelineValue: 'April 24 - 26, 2026',
+		eventTimelineLabel: '19:00 UTC Start',
+		eventDurationValue: '48 Hours',
+		eventDurationLabel: 'Non-stop Hallucinations',
+		eventFormatValue: 'Jeopardy CTF',
+		eventFormatLabel: 'Multiple Skill Categories',
+		prize1Amount: '$2,048',
+		prize1Label: 'First Place',
+		prize1Desc: 'Sbrago',
+		prize2Amount: '$1,024',
+		prize2Label: 'Second Place',
+		prize2Desc: 'Sbrogo',
+		prize3Amount: '$512',
+		prize3Label: 'Third Place',
+		prize3Desc: 'Sbrugo'
 	},
 	auth: {
 		signUpDescription: 'Join TRXD and start hacking'
@@ -107,7 +141,9 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 			browserTitle: asString(brand.browserTitle, defaultSiteContent.brand.browserTitle),
 			footerText: asString(brand.footerText, defaultSiteContent.brand.footerText),
 			logoAlt: asString(brand.logoAlt, defaultSiteContent.brand.logoAlt),
-			adminTitleSuffix: asString(brand.adminTitleSuffix, defaultSiteContent.brand.adminTitleSuffix)
+			adminTitleSuffix: asString(brand.adminTitleSuffix, defaultSiteContent.brand.adminTitleSuffix),
+			heroSubtitle: asString(brand.heroSubtitle, defaultSiteContent.brand.heroSubtitle),
+			discordUrl: asString(brand.discordUrl, defaultSiteContent.brand.discordUrl)
 		},
 		home: {
 			heroTitle: asString(home.heroTitle, defaultSiteContent.home.heroTitle),
@@ -125,7 +161,34 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 			rulesTitle: asString(home.rulesTitle, defaultSiteContent.home.rulesTitle),
 			rulesMarkdown: asString(home.rulesMarkdown, defaultSiteContent.home.rulesMarkdown),
 			sponsorsTitle: asString(home.sponsorsTitle, defaultSiteContent.home.sponsorsTitle),
-			sponsors
+			sponsors,
+			eventTimelineValue: asString(
+				home.eventTimelineValue,
+				defaultSiteContent.home.eventTimelineValue
+			),
+			eventTimelineLabel: asString(
+				home.eventTimelineLabel,
+				defaultSiteContent.home.eventTimelineLabel
+			),
+			eventDurationValue: asString(
+				home.eventDurationValue,
+				defaultSiteContent.home.eventDurationValue
+			),
+			eventDurationLabel: asString(
+				home.eventDurationLabel,
+				defaultSiteContent.home.eventDurationLabel
+			),
+			eventFormatValue: asString(home.eventFormatValue, defaultSiteContent.home.eventFormatValue),
+			eventFormatLabel: asString(home.eventFormatLabel, defaultSiteContent.home.eventFormatLabel),
+			prize1Amount: asString(home.prize1Amount, defaultSiteContent.home.prize1Amount),
+			prize1Label: asString(home.prize1Label, defaultSiteContent.home.prize1Label),
+			prize1Desc: asString(home.prize1Desc, defaultSiteContent.home.prize1Desc),
+			prize2Amount: asString(home.prize2Amount, defaultSiteContent.home.prize2Amount),
+			prize2Label: asString(home.prize2Label, defaultSiteContent.home.prize2Label),
+			prize2Desc: asString(home.prize2Desc, defaultSiteContent.home.prize2Desc),
+			prize3Amount: asString(home.prize3Amount, defaultSiteContent.home.prize3Amount),
+			prize3Label: asString(home.prize3Label, defaultSiteContent.home.prize3Label),
+			prize3Desc: asString(home.prize3Desc, defaultSiteContent.home.prize3Desc)
 		},
 		auth: {
 			signUpDescription: asString(auth.signUpDescription, defaultSiteContent.auth.signUpDescription)
@@ -139,56 +202,5 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 	};
 }
 
-function createSiteContentStore() {
-	const { subscribe, set } = writable<SiteContent>(defaultSiteContent);
-
-	let current = defaultSiteContent;
-	let loaded = false;
-	let inFlight: Promise<SiteContent> | null = null;
-
-	async function load(force = false): Promise<SiteContent> {
-		if (!browser) return defaultSiteContent;
-		if (!force && loaded) return current;
-		if (!force && inFlight) return inFlight;
-
-		inFlight = (async () => {
-			try {
-				const response = await fetch(`/site-content.json?t=${Date.now()}`, {
-					cache: 'no-store'
-				});
-
-				if (!response.ok) {
-					throw new Error(`Failed to load site-content.json (${response.status})`);
-				}
-
-				const data = normalizeSiteContent(await response.json());
-				current = data;
-				set(data);
-				loaded = true;
-				return data;
-			} catch {
-				current = defaultSiteContent;
-				set(defaultSiteContent);
-				loaded = true;
-				return defaultSiteContent;
-			} finally {
-				inFlight = null;
-			}
-		})();
-
-		return inFlight;
-	}
-
-	return {
-		subscribe,
-		load,
-		reset() {
-			current = defaultSiteContent;
-			loaded = false;
-			set(defaultSiteContent);
-		}
-	};
-}
-
-export const siteContent = createSiteContentStore();
+export const siteContent = writable<SiteContent>(normalizeSiteContent(rawContent));
 export const siteContentDefaults = defaultSiteContent;

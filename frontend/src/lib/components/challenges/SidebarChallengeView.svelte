@@ -14,7 +14,8 @@
 		Trophy,
 		Users,
 		Monitor,
-		Clock
+		Clock,
+		EyeOff
 	} from '@lucide/svelte';
 	import { cn } from '$lib/utils';
 	import type { Challenge } from '$lib/types';
@@ -29,6 +30,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { fmtTimeLeft } from '$lib/utils/time';
 	import { formatConnectionString } from '$lib/utils/connection';
+	import { authState } from '$lib/stores/auth';
 
 	let {
 		grouped,
@@ -45,6 +47,10 @@
 	} = $props();
 
 	import { uiStore } from '$lib/stores/ui.svelte';
+
+	const isPrivileged = $derived(
+		authState.user?.role === 'Admin' || authState.user?.role === 'Author'
+	);
 
 	// Use uiStore for reactive view preference
 	const challengeView = $derived(uiStore.challengeView);
@@ -130,8 +136,8 @@
 		);
 
 		// Any challenge with 'instance: true' is treated as an instance challenge
-		// and will never show static placeholder connection info.
-		if ((isDynamicType || ch.instance) && (!ch.instance_host || isLocal)) {
+		// and will never show static placeholder connection info if the host is local.
+		if ((isDynamicType || ch.instance) && !ch.instance_host && isLocal) {
 			return '';
 		}
 
@@ -212,18 +218,24 @@
 												activeChallenge?.id === ch.id
 													? 'bg-primary/10 text-foreground shadow-[inset_3px_0_0_0_hsl(var(--primary))]'
 													: ch.solved
-														? 'bg-emerald-500/[0.16] text-muted-foreground hover:bg-emerald-500/[0.20] dark:bg-emerald-400/[0.18] dark:hover:bg-emerald-400/[0.22]'
+														? 'bg-[#05100a] text-emerald-500/80 hover:bg-[#081a11]'
 														: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
 											)}
 										>
 										<div class="flex items-start justify-between gap-3">
-											<span
-												class={cn(
-													'text-zinc-900 dark:text-zinc-100 truncate text-sm font-bold tracking-tight'
-												)}
-											>
-												{ch.name}
-											</span>
+											<div class="flex items-center gap-2">
+												<span
+													class={cn(
+														'text-zinc-900 dark:text-zinc-100 truncate text-sm font-bold tracking-tight',
+														ch.hidden && isPrivileged ? 'opacity-50' : ''
+													)}
+												>
+													{ch.name}
+												</span>
+												{#if ch.hidden && isPrivileged}
+													<EyeOff class="h-3 w-3 text-zinc-400" />
+												{/if}
+											</div>
 											{#if ch.solved}
 												<CheckCircle class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
 											{/if}
@@ -300,9 +312,18 @@
 								</Badge>
 								{#if activeChallenge.solved}
 									<Badge
-										class="border-none bg-green-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-green-500"
+										class="border-none bg-[#05100a] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-500/80"
 									>
 										Solved
+									</Badge>
+								{/if}
+								{#if activeChallenge.hidden && isPrivileged}
+									<Badge
+										variant="outline"
+										class="border-zinc-400/20 bg-zinc-400/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
+									>
+										<EyeOff class="mr-1.5 h-3 w-3" />
+										Hidden
 									</Badge>
 								{/if}
 								{#if activeChallenge.tags && activeChallenge.tags.length > 0}

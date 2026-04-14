@@ -152,9 +152,9 @@
 								<Button
 									variant="ghost"
 									{...props}
-									class="group relative flex h-20 w-60 items-center justify-between rounded-2xl border border-transparent px-5 transition-all active:scale-[0.98]"
+									class="group relative flex h-14 w-auto items-center justify-end rounded-2xl border border-transparent px-3 transition-all active:scale-[0.98] sm:h-20 sm:w-60 sm:justify-between sm:px-5"
 								>
-									<div class="flex items-center gap-4">
+									<div class="flex items-center gap-2 sm:gap-4">
 										<div
 											class="ring-muted/30 relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full shadow-lg ring-1"
 										>

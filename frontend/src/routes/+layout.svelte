@@ -27,7 +27,6 @@
 	});
 
 	loadUser(false);
-	void siteContent.load();
 </script>
 
 <svelte:head>

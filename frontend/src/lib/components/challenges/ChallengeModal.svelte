@@ -118,7 +118,7 @@
 					{/if}
 					{#if challenge?.solved}
 						<span
-							class="inline-flex items-center rounded-md bg-green-500/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-green-500"
+							class="inline-flex items-center rounded-md bg-emerald-950/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
 						>
 							Solved
 						</span>
@@ -209,10 +209,10 @@
 					<button
 						type="button"
 						onclick={() => copyToClipboard(connectionString)}
-						class="focus:ring-primary inline-flex h-10 items-center gap-2 rounded-md bg-gray-100 px-4 font-mono text-sm font-medium transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:hover:bg-gray-700"
+						class="focus:ring-primary inline-flex h-10 min-w-0 flex-1 items-center gap-2 rounded-md bg-gray-100 px-4 font-mono text-sm font-medium transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 dark:bg-gray-800 dark:hover:bg-gray-700"
 						aria-label="Copy connection string: {connectionString}"
 					>
-						<span>{connectionString}</span>
+						<span class="block max-w-full truncate">{connectionString}</span>
 					</button>
 					{#if connectionString.startsWith('http')}
 						<a
