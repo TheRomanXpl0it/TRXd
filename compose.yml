@@ -8,15 +8,16 @@ services:
     restart: always
     environment:
       CLICOLOR_FORCE: ${CLICOLOR_FORCE:-0}
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      REDIS_HOST: redis
+      REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     depends_on:
       - postgres
       - redis
+      - traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./.data/attachments:/app/attachments
@@ -34,16 +35,16 @@ services:
       - "traefik.http.services.app.loadbalancer.server.port=1337"
 
       # --- INSTANCES ROUTER (rate limited) ---
-      - "traefik.http.routers.app-instances.rule=PathPrefix(`/api/instances`)"
+      - "traefik.http.routers.app-instances.rule=Path(`/api/instances`)"
       - "traefik.http.routers.app-instances.entrypoints=web"
       - "traefik.http.routers.app-instances.priority=10"
       - "traefik.http.routers.app-instances.service=app"
       - "traefik.http.routers.app-instances.middlewares=app-instances-ratelimit"
 
-      # --- RATE LIMIT MIDDLEWARE ---
-      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.average=10"
-      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.period=5s"
-      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.burst=20"
+      # --- INSTANCES RATE LIMIT MIDDLEWARE ---
+      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.average=1"
+      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.burst=10"
+      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.period=60s"
       - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.sourcecriterion.requestheadername=CF-Connecting-IP"
 
   postgres:
@@ -63,7 +64,7 @@ services:
       - default #! Debugging
 
   adminer:
-    image: adminer:5.4.1
+    image: adminer:5
     restart: always
     ports:
       - 8000:8080
@@ -74,7 +75,7 @@ services:
       - default
 
   redis:
-    image: redis:8.2-alpine
+    image: redis:8-alpine
     restart: always
     ports:
       - "${REDIS_PORT:-6379}:6379"
@@ -85,23 +86,10 @@ services:
       - internal
       - default #! Debugging
 
-  nginx:
-    image: nginx:1.29-alpine
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    networks:
-      default:
-      trxd-shared-internal:
-        ipv4_address: 172.137.0.2
-
   traefik:
     image: traefik:v3.6
     restart: always
     command:
-      - "--log.level=DEBUG" #! Debugging
       - "--api.insecure=true" #! Debugging
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"

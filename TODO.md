@@ -1,5 +1,11 @@
 # TODO
  - resolve TODOs left into the code
+ - rate limiters:
+  - instances
+  - flag submit
+  - registration
+  - attachments download
+  - check mail server provider rate limits
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
