@@ -28,10 +28,10 @@
 
 	const items = $derived([
 		{ title: 'Profile', href: '/settings/profile', icon: User },
+		{ title: 'Appearance', href: '/settings/appearance', icon: Palette },
 		...(!authState.userMode && user?.team_id ? [
 			{ title: 'Team', href: '/settings/team', icon: ShieldHalf }
-		] : []),
-		{ title: 'Appearance', href: '/settings/appearance', icon: Palette }
+		] : [])
 	]);
 
 	const currentPath = $derived(page.url.pathname);

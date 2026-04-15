@@ -263,6 +263,8 @@ func TestRoute(t *testing.T) {
 				"solves":      0,
 				"tags":        test.testBody["tags"],
 				"timeout":     0,
+				"instance_hash_domain": test.testBody["hash_domain"],
+				"instance_renewable":   test.testBody["renewable"],
 			}
 			var challengeBody any
 			for _, v := range List(body) {
@@ -343,6 +345,8 @@ func TestRoute(t *testing.T) {
 		"solves":      0,
 		"tags":        testBody["tags"],
 		"timeout":     0,
+		"instance_hash_domain": testBody["hash_domain"],
+		"instance_renewable":   testBody["renewable"],
 	}
 	var challengeBody any
 	for _, v := range List(body) {

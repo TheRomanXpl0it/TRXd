@@ -108,7 +108,7 @@
 		const rand = mulberry32(seedNum);
 		const palette = generateMonochromaticPalette(rand);
 
-		const shapeTypes = ['circle', 'rect', 'organic'];
+		const shapeTypes = ['circle', 'organic'];
 
 		const layers = [
 			{

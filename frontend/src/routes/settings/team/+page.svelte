@@ -18,11 +18,16 @@
 
 	let user = $derived(authState.user);
 	let teamData = $state<any>(data?.team ?? null);
-	let name = $state(teamData?.name ?? (authState.userMode ? (authState.user?.name ?? '') : ''));
-	let countryCode = $state(
-		teamData?.country?.toUpperCase?.() ??
-			(authState.userMode ? (authState.user?.country ?? '') : '')
-	);
+	let name = $state('');
+	let countryCode = $state('');
+
+	$effect(() => {
+		if (teamData) {
+			name = teamData.name ?? '';
+			countryCode = teamData.country?.toUpperCase() ?? '';
+		}
+	});
+
 	let saving = $state(false);
 
 	let newPassword = $state('');
