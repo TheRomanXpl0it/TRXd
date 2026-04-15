@@ -44,6 +44,14 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the rate at which challenge points decay",
 		Secret:      false,
 	},
+	"instance-renewable": {
+		Name:        "Renewable Instances",
+		Value:       false,
+		Type:        "boolean",
+		Category:    "instances",
+		Description: "default to make the instances renewable (reset the instance lifetime), otherwise can be set on each challenge separately",
+		Secret:      false,
+	},
 	"instance-lifetime": {
 		Name:        "Instance Lifetime",
 		Value:       30 * 60, // 30 minutes

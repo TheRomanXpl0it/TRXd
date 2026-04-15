@@ -41,7 +41,13 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingSession, err)
 	}
 
+	err = sess.Regenerate()
+	if err != nil {
+		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorRegeneratingSession, err)
+	}
+
 	sess.Set("uid", user.ID)
+
 	err = sess.Save()
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorSavingSession, err)

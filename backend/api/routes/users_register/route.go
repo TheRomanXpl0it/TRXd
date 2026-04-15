@@ -77,6 +77,11 @@ func loginUser(c *fiber.Ctx, userID int32) (bool, error) {
 		return false, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingSession, err)
 	}
 
+	err = sess.Regenerate()
+	if err != nil {
+		return false, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorRegeneratingSession, err)
+	}
+
 	sess.Set("uid", userID)
 
 	err = sess.Save()

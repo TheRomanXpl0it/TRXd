@@ -61,7 +61,7 @@ func UpdateConfig(ctx context.Context, key string, value any) error {
 func GetCompleteConfig(ctx context.Context, key string) (*sqlc.Config, error) {
 	config, err := Sql.GetConfig(ctx, key)
 	if err != nil {
-		if err = sql.ErrNoRows; err != nil {
+		if err == sql.ErrNoRows {
 			return nil, nil
 		}
 		return nil, err

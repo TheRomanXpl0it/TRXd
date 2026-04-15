@@ -10,7 +10,9 @@ SELECT
     i.expires_at,
     i.host AS instance_host,
     i.port AS instance_port,
-    i.docker_id
+    i.docker_id,
+    d.hash_domain AS instance_hash_domain,
+    d.renewable AS instance_renewable
   FROM challenges c
   LEFT JOIN attachments a
     ON a.chall_id = c.id
@@ -22,8 +24,10 @@ SELECT
           AND users.role = 'Player'
           AND submissions.status = 'Correct') s
     ON s.chall_id = c.id
+  LEFT JOIN docker_configs d
+    ON d.chall_id = c.id
   LEFT JOIN instances i
     ON i.chall_id = c.id
       AND i.team_id = (SELECT team_id FROM tid)
-  GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id 
+  GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id, d.hash_domain, d.renewable
   ORDER BY c.points ASC, c.id ASC;

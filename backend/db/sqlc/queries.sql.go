@@ -293,7 +293,9 @@ SELECT
     i.expires_at,
     i.host AS instance_host,
     i.port AS instance_port,
-    i.docker_id
+    i.docker_id,
+    d.hash_domain AS instance_hash_domain,
+    d.renewable AS instance_renewable
   FROM challenges c
   LEFT JOIN attachments a
     ON a.chall_id = c.id
@@ -305,36 +307,40 @@ SELECT
           AND users.role = 'Player'
           AND submissions.status = 'Correct') s
     ON s.chall_id = c.id
+  LEFT JOIN docker_configs d
+    ON d.chall_id = c.id
   LEFT JOIN instances i
     ON i.chall_id = c.id
       AND i.team_id = (SELECT team_id FROM tid)
-  GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id 
+  GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id, d.hash_domain, d.renewable
   ORDER BY c.points ASC, c.id ASC
 `
 
 type GetAllChallengesInfoRow struct {
-	ID           int32          `json:"id"`
-	Name         string         `json:"name"`
-	Category     string         `json:"category"`
-	Description  string         `json:"description"`
-	Authors      []string       `json:"authors"`
-	Tags         []string       `json:"tags"`
-	Type         DeployType     `json:"type"`
-	Hidden       bool           `json:"hidden"`
-	MaxPoints    int32          `json:"max_points"`
-	ScoreType    ScoreType      `json:"score_type"`
-	Points       int32          `json:"points"`
-	Solves       int32          `json:"solves"`
-	Host         string         `json:"host"`
-	Port         int32          `json:"port"`
-	ConnType     ConnType       `json:"conn_type"`
-	Solved       bool           `json:"solved"`
-	FirstBlood   bool           `json:"first_blood"`
-	Attachments  []string       `json:"attachments"`
-	ExpiresAt    sql.NullTime   `json:"expires_at"`
-	InstanceHost sql.NullString `json:"instance_host"`
-	InstancePort sql.NullInt32  `json:"instance_port"`
-	DockerID     sql.NullString `json:"docker_id"`
+	ID                 int32          `json:"id"`
+	Name               string         `json:"name"`
+	Category           string         `json:"category"`
+	Description        string         `json:"description"`
+	Authors            []string       `json:"authors"`
+	Tags               []string       `json:"tags"`
+	Type               DeployType     `json:"type"`
+	Hidden             bool           `json:"hidden"`
+	MaxPoints          int32          `json:"max_points"`
+	ScoreType          ScoreType      `json:"score_type"`
+	Points             int32          `json:"points"`
+	Solves             int32          `json:"solves"`
+	Host               string         `json:"host"`
+	Port               int32          `json:"port"`
+	ConnType           ConnType       `json:"conn_type"`
+	Solved             bool           `json:"solved"`
+	FirstBlood         bool           `json:"first_blood"`
+	Attachments        []string       `json:"attachments"`
+	ExpiresAt          sql.NullTime   `json:"expires_at"`
+	InstanceHost       sql.NullString `json:"instance_host"`
+	InstancePort       sql.NullInt32  `json:"instance_port"`
+	DockerID           sql.NullString `json:"docker_id"`
+	InstanceHashDomain sql.NullBool   `json:"instance_hash_domain"`
+	InstanceRenewable  sql.NullBool   `json:"instance_renewable"`
 }
 
 // Retrieve all challenges along with first blood status and instance info for a user
@@ -370,6 +376,8 @@ func (q *Queries) GetAllChallengesInfo(ctx context.Context, id int32) ([]GetAllC
 			&i.InstanceHost,
 			&i.InstancePort,
 			&i.DockerID,
+			&i.InstanceHashDomain,
+			&i.InstanceRenewable,
 		); err != nil {
 			return nil, err
 		}
@@ -477,7 +485,7 @@ func (q *Queries) GetCategory(ctx context.Context, name string) (Category, error
 }
 
 const getChallDockerConfig = `-- name: GetChallDockerConfig :one
-SELECT chall_id, image, compose, hash_domain, lifetime, envs, max_memory, max_cpu FROM docker_configs WHERE chall_id = $1
+SELECT chall_id, image, compose, hash_domain, lifetime, renewable, envs, max_memory, max_cpu FROM docker_configs WHERE chall_id = $1
 `
 
 func (q *Queries) GetChallDockerConfig(ctx context.Context, challID int32) (DockerConfig, error) {
@@ -489,6 +497,7 @@ func (q *Queries) GetChallDockerConfig(ctx context.Context, challID int32) (Dock
 		&i.Compose,
 		&i.HashDomain,
 		&i.Lifetime,
+		&i.Renewable,
 		&i.Envs,
 		&i.MaxMemory,
 		&i.MaxCpu,
@@ -1564,10 +1573,11 @@ SET
   compose = COALESCE($2, compose),
   hash_domain = COALESCE($3, hash_domain),
   lifetime = COALESCE($4, lifetime),
-  envs = COALESCE($5, envs),
-  max_memory = COALESCE($6, max_memory),
-  max_cpu = COALESCE($7, max_cpu)
-WHERE chall_id = $8
+  renewable = COALESCE($5, renewable),
+  envs = COALESCE($6, envs),
+  max_memory = COALESCE($7, max_memory),
+  max_cpu = COALESCE($8, max_cpu)
+WHERE chall_id = $9
 `
 
 type UpdateDockerConfigsParams struct {
@@ -1575,6 +1585,7 @@ type UpdateDockerConfigsParams struct {
 	Compose    sql.NullString `json:"compose"`
 	HashDomain sql.NullBool   `json:"hash_domain"`
 	Lifetime   sql.NullInt32  `json:"lifetime"`
+	Renewable  sql.NullBool   `json:"renewable"`
 	Envs       sql.NullString `json:"envs"`
 	MaxMemory  sql.NullInt32  `json:"max_memory"`
 	MaxCpu     sql.NullString `json:"max_cpu"`
@@ -1588,6 +1599,7 @@ func (q *Queries) UpdateDockerConfigs(ctx context.Context, arg UpdateDockerConfi
 		arg.Compose,
 		arg.HashDomain,
 		arg.Lifetime,
+		arg.Renewable,
 		arg.Envs,
 		arg.MaxMemory,
 		arg.MaxCpu,

@@ -61,7 +61,7 @@ func IsChallEmpty(data *UpdateChallParams) bool {
 
 func IsDockerConfigsEmpty(data *UpdateChallParams) bool {
 	if data.Image == nil && data.Compose == nil && data.HashDomain == nil && data.Lifetime == nil &&
-		data.Envs == nil && data.MaxMemory == nil && data.MaxCpu == nil {
+		data.Renewable == nil && data.Envs == nil && data.MaxMemory == nil && data.MaxCpu == nil {
 		return true
 	}
 	return false
@@ -99,6 +99,7 @@ func UpdateChallenge(ctx context.Context, data *UpdateChallParams) error {
 		Compose:    nullString(data.Compose),
 		HashDomain: nullBool(data.HashDomain),
 		Lifetime:   nullInt32(data.Lifetime),
+		Renewable:  nullBool(data.Renewable),
 		Envs:       nullString(data.Envs),
 		MaxMemory:  nullInt32(data.MaxMemory),
 		MaxCpu:     nullString(data.MaxCpu),

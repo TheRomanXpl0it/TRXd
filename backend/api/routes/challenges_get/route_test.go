@@ -145,6 +145,7 @@ func TestRoute(t *testing.T) {
 			"lifetime":    0,
 			"max_cpu":     "",
 			"max_memory":  0,
+			"renewable":   false,
 		},
 		"flags": []JSON{
 			{
@@ -178,6 +179,7 @@ func TestRoute(t *testing.T) {
 			"lifetime":    0,
 			"max_cpu":     "",
 			"max_memory":  0,
+			"renewable":   false,
 		},
 		"flags": []JSON{
 			{

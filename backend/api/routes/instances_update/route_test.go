@@ -88,8 +88,20 @@ func TestRoute(t *testing.T) {
 	session.Patch("/instances", JSON{"chall_id": challID1}, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.ChallengeNotInstanciable))
 
+	session.Patch("/instances", JSON{"chall_id": challID4}, http.StatusNotFound)
+	session.CheckResponse(errorf(consts.InstanceNotFound))
+
 	session.Delete("/instances", JSON{"chall_id": challID4}, http.StatusNotFound)
 	session.CheckResponse(errorf(consts.InstanceNotFound))
+
+	session.Patch("/instances", JSON{"chall_id": challID3}, http.StatusNotFound)
+	session.CheckResponse(errorf(consts.InstanceNotFound))
+
+	session.Post("/instances", JSON{"chall_id": challID3}, http.StatusOK)
+	body = session.Body()
+	if _, ok := Json(body)["timeout"]; !ok {
+		t.Fatalf("Expected timeout to be present in response: %+v", body)
+	}
 
 	session.Patch("/instances", JSON{"chall_id": challID3}, http.StatusOK)
 	body = session.Body()

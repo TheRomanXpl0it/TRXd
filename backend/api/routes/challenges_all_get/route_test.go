@@ -1,11 +1,13 @@
 package challenges_all_get_test
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
 	"trxd/api"
 	"trxd/db"
+	"trxd/db/sqlc"
 	"trxd/utils/test_utils"
 )
 
@@ -304,4 +306,21 @@ func TestRoute(t *testing.T) {
 	}
 	test_utils.DeleteKeys(body, "id", "timeout")
 	test_utils.Compare(t, expectedAuthor, body)
+
+	session.Get("/info", nil, http.StatusOK)
+	body = session.Body()
+	teamID := Int32(Json(body)["team_id"])
+	err = db.Sql.UpdateInstanceDockerID(t.Context(), sqlc.UpdateInstanceDockerIDParams{
+		TeamID:   teamID,
+		ChallID:  challID,
+		DockerID: sql.NullString{String: "1", Valid: true},
+	})
+	if err != nil {
+		t.Fatalf("Failed to update instance docker ID: %v", err)
+	}
+
+	expectedAuthor[3]["instance_hash_domain"] = true
+	expectedAuthor[3]["instance_renewable"] = false
+	session.Get("/challenges", nil, http.StatusOK)
+	session.CheckFilteredResponse(expectedAuthor, "id", "timeout", "instance_host")
 }

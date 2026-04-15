@@ -279,6 +279,7 @@ type DockerConfig struct {
 	Compose    string `json:"compose"`
 	HashDomain bool   `json:"hash_domain"`
 	Lifetime   int32  `json:"lifetime"`
+	Renewable  bool   `json:"renewable"`
 	Envs       string `json:"envs"`
 	MaxMemory  int32  `json:"max_memory"`
 	MaxCpu     string `json:"max_cpu"`

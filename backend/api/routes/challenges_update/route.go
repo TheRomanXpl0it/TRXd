@@ -30,6 +30,7 @@ type UpdateChallParams struct {
 	Compose    *string `json:"compose"`
 	HashDomain *bool   `json:"hash_domain"`
 	Lifetime   *int32  `json:"lifetime" validate:"omitempty,challenge_lifetime"`
+	Renewable  *bool   `json:"renewable"`
 	Envs       *string `json:"envs" validate:"omitempty,challenge_envs"`
 	MaxMemory  *int32  `json:"max_memory" validate:"omitempty,challenge_max_memory"`
 	MaxCpu     *string `json:"max_cpu" validate:"omitempty,challenge_max_cpu"`

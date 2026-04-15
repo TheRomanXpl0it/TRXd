@@ -12,6 +12,7 @@ type DockerConfig struct {
 	Compose    string  `json:"compose"`
 	HashDomain *bool   `json:"hash_domain"`
 	Lifetime   *int    `json:"lifetime"`
+	Renewable  *bool   `json:"renewable"`
 	Envs       *string `json:"envs"`
 	MaxMemory  *int    `json:"max_memory"`
 	MaxCpu     *string `json:"max_cpu"`
@@ -89,6 +90,7 @@ func GetChallenge(ctx context.Context, id int32, uid int32, tid int32, author bo
 		Envs:       &dockerConfig.Envs,
 		MaxMemory:  new(int(dockerConfig.MaxMemory)),
 		MaxCpu:     &dockerConfig.MaxCpu,
+		Renewable:  &dockerConfig.Renewable,
 	}
 
 	return &chall, nil

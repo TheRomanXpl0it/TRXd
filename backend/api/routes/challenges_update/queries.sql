@@ -24,6 +24,7 @@ SET
   compose = COALESCE(sqlc.narg('compose'), compose),
   hash_domain = COALESCE(sqlc.narg('hash_domain'), hash_domain),
   lifetime = COALESCE(sqlc.narg('lifetime'), lifetime),
+  renewable = COALESCE(sqlc.narg('renewable'), renewable),
   envs = COALESCE(sqlc.narg('envs'), envs),
   max_memory = COALESCE(sqlc.narg('max_memory'), max_memory),
   max_cpu = COALESCE(sqlc.narg('max_cpu'), max_cpu)

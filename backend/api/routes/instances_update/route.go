@@ -48,6 +48,14 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
 	}
 
+	instance, err := instancer.GetInstance(c.Context(), *data.ChallID, tid)
+	if err != nil {
+		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingInstance, err)
+	}
+	if instance == nil {
+		return utils.Error(c, fiber.StatusNotFound, consts.InstanceNotFound)
+	}
+
 	if chall.DockerConfig.Lifetime == 0 {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.MissingLifetime, errors.New(consts.MissingLifetime))
 	}

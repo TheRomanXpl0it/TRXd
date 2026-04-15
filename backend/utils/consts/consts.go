@@ -96,6 +96,7 @@ const (
 	ErrorInitializingEmailClient  = "Error initializing email client"
 	ErrorLoggingIn                = "Error logging in"
 	ErrorParsingTime              = "Error parsing time"
+	ErrorRegeneratingSession      = "Error regenerating session"
 	ErrorRegisteringTeam          = "Error registering team"
 	ErrorRegisteringUser          = "Error registering user"
 	ErrorResettingTeamPassword    = "Error resetting team password"
