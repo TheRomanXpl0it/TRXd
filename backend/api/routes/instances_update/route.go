@@ -13,6 +13,31 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+func canRenewInstance(c *fiber.Ctx, chall *db.Chall, role sqlc.UserRole, tid int32, challID int32) (bool, error) {
+	if chall.Info.Hidden &&
+		!utils.In(role, []sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}) {
+		return false, utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
+	}
+
+	if chall.Info.Type == sqlc.DeployTypeNormal {
+		return false, utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
+	}
+
+	if !chall.DockerConfig.Renewable {
+		return false, utils.Error(c, fiber.StatusBadRequest, consts.ChallengeInstanceNotRenewable)
+	}
+
+	instance, err := instancer.GetInstance(c.Context(), challID, tid)
+	if err != nil {
+		return false, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingInstance, err)
+	}
+	if instance == nil {
+		return false, utils.Error(c, fiber.StatusNotFound, consts.InstanceNotFound)
+	}
+
+	return true, nil
+}
+
 func Route(c *fiber.Ctx) error {
 	role := c.Locals("role").(sqlc.UserRole)
 	tid := c.Locals("tid").(int32)
@@ -40,24 +65,9 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
 	}
 
-	if chall.Info.Hidden && !utils.In(role,
-		[]sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}) {
-		return utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
-	}
-	if chall.Info.Type == sqlc.DeployTypeNormal {
-		return utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
-	}
-
-	if !chall.DockerConfig.Renewable {
-		return utils.Error(c, fiber.StatusBadRequest, consts.ChallengeInstanceNotRenewable)
-	}
-
-	instance, err := instancer.GetInstance(c.Context(), *data.ChallID, tid)
-	if err != nil {
-		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingInstance, err)
-	}
-	if instance == nil {
-		return utils.Error(c, fiber.StatusNotFound, consts.InstanceNotFound)
+	canRenew, err := canRenewInstance(c, chall, role, tid, *data.ChallID)
+	if err != nil || !canRenew {
+		return err
 	}
 
 	if chall.DockerConfig.Lifetime == 0 {
