@@ -84,7 +84,8 @@ export interface Challenge {
 	instance: boolean;
 	instance_host?: string | null;
 	instance_port?: number | null;
-	hash_domain?: boolean;
+	instance_hash_domain?: boolean;
+	instance_renewable?: boolean;
 	timeout?: number | null;
 	image?: string;
 	compose?: string;

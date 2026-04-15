@@ -18,6 +18,9 @@
 	import { Globe } from '@lucide/svelte';
 	import countries from '$lib/data/countries.json';
 	import PixelBackground from '$lib/components/ui/PixelBackground.svelte';
+	
+	// Pre-process countries into a map for O(1) lookups
+	const countryMap = new Map((countries as any[]).map(c => [c.iso3?.toUpperCase(), c.iso2?.toUpperCase()]));
 
 	let perPage = $state(20);
 	let currentPage = $state(1);
@@ -69,8 +72,8 @@
 	}
 
 	function getCountryIso2(iso3: string): string | null {
-		const country = (countries as any[]).find((c) => c.iso3?.toUpperCase() === iso3?.toUpperCase());
-		return country?.iso2?.toUpperCase() ?? null;
+		if (!iso3) return null;
+		return countryMap.get(iso3.toUpperCase()) ?? null;
 	}
 </script>
 
@@ -210,6 +213,7 @@
 																	<Globe class="text-muted-foreground h-2 w-2" />
 																{/if}
 															</div>
+                                                            <span class="sr-only">{row.country}</span>
 														{/if}
 													</div>
 													<span class="text-foreground font-medium">

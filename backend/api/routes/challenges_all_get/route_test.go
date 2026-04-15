@@ -60,6 +60,8 @@ func TestRoute(t *testing.T) {
 			"tags": []string{
 				"tag-4",
 			},
+			"instance_hash_domain": false,
+			"instance_renewable":   false,
 			"timeout": 0,
 		},
 		{
@@ -136,6 +138,8 @@ func TestRoute(t *testing.T) {
 			"tags": []string{
 				"tag-3",
 			},
+			"instance_hash_domain": true,
+			"instance_renewable":   false,
 			"timeout": 0,
 		},
 	}
@@ -178,6 +182,8 @@ func TestRoute(t *testing.T) {
 			"tags": []string{
 				"tag-4",
 			},
+			"instance_hash_domain": false,
+			"instance_renewable":   false,
 		},
 		{
 			"attachments": []string{},
@@ -251,6 +257,8 @@ func TestRoute(t *testing.T) {
 			"tags": []string{
 				"tag-3",
 			},
+			"instance_hash_domain": true,
+			"instance_renewable":   false,
 		},
 		{
 			"attachments": []string{},
@@ -319,8 +327,6 @@ func TestRoute(t *testing.T) {
 		t.Fatalf("Failed to update instance docker ID: %v", err)
 	}
 
-	expectedAuthor[3]["instance_hash_domain"] = true
-	expectedAuthor[3]["instance_renewable"] = false
 	session.Get("/challenges", nil, http.StatusOK)
 	session.CheckFilteredResponse(expectedAuthor, "id", "timeout", "instance_host")
 }

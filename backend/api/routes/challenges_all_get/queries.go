@@ -87,12 +87,13 @@ func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Ch
 			if challenge.InstancePort.Valid {
 				chall.InstancePort = int(challenge.InstancePort.Int32)
 			}
-			if challenge.InstanceHashDomain.Valid {
-				chall.InstanceHashDomain = &challenge.InstanceHashDomain.Bool
-			}
-			if challenge.InstanceRenewable.Valid {
-				chall.InstanceRenewable = &challenge.InstanceRenewable.Bool
-			}
+		}
+
+		if challenge.InstanceHashDomain.Valid {
+			chall.InstanceHashDomain = &challenge.InstanceHashDomain.Bool
+		}
+		if challenge.InstanceRenewable.Valid {
+			chall.InstanceRenewable = &challenge.InstanceRenewable.Bool
 		}
 
 		challsData = append(challsData, chall)

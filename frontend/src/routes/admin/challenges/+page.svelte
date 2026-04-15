@@ -15,8 +15,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
-
-	import ChallengeEditSheet from '$lib/components/challenges/ChallengeEditSheet.svelte';
+	import { goto } from '$app/navigation';
 
 	let challenges = $state<any[]>([]);
 	let loading = $state(true);
@@ -86,8 +85,7 @@
 	}
 
 	function openEdit(chall: any) {
-		selectedChallenge = chall;
-		editSheetOpen = true;
+		goto(`/admin/challenges/${chall.id}`);
 	}
 </script>
 
@@ -256,14 +254,6 @@
 	{/if}
 </div>
 
-{#if selectedChallenge}
-	<ChallengeEditSheet
-		bind:open={editSheetOpen}
-		challenge_user={selectedChallenge}
-		onupdated={() => {
-			loadChallenges();
-		}}
-	/>
-{/if}
+
 
 

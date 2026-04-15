@@ -56,7 +56,7 @@ describe('InstanceControls Component', () => {
 			timeout: 3600
 		});
 
-		const challenge = { id: challengeId, host: null, port: null, timeout: null };
+		const challenge = { id: challengeId, instance_host: null, instance_port: null, timeout: null };
 		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
@@ -93,8 +93,8 @@ describe('InstanceControls Component', () => {
 
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -139,8 +139,8 @@ describe('InstanceControls Component', () => {
 
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -172,7 +172,7 @@ describe('InstanceControls Component', () => {
 
 		mockStart.mockRejectedValueOnce(new Error('No available instances'));
 
-		const challenge = { id: challengeId, host: null, port: null, timeout: null };
+		const challenge = { id: challengeId, instance_host: null, instance_port: null, timeout: null };
 		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
@@ -204,8 +204,8 @@ describe('InstanceControls Component', () => {
 
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -240,7 +240,7 @@ describe('InstanceControls Component', () => {
 				)
 		);
 
-		const challenge = { id: challengeId, host: null, port: null, timeout: null };
+		const challenge = { id: challengeId, instance_host: null, instance_port: null, timeout: null };
 		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
@@ -272,8 +272,8 @@ describe('InstanceControls Component', () => {
 
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -307,7 +307,7 @@ describe('InstanceControls Component', () => {
 				)
 		);
 
-		const challenge = { id: challengeId, host: null, port: null, timeout: null };
+		const challenge = { id: challengeId, instance_host: null, instance_port: null, timeout: null };
 		renderWithProviders(InstanceControls, {
 			props: {
 				challenge,
@@ -328,7 +328,7 @@ describe('InstanceControls Component', () => {
 
 	it('formats countdown timer correctly for hours', async () => {
 		const challengeId = Math.floor(Math.random() * 10000);
-		const challenge = { id: challengeId, host: 'test.com', port: 1337, timeout: 3600 };
+		const challenge = { id: challengeId, instance_host: 'test.com', instance_port: 1337, timeout: 3600 };
 
 		renderWithProviders(InstanceControls, {
 			props: {
@@ -343,7 +343,7 @@ describe('InstanceControls Component', () => {
 
 	it('formats countdown timer correctly for minutes', async () => {
 		const challengeId = Math.floor(Math.random() * 10000);
-		const challenge = { id: challengeId, host: 'test.com', port: 1337, timeout: 3600 };
+		const challenge = { id: challengeId, instance_host: 'test.com', instance_port: 1337, timeout: 3600 };
 
 		renderWithProviders(InstanceControls, {
 			props: {
@@ -358,7 +358,7 @@ describe('InstanceControls Component', () => {
 
 	it('formats countdown timer correctly for seconds only', async () => {
 		const challengeId = Math.floor(Math.random() * 10000);
-		const challenge = { id: challengeId, host: 'test.com', port: 1337, timeout: 3600 };
+		const challenge = { id: challengeId, instance_host: 'test.com', instance_port: 1337, timeout: 3600 };
 
 		renderWithProviders(InstanceControls, {
 			props: {
@@ -375,8 +375,8 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -395,8 +395,8 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: null,
+			instance_host: 'ctf.example.com',
+			instance_port: null,
 			timeout: 3600
 		};
 
@@ -423,8 +423,8 @@ describe('InstanceControls Component', () => {
 
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -446,7 +446,7 @@ describe('InstanceControls Component', () => {
 
 	it('shows start button when countdown is 0', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
-		const challenge = { id: challengeId, host: null, port: null, timeout: null };
+		const challenge = { id: challengeId, instance_host: null, instance_port: null, timeout: null };
 
 		renderWithProviders(InstanceControls, {
 			props: {
@@ -467,8 +467,8 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -489,8 +489,8 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -517,8 +517,8 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 
@@ -534,7 +534,7 @@ describe('InstanceControls Component', () => {
 
 		// Update countdown to 0 (expired)
 		await rerender({
-			challenge: { ...challenge, host: null, port: null, timeout: null },
+			challenge: { ...challenge, instance_host: null, instance_port: null, timeout: null },
 			countdown: 0
 		});
 
@@ -551,8 +551,8 @@ describe('InstanceControls Component', () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = {
 			id: challengeId,
-			host: 'ctf.example.com',
-			port: 1337,
+			instance_host: 'ctf.example.com',
+			instance_port: 1337,
 			timeout: 3600
 		};
 

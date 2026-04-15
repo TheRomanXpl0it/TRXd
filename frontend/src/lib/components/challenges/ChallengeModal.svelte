@@ -51,25 +51,18 @@
 	);
 
 	const connectionString = $derived.by(() => {
+		// Dynamic challenges handle their own connection info via InstanceControls
+		if (isDynamicType || challenge?.instance) return '';
+
 		const h = challenge?.host || '';
 		const p = challenge?.port;
-		const isLocal = ['localhost', '127.0.0.1', '0.0.0.0', '::1', '[::1]'].includes(
-			h.toLowerCase().trim()
-		);
 
-		if ((isDynamicType || challenge?.instance) && (!challenge?.instance_host || isLocal)) {
-			return '';
-		}
-
-		if (challenge?.connection_info && (!challenge.instance || !challenge.connection_info.includes('localhost'))) {
-			return challenge.connection_info;
-		}
+		if (!h) return '';
 
 		return formatConnectionString({
 			host: h,
 			port: p,
-			connType: challenge?.conn_type,
-			sslWithoutPort: isDynamicType || challenge?.instance || !!challenge?.instance_host
+			connType: challenge?.conn_type
 		});
 	});
 </script>
@@ -81,7 +74,7 @@
 	>
 		<Dialog.Header class="pb-4 sm:pb-6">
 			<div class="min-w-0 flex-1">
-				<Dialog.Title class="mb-3 break-words pr-8 text-2xl font-bold sm:text-3xl">
+				<Dialog.Title class="mb-3 break-words pr-8 text-2xl font-black tracking-tighter sm:text-3xl">
 					{challenge?.name ?? 'Challenge'}
 				</Dialog.Title>
 

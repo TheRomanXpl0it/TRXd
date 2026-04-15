@@ -32,7 +32,7 @@
 			class="mx-auto mb-8 h-auto w-48 sm:w-64"
 		/>
 
-		<h1 class="mb-4 text-4xl font-bold text-gray-900 sm:text-5xl dark:text-white">
+		<h1 class="mb-4 text-4xl font-black tracking-tighter text-gray-900 sm:text-6xl dark:text-white">
 			{$siteContent.home.heroTitle}
 		</h1>
 
@@ -59,7 +59,7 @@
 	{#if hasRules}
 		<section class="mb-8 w-full max-w-4xl rounded-2xl border border-gray-200/70 bg-white/60 p-6 shadow-sm dark:border-gray-800 dark:bg-white/5">
 			{#if $siteContent.home.rulesTitle}
-				<h2 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
+				<h2 class="mb-4 text-2xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">
 					{$siteContent.home.rulesTitle}
 				</h2>
 			{/if}
@@ -75,7 +75,7 @@
 	{#if hasSponsors}
 		<section class="w-full max-w-5xl">
 			{#if $siteContent.home.sponsorsTitle}
-				<h2 class="mb-4 text-center text-2xl font-bold text-gray-900 dark:text-white">
+				<h2 class="mb-4 text-center text-2xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">
 					{$siteContent.home.sponsorsTitle}
 				</h2>
 			{/if}

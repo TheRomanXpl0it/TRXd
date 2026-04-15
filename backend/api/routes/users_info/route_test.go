@@ -84,4 +84,10 @@ func TestRoute(t *testing.T) {
 	expected["email_verification"] = true
 	session.Get("/info", nil, http.StatusOK)
 	session.CheckFilteredResponse(expected, "id", "team_id")
+
+	// Verify country field
+	session.Patch("/users", JSON{"name": "test", "country": "USA"}, http.StatusOK)
+	expected["country"] = "USA"
+	session.Get("/info", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id", "team_id")
 }

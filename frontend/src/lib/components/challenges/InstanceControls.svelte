@@ -123,28 +123,13 @@
 	}
 
 	const connectionString = $derived.by(() => {
-		// Only show connection info if we have an active instance OR it's a static challenge
-		const hasInstance = challenge?.instance || !!challenge?.instance_host;
-		const isDynamic = challenge?.type === 'Container' || challenge?.type === 'Compose';
-
-		// If it's a dynamic challenge and we don't have an instance, show nothing
-		if (isDynamic && !hasInstance) return '';
-
-		const h = hasInstance
-			? (challenge?.instance_host ?? challenge?.host ?? '')
-			: (challenge?.host ?? '');
-		const p = hasInstance ? challenge?.instance_port : challenge?.port;
-
-		const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(h.toLowerCase().trim());
-
-		// Only hide for dynamic challenges if we DON'T have a real instance host
-		if (!h || (isDynamic && !challenge?.instance_host && isLocal)) return '';
+		if (!challenge?.instance_host) return '';
 
 		return formatConnectionString({
-			host: h,
-			port: p,
-			connType: challenge?.conn_type,
-			sslWithoutPort: isDynamic || hasInstance
+			host: challenge.instance_host,
+			port: challenge.instance_port,
+			connType: challenge.conn_type,
+			sslWithoutPort: !!challenge.instance_hash_domain
 		});
 	});
 
@@ -183,7 +168,7 @@
 				</button>
 
 				<div class="flex shrink-0 items-center gap-2">
-					{#if showTimer}
+					{#if showTimer && challenge?.instance_renewable !== false}
 						<div
 							class="bg-muted/40 border-border/60 flex h-11 flex-1 shrink-0 items-center gap-2 rounded-lg border px-3 text-green-600 sm:flex-none dark:text-green-500"
 						>
@@ -200,6 +185,15 @@
 								{/if}
 							</button>
 							<div class="bg-border/70 h-5 w-px"></div>
+							<div class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums">
+								<Clock class="h-4 w-4" />
+								<span>{formatCountdown(countdown)}</span>
+							</div>
+						</div>
+					{:else if showTimer}
+						<div
+							class="bg-muted/40 border-border/60 flex h-11 flex-1 shrink-0 items-center gap-3 rounded-lg border px-4 text-green-600 sm:flex-none dark:text-green-500"
+						>
 							<div class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums">
 								<Clock class="h-4 w-4" />
 								<span>{formatCountdown(countdown)}</span>

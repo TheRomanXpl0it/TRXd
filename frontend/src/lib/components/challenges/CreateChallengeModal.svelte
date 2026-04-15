@@ -64,6 +64,8 @@
 	let port = $state<number | null>(null);
 	let connType = $state('NONE');
 	let envVars = $state<{ name: string; value: string }[]>([]);
+	let hashDomain = $state(false);
+	let renewable = $state(true);
 	let flags = $state<{ flag: string; regex: boolean }[]>([{ flag: '', regex: false }]);
 
 	// Attachments
@@ -126,6 +128,8 @@
 					host,
 					port,
 					conn_type: connType,
+					hash_domain: hashDomain,
+					renewable: renewable,
 					hidden: true // Hidden by default on creation
 				};
 
@@ -188,6 +192,8 @@
 		port = null;
 		connType = 'NONE';
 		envVars = [];
+		hashDomain = false;
+		renewable = true;
 		flags = [{ flag: '', regex: false }];
 		attachments = [];
 		activeTab = 'meta';
@@ -203,7 +209,7 @@
 	<Dialog.Overlay />
 	<Dialog.Content class="block max-h-[95vh] overflow-hidden p-0 sm:max-w-[800px]">
 		<Dialog.Header class="px-6 pb-2 pt-6">
-			<Dialog.Title class="text-2xl font-black tracking-tight">Create Challenge</Dialog.Title>
+			<Dialog.Title class="text-2xl font-black tracking-tighter uppercase">Create Challenge</Dialog.Title>
 			<Dialog.Description>
 				Fill in the details to deploy a new challenge to the platform.
 			</Dialog.Description>
@@ -357,12 +363,22 @@
 											/>
 										</div>
 									{/if}
-									<div class="flex items-center gap-4">
+									<div class="flex flex-wrap items-center gap-6">
 										<div class="flex-1">
 											<Label for="lifetime" class="mb-2 block text-sm font-bold"
 												>Instance Lifetime (s)</Label
 											>
 											<Input id="lifetime" type="number" bind:value={lifetime} />
+										</div>
+										<div class="flex flex-col gap-3 pt-6">
+											<div class="flex items-center gap-2">
+												<Checkbox id="hash-domain" bind:checked={hashDomain} />
+												<Label for="hash-domain" class="text-xs font-bold uppercase cursor-pointer">Hash Domain</Label>
+											</div>
+											<div class="flex items-center gap-2">
+												<Checkbox id="renewable" bind:checked={renewable} />
+												<Label for="renewable" class="text-xs font-bold uppercase cursor-pointer">Renewable</Label>
+											</div>
 										</div>
 									</div>
 								</div>

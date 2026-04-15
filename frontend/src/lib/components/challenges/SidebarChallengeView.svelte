@@ -239,6 +239,14 @@
 											{#if ch.solved}
 												<CheckCircle class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
 											{/if}
+											{#if countdowns[ch.id] > 0}
+												<div
+													class="flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-tighter text-emerald-500 dark:bg-emerald-500/20"
+												>
+													<Clock class="h-2.5 w-2.5" />
+													{fmtTimeLeft(countdowns[ch.id])}
+												</div>
+											{/if}
 										</div>
 
 										<div

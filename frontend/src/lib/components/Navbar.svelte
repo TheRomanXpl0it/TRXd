@@ -198,13 +198,7 @@
 								{/if}
 
 								<DropdownMenu.Item
-									onclick={() => {
-										if (authState.userMode) {
-											goto('/users');
-										} else {
-											goto('/account');
-										}
-									}}
+									onclick={() => goto('/account')}
 									class="cursor-pointer gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors"
 								>
 									<User class="h-4.5 w-4.5 opacity-70" />

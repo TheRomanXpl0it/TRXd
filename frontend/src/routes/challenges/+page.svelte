@@ -12,8 +12,6 @@
 	import ChallengeFilters from '$lib/components/challenges/ChallengeFilters.svelte';
 	import ChallengeCard from '$lib/components/challenges/ChallengeCard.svelte';
 	import ChallengeModal from '$lib/components/challenges/ChallengeModal.svelte';
-	import AdminControls from '$lib/components/challenges/AdminControls.svelte';
-	import CreateChallengeModal from '$lib/components/challenges/CreateChallengeModal.svelte';
 	import WaitingPage from '$lib/components/challenges/WaitingPage.svelte';
 	import EndPage from '$lib/components/challenges/EndPage.svelte';
 	import { Flag, Users, Trophy, ChevronDown, Search, Monitor } from '@lucide/svelte';
@@ -274,12 +272,7 @@
 	}
 </script>
 
-{#if isAdmin}
-	<AdminControls
-		onopen-create={() => (createChallengeOpen = true)}
-		oncategory-created={() => categoriesQuery.refetch()}
-	/>
-{/if}
+
 
 {#if (!upcoming && !ended || isAdmin) && challengeView !== 'sidebar'}
 	<div class="mb-10 w-full">
@@ -344,7 +337,7 @@
 	<div class="space-y-10 pb-20">
 		{#each grouped as [category, items]}
 			<div>
-				<h2 class="text-muted-foreground/60 mb-4 text-sm font-black uppercase tracking-widest">
+				<h2 class="text-muted-foreground/60 mb-4 text-sm font-black uppercase tracking-tighter">
 					{category}
 				</h2>
 				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -383,15 +376,7 @@
 	{/if}
 {/if}
 
-<CreateChallengeModal
-	bind:open={createChallengeOpen}
-	{categories}
-	{challengeTypes}
-	oncreated={() => {
-		challengesQuery.refetch();
-		categoriesQuery.refetch();
-	}}
-/>
+
 
 <style>
 	:global(body.overflow-hidden) {

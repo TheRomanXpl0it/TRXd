@@ -5,12 +5,12 @@
 	import { getTeam } from '$lib/team';
 	import { getUserData } from '$lib/user';
 	import Solvelist from '$lib/components/account/AccountScoreboard.svelte';
-	import UserUpdate from '$lib/components/account/AccountEdit.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { goto } from '$app/navigation';
 	import {
-		Pencil,
 		Mail,
 		Users,
+		Settings,
 		Globe,
 		Medal
 	} from '@lucide/svelte';
@@ -24,7 +24,6 @@
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
 	import countries from '$lib/data/countries.json';
 
-	let editSheetOpen = $state(false);
 	let activeTab = $state<'overview' | 'solves' | 'achievements'>('overview');
 
 	// Derive currentUserId from params/user
@@ -143,12 +142,9 @@
 	<div class="mx-auto max-w-5xl space-y-8 py-10">
 		<div class="flex items-center justify-between">
 			<h2 class="text-3xl font-bold tracking-tight">Profile</h2>
-			{#if isOwnProfile}
-				<Button variant="outline" size="sm" onclick={() => (editSheetOpen = true)} class="gap-2">
-					<Pencil class="h-4 w-4" />
-					Edit Profile
-				</Button>
-			{/if}
+			<div class="flex items-center gap-3">
+				<!-- Settings are now in /settings main page -->
+			</div>
 		</div>
 
 		<!-- Hero Card -->
@@ -426,13 +422,4 @@
 	</div>
 {/if}
 
-{#if userVerboseData}
-	<UserUpdate
-		bind:open={editSheetOpen}
-		user={userVerboseData}
-		onupdated={() => {
-			userQuery.refetch();
-			if (!authState.userMode) teamQuery.refetch();
-		}}
-	/>
-{/if}
+

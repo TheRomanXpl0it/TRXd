@@ -6,10 +6,8 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 
 	import SolveListTable from '$lib/components/team/TeamScoreboard.svelte';
-	import TeamMembers from '$lib/components/team/TeamMemberlist.svelte';
 	import TeamJoinCreate from '$lib/components/team/TeamJoinCreate.svelte';
-	import TeamEdit from '$lib/components/team/TeamEdit.svelte';
-	import { getTeam, getTeamInviteToken } from '$lib/team';
+	import { getTeam } from '$lib/team';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { toast } from 'svelte-sonner';
@@ -67,16 +65,6 @@
 		return new Date(authState.startTime).getTime() > Date.now();
 	});
 
-	async function copyInviteLink() {
-		try {
-			const { token } = await getTeamInviteToken();
-			const url = `${window.location.origin}/join?token=${token}`;
-			await navigator.clipboard.writeText(url);
-			toast.success('Invite link copied to clipboard!');
-		} catch (err: any) {
-			toast.error(err?.message ?? 'Failed to generate invite link');
-		}
-	}
 </script>
 
 {#if !authState.ready || loading}
@@ -108,18 +96,6 @@
 		<!-- Header -->
 		<div class="flex items-center justify-between">
 			<h2 class="text-3xl font-bold tracking-tight">Team Profile</h2>
-			{#if isOwnTeam}
-				<div class="flex items-center gap-2">
-					<Button variant="outline" size="sm" onclick={copyInviteLink} class="gap-2">
-						<Link class="h-4 w-4" />
-						Invite
-					</Button>
-					<Button variant="outline" size="sm" onclick={() => (teamEditOpen = true)} class="gap-2">
-						<Pencil class="h-4 w-4" />
-						Edit Team
-					</Button>
-				</div>
-			{/if}
 		</div>
 
 		<!-- Hero Card -->
@@ -371,6 +347,3 @@
 	</div>
 {/if}
 
-{#if team}
-	<TeamEdit bind:open={teamEditOpen} {team} onupdated={() => teamQuery.refetch()} />
-{/if}

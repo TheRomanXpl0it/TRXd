@@ -51,6 +51,7 @@
 	let connType = $state('NONE');
 	let authorsCsv = $state('');
 	let hashDomain = $state(false);
+	let renewable = $state(true);
 	let imageName = $state('');
 	let composeFile = $state('');
 	let maxCPU = $state('');
@@ -198,6 +199,7 @@
 				);
 				imageName = String(challenge?.docker_config?.image ?? '');
 				hashDomain = Boolean(challenge?.docker_config?.hash_domain ?? false);
+				renewable = Boolean(challenge?.docker_config?.renewable ?? true);
 				composeFile = String(challenge?.docker_config?.compose ?? '');
 				maxCPU = String(challenge?.docker_config?.max_cpu ?? '');
 				maxRam = String(challenge?.docker_config?.max_memory ?? '');
@@ -277,6 +279,7 @@
 			image: type === 'Container' ? str(imageName) : undefined,
 			compose: type === 'Compose' ? str(composeFile) : undefined,
 			hash_domain: hashDomain,
+			renewable: renewable,
 
 			// performance / limits
 			max_points: toInt(maxPoints) ?? 500,
@@ -356,7 +359,7 @@
 					<Cpu class="text-muted-foreground h-8 w-8" />
 				</div>
 				<div>
-					<Sheet.Title class="text-xl font-bold">Edit Challenge</Sheet.Title>
+					<Sheet.Title class="text-xl font-black tracking-tighter uppercase">Edit Challenge</Sheet.Title>
 					<Sheet.Description class="text-muted-foreground/80 mt-1">
 						Modify settings for <b class="text-foreground">{challenge?.name ?? '-'}</b>
 					</Sheet.Description>
@@ -814,9 +817,15 @@
 											<MonacoEditor bind:value={composeFile} language="yaml" class="mt-3" />
 										{/if}
 									</div>
-									<div class="flex items-center gap-3">
-										<Checkbox id="com-hashdomain" bind:checked={hashDomain} />
-										<Label for="com-hashdomain" class="cursor-pointer">Hash Domain</Label>
+									<div class="flex flex-wrap items-center gap-6">
+										<div class="flex items-center gap-3">
+											<Checkbox id="com-hashdomain" bind:checked={hashDomain} />
+											<Label for="com-hashdomain" class="cursor-pointer">Hash Domain</Label>
+										</div>
+										<div class="flex items-center gap-3">
+											<Checkbox id="com-renewable" bind:checked={renewable} />
+											<Label for="com-renewable" class="cursor-pointer">Renewable</Label>
+										</div>
 									</div>
 								</div>
 
@@ -917,11 +926,19 @@
 													Ensure this image is available on the deployment server's Docker daemon.
 												</p>
 											</div>
-											<div class="flex items-center gap-3 pt-2">
-												<Checkbox id="ho-hashdomain" bind:checked={hashDomain} />
-												<Label for="ho-hashdomain" class="cursor-pointer text-sm font-medium"
-													>Use Hash Domain Mapping</Label
-												>
+											<div class="flex flex-wrap items-center gap-6 pt-2">
+												<div class="flex items-center gap-3">
+													<Checkbox id="ho-hashdomain" bind:checked={hashDomain} />
+													<Label for="ho-hashdomain" class="cursor-pointer text-sm font-medium"
+														>Use Hash Domain Mapping</Label
+													>
+												</div>
+												<div class="flex items-center gap-3">
+													<Checkbox id="ho-renewable" bind:checked={renewable} />
+													<Label for="ho-renewable" class="cursor-pointer text-sm font-medium"
+														>Renewable</Label
+													>
+												</div>
 											</div>
 										</div>
 									</div>

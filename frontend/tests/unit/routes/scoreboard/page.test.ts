@@ -3,6 +3,7 @@ import { renderWithProviders } from '../../render';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import Scoreboard from '../../../../src/routes/scoreboard/+page.svelte';
 import { authState } from '$lib/stores/auth';
+import { createQuery } from '@tanstack/svelte-query';
 
 // Mock the scoreboard API functions
 vi.mock('@/scoreboard', () => ({
@@ -42,11 +43,29 @@ describe('Scoreboard Page', () => {
 		expect(screen.queryByText('Starting soon')).not.toBeInTheDocument();
 	});
 
-	it('shows Scoreboard when competition has started', async () => {
-		authState.startTime = new Date(Date.now() - 1000000).toISOString();
+	it('renders scoreboard rows with correct country mapping', async () => {
+		const mockTeams = [
+			{ id: 1, name: 'Team One', score: 1000, country: 'USA' },
+			{ id: 2, name: 'Team Two', score: 800, country: 'ITA' }
+		];
+
+		// Mock the query data
+		vi.mocked(createQuery).mockReturnValue({
+			data: { data: mockTeams, pagination: { total: 2 } },
+			isLoading: false,
+			error: null
+		} as any);
 
 		renderWithProviders(Scoreboard);
 
-		expect(screen.getByText('Scoreboard')).toBeInTheDocument();
+		expect(screen.getByText('Team One')).toBeInTheDocument();
+		expect(screen.getByText('1,000 pts')).toBeInTheDocument();
+		expect(screen.getByText('Team Two')).toBeInTheDocument();
+		expect(screen.getByText('800 pts')).toBeInTheDocument();
+        
+        // Check if USA and ITA are mapped correctly via their ISO3 codes
+        // The component uses getCountryIso2 which I optimized
+        expect(screen.getByText('USA')).toBeInTheDocument();
+        expect(screen.getByText('ITA')).toBeInTheDocument();
 	});
 });

@@ -434,7 +434,7 @@
 	<main class="space-y-20">
 		<!-- About Section -->
 		<section class="max-w-2xl mx-auto text-center space-y-6 card-custom p-10 rounded-3xl">
-			<h2 class="text-xs font-black uppercase tracking-[0.3em] text-zinc-muted">The CTF</h2>
+			<h2 class="text-zinc-muted text-xs font-black uppercase tracking-[0.3em]">The CTF</h2>
 			<p class="text-lg text-zinc-muted leading-relaxed">
 				{$siteContent.home.heroDescription}
 			</p>
@@ -524,7 +524,9 @@
 			<!-- Sponsors Section -->
 			<section class="space-y-10">
 				<div class="text-center space-y-2">
-					<p class="text-2xl font-black uppercase tracking-tighter">{$siteContent.home.sponsorsTitle || 'Sponsors'}</p>
+					<h2 class="text-2xl font-black uppercase tracking-tighter">
+						{$siteContent.home.sponsorsTitle || 'Sponsors'}
+					</h2>
 				</div>
 				<div class="space-y-4 max-w-4xl mx-auto">
 					{#each $siteContent.home.sponsors as sponsor}

@@ -56,6 +56,9 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
 	}
 	info["user_mode"] = userMode == "true"
+	if user.Country.Valid {
+		info["country"] = user.Country.String
+	}
 
 	var teamID *int32
 	if user.TeamID.Valid {
