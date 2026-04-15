@@ -55,7 +55,8 @@ const (
 	AlreadyLoggedIn         = "Already logged in"
 	AlreadyRegistered       = "Already registered"
 
-	ChallengeNotInstanciable = "Challenge is not instanciable"
+	ChallengeInstanceNotRenewable = "Challenge instance is not renewable"
+	ChallengeNotInstanciable      = "Challenge is not instanciable"
 
 	DisabledRegistrations = "Registrations are disabled"
 

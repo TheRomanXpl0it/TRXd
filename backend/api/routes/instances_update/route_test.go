@@ -88,8 +88,8 @@ func TestRoute(t *testing.T) {
 	session.Patch("/instances", JSON{"chall_id": challID1}, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.ChallengeNotInstanciable))
 
-	session.Patch("/instances", JSON{"chall_id": challID4}, http.StatusNotFound)
-	session.CheckResponse(errorf(consts.InstanceNotFound))
+	session.Patch("/instances", JSON{"chall_id": challID4}, http.StatusBadRequest)
+	session.CheckResponse(errorf(consts.ChallengeInstanceNotRenewable))
 
 	session.Delete("/instances", JSON{"chall_id": challID4}, http.StatusNotFound)
 	session.CheckResponse(errorf(consts.InstanceNotFound))

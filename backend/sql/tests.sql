@@ -58,7 +58,7 @@ BEGIN
   INSERT INTO challenges (name, category, description, authors, tags, type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-3', 'cat-1', 'TEST chall-3 DESC', ARRAY['author1'], ARRAY['tag-3'], 'Container', 500, 'Dynamic', 'chall-3.test.com', 1337, 'HTTP', false);
   INSERT INTO challenges (name, category, description, authors, tags, type, max_points, score_type, conn_type, hidden) VALUES ('chall-4', 'cat-1', 'TEST chall-4 DESC', ARRAY['author2'], ARRAY['tag-4'], 'Compose', 500, 'Dynamic', 'HTTP', false);
   INSERT INTO challenges (name, category, description, authors, tags, type, max_points, score_type) VALUES ('chall-5', 'cat-2', 'TEST chall-5 DESC', ARRAY['author3'], ARRAY['tag-5'], 'Normal', 500, 'Static');
-  UPDATE docker_configs SET image='echo-server:latest', hash_domain=TRUE WHERE chall_id=(SELECT id FROM challenges WHERE name='chall-3');
+  UPDATE docker_configs SET image='echo-server:latest', renewable=TRUE, hash_domain=TRUE WHERE chall_id=(SELECT id FROM challenges WHERE name='chall-3');
   UPDATE docker_configs SET compose='
 services:
   chall:

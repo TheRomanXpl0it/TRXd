@@ -48,6 +48,10 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
 	}
 
+	if !chall.DockerConfig.Renewable {
+		return utils.Error(c, fiber.StatusBadRequest, consts.ChallengeInstanceNotRenewable)
+	}
+
 	instance, err := instancer.GetInstance(c.Context(), *data.ChallID, tid)
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingInstance, err)

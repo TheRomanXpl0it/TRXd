@@ -8,6 +8,7 @@ SELECT
   image,
   compose,
   hash_domain,
+  renewable,
   envs,
   COALESCE(NULLIF(lifetime, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-lifetime')) AS lifetime,
   COALESCE(NULLIF(max_memory, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-max-memory')) AS max_memory,

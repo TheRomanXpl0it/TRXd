@@ -44,6 +44,7 @@ SELECT
   image,
   compose,
   hash_domain,
+  renewable,
   envs,
   COALESCE(NULLIF(lifetime, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-lifetime')) AS lifetime,
   COALESCE(NULLIF(max_memory, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-max-memory')) AS max_memory,
@@ -56,6 +57,7 @@ type GetDockerConfigsByIDRow struct {
 	Image      string      `json:"image"`
 	Compose    string      `json:"compose"`
 	HashDomain bool        `json:"hash_domain"`
+	Renewable  bool        `json:"renewable"`
 	Envs       string      `json:"envs"`
 	Lifetime   interface{} `json:"lifetime"`
 	MaxMemory  interface{} `json:"max_memory"`
@@ -70,6 +72,7 @@ func (q *Queries) GetDockerConfigsByID(ctx context.Context, challID int32) (GetD
 		&i.Image,
 		&i.Compose,
 		&i.HashDomain,
+		&i.Renewable,
 		&i.Envs,
 		&i.Lifetime,
 		&i.MaxMemory,
