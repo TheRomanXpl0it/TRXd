@@ -12,8 +12,8 @@ SELECT team_id, chall_id, expires_at, docker_id
       WHERE key='reclaim-instance-interval'
     ) || ' seconds')::INTERVAL
   ORDER BY expires_at ASC
-  FOR UPDATE SKIP LOCKED
-  LIMIT 1;
+  LIMIT 1
+  FOR UPDATE SKIP LOCKED;
 
 -- name: CreateInstance :one
 -- Creates a new instance for a team
