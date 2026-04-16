@@ -77,11 +77,20 @@ func UpdateInstanceExpire(ctx context.Context, tid int32, challID int32, expires
 	return nil
 }
 
-func dbDeleteInstance(ctx context.Context, tid int32, challID int32) error {
-	err := db.Sql.DeleteInstance(ctx, sqlc.DeleteInstanceParams{
+func dbDeleteInstance(ctx context.Context, tid int32, challID int32, sqlTx ...*sqlc.Queries) error {
+	var err error
+
+	params := sqlc.DeleteInstanceParams{
 		TeamID:  tid,
 		ChallID: challID,
-	})
+	}
+
+	if len(sqlTx) > 0 && sqlTx[0] != nil {
+		err = sqlTx[0].DeleteInstance(ctx, params)
+	} else {
+		err = db.Sql.DeleteInstance(ctx, params)
+	}
+
 	if err != nil {
 		return err
 	}

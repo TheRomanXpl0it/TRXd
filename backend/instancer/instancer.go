@@ -14,6 +14,8 @@ import (
 	"trxd/utils/log"
 )
 
+const FallbackInterval = 1 * time.Second
+
 func InitInstancer() error {
 	var err error
 
@@ -101,29 +103,49 @@ func reclaimLoop() {
 		time.Sleep(sleep)
 		ctx := context.Background()
 
-		next, err := db.Sql.GetNextInstanceToDelete(ctx)
-		if err != nil {
-			if err != sql.ErrNoRows {
-				log.Error("Failed to get next instance to delete:", "err", err)
-			} else {
-				sleep, err = GetInterval(ctx)
-				if err != nil {
-					log.Fatal("Failed to get reclaim interval:", "err", err)
-				}
-			}
-			continue
-		}
-
-		if time.Now().Before(next.ExpiresAt) {
-			sleep = time.Until(next.ExpiresAt)
-			continue
-		} else {
-			sleep = 0
-		}
-
-		err = DeleteInstance(ctx, next.TeamID, next.ChallID, next.DockerID)
-		if err != nil {
-			log.Error("Failed to delete instance:", "err", err)
-		}
+		sleep = reclaimAction(ctx)
 	}
+}
+
+func reclaimAction(ctx context.Context) time.Duration {
+	tx, err := db.BeginTx(ctx)
+	if err != nil {
+		log.Error("Failed to begin transaction:", "err", err)
+		return FallbackInterval
+	}
+	defer db.Rollback(tx)
+
+	sqlTx := db.Sql.WithTx(tx)
+
+	next, err := sqlTx.GetNextInstanceToDelete(ctx)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			log.Error("Failed to get next instance to delete:", "err", err)
+			return FallbackInterval
+		}
+
+		sleep, err := GetInterval(ctx)
+		if err != nil {
+			log.Error("Failed to get reclaim interval:", "err", err)
+		}
+
+		return sleep
+	}
+
+	if time.Now().Before(next.ExpiresAt) {
+		return time.Until(next.ExpiresAt)
+	}
+
+	err = DeleteInstance(ctx, next.TeamID, next.ChallID, next.DockerID, sqlTx)
+	if err != nil {
+		log.Error("Failed to delete instance:", "err", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Error("Failed to commit transaction:", "err", err)
+		return FallbackInterval
+	}
+
+	return 0
 }

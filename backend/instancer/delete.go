@@ -3,13 +3,14 @@ package instancer
 import (
 	"context"
 	"database/sql"
+	"trxd/db/sqlc"
 	"trxd/instancer/composes"
 	"trxd/instancer/containers"
 
 	"trxd/utils/log"
 )
 
-func DeleteInstance(ctx context.Context, tid int32, challID int32, dockerID sql.NullString) error {
+func DeleteInstance(ctx context.Context, tid int32, challID int32, dockerID sql.NullString, sqlTx ...*sqlc.Queries) error {
 	log.Info("Deleting instance:", "chall", challID, "team", tid)
 
 	if dockerID.Valid {
@@ -24,7 +25,7 @@ func DeleteInstance(ctx context.Context, tid int32, challID int32, dockerID sql.
 		}
 	}
 
-	err := dbDeleteInstance(ctx, tid, challID)
+	err := dbDeleteInstance(ctx, tid, challID, sqlTx...)
 	if err != nil {
 		return err
 	}
