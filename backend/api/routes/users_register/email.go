@@ -3,6 +3,8 @@ package users_register
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
+	"time"
 	"trxd/db"
 	"trxd/utils"
 	"trxd/utils/consts"
@@ -27,6 +29,32 @@ func verifyMailEnabled(c *fiber.Ctx) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func generateJWTForEmail(c *fiber.Ctx, registerEmail string) (string, error) {
+	expiration, err := db.GetConfig(c.Context(), "email-expiration")
+	if err != nil {
+		return "", utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
+	}
+	if expiration == "" {
+		return "", utils.Error(c, fiber.StatusInternalServerError, consts.InvalidEmailExpiration)
+	}
+
+	expirationSeconds, err := strconv.Atoi(expiration)
+	if err != nil {
+		return "", utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
+	}
+
+	signed, err := jwt.GenerateJWT(c.Context(), jwt.Map{
+		"email": registerEmail,
+		"exp":   time.Now().Add(time.Duration(expirationSeconds) * time.Second).Unix(),
+		"iat":   time.Now().Unix(),
+	})
+	if err != nil {
+		return "", utils.Error(c, fiber.StatusInternalServerError, consts.ErrorSigningVerificationToken, err)
+	}
+
+	return signed, nil
 }
 
 func registerViaMail(c *fiber.Ctx, registerEmail string) error {
@@ -58,9 +86,9 @@ func registerViaMail(c *fiber.Ctx, registerEmail string) error {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorInitializingEmailClient, err)
 	}
 
-	signed, err := jwt.GenerateJWT(c.Context(), jwt.Map{"email": registerEmail})
-	if err != nil {
-		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorSigningVerificationToken, err)
+	signed, err := generateJWTForEmail(c, registerEmail)
+	if err != nil || signed == "" {
+		return err
 	}
 
 	body := fmt.Sprintf(BODY_TEMPLATE, domain, signed)

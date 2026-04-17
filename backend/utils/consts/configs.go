@@ -196,6 +196,14 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the password for the email account used for sending verification emails",
 		Secret:      true,
 	},
+	"email-expiration": {
+		Name:        "Email Token Expiration",
+		Value:       30 * 60, // 30 minutes
+		Type:        "duration",
+		Category:    "email",
+		Description: "the expiration time for the email verification tokens in seconds",
+		Secret:      false,
+	},
 }
 
 func LoadEnvConfigs() {

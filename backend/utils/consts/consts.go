@@ -117,6 +117,7 @@ const (
 	InvalidCountry          = "Invalid country code, must be ISO3166-1 alpha-3"
 	InvalidCredentials      = "Invalid email or password"
 	InvalidDomain           = "Invalid domain"
+	InvalidEmailExpiration  = "Invalid email expiration"
 	InvalidEmail            = "Invalid email format"
 	InvalidEnvs             = "Invalid environment variables"
 	InvalidFilePath         = "Invalid file path"

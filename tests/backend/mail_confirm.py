@@ -53,10 +53,13 @@ def change_conf(s, key, value):
 admin = login('admin@email.com', 'testpass')
 
 change_conf(admin, 'domain', 'localhost:1337')
+change_conf(admin, 'email-verification', "true")
 change_conf(admin, 'email-server', server)
 change_conf(admin, 'email-port', str(port))
 change_conf(admin, 'email-addr', addr)
 change_conf(admin, 'email-passwd', passwd)
+
+# change_conf(admin, 'email-expiration', "1") # 1 second for testing
 
 
 name = "tester"
