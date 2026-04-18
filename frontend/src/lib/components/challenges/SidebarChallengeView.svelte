@@ -120,7 +120,7 @@
 
 	$effect(() => {
 		if (!activeChallenge && filteredGrouped.length > 0 && filteredGrouped[0][1].length > 0) {
-			activeChallenge = filteredGrouped[0][1][0];
+			activeChallenge = { ...filteredGrouped[0][1][0] };
 		}
 	});
 
@@ -195,7 +195,7 @@
 					<div class="space-y-1">
 						<button
 							onclick={() => toggleCategory(category)}
-							class="text-muted-foreground hover:text-foreground hover:bg-muted/50 group flex w-full items-center justify-between rounded-md px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-all"
+							class="bg-muted/40 dark:bg-muted/20 hover:bg-muted/60 dark:hover:bg-muted/30 text-muted-foreground hover:text-foreground group flex w-full items-center justify-between rounded-md px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-all"
 						>
 							<div class="flex items-center gap-2">
 								<ChevronDown
@@ -218,7 +218,7 @@
 												activeChallenge?.id === ch.id
 													? 'bg-primary/10 text-foreground shadow-[inset_3px_0_0_0_hsl(var(--primary))]'
 													: ch.solved
-														? 'bg-[#05100a] text-emerald-500/80 hover:bg-[#081a11]'
+												? 'bg-emerald-500/10 dark:bg-[#05100a] text-emerald-600 dark:text-emerald-500/80 hover:bg-emerald-500/20 dark:hover:bg-[#081a11]'
 														: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
 											)}
 										>
@@ -320,7 +320,7 @@
 								</Badge>
 								{#if activeChallenge.solved}
 									<Badge
-										class="border-none bg-[#05100a] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-500/80"
+										class="border-none bg-emerald-500/10 dark:bg-[#05100a] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-500/80"
 									>
 										Solved
 									</Badge>

@@ -43,6 +43,8 @@ vi.mock('$lib/env', () => ({
 	}
 }));
 
+
+
 // Mock the admin-only modal and controls to prevent errors from dynamic imports or missing aliases
 vi.mock('$lib/components/challenges/CreateChallengeModal.svelte', () => ({
 	default: () => null
@@ -99,5 +101,24 @@ describe('Challenges Page', () => {
 		expect(await screen.findByText('Admin Chall')).toBeInTheDocument();
 		// Should NOT show WaitingPage
 		expect(screen.queryByText(/Prepare your horses/i)).not.toBeInTheDocument();
+	});
+
+	it('does not auto-open a challenge from the URL hash', async () => {
+		window.location.hash = '#challenge-1';
+
+		authState.ready = true;
+		authState.startTime = new Date(Date.now() - 100000).toISOString();
+		authState.user = { role: 'User' } as any;
+
+		(createQuery as any).mockReturnValue({
+			data: [{ id: 1, name: 'Hash Chall', category: 'Web', points: 100 }],
+			isLoading: false,
+			error: null
+		});
+
+		renderWithProviders(Page);
+		expect(await screen.findByText('Hash Chall')).toBeInTheDocument();
+		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+		expect(window.location.hash).toBe('#challenge-1');
 	});
 });

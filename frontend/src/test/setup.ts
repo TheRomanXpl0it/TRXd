@@ -2,6 +2,29 @@ import '@testing-library/jest-dom';
 import { vi, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/svelte';
 
+const originalConsoleWarn = console.warn.bind(console);
+const originalConsoleError = console.error.bind(console);
+
+function shouldSuppressSvelteDerivedInert(args: unknown[]) {
+	return args.some(
+		(arg) =>
+			typeof arg === 'string' &&
+			(arg.includes('[svelte] derived_inert') ||
+				arg.includes('Reading a derived belonging to a now-destroyed effect') ||
+				arg.includes('https://svelte.dev/e/derived_inert'))
+	);
+}
+
+console.warn = (...args: Parameters<typeof console.warn>) => {
+	if (shouldSuppressSvelteDerivedInert(args)) return;
+	originalConsoleWarn(...args);
+};
+
+console.error = (...args: Parameters<typeof console.error>) => {
+	if (shouldSuppressSvelteDerivedInert(args)) return;
+	originalConsoleError(...args);
+};
+
 // Mock ApexCharts globally — it requires a real browser and fails in JSDOM
 vi.mock('apexcharts', () => {
 	return {

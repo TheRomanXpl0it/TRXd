@@ -12,6 +12,7 @@
  - utility:
    - better names for binary flags
    - DOCUMENTATION
+ - Change email verification flow
 
 ## Frontend
  - [/] Extra:

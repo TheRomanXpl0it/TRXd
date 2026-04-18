@@ -90,7 +90,7 @@ describe('Sign Up Page', () => {
 		expect(screen.getByRole('button', { name: /complete sign up/i })).toBeInTheDocument();
 	});
 
-	it('completes registration from the verification token and pending signup data', async () => {
+	it('restores pending signup data so the user can complete verification manually', async () => {
 		authState.emailVerification = true;
 		sessionStorage.setItem(
 			'pending-signup',
@@ -100,8 +100,6 @@ describe('Sign Up Page', () => {
 				password: 'password123'
 			})
 		);
-		window.history.replaceState({}, '', '/signUp?token=test-token');
-
 		const user = userEvent.setup();
 		renderWithProviders(Page);
 
@@ -109,9 +107,9 @@ describe('Sign Up Page', () => {
 			expect(screen.getByRole('button', { name: /complete sign up/i })).toBeInTheDocument()
 		);
 
-		expect(screen.getByDisplayValue('test-token')).toBeInTheDocument();
 		expect(screen.getByDisplayValue('tester')).toBeInTheDocument();
 		expect(screen.getByDisplayValue('tester@example.com')).toBeDisabled();
+		await user.type(screen.getByLabelText(/verification token/i), 'test-token');
 
 		await user.click(screen.getByRole('button', { name: /complete sign up/i }));
 

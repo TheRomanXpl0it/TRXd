@@ -89,7 +89,7 @@
 	</div>
 {:else if !team}
 	<div class="mx-auto max-w-4xl py-10">
-		<TeamJoinCreate oncreated={() => loadUser()} onjoined={() => loadUser()} />
+		<TeamJoinCreate />
 	</div>
 {:else}
 	<div class="mx-auto max-w-6xl space-y-8 py-10">

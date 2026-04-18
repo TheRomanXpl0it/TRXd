@@ -28,7 +28,7 @@ export interface User {
 	role: 'User' | 'Admin' | 'Author';
 	country?: string;
 	joined_at?: string;
-	solves?: any[]; // Populated by GetUser / GetTeam
+	solves?: Solve[]; // Stricter type
 	badges?: Badge[];
 	score?: number;
 	total_category_challenges?: { category: string; count: number }[];
@@ -40,11 +40,12 @@ export interface Team {
 	email?: string;
 	country?: string;
 	tags?: string[];
-	captain_id?: number;
+	captain_id?: number; // TODO
 	members?: User[];
-	solves?: any[]; // Populated by GetTeam
+	solves?: Solve[]; // Stricter type
 	badges?: Badge[];
 	score?: number;
+	role?: 'User' | 'Admin' | 'Author'; // Match User role enum exactly
 	total_category_challenges?: { category: string; count: number }[];
 }
 
@@ -52,6 +53,11 @@ export interface Category {
 	id?: number;
 	name: string;
 	color?: string;
+}
+
+export interface Flag {
+	flag: string;
+	regex: boolean;
 }
 
 export interface Challenge {
@@ -97,6 +103,17 @@ export interface Challenge {
 
 	// Admin fields
 	hidden?: boolean;
+	flags?: Flag[];
+	docker_config?: {
+		image: string;
+		compose: string;
+		hash_domain: boolean;
+		lifetime: number;
+		renewable: boolean;
+		envs: string;
+		max_memory: number;
+		max_cpu: string;
+	};
 }
 
 export interface Solve {
@@ -110,8 +127,19 @@ export interface Solve {
 	first_blood?: boolean;
 }
 
-export interface ApiError {
+export interface BaseResponse {
 	success: boolean;
-	errors?: string[];
 	message?: string;
+	error?: string;
+	errors?: string[];
 }
+
+export interface SearchUsersResponse extends BaseResponse {
+	users: User[];
+}
+
+export interface SearchTeamsResponse extends BaseResponse {
+	teams: Team[];
+}
+
+export interface ApiError extends BaseResponse { }

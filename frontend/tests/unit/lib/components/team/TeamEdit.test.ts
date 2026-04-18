@@ -79,6 +79,7 @@ describe('TeamEdit Component', () => {
 		await waitFor(() => {
 			expect(updateTeam).toHaveBeenCalledWith(7, 'New Team', 'ITA', ['tag1']);
 		});
+		await flush();
 	});
 
 	it('updates team successfully and invalidates cache', async () => {
@@ -101,6 +102,7 @@ describe('TeamEdit Component', () => {
 			expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ['teams'] });
 			expect(showSuccess).toHaveBeenCalledWith('Team updated.');
 		});
+		await flush();
 	});
 
 	it('handles update error', async () => {

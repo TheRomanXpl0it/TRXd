@@ -15,14 +15,11 @@
 	import { siteContent } from '$lib/site-content';
 	import { onMount } from 'svelte';
 	import { UserPlus } from '@lucide/svelte';
-
-	const PENDING_SIGNUP_KEY = 'pending-signup';
-
-	type PendingSignup = {
-		email: string;
-		name: string;
-		password: string;
-	};
+	import {
+		clearPendingSignup,
+		readPendingSignup,
+		savePendingSignup
+	} from '$lib/registration';
 
 	let name = $state('');
 	let email = $state('');
@@ -39,34 +36,6 @@
 	const isVerificationStep = $derived(
 		emailVerificationEnabled && (verificationRequested || token.trim().length > 0)
 	);
-
-	function readPendingSignup(): PendingSignup | null {
-		if (typeof window === 'undefined') return null;
-		const raw = sessionStorage.getItem(PENDING_SIGNUP_KEY);
-		if (!raw) return null;
-		try {
-			const parsed = JSON.parse(raw) as Partial<PendingSignup>;
-			if (!parsed.email || !parsed.name || !parsed.password) return null;
-			return {
-				email: parsed.email,
-				name: parsed.name,
-				password: parsed.password
-			};
-		} catch {
-			sessionStorage.removeItem(PENDING_SIGNUP_KEY);
-			return null;
-		}
-	}
-
-	function savePendingSignup(data: PendingSignup) {
-		if (typeof window === 'undefined') return;
-		sessionStorage.setItem(PENDING_SIGNUP_KEY, JSON.stringify(data));
-	}
-
-	function clearPendingSignup() {
-		if (typeof window === 'undefined') return;
-		sessionStorage.removeItem(PENDING_SIGNUP_KEY);
-	}
 
 	function clearVerificationTokenFromUrl() {
 		if (typeof window === 'undefined') return;
@@ -87,7 +56,6 @@
 	}
 
 	onMount(() => {
-		if (typeof window === 'undefined') return;
 		const queryToken = new URL(window.location.href).searchParams.get('token')?.trim() ?? '';
 		if (queryToken) {
 			token = queryToken;

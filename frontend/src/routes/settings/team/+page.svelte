@@ -10,14 +10,20 @@
 	import { Input } from '$lib/components/ui/input';
 	import Label from '$lib/components/ui/label/label.svelte';
 	import * as Card from '$lib/components/ui/card';
-	import { onMount } from 'svelte';
 	import { ShieldHalf, Lock, Globe, Link as LinkIcon, Users, Check } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
-
-	let { data } = $props();
+	import { createQuery } from '@tanstack/svelte-query';
 
 	let user = $derived(authState.user);
-	let teamData = $state<any>(data?.team ?? null);
+
+	const teamQuery = createQuery(() => ({
+		queryKey: ['team', user?.team_id],
+		queryFn: () => getTeam(user!.team_id!),
+		enabled: !!user?.team_id
+	}));
+
+	let teamData = $derived(teamQuery.data);
+
 	let name = $state('');
 	let countryCode = $state('');
 
@@ -37,29 +43,13 @@
 	let inviteLoading = $state(false);
 	let inviteCopied = $state(false);
 
-	async function fetchTeam() {
-		if (!user?.team_id) return;
-		try {
-			teamData = await getTeam(user.team_id);
-			name = teamData.name ?? '';
-			countryCode = teamData.country?.toUpperCase?.() ?? '';
-		} catch (err) {
-			console.error('Failed to fetch team data', err);
-		}
-	}
-
-	onMount(() => {
-		// Just ensure auth is fresh, but we already have data from load()
-		if (!data.team) fetchTeam();
-	});
-
 	async function handleSaveTeam() {
 		if (!user?.team_id) return;
 		saving = true;
 		try {
 			await updateTeam(user.team_id, name.trim(), countryCode.trim());
 			await loadUser(true);
-			await fetchTeam();
+			teamQuery.refetch();
 			showSuccess('Team profile updated successfully.');
 		} catch (err: any) {
 			showError(err, 'Failed to update team.');
@@ -227,8 +217,8 @@
 		<!-- Security Card -->
 		<Card.Root>
 			<Card.Header>
-				<Card.Title>Competition Security</Card.Title>
-				<Card.Description>Update the team password/join code.</Card.Description>
+				<Card.Title>Security</Card.Title>
+				<Card.Description>Update the team password</Card.Description>
 			</Card.Header>
 			<Card.Content class="space-y-4">
 				<div class="grid gap-4 md:grid-cols-2">

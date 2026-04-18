@@ -42,21 +42,8 @@
 		authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin
 	);
 
-	$effect(() => {
-		if (typeof document !== 'undefined') {
-			const shouldHideScroll = challengeView === 'sidebar' || ((upcoming || ended) && !isAdmin);
-			document.body.classList.toggle('overflow-hidden', shouldHideScroll);
-		}
-		return () => {
-			if (typeof document !== 'undefined') {
-				document.body.classList.remove('overflow-hidden');
-			}
-		};
-	});
-
 	let openSolves = $state(false);
 
-	// 2. Local State
 	let createChallengeOpen = $state(false);
 	let selectedId = $state<number | null>(null);
 	let countdowns: Record<string, number> = $state({});
@@ -231,11 +218,14 @@
 
 	function closeModal() {
 		openModal = false;
-		// Clear selection when closing
-		setTimeout(() => {
-			selectedId = null;
-		}, 200);
+		selectedId = null;
 	}
+
+	$effect(() => {
+		if (challengeView !== 'sidebar' && selectedId && !openModal) {
+			closeModal();
+		}
+	});
 
 	function copyToClipboard(text: string) {
 		if (typeof navigator === 'undefined') return;
@@ -272,9 +262,7 @@
 	}
 </script>
 
-
-
-{#if (!upcoming && !ended || isAdmin) && challengeView !== 'sidebar'}
+{#if ((!upcoming && !ended) || isAdmin) && challengeView !== 'sidebar'}
 	<div class="mb-10 w-full">
 		<ChallengeFilters
 			bind:search
@@ -296,7 +284,7 @@
 		</div>
 		<h2 class="mb-3 text-3xl font-bold tracking-tight">Team Required</h2>
 		<p class="text-muted-foreground mx-auto mb-8 max-w-md text-lg leading-relaxed">
-			You must join or create a team to participate in the competition and view challenges.
+			You must join or create a team to participate in the CTF and view challenges.
 		</p>
 		<div class="flex gap-4">
 			<Button
@@ -375,12 +363,3 @@
 		/>
 	{/if}
 {/if}
-
-
-
-<style>
-	:global(body.overflow-hidden) {
-		overflow: hidden !important;
-		padding-right: 0 !important;
-	}
-</style>

@@ -109,7 +109,8 @@
 							class="relative h-12 w-12 drop-shadow-sm"
 						/>
 					</div>
-					<span class="text-foreground text-3xl font-black tracking-tighter"
+					<span
+						class="text-foreground hidden text-3xl font-black tracking-tighter truncate sm:block md:max-w-[100px] lg:max-w-none"
 						>{$siteContent.brand.shortName}</span
 					>
 				</a>
@@ -239,7 +240,7 @@
 						href="/signIn"
 						variant="default"
 						size="lg"
-						class="shadow-primary/20 px-8 font-bold shadow-lg transition-all hover:scale-105 active:scale-95"
+						class="shadow-primary/20 px-8 font-bold shadow-lg transition-all"
 					>
 						Sign In
 					</Button>

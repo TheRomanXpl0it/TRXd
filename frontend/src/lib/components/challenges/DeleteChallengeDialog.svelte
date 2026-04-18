@@ -16,8 +16,11 @@
 
 	let confirmationText = $state('');
 
-	const expectedText = $derived(`Yes, I want to delete '${toDelete?.name ?? ''}'`);
-	const canDelete = $derived(confirmationText === expectedText);
+	const expectedText = $derived.by(() => {
+		const name = toDelete?.name ?? '';
+		return `Yes, I want to delete '${name}'`;
+	});
+	const canDelete = $derived(confirmationText.length > 0 && confirmationText === expectedText);
 
 	// Reset confirmation text when dialog opens/closes
 	$effect(() => {

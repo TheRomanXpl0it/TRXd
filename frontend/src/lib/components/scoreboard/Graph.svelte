@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { Chart, Svg, Axis, Spline, Highlight, Tooltip as ChartTooltip } from 'layerchart';
+	import { Chart, Canvas, Svg, Axis, Spline, Highlight, Tooltip as ChartTooltip } from 'layerchart';
 	import { scaleTime, scaleLinear } from 'd3-scale';
 	// @ts-ignore - Ignore missing type declarations for d3-shape
 	import { curveStepAfter } from 'd3-shape';
 	import { mode } from 'mode-watcher';
 
-	// Props interface
 	interface Props {
 		data?: any[];
 		timeMin?: number;
@@ -15,61 +14,85 @@
 		height?: string;
 	}
 
+	interface SolveDatum {
+		points: number;
+		date: Date;
+	}
+
+	interface ChartPoint {
+		date: Date;
+		value: number;
+		name: string;
+		color: string;
+	}
+
+	interface ChartSeries {
+		id: string | number;
+		name: string;
+		data: ChartPoint[];
+		color: string;
+	}
+
 	let {
 		data = [],
 		timeMin,
 		timeMax,
-		userMode = false,
+		userMode: _userMode = false,
 		compact = false,
 		height = ''
 	}: Props = $props();
 
+	const xScale = scaleTime();
+	const yScale = scaleLinear();
+
 	const isDark = $derived(mode.current === 'dark');
 
-	// Parse ISO timestamps to Date
-	function toDate(t: any): Date | null {
+	function toDate(t: unknown): Date | null {
 		if (t instanceof Date) return t;
+
 		if (typeof t === 'number') {
 			return new Date(t < 2_000_000_000 ? t * 1000 : t);
 		}
+
 		if (typeof t !== 'string') return null;
+
+		// Truncate excessive fractional seconds for safer Date parsing
 		const fixed = t.replace(/\.(\d{3})\d*(Z|[+\-]\d\d:\d\d)$/, '.$1$2');
 		const d = new Date(fixed);
-		return isNaN(d.getTime()) ? null : d;
+
+		return Number.isNaN(d.getTime()) ? null : d;
 	}
 
-	function normalizeTeam(entry: any): any[] {
+	function normalizeTeam(entry: any): SolveDatum[] {
 		if (!entry) return [];
-		if (Array.isArray(entry.submissions)) {
-			return entry.submissions.map((s: any) => ({
-				points: Number(s?.score ?? 0),
-				date: toDate(s?.timestamp),
-				fb: !!s?.first_blood
-			}));
-		}
-		if (Array.isArray(entry.solves)) {
-			return entry.solves.map((s: any) => ({
-				points: Number(s?.[1] ?? 0),
-				date: toDate(s?.[2]),
-				fb: !!s?.[3]
-			}));
-		}
-		return [];
-	}
 
-	function totalPoints(entry: any): number {
-		const solves = normalizeTeam(entry);
-		if (solves.length === 0) return 0;
-		return Math.max(...solves.map((s) => Number(s?.points ?? 0)));
+		if (Array.isArray(entry.submissions)) {
+			return entry.submissions
+				.map((s: any) => ({
+					points: Number(s?.score ?? 0),
+					date: toDate(s?.timestamp)
+				}))
+				.filter((s: { points: number; date: Date | null }): s is SolveDatum => s.date !== null);
+		}
+
+		if (Array.isArray(entry.solves)) {
+			return entry.solves
+				.map((s: any) => ({
+					points: Number(s?.[1] ?? 0),
+					date: toDate(s?.[2])
+				}))
+				.filter((s: { points: number; date: Date | null }): s is SolveDatum => s.date !== null);
+		}
+
+		return [];
 	}
 
 	function nameForTeam(team: any): string {
 		if (team?.team_name) return team.team_name;
 		if (team?.name) return team.name;
-		return String(team?.team_id || team?.id || '');
+		return String(team?.team_id ?? team?.id ?? '');
 	}
 
-	// Competitive colors for top 3
 	const top3Colors = ['#fbbf24', '#94a3b8', '#cd7f32'];
 	const colors = [
 		'#3b82f6',
@@ -86,81 +109,96 @@
 
 	let highlightedTeam = $state<string | number | null>(null);
 
-	const chartData = $derived.by(() => {
+	const xDomain = $derived.by(() => {
+		const min = toDate(timeMin);
+		const max = toDate(timeMax);
+		return min || max ? [min, max] : undefined;
+	});
+
+	const chartData = $derived.by<ChartSeries[]>(() => {
 		const arr = Array.isArray(data) ? data : [];
 		if (arr.length === 0) return [];
 
-		const nowMs = Date.now();
-		
-		// Single pass to normalize and pre-calculate scores/times
+		const now = new Date();
+
 		const processedTeams = arr.map((team: any) => {
-			const rawSolves = normalizeTeam(team);
-			const solves = rawSolves
-				.filter((s: any) => s.date !== null)
-				.sort((a: any, b: any) => a.date.getTime() - b.date.getTime());
+			const solves = normalizeTeam(team).sort((a, b) => a.date.getTime() - b.date.getTime());
 
 			const total = solves.length > 0 ? solves[solves.length - 1].points : 0;
 			const lastSolve = solves.length > 0 ? solves[solves.length - 1].date.getTime() : 0;
 
 			return {
 				...team,
+				id: team?.team_id ?? team?.id ?? nameForTeam(team),
+				name: nameForTeam(team),
 				solves,
 				total,
-				lastSolve,
-				name: nameForTeam(team)
+				lastSolve
 			};
 		});
 
-		// Rank optimized teams
 		const ranked = processedTeams
-			.filter(t => t.total > 0)
-			.sort((a, b) => 
-				b.total - a.total || 
-				a.lastSolve - b.lastSolve || 
-				(a.id || a.team_id || 0) - (b.id || b.team_id || 0)
+			.filter((team) => team.total > 0)
+			.sort(
+				(a, b) =>
+					b.total - a.total || a.lastSolve - b.lastSolve || Number(a.id ?? 0) - Number(b.id ?? 0)
 			);
 
-		// Build series
 		return ranked.map((team, index) => {
 			const color = index < 3 ? top3Colors[index] : colors[(index - 3) % colors.length];
-			const points: Array<{ date: Date; value: number; name: string; color: string }> = [];
+			const firstSolve = team.solves[0];
+			const lastSolve = team.solves[team.solves.length - 1];
 
-			if (team.solves.length > 0) {
-				// Start from 0 at the first solve time
-				points.push({
-					date: team.solves[0].date,
-					value: 0,
+			const points: ChartPoint[] = new Array(team.solves.length + 2);
+
+			points[0] = {
+				date: firstSolve.date,
+				value: 0,
+				name: team.name,
+				color
+			};
+
+			for (let i = 0; i < team.solves.length; i++) {
+				const solve = team.solves[i];
+				points[i + 1] = {
+					date: solve.date,
+					value: solve.points,
 					name: team.name,
 					color
-				});
-
-				// Add all solve points
-				for (const s of team.solves) {
-					points.push({
-						date: s.date,
-						value: s.points,
-						name: team.name,
-						color
-					});
-				}
-
-				// Extend to now
-				points.push({
-					date: new Date(nowMs),
-					value: team.solves[team.solves.length - 1].points,
-					name: team.name,
-					color
-				});
+				};
 			}
 
+			points[points.length - 1] = {
+				date: now,
+				value: lastSolve.points,
+				name: team.name,
+				color
+			};
+
 			return {
-				id: team.team_id || team.id,
+				id: team.id,
 				name: team.name,
 				data: points,
 				color
 			};
 		});
 	});
+
+	// bisect-x expects x-sorted data
+	const flatChartData = $derived.by<ChartPoint[]>(() => {
+		const flat = chartData.flatMap((series) => series.data);
+		flat.sort((a, b) => a.date.getTime() - b.date.getTime());
+		return flat;
+	});
+
+	const legendData = $derived(
+		chartData.map((series) => ({
+			id: series.id,
+			name: series.name,
+			color: series.color,
+			lastScore: series.data.length > 0 ? series.data[series.data.length - 1].value : 0
+		}))
+	);
 
 	const textColor = $derived('hsl(var(--muted-foreground))');
 	const gridColor = $derived('hsl(var(--border))');
@@ -174,11 +212,12 @@
 		{#if chartData.length > 0}
 			{#key isDark}
 				<Chart
-					data={chartData.flatMap((s) => s.data)}
+					data={flatChartData}
 					x="date"
-					xScale={scaleTime()}
+					{xScale}
+					{xDomain}
 					y="value"
-					yScale={scaleLinear()}
+					{yScale}
 					yDomain={[0, null]}
 					padding={{
 						left: compact ? 16 : 24,
@@ -186,26 +225,33 @@
 						top: compact ? 8 : 12,
 						right: compact ? 8 : 12
 					}}
-					tooltip={{ mode: 'voronoi' }}
+					tooltip={{ mode: 'bisect-x' }}
 				>
+					<!-- Use Svg for more reliable styling and theme isolation -->
 					<Svg>
 						<Axis
 							placement="left"
+							tickSpacing={compact ? 28 : 40}
 							grid={{ style: `stroke: ${gridColor}; stroke-dasharray: 4` }}
 							rule={{
 								style: `font-size: ${compact ? '9px' : '11px'}; fill: ${textColor}; font-weight: bold;`
 							}}
 						/>
-						{#each chartData as series}
+						
+						{#each chartData as series (series.id)}
 							<Spline
 								data={series.data}
-								class="stroke-[3px] transition-all duration-300"
-								style={`stroke: ${series.color}; opacity: ${highlightedTeam === null || highlightedTeam === series.id ? 1 : 0.1};`}
 								curve={curveStepAfter}
+								stroke={series.color}
+								strokeWidth={3}
+								fill="none"
+								opacity={highlightedTeam === null || highlightedTeam === series.id ? 1 : 0.12}
 							/>
 						{/each}
-						<Highlight lines points={{ r: 6 }} />
+
+						<Highlight lines points={{ r: compact ? 5 : 6 }} />
 					</Svg>
+
 					<ChartTooltip.Root
 						class="bg-card/95 text-card-foreground border-muted/30 z-50 min-w-[150px] rounded-lg border p-3 text-sm shadow-xl backdrop-blur-sm"
 					>
@@ -252,26 +298,22 @@
 		{/if}
 	</div>
 
-	<!-- Legend at bottom -->
-	{#if chartData.length > 0 && !compact}
-		<div class="custom-scrollbar mt-6 max-h-[120px] overflow-y-auto px-4 sm:max-h-none sm:px-6">
+	{#if legendData.length > 0 && !compact}
+		<div
+			class="custom-scrollbar mt-6 max-h-[120px] overflow-y-auto px-4 sm:max-h-none sm:px-6"
+			style="content-visibility: auto; contain-intrinsic-size: 120px;"
+		>
 			<div class="flex flex-wrap justify-center gap-3 py-1 text-sm sm:gap-4">
-				{#each chartData as series}
-					{@const lastScore =
-						series.data.length > 0 ? series.data[series.data.length - 1].value : 0}
+				{#each legendData as series (series.id)}
 					<button
 						type="button"
 						class="hover:bg-muted/50 focus:ring-primary/30 group flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 transition-all duration-200 focus:outline-none focus:ring-2 {highlightedTeam !==
 							null && highlightedTeam !== series.id
 							? 'opacity-30 grayscale-[50%]'
 							: 'opacity-100'}"
-						title="{series.name}: {lastScore} pts"
+						title="{series.name}: {series.lastScore} pts"
 						onclick={() => {
-							if (highlightedTeam === series.id) {
-								highlightedTeam = null;
-							} else {
-								highlightedTeam = series.id;
-							}
+							highlightedTeam = highlightedTeam === series.id ? null : series.id;
 						}}
 					>
 						<div
@@ -281,9 +323,9 @@
 								: ''}"
 							style="background-color: {series.color};"
 						></div>
-						<span class="text-foreground text-xs font-bold tracking-tight sm:text-sm"
-							>{series.name}</span
-						>
+						<span class="text-foreground text-xs font-bold tracking-tight sm:text-sm">
+							{series.name}
+						</span>
 					</button>
 				{/each}
 			</div>
@@ -295,13 +337,16 @@
 	.custom-scrollbar::-webkit-scrollbar {
 		width: 4px;
 	}
+
 	.custom-scrollbar::-webkit-scrollbar-track {
 		background: transparent;
 	}
+
 	.custom-scrollbar::-webkit-scrollbar-thumb {
 		background: hsl(var(--muted-foreground) / 0.2);
 		border-radius: 10px;
 	}
+
 	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
 		background: hsl(var(--muted-foreground) / 0.4);
 	}

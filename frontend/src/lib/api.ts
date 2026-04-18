@@ -26,6 +26,8 @@ function getCookie(name: string): string | null {
 	return match ? decodeURIComponent(match[2]) : null;
 }
 
+import type { BaseResponse } from './types';
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 	const headers = new Headers(init.headers ?? {});
 
@@ -65,9 +67,13 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 	if (!res.ok) {
 		let errorMessage = res.statusText;
 		try {
-			const errorBody = await parse<{ error?: string }>(res);
+			const errorBody = await parse<BaseResponse>(res);
 			if (typeof errorBody === 'object' && errorBody?.error) {
 				errorMessage = errorBody.error;
+			} else if (typeof errorBody === 'object' && errorBody?.message) {
+				errorMessage = errorBody.message;
+			} else if (typeof errorBody === 'object' && errorBody?.errors && errorBody.errors.length > 0) {
+				errorMessage = errorBody.errors[0];
 			}
 		} catch {
 			// use default statusText if parsing fails

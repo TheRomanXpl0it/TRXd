@@ -85,7 +85,7 @@
 	}
 
 	function openEdit(chall: any) {
-		goto(`/admin/challenges/${chall.id}`);
+		goto(`/admin/challenges/${chall.id}/edit`);
 	}
 </script>
 

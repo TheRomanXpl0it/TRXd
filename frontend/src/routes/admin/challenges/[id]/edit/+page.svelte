@@ -8,12 +8,10 @@
 	import * as Card from '$lib/components/ui/card';
 	import { toast } from 'svelte-sonner';
 	import {
-		createChallenge,
-		getChallenges,
 		updateChallenge,
 		uploadAttachments
 	} from '$lib/challenges';
-	import { createFlags } from '$lib/flags';
+	import { createFlags, deleteFlags } from '$lib/flags';
 	import { goto } from '$app/navigation';
 	import {
 		PlusCircle,
@@ -24,21 +22,25 @@
 		X,
 		Paperclip,
 		Tags as TagsIcon,
-		Plus
+		Plus,
+		Edit
 	} from '@lucide/svelte';
 	import CategorySelect from '$lib/components/challenges/CategorySelect.svelte';
 	import TagMultiSelect from '$lib/components/challenges/TagMultiselect.svelte';
 	import MonacoEditor from '$lib/components/MonacoEditor.svelte';
 	import { getCategories } from '$lib/categories';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
+	import type { Challenge } from '$lib/types';
 
-	// Form State
+	let { data }: { data: { challenge: Challenge } } = $props();
+
+	// Form State prefilled
 	let name = $state('');
 	let category = $state('');
 	let description = $state('');
 	let type = $state('Normal');
 	let points = $state(500);
-	let dynamicScore = $state(true);
+	let dynamicScore = $state(false);
 	let hidden = $state(false);
 
 	let host = $state('');
@@ -53,12 +55,13 @@
 	];
 
 	// Flags
-	let flags = $state([{ flag: '', regex: false }]);
+	let flags = $state<{ flag: string; regex: boolean }[]>([{ flag: '', regex: false }]);
+	let originalFlags: { flag: string; regex: boolean }[] = [];
 
 	// Docker Config (for Container/Compose)
 	let imageName = $state('');
 	let composeFile = $state('');
-	let lifetime = $state(0);
+	let lifetime = $state(1800);
 	let maxMemory = $state(0);
 	let maxCpu = $state('');
 	let hashDomain = $state(false);
@@ -72,6 +75,60 @@
 	let tags = $state<string[]>([]);
 	let authorsCsv = $state('');
 	let envVars = $state<{ name: string; value: string }[]>([]);
+
+	$effect(() => {
+		if (data.challenge) {
+			untrack(() => {
+				name = data.challenge.name;
+				category = data.challenge.category ?? '';
+				description = data.challenge.description || '';
+				type = data.challenge.type || 'Normal';
+				points = data.challenge.max_points || data.challenge.points || 500;
+				dynamicScore = data.challenge.score_type === 'Dynamic';
+				hidden = !!data.challenge.hidden;
+
+				host = data.challenge.host || '';
+				port = data.challenge.port ?? undefined;
+				connType = data.challenge.conn_type || 'NONE';
+
+				flags =
+					data.challenge.flags && data.challenge.flags.length > 0
+						? data.challenge.flags.map((f) => ({ flag: f.flag, regex: f.regex }))
+						: [{ flag: '', regex: false }];
+				originalFlags = JSON.parse(JSON.stringify(flags));
+
+				imageName = data.challenge.docker_config?.image || data.challenge.image || '';
+				composeFile = data.challenge.docker_config?.compose || data.challenge.compose || '';
+				lifetime = data.challenge.docker_config?.lifetime || data.challenge.timeout || 1800;
+				maxMemory = data.challenge.docker_config?.max_memory || 0;
+				maxCpu = data.challenge.docker_config?.max_cpu || '';
+				hashDomain = data.challenge.docker_config
+					? !!data.challenge.docker_config.hash_domain
+					: !!data.challenge.instance_hash_domain;
+				renewable = data.challenge.docker_config
+					? !!data.challenge.docker_config.renewable
+					: !!data.challenge.instance_renewable;
+
+				tags = data.challenge.tags || [];
+				authorsCsv = (data.challenge.authors || []).join(', ');
+
+				if (data.challenge.docker_config?.envs) {
+					try {
+						const parsedEnvs = JSON.parse(data.challenge.docker_config.envs);
+						envVars = Object.entries(parsedEnvs).map(([name, value]) => ({
+							name,
+							value: String(value)
+						}));
+					} catch (e) {
+						console.error('Failed to parse envs', e);
+					}
+				} else {
+					envVars = [];
+				}
+			});
+		}
+	});
+
 	let attachments = $state<File[]>([]);
 	let fileInputEl = $state<HTMLInputElement | null>(null);
 
@@ -110,22 +167,8 @@
 
 		loading = true;
 		try {
-			// 1. Create base challenge
-			const baseRes = await createChallenge(
-				name.trim(),
-				category,
-				description.trim(),
-				type,
-				points,
-				dynamicScore ? 'Dynamic' : 'Static'
-			);
+			const challId = data.challenge.id;
 
-			// 2. Fetch the newly created challenge to get its ID
-			const all = await getChallenges();
-			const newChall = all.sort((a, b: any) => b.id - a.id).find((c) => c.name === name.trim());
-			const challId = newChall?.id || baseRes.id;
-
-			// 3. Update Advanced Fields
 			const authors = authorsCsv
 				.split(',')
 				.map((a) => a.trim())
@@ -160,13 +203,35 @@
 				envs: Object.keys(envObj).length > 0 ? JSON.stringify(envObj) : undefined
 			});
 
-			// 4. Create Flags
-			const validFlags = flags.filter((f) => f.flag.trim());
-			if (validFlags.length > 0) {
-				await createFlags(validFlags, challId);
+			// Manage Flags
+			const currentFlags = flags.filter((f) => f.flag.trim());
+			
+			// Find flags to delete (in original but not in current)
+			const toDelete = originalFlags.filter(
+				(of) => of.flag && !currentFlags.some((cf) => cf.flag === of.flag)
+			);
+			
+			// Find flags to create (in current but not in original, or changed)
+			const toCreate = currentFlags.filter(
+				(cf) => !originalFlags.some((of) => of.flag === cf.flag && of.regex === cf.regex)
+			);
+
+			// First delete flags that were removed or changed
+			// (Note: if a flag changed its regex, we delete and recreate)
+			const changedToDelete = currentFlags.filter(
+				(cf) => originalFlags.some((of) => of.flag === cf.flag && of.regex !== cf.regex)
+			);
+			
+			const allToDelete = [...toDelete, ...changedToDelete];
+			if (allToDelete.length > 0) {
+				await deleteFlags(allToDelete, challId);
 			}
 
-			// 5. Upload Attachments
+			if (toCreate.length > 0) {
+				await createFlags(toCreate, challId);
+			}
+
+			// Upload Attachments
 			if (attachments.length > 0) {
 				const fd = new FormData();
 				fd.append('chall_id', String(challId));
@@ -176,10 +241,10 @@
 				await uploadAttachments(fd);
 			}
 
-			toast.success('Challenge created successfully!');
-			goto('/challenges');
+			toast.success('Challenge updated successfully!');
+			goto('/admin');
 		} catch (err: any) {
-			toast.error(err?.message || 'Failed to create challenge');
+			toast.error(err?.message || 'Failed to update challenge');
 		} finally {
 			loading = false;
 		}
@@ -199,11 +264,11 @@
 	<div class="flex items-center justify-between">
 		<div class="flex items-center gap-4">
 			<div class="bg-primary/10 text-primary rounded-full p-3">
-				<PlusCircle class="h-8 w-8" />
+				<Edit class="h-8 w-8" />
 			</div>
 			<div>
-				<h1 class="text-3xl font-bold tracking-tight">Create Challenge</h1>
-				<p class="text-muted-foreground mt-1">Configure all challenge settings in one go</p>
+				<h1 class="text-3xl font-bold tracking-tight">Edit Challenge</h1>
+				<p class="text-muted-foreground mt-1">Update challenge settings</p>
 			</div>
 		</div>
 		<Button size="lg" onclick={handleSubmit} disabled={loading} class="gap-2 px-8">
@@ -212,7 +277,7 @@
 			{:else}
 				<Save class="h-4 w-4" />
 			{/if}
-			Create Challenge
+			Update Challenge
 		</Button>
 	</div>
 
@@ -345,7 +410,7 @@
 					<Card.Header class="flex flex-row items-center justify-between">
 						<div>
 							<Card.Title>Flags</Card.Title>
-							<Card.Description>Manage correct answers for this challenge.</Card.Description>
+							<Card.Description>Manage correct answers for this challenge (Add new flags).</Card.Description>
 						</div>
 						<Button variant="outline" size="sm" onclick={addFlag}>Add Flag</Button>
 					</Card.Header>
@@ -504,7 +569,7 @@
 				<Card.Root>
 					<Card.Header>
 						<Card.Title>Attachments</Card.Title>
-						<Card.Description>Upload files for players to download.</Card.Description>
+						<Card.Description>Upload additional files for players to download.</Card.Description>
 					</Card.Header>
 					<Card.Content class="space-y-6">
 						<div
@@ -560,6 +625,26 @@
 											>
 												<X class="h-4 w-4" />
 											</Button>
+										</div>
+									{/each}
+								</div>
+							</div>
+						{/if}
+						
+						{#if data.challenge.attachments && data.challenge.attachments.length > 0}
+							<div class="space-y-3 border-t pt-4">
+								<h5 class="text-muted-foreground text-xs font-black uppercase tracking-widest">
+									Existing Attachments ({data.challenge.attachments.length})
+								</h5>
+								<div class="grid gap-2">
+									{#each data.challenge.attachments as existingFile}
+										<div
+											class="bg-muted/30 group flex items-center justify-between rounded-lg border p-3"
+										>
+											<div class="flex min-w-0 items-center gap-3">
+												<Paperclip class="h-4 w-4 shrink-0 opacity-40" />
+												<span class="truncate text-sm font-medium">{existingFile.split('/').pop()}</span>
+											</div>
 										</div>
 									{/each}
 								</div>

@@ -53,8 +53,13 @@ export function renderMarkdown(markdown: string): string {
 export function renderMarkdownInline(markdown: string): string {
 	if (!markdown) return '';
 
-	const html = renderMarkdown(markdown);
+	const html = renderMarkdown(markdown).trim();
+	if (html.startsWith('<p>') && html.endsWith('</p>')) {
+		const matches = html.match(/<p/g);
+		if (matches && matches.length === 1) {
+			return html.slice(3, -4);
+		}
+	}
 
-	// this might not be safe
-	return html.replace(/^<p>([\s\S]*)<\/p>$/, '$1');
+	return html;
 }
