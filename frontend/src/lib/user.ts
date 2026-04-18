@@ -1,5 +1,11 @@
 import { api } from '$lib/api';
-import type { User, PaginatedResponse, BaseResponse, SearchUsersResponse } from '$lib/types';
+import type {
+	User,
+	PaginatedResponse,
+	BaseResponse,
+	PasswordResetResponse,
+	SearchUsersResponse
+} from '$lib/types';
 import { getTeamByEmail, getTeamByName } from '$lib/team';
 
 import { authState } from '$lib/stores/auth';
@@ -67,11 +73,14 @@ export async function updateUserRole(userId: number, role: string): Promise<Base
 	});
 }
 
-export async function resetUserPassword(userId: number, newPassword?: string): Promise<BaseResponse> {
+export async function resetUserPassword(
+	userId: number,
+	newPassword?: string
+): Promise<PasswordResetResponse> {
 	const body: any = { user_id: userId };
 	if (newPassword) body.new_password = newPassword;
 
-	return api<BaseResponse>('/users/password', {
+	return api<PasswordResetResponse>('/users/password', {
 		headers: { 'content-type': 'application/json' },
 		method: 'PATCH',
 		body: JSON.stringify(body)

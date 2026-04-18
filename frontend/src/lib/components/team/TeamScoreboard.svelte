@@ -13,7 +13,7 @@
 
 	// Prop (team contains solves[] and members[])
 	let { team } = $props<{ team: any }>();
-	let solves = $state(team?.solves);
+	const solves = $derived(Array.isArray(team?.solves) ? team.solves : []);
 
 	// Map of memberId -> memberName for quick lookup
 	let memberNameById: Record<string, string> = $state({});

@@ -1,5 +1,11 @@
 import { api } from '$lib/api';
-import type { Team, PaginatedResponse, BaseResponse, SearchTeamsResponse } from '$lib/types';
+import type {
+	Team,
+	PaginatedResponse,
+	BaseResponse,
+	PasswordResetResponse,
+	SearchTeamsResponse
+} from '$lib/types';
 
 export async function getTeams(page = 1, limit = 20): Promise<PaginatedResponse<Team>> {
 	const offset = (page - 1) * limit;
@@ -51,11 +57,14 @@ export async function updateTeam(
 	});
 }
 
-export async function resetTeamPassword(teamId: number, newPassword?: string): Promise<BaseResponse> {
+export async function resetTeamPassword(
+	teamId: number,
+	newPassword?: string
+): Promise<PasswordResetResponse> {
 	const body: any = { team_id: teamId };
 	if (newPassword) body.new_password = newPassword;
-	
-	return api<BaseResponse>('/teams/password', {
+
+	return api<PasswordResetResponse>('/teams/password', {
 		headers: { 'content-type': 'application/json' },
 		method: 'PATCH',
 		body: JSON.stringify(body)

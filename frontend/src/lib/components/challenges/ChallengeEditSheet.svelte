@@ -73,9 +73,7 @@
 	);
 
 	// Current selected tags, as **strings**, deduped
-	let tags = $state<string[]>(
-		Array.from(new Set((Array.isArray(all_tags) ? all_tags : []).map(String)))
-	);
+	let tags = $state<string[]>([]);
 
 	let existingAttachments = $state<string[]>([]); // from backend
 	let removedAttachmentNames = $state<Set<string>>(new Set()); // user-marked for deletion

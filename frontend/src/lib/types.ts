@@ -134,6 +134,10 @@ export interface BaseResponse {
 	errors?: string[];
 }
 
+export interface PasswordResetResponse extends BaseResponse {
+	new_password?: string;
+}
+
 export interface SearchUsersResponse extends BaseResponse {
 	users: User[];
 }

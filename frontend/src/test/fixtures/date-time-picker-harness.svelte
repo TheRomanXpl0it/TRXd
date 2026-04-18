@@ -3,7 +3,11 @@
 
 	let { initialValue = '', invalid = false }: { initialValue?: string; invalid?: boolean } = $props();
 
-	let value = $state(initialValue);
+	let value = $state('');
+
+	$effect(() => {
+		value = initialValue;
+	});
 </script>
 
 <DateTimePicker bind:value {invalid} />
