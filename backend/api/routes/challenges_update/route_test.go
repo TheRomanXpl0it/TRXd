@@ -244,25 +244,25 @@ func TestRoute(t *testing.T) {
 			session.Get("/challenges", nil, http.StatusOK)
 			body := session.Body()
 			expected := JSON{
-				"attachments": []string{},
-				"authors":     test.testBody["authors"],
-				"category":    test.testBody["category"],
-				"conn_type":   test.testBody["conn_type"],
-				"description": test.testBody["description"],
-				"first_blood": false,
-				"hidden":      test.testBody["hidden"],
-				"host":        test.testBody["host"],
-				"id":          challID,
-				"instance":    test.testBody["type"] != "Normal",
-				"max_points":  test.testBody["max_points"],
-				"name":        test.testBody["name"],
-				"points":      test.testBody["max_points"],
-				"port":        1234,
-				"score_type":  test.testBody["score_type"],
-				"solved":      false,
-				"solves":      0,
-				"tags":        test.testBody["tags"],
-				"timeout":     0,
+				"attachments":          []string{},
+				"authors":              test.testBody["authors"],
+				"category":             test.testBody["category"],
+				"conn_type":            test.testBody["conn_type"],
+				"description":          test.testBody["description"],
+				"first_blood":          false,
+				"hidden":               test.testBody["hidden"],
+				"host":                 test.testBody["host"],
+				"id":                   challID,
+				"instance":             test.testBody["type"] != "Normal",
+				"max_points":           test.testBody["max_points"],
+				"name":                 test.testBody["name"],
+				"points":               test.testBody["max_points"],
+				"port":                 1234,
+				"score_type":           test.testBody["score_type"],
+				"solved":               false,
+				"solves":               0,
+				"tags":                 test.testBody["tags"],
+				"timeout":              0,
 				"instance_hash_domain": test.testBody["hash_domain"],
 				"instance_renewable":   test.testBody["renewable"],
 			}
@@ -278,6 +278,7 @@ func TestRoute(t *testing.T) {
 			session.Get(fmt.Sprintf("/challenges/%d", challID), nil, http.StatusOK)
 			body = session.Body()
 			expected = JSON{
+				"attachments": []string{},
 				"docker_config": JSON{
 					"compose":     test.testBody["compose"],
 					"envs":        test.testBody["envs"],
@@ -323,28 +324,28 @@ func TestRoute(t *testing.T) {
 	session.Patch("/challenges", testBody, http.StatusOK)
 	session.CheckResponse(nil)
 
-	session.Get("/challenges/", nil, http.StatusOK)
+	session.Get("/challenges", nil, http.StatusOK)
 	body := session.Body()
 	expected := JSON{
-		"attachments": []string{},
-		"authors":     testBody["authors"],
-		"category":    testBody["category"],
-		"conn_type":   "TCP",
-		"description": testBody["description"],
-		"first_blood": false,
-		"hidden":      testBody["hidden"],
-		"host":        testBody["host"],
-		"id":          challID,
-		"instance":    testBody["type"] != "Normal",
-		"max_points":  testBody["max_points"],
-		"name":        testBody["name"],
-		"points":      testBody["max_points"],
-		"port":        testBody["port"],
-		"score_type":  "Dynamic",
-		"solved":      false,
-		"solves":      0,
-		"tags":        testBody["tags"],
-		"timeout":     0,
+		"attachments":          []string{},
+		"authors":              testBody["authors"],
+		"category":             testBody["category"],
+		"conn_type":            "TCP",
+		"description":          testBody["description"],
+		"first_blood":          false,
+		"hidden":               testBody["hidden"],
+		"host":                 testBody["host"],
+		"id":                   challID,
+		"instance":             testBody["type"] != "Normal",
+		"max_points":           testBody["max_points"],
+		"name":                 testBody["name"],
+		"points":               testBody["max_points"],
+		"port":                 testBody["port"],
+		"score_type":           "Dynamic",
+		"solved":               false,
+		"solves":               0,
+		"tags":                 testBody["tags"],
+		"timeout":              0,
 		"instance_hash_domain": testBody["hash_domain"],
 		"instance_renewable":   testBody["renewable"],
 	}
@@ -360,6 +361,7 @@ func TestRoute(t *testing.T) {
 	session.Get(fmt.Sprintf("/challenges/%d", challID), nil, http.StatusOK)
 	body = session.Body()
 	expected = JSON{
+		"attachments": []string{},
 		"docker_config": JSON{
 			"compose":     testBody["compose"],
 			"envs":        testBody["envs"],

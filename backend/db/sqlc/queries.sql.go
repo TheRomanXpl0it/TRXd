@@ -484,10 +484,42 @@ func (q *Queries) GetCategory(ctx context.Context, name string) (Category, error
 	return i, err
 }
 
+const getChallAttachments = `-- name: GetChallAttachments :many
+SELECT
+    (a.hash || '/' || a.name)::TEXT AS attachments
+  FROM attachments a
+  WHERE chall_id = $1
+`
+
+// Retrieve all attachments associated with a challenge
+func (q *Queries) GetChallAttachments(ctx context.Context, challID int32) ([]string, error) {
+	rows, err := q.query(ctx, q.getChallAttachmentsStmt, getChallAttachments, challID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var attachments string
+		if err := rows.Scan(&attachments); err != nil {
+			return nil, err
+		}
+		items = append(items, attachments)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getChallDockerConfig = `-- name: GetChallDockerConfig :one
 SELECT chall_id, image, compose, hash_domain, lifetime, renewable, envs, max_memory, max_cpu FROM docker_configs WHERE chall_id = $1
 `
 
+// Retrieve Docker configuration for a challenge
 func (q *Queries) GetChallDockerConfig(ctx context.Context, challID int32) (DockerConfig, error) {
 	row := q.queryRow(ctx, q.getChallDockerConfigStmt, getChallDockerConfig, challID)
 	var i DockerConfig

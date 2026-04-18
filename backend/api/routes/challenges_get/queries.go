@@ -19,11 +19,44 @@ type DockerConfig struct {
 }
 
 type Chall struct {
-	SolvesList []sqlc.GetChallengeSolvesRow `json:"solves_list"`
+	SolvesList  []sqlc.GetChallengeSolvesRow `json:"solves_list"`
+	Attachments []string                     `json:"attachments"`
 
 	Type         *sqlc.DeployType               `json:"type,omitempty"`
 	Flags        *[]sqlc.GetFlagsByChallengeRow `json:"flags,omitempty"`
 	DockerConfig *DockerConfig                  `json:"docker_config,omitempty"`
+}
+
+func GetChallengeSolves(ctx context.Context, challengeID int32) ([]sqlc.GetChallengeSolvesRow, error) {
+	solves, err := db.Sql.GetChallengeSolves(ctx, challengeID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return []sqlc.GetChallengeSolvesRow{}, nil
+		}
+		return nil, err
+	}
+
+	if solves == nil {
+		solves = []sqlc.GetChallengeSolvesRow{}
+	}
+
+	return solves, nil
+}
+
+func GetChallAttachments(ctx context.Context, challengeID int32) ([]string, error) {
+	attachments, err := db.Sql.GetChallAttachments(ctx, challengeID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return []string{}, nil
+		}
+		return nil, err
+	}
+
+	if attachments == nil {
+		attachments = []string{}
+	}
+
+	return attachments, nil
 }
 
 func GetFlagsByChallenge(ctx context.Context, challengeID int32) ([]sqlc.GetFlagsByChallengeRow, error) {
@@ -47,16 +80,16 @@ func GetChallenge(ctx context.Context, id int32, uid int32, tid int32, author bo
 		return nil, nil
 	}
 
-	solves, err := db.Sql.GetChallengeSolves(ctx, id)
+	chall := Chall{}
+
+	chall.SolvesList, err = GetChallengeSolves(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	chall := Chall{
-		SolvesList: []sqlc.GetChallengeSolvesRow{},
-	}
-	if solves != nil {
-		chall.SolvesList = solves
+	chall.Attachments, err = GetChallAttachments(ctx, id)
+	if err != nil {
+		return nil, err
 	}
 
 	if !author { // Not Author

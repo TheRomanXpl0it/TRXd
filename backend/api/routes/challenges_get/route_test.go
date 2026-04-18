@@ -51,6 +51,7 @@ func TestRoute(t *testing.T) {
 	}
 
 	expectedPlayer := JSON{
+		"attachments": []string{},
 		"solves_list": []JSON{
 			{
 				"name": "A",
@@ -84,6 +85,7 @@ func TestRoute(t *testing.T) {
 	session.CheckFilteredResponse(expectedPlayer, "id", "timestamp")
 
 	expectedAuthor := JSON{
+		"attachments": []string{},
 		"flags": []JSON{
 			{
 				"flag":  "flag{test-1}",
@@ -111,6 +113,7 @@ func TestRoute(t *testing.T) {
 	session.CheckFilteredResponse(expectedAuthor, "id", "timestamp")
 
 	expectedAuthorHidden := JSON{
+		"attachments": []string{},
 		"flags": []JSON{
 			{
 				"flag":  "flag{test-5}",
@@ -137,6 +140,7 @@ func TestRoute(t *testing.T) {
 	session.CheckFilteredResponse(expectedAuthorHidden, "id", "timestamp")
 
 	expectedDocker := JSON{
+		"attachments": []string{},
 		"docker_config": JSON{
 			"compose":     "",
 			"envs":        "",
@@ -171,6 +175,7 @@ func TestRoute(t *testing.T) {
 	}
 
 	expectedInstance := JSON{
+		"attachments": []string{},
 		"docker_config": JSON{
 			"compose":     "",
 			"envs":        "",

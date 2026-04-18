@@ -87,6 +87,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getCategoryStmt, err = db.PrepareContext(ctx, getCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query GetCategory: %w", err)
 	}
+	if q.getChallAttachmentsStmt, err = db.PrepareContext(ctx, getChallAttachments); err != nil {
+		return nil, fmt.Errorf("error preparing query GetChallAttachments: %w", err)
+	}
 	if q.getChallDockerConfigStmt, err = db.PrepareContext(ctx, getChallDockerConfig); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChallDockerConfig: %w", err)
 	}
@@ -345,6 +348,11 @@ func (q *Queries) Close() error {
 	if q.getCategoryStmt != nil {
 		if cerr := q.getCategoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getCategoryStmt: %w", cerr)
+		}
+	}
+	if q.getChallAttachmentsStmt != nil {
+		if cerr := q.getChallAttachmentsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getChallAttachmentsStmt: %w", cerr)
 		}
 	}
 	if q.getChallDockerConfigStmt != nil {
@@ -657,6 +665,7 @@ type Queries struct {
 	getBadgesFromTeamStmt          *sql.Stmt
 	getCategoriesStmt              *sql.Stmt
 	getCategoryStmt                *sql.Stmt
+	getChallAttachmentsStmt        *sql.Stmt
 	getChallDockerConfigStmt       *sql.Stmt
 	getChallengeByIDStmt           *sql.Stmt
 	getChallengeSolvesStmt         *sql.Stmt
@@ -734,6 +743,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getBadgesFromTeamStmt:          q.getBadgesFromTeamStmt,
 		getCategoriesStmt:              q.getCategoriesStmt,
 		getCategoryStmt:                q.getCategoryStmt,
+		getChallAttachmentsStmt:        q.getChallAttachmentsStmt,
 		getChallDockerConfigStmt:       q.getChallDockerConfigStmt,
 		getChallengeByIDStmt:           q.getChallengeByIDStmt,
 		getChallengeSolvesStmt:         q.getChallengeSolvesStmt,
