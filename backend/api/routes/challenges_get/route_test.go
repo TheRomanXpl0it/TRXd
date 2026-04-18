@@ -51,7 +51,6 @@ func TestRoute(t *testing.T) {
 	}
 
 	expectedPlayer := JSON{
-		"attachments": []string{},
 		"solves_list": []JSON{
 			{
 				"name": "A",
@@ -86,6 +85,13 @@ func TestRoute(t *testing.T) {
 
 	expectedAuthor := JSON{
 		"attachments": []string{},
+		"authors": []string{
+			"author1",
+			"author2",
+		},
+		"category":    "cat-1",
+		"conn_type":   "TCP",
+		"description": "TEST chall-1 DESC",
 		"flags": []JSON{
 			{
 				"flag":  "flag{test-1}",
@@ -96,10 +102,20 @@ func TestRoute(t *testing.T) {
 				"regex": true,
 			},
 		},
+		"hidden":     false,
+		"host":       "ctf.theromanxpl0.it",
+		"max_points": 500,
+		"name":       "chall-1",
+		"port":       1234,
+		"score_type": "Dynamic",
 		"solves_list": []JSON{
 			{
 				"name": "A",
 			},
+		},
+		"tags": []string{
+			"tag-1",
+			"test-tag",
 		},
 		"type": "Normal",
 	}
@@ -114,14 +130,29 @@ func TestRoute(t *testing.T) {
 
 	expectedAuthorHidden := JSON{
 		"attachments": []string{},
+		"authors": []string{
+			"author3",
+		},
+		"category":    "cat-2",
+		"conn_type":   "NONE",
+		"description": "TEST chall-5 DESC",
 		"flags": []JSON{
 			{
 				"flag":  "flag{test-5}",
 				"regex": false,
 			},
 		},
-		"solves_list": []any{},
-		"type":        "Normal",
+		"hidden":      true,
+		"host":        "",
+		"max_points":  500,
+		"name":        "chall-5",
+		"port":        0,
+		"score_type":  "Static",
+		"solves_list": []JSON{},
+		"tags": []string{
+			"tag-5",
+		},
+		"type": "Normal",
 	}
 
 	session.Get("/challenges", nil, http.StatusOK)
@@ -141,6 +172,12 @@ func TestRoute(t *testing.T) {
 
 	expectedDocker := JSON{
 		"attachments": []string{},
+		"authors": []string{
+			"author1",
+		},
+		"category":    "cat-1",
+		"conn_type":   "HTTP",
+		"description": "TEST chall-3 DESC",
 		"docker_config": JSON{
 			"compose":     "",
 			"envs":        "",
@@ -157,10 +194,19 @@ func TestRoute(t *testing.T) {
 				"regex": false,
 			},
 		},
+		"hidden":     false,
+		"host":       "chall-3.test.com",
+		"max_points": 500,
+		"name":       "chall-3",
+		"port":       1337,
+		"score_type": "Dynamic",
 		"solves_list": []JSON{
 			{
 				"name": "A",
 			},
+		},
+		"tags": []string{
+			"tag-3",
 		},
 		"type": "Container",
 	}
@@ -176,6 +222,12 @@ func TestRoute(t *testing.T) {
 
 	expectedInstance := JSON{
 		"attachments": []string{},
+		"authors": []string{
+			"author1",
+		},
+		"category":    "cat-1",
+		"conn_type":   "HTTP",
+		"description": "TEST chall-3 DESC",
 		"docker_config": JSON{
 			"compose":     "",
 			"envs":        "",
@@ -192,10 +244,19 @@ func TestRoute(t *testing.T) {
 				"regex": false,
 			},
 		},
+		"hidden":     false,
+		"host":       "chall-3.test.com",
+		"max_points": 500,
+		"name":       "chall-3",
+		"port":       1337,
+		"score_type": "Dynamic",
 		"solves_list": []JSON{
 			{
 				"name": "A",
 			},
+		},
+		"tags": []string{
+			"tag-3",
 		},
 		"type": "Container",
 	}

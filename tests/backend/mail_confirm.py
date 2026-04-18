@@ -11,7 +11,9 @@ if server is None or port is None or addr is None or passwd is None or toAddr is
 	print("Please set TEST_EMAIL_SERVER, TEST_EMAIL_PORT, TEST_EMAIL_ADDR, TEST_EMAIL_PASSWD and TEST_TO_EMAIL_ADDR environment variables to run this test.")
 	exit(0)
 
-url = 'http://localhost:1337/api'
+host = 'localhost:1337'
+
+url = f'http://{host}/api'
 
 
 def login(mail, password):
@@ -52,7 +54,7 @@ def change_conf(s, key, value):
 
 admin = login('admin@email.com', 'testpass')
 
-change_conf(admin, 'domain', 'localhost:1337')
+change_conf(admin, 'domain', host)
 change_conf(admin, 'email-verification', "true")
 change_conf(admin, 'email-server', server)
 change_conf(admin, 'email-port', str(port))

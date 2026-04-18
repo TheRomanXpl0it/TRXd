@@ -279,6 +279,10 @@ func TestRoute(t *testing.T) {
 			body = session.Body()
 			expected = JSON{
 				"attachments": []string{},
+				"authors":     test.testBody["authors"],
+				"category":    test.testBody["category"],
+				"conn_type":   test.testBody["conn_type"],
+				"description": test.testBody["description"],
 				"docker_config": JSON{
 					"compose":     test.testBody["compose"],
 					"envs":        test.testBody["envs"],
@@ -290,7 +294,14 @@ func TestRoute(t *testing.T) {
 					"renewable":   test.testBody["renewable"],
 				},
 				"flags":       []string{},
-				"solves_list": []string{},
+				"hidden":      test.testBody["hidden"],
+				"host":        test.testBody["host"],
+				"max_points":  test.testBody["max_points"],
+				"name":        test.testBody["name"],
+				"port":        test.testBody["port"],
+				"score_type":  test.testBody["score_type"],
+				"solves_list": []JSON{},
+				"tags":        test.testBody["tags"],
 				"type":        test.testBody["type"],
 			}
 			test_utils.Compare(t, expected, body)
@@ -362,6 +373,10 @@ func TestRoute(t *testing.T) {
 	body = session.Body()
 	expected = JSON{
 		"attachments": []string{},
+		"authors":     testBody["authors"],
+		"category":    testBody["category"],
+		"conn_type":   "TCP",
+		"description": testBody["description"],
 		"docker_config": JSON{
 			"compose":     testBody["compose"],
 			"envs":        testBody["envs"],
@@ -373,7 +388,14 @@ func TestRoute(t *testing.T) {
 			"renewable":   testBody["renewable"],
 		},
 		"flags":       []string{},
-		"solves_list": []string{},
+		"hidden":      testBody["hidden"],
+		"host":        testBody["host"],
+		"max_points":  testBody["max_points"],
+		"name":        testBody["name"],
+		"port":        testBody["port"],
+		"score_type":  "Dynamic",
+		"solves_list": []JSON{},
+		"tags":        testBody["tags"],
 		"type":        "Container",
 	}
 	test_utils.Compare(t, expected, body)
