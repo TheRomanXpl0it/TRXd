@@ -12,6 +12,7 @@
 		uploadAttachments
 	} from '$lib/challenges';
 	import { createFlags, deleteFlags } from '$lib/flags';
+	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import {
 		PlusCircle,
@@ -79,8 +80,8 @@
 	$effect(() => {
 		if (data.challenge) {
 			untrack(() => {
-				name = data.challenge.name;
-				category = data.challenge.category ?? '';
+				name = data.challenge.name || '';
+				category = data.challenge.category || '';
 				description = data.challenge.description || '';
 				type = data.challenge.type || 'Normal';
 				points = data.challenge.max_points || data.challenge.points || 500;
@@ -161,13 +162,13 @@
 	});
 
 	async function handleSubmit() {
-		if (!name.trim()) return toast.error('Name is required');
+		if (!name || !name.trim()) return toast.error('Name is required');
 		if (!category) return toast.error('Category is required');
 		if (points <= 0) return toast.error('Points must be greater than 0');
 
 		loading = true;
 		try {
-			const challId = data.challenge.id;
+			const challId = Number($page.params.id);
 
 			const authors = authorsCsv
 				.split(',')
