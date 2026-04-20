@@ -125,8 +125,6 @@ func SetupFeatures(app *fiber.App) {
 			}()
 			return c.Next()
 		})
-
-		// app.Use(limiter.New())
 	}
 
 	app.Use(compress.New())
