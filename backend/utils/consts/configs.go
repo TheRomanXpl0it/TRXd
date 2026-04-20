@@ -23,7 +23,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"allow-register": {
 		Name:        "Allow Register",
 		Value:       false,
-		Type:        "boolean",
+		Type:        "bool",
 		Category:    "",
 		Description: "whether to allow user registration",
 		Secret:      false,
@@ -31,7 +31,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"chall-min-points": {
 		Name:        "Challenge Min Points",
 		Value:       50,
-		Type:        "integer",
+		Type:        "int",
 		Category:    "",
 		Description: "the minimum points a challenge can award",
 		Secret:      false,
@@ -39,7 +39,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"chall-points-decay": {
 		Name:        "Challenge Points Decay",
 		Value:       15,
-		Type:        "integer",
+		Type:        "int",
 		Category:    "",
 		Description: "the rate at which challenge points decay",
 		Secret:      false,
@@ -63,7 +63,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"instance-max-memory": {
 		Name:        "Instance Max Memory",
 		Value:       512,
-		Type:        "integer",
+		Type:        "int",
 		Category:    "instances",
 		Description: "the maximum memory allocation for each instance in MB",
 		Secret:      false,
@@ -95,7 +95,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"hash-len": {
 		Name:        "Hash Domain Length",
 		Value:       12,
-		Type:        "integer",
+		Type:        "int",
 		Category:    "instances",
 		Description: "the length of the random hash used into the instance domain (e.g. abcdef123456.domain.com)",
 		Secret:      false,
@@ -119,7 +119,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"user-mode": {
 		Name:        "Single User Mode",
 		Value:       false,
-		Type:        "boolean",
+		Type:        "bool",
 		Category:    "",
 		Description: "if enabled there will be no teams, but only users, like a single player mode",
 		Secret:      false,
@@ -127,7 +127,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 	"scoreboard-top": {
 		Name:        "Scoreboard Top Teams",
 		Value:       10,
-		Type:        "integer",
+		Type:        "int",
 		Category:    "",
 		Description: "the number of the top teams to show on the scoreboard graph",
 		Secret:      false,
@@ -137,7 +137,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Value:       "",
 		Type:        "date",
 		Category:    "",
-		Description: "the start time for the competition following the RFC3339 format (e.g. 2024-01-02T15:04:05Z07:00)",
+		Description: "the start time for the competition following the RFC3339 format",
 		Secret:      false,
 	},
 	"end-time": {
@@ -145,13 +145,13 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Value:       "",
 		Type:        "date",
 		Category:    "",
-		Description: "the end time for the competition following the RFC3339 format (e.g. 2024-01-02T15:04:05Z07:00)",
+		Description: "the end time for the competition following the RFC3339 format",
 		Secret:      false,
 	},
 	"email-verification": {
 		Name:        "Email Verification",
 		Value:       false,
-		Type:        "boolean",
+		Type:        "bool",
 		Category:    "email",
 		Description: "enables all the email related features",
 		Secret:      false,

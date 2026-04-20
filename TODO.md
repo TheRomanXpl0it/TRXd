@@ -6,6 +6,11 @@
   - registration
   - attachments download
   - check mail server provider rate limits
+ - ncat button not copying to clipboard
+ - ctf ended not able to see the challs
+ - add a red drop if challenge is first blodded
+ - maybe change the color a bit for the solved challenges
+ - make the challs hidden by default in the frontend
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
