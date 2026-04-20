@@ -1,7 +1,7 @@
 {
   "brand": {
-    "shortName": "CyberChallenge.IT",
-    "browserTitle": "CyberChallenge.IT",
+    "shortName": "TRX CTF 2026",
+    "browserTitle": "TRX CTF 2026",
     "footerText": "TheRomanXpl0it \u00a9 2026",
     "logoAlt": "TRX Logo",
     "adminTitleSuffix": "Admin",
@@ -9,16 +9,23 @@
     "discordUrl": ""
   },
   "home": {
-    "heroTitle": "CyberChallenge.IT 2026",
-    "heroDescription": "",
+    "heroTitle": "TRX CTF 2026",
+    "heroDescription": "NON HO RICEVUTO I DATI, QUESTO E UN PLACEHOLDER",
     "primaryCtaLabel": "View Challenges",
     "primaryCtaHref": "/challenges",
     "secondaryCtaLabel": "Scoreboard",
     "secondaryCtaHref": "/scoreboard",
-    "rulesTitle": "",
-    "rulesMarkdown": "",
-    "sponsorsTitle": "",
-    "sponsors": [],
+    "rulesTitle": "Rules",
+    "rulesMarkdown": "NON HO RICEVUTO I DATI, QUESTO E UN PLACEHOLDER",
+    "sponsorsTitle": "Sponsors",
+    "sponsors": [
+      {
+        "name": "Google",
+        "url": "goo.gle/ctfsponsorship",
+        "logo": "/sponsors/google.svg",
+        "description": "Infrastructure for this CTF is sponsored by Google through Google Cloud Platform credits"
+      }
+    ],
     "eventTimelineValue": "",
     "eventTimelineLabel": "",
     "eventDurationValue": "",
@@ -39,6 +46,6 @@
     "signUpDescription": "Sign in and start hacking"
   },
   "settings": {
-    "appearanceDescription": ""
+    "appearanceDescription": "Customize how TRX CTF looks for you."
   }
 }

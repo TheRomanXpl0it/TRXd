@@ -1,0 +1,192 @@
+{
+  "title": "TRXd Site Editor",
+  "description": "Edit the frontend content that gets baked into the static build before you deploy with Docker Compose.",
+  "sections": [
+    {
+      "id": "brand",
+      "label": "Branding",
+      "description": "Shared labels used across the app shell and admin pages.",
+      "fields": [
+        {
+          "path": "brand.shortName",
+          "label": "Short brand name",
+          "type": "text",
+          "default": "TRXd",
+          "placeholder": "TRXd",
+          "help": "Used in the navbar and compact brand labels."
+        },
+        {
+          "path": "brand.browserTitle",
+          "label": "Browser title",
+          "type": "text",
+          "default": "TRXD",
+          "placeholder": "TRX CTF 2026",
+          "help": "Used for the browser tab title."
+        },
+        {
+          "path": "brand.footerText",
+          "label": "Footer text",
+          "type": "text",
+          "default": "TRXd Platform \u00a9 2026",
+          "placeholder": "TRX CTF Platform \u00a9 2026",
+          "help": "Shown in the mobile navigation footer."
+        },
+        {
+          "path": "brand.logoAlt",
+          "label": "Logo alt text",
+          "type": "text",
+          "default": "TRXD Logo",
+          "placeholder": "TRX CTF Logo",
+          "help": "Accessibility label for the shared logo image."
+        },
+        {
+          "path": "brand.adminTitleSuffix",
+          "label": "Admin title suffix",
+          "type": "text",
+          "default": "TRXd Admin",
+          "placeholder": "TRX CTF Admin",
+          "help": "Appended to admin page browser titles."
+        }
+      ]
+    },
+    {
+      "id": "home",
+      "label": "Homepage",
+      "description": "Hero copy, calls to action, rules, and optional sponsor cards.",
+      "fields": [
+        {
+          "path": "home.heroTitle",
+          "label": "Hero title",
+          "type": "text",
+          "default": "Welcome to TRXD",
+          "placeholder": "Welcome to TRX CTF 2026"
+        },
+        {
+          "path": "home.heroDescription",
+          "label": "Hero description",
+          "type": "textarea",
+          "default": "A platform for hackers and cybersecurity enthusiasts",
+          "placeholder": "Describe the event or platform."
+        },
+        {
+          "path": "home.primaryCtaLabel",
+          "label": "Primary button label",
+          "type": "text",
+          "default": "View Challenges",
+          "placeholder": "Start Playing"
+        },
+        {
+          "path": "home.primaryCtaHref",
+          "label": "Primary button link",
+          "type": "url",
+          "default": "/challenges",
+          "placeholder": "/challenges"
+        },
+        {
+          "path": "home.secondaryCtaLabel",
+          "label": "Secondary button label",
+          "type": "text",
+          "default": "Scoreboard",
+          "placeholder": "Rules"
+        },
+        {
+          "path": "home.secondaryCtaHref",
+          "label": "Secondary button link",
+          "type": "url",
+          "default": "/scoreboard",
+          "placeholder": "/scoreboard"
+        },
+        {
+          "path": "home.rulesTitle",
+          "label": "Rules section title",
+          "type": "text",
+          "default": "",
+          "placeholder": "Rules",
+          "help": "Leave empty to hide the rules block."
+        },
+        {
+          "path": "home.rulesMarkdown",
+          "label": "Rules markdown",
+          "type": "markdown",
+          "default": "",
+          "placeholder": "## Rules\n- Be respectful\n- No attacks outside the game",
+          "help": "Rendered below the hero section when not empty."
+        },
+        {
+          "path": "home.sponsorsTitle",
+          "label": "Sponsors section title",
+          "type": "text",
+          "default": "",
+          "placeholder": "Sponsors",
+          "help": "Leave empty to hide the sponsor section heading."
+        },
+        {
+          "path": "home.sponsors",
+          "label": "Sponsors",
+          "type": "list",
+          "default": [],
+          "itemLabel": "Sponsor",
+          "fields": [
+            {
+              "key": "name",
+              "label": "Name",
+              "type": "text",
+              "default": "",
+              "placeholder": "Acme Security"
+            },
+            {
+              "key": "url",
+              "label": "Website",
+              "type": "url",
+              "default": "",
+              "placeholder": "https://example.com"
+            },
+            {
+              "key": "logo",
+              "label": "Logo path",
+              "type": "text",
+              "default": "",
+              "placeholder": "/sponsors/acme.svg",
+              "help": "Use a path under frontend/static for built-in assets."
+            },
+            {
+              "key": "description",
+              "label": "Description",
+              "type": "textarea",
+              "default": "",
+              "placeholder": "Optional short sponsor blurb."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "auth",
+      "label": "Authentication",
+      "description": "Copy shown on the sign-up screen.",
+      "fields": [
+        {
+          "path": "auth.signUpDescription",
+          "label": "Sign-up description",
+          "type": "textarea",
+          "default": "Join TRXD and start hacking",
+          "placeholder": "Join TRX CTF and start hacking"
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "label": "Settings",
+      "description": "Text shown in user settings.",
+      "fields": [
+        {
+          "path": "settings.appearanceDescription",
+          "label": "Appearance description",
+          "type": "textarea",
+          "default": "Customize how TRXd looks for you.",
+          "placeholder": "Customize how TRX CTF looks for you."
+        }
+      ]
+    }
+  ]
+}

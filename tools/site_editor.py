@@ -503,6 +503,10 @@ EDITOR_HTML = """<!doctype html>
       const current = JSON.stringify(state.content);
       const dirty = current !== state.pristine;
       updateStatus(dirty ? 'Unsaved changes' : 'Saved');
+      const browserTitle = getByPath(state.content, 'brand.browserTitle');
+      if (browserTitle) {
+        document.title = `${browserTitle} — Site Editor`;
+      }
     }
 
     function showError(message) {
