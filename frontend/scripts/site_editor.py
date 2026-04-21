@@ -17,13 +17,18 @@ from typing import Any
 from urllib.parse import urlparse
 
 
-ROOT = Path(__file__).resolve().parents[1]
-CONTENT_PATH = ROOT / 'frontend' / 'static' / 'site-content.json'
-APP_HTML_PATH = ROOT / 'frontend' / 'src' / 'app.html'
+FRONTEND_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = FRONTEND_ROOT.parent
+CONTENT_PATH = FRONTEND_ROOT / 'static' / 'site-content.json'
+SCHEMA_PATH = PROJECT_ROOT / 'tools' / 'site-schema.json'
+APP_HTML_PATH = FRONTEND_ROOT / 'src' / 'app.html'
 APP_TITLE_START = '		<!-- app-title:start -->'
 APP_TITLE_END = '		<!-- app-title:end -->'
 APP_TITLE_FALLBACK = 'TRXD'
-RULES_PATH = ROOT / 'rules.md'
+RULES_PATHS = (
+    FRONTEND_ROOT / 'rules.md',
+    PROJECT_ROOT / 'rules.md',
+)
 
 
 EDITOR_HTML = """<!doctype html>
@@ -888,12 +893,20 @@ def sync_with_schema(schema: dict[str, Any], content: Any) -> dict[str, Any]:
     return merged
 
 
+def find_rules_path() -> Path | None:
+    for candidate in RULES_PATHS:
+        if candidate.exists():
+            return candidate
+    return None
+
+
 def load_rules_content() -> tuple[str, str] | None:
-    if not RULES_PATH.exists():
+    rules_path = find_rules_path()
+    if rules_path is None:
         print("[!] rules.md file not provided. skipping rules generation.")
         return None
 
-    raw = RULES_PATH.read_text(encoding='utf-8').strip()
+    raw = rules_path.read_text(encoding='utf-8').strip()
     if not raw:
         return '', ''
 
@@ -921,9 +934,9 @@ def sync_rules_into_content(content: dict[str, Any]) -> dict[str, Any]:
 
 
 def load_schema() -> dict[str, Any]:
-    schema = read_json(CONTENT_PATH)
+    schema = read_json(SCHEMA_PATH)
     if not isinstance(schema, dict):
-        raise SiteEditorError(f'Expected an object in {CONTENT_PATH}')
+        raise SiteEditorError(f'Expected an object in {SCHEMA_PATH}')
     return schema
 
 
@@ -935,37 +948,13 @@ def load_content(schema: dict[str, Any]) -> dict[str, Any]:
     synced = sync_with_schema(schema, content)
     return sync_rules_into_content(synced)
 
-def sync_app_html_title(content: Any) -> None:
-    if not APP_HTML_PATH.exists():
-        return
 
-    browser_title = APP_TITLE_FALLBACK
-    if isinstance(content, dict):
-        brand = content.get('brand')
-        if isinstance(brand, dict):
-            raw_title = brand.get('browserTitle')
-            if isinstance(raw_title, str) and raw_title.strip():
-                browser_title = raw_title.strip()
-
-    html_content = APP_HTML_PATH.read_text(encoding='utf-8')
-    managed_block = (
-        f'{APP_TITLE_START}\n'
-        f'		<title>{html.escape(browser_title, quote=True)}</title>\n'
-        f'{APP_TITLE_END}'
-    )
-
-    start_index = html_content.find(APP_TITLE_START)
-    end_index = html_content.find(APP_TITLE_END)
-
-    if start_index != -1 and end_index != -1 and end_index >= start_index:
-        end_index += len(APP_TITLE_END)
-        next_html = html_content[:start_index] + managed_block + html_content[end_index:]
-    else:
-        next_html = html_content.replace('		%sveltekit.head%', f'{managed_block}\n		%sveltekit.head%')
-
-    if next_html != html_content:
-        APP_HTML_PATH.write_text(next_html, encoding='utf-8')
-
+def sync_site_content() -> dict[str, Any]:
+    schema = load_schema()
+    content = load_content(schema)
+    write_json(CONTENT_PATH, content)
+    sync_app_html_title(content)
+    return content
 
 def sync_app_html_title(content: Any) -> None:
     if not APP_HTML_PATH.exists():
@@ -1079,11 +1068,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument('--host', default='127.0.0.1', help='Host interface to bind to.')
     parser.add_argument('--port', type=int, default=8765, help='Port to bind to.')
     parser.add_argument('--no-browser', action='store_true', help='Do not open a browser tab automatically.')
+    parser.add_argument('--sync-only', action='store_true', help='Sync rules.md into site-content.json and exit.')
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    if args.sync_only:
+        sync_site_content()
+        print(f'Synced {CONTENT_PATH.relative_to(PROJECT_ROOT)}')
+        return
+
     schema = load_schema()
     sync_app_html_title(load_content(schema))
     server = SiteEditorServer((args.host, args.port), SiteEditorHandler, schema)
@@ -1091,7 +1086,10 @@ def main() -> None:
     url = f'http://{actual_host}:{actual_port}'
 
     print(f'Site editor ready at {url}')
-    print(f'Editing {CONTENT_PATH.relative_to(ROOT)} using {CONTENT_PATH.relative_to(ROOT)}')
+    print(
+        f'Editing {CONTENT_PATH.relative_to(PROJECT_ROOT)} '
+        f'using {SCHEMA_PATH.relative_to(PROJECT_ROOT)}'
+    )
     print('Press Ctrl+C to stop.')
 
     if not args.no_browser:
