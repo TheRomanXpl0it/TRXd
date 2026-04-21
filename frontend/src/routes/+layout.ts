@@ -8,15 +8,21 @@ export async function load({ url }: { url: URL }) {
 	// Let the user state initialize
 	await loadUser(false);
 
-	// Public routes
-	const publicRoutes = ['/signIn', '/signUp', '/forgot', '/verify'];
-	const isPublicRoute = publicRoutes.some((r) => url.pathname.startsWith(r));
+	// Routes that are ONLY for guests (not logged in)
+	const guestOnlyRoutes = ['/signIn', '/signUp', '/forgot', '/verify'];
+	const isGuestOnlyRoute = guestOnlyRoutes.some((r) => url.pathname.startsWith(r));
 
-	if (!authState.user && !isPublicRoute) {
+	// Routes that are public for EVERYONE
+	const publicRoutes = ['/', '/home', '/scoreboard', '/teams', '/users'];
+	const isPublicRoute = publicRoutes.some((r) =>
+		r === '/' ? url.pathname === '/' : url.pathname.startsWith(r)
+	);
+
+	if (!authState.user && !isPublicRoute && !isGuestOnlyRoute) {
 		throw redirect(302, '/signIn');
 	}
 
-	if (authState.user && isPublicRoute) {
+	if (authState.user && isGuestOnlyRoute) {
 		throw redirect(302, '/challenges');
 	}
 

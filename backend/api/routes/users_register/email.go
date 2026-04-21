@@ -81,7 +81,7 @@ func registerViaMail(c *fiber.Ctx, registerEmail string) error {
 		return utils.Error(c, fiber.StatusConflict, consts.UserAlreadyExists)
 	}
 
-	err = email.InitEmailClientFromConfigs(c.Context())
+	client, err := email.InitEmailClientFromConfigs(c.Context())
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorInitializingEmailClient, err)
 	}
@@ -92,7 +92,7 @@ func registerViaMail(c *fiber.Ctx, registerEmail string) error {
 	}
 
 	body := fmt.Sprintf(BODY_TEMPLATE, domain, signed)
-	err = email.SendEmail(c.Context(), registerEmail, SUBJECT, body)
+	err = client.SendEmail(c.Context(), registerEmail, SUBJECT, body)
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorSendingVerificationEmail, err)
 	}

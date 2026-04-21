@@ -138,12 +138,8 @@ export interface PasswordResetResponse extends BaseResponse {
 	new_password?: string;
 }
 
-export interface SearchUsersResponse extends BaseResponse {
-	users: User[];
-}
+export type SearchUsersResponse = User | { users: User[] };
 
-export interface SearchTeamsResponse extends BaseResponse {
-	teams: Team[];
-}
+export type SearchTeamsResponse = Team | { teams: Team[] };
 
 export interface ApiError extends BaseResponse { }

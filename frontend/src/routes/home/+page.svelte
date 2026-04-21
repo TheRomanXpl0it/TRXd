@@ -11,6 +11,7 @@
 	const isAdmin = $derived(authState.user?.role === 'Admin');
 	const hasRules = $derived(Boolean($siteContent.home.rulesTitle || $siteContent.home.rulesMarkdown));
 	const hasSponsors = $derived($siteContent.home.sponsors.length > 0);
+	const hasSecondaryContent = $derived(hasRules || hasSponsors);
 </script>
 
 <svelte:head>
@@ -56,61 +57,75 @@
 		</div>
 	</div>
 
-	{#if hasRules}
-		<section class="mb-8 w-full max-w-4xl rounded-2xl border border-gray-200/70 bg-white/60 p-6 shadow-sm dark:border-gray-800 dark:bg-white/5">
-			{#if $siteContent.home.rulesTitle}
-				<h2 class="mb-4 text-2xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">
-					{$siteContent.home.rulesTitle}
-				</h2>
-			{/if}
+	{#if hasSecondaryContent}
+		<div class="mt-20 flex w-full flex-col items-center gap-8 sm:mt-24 lg:mt-28">
+			{#if hasRules}
+				<section class="w-full max-w-4xl rounded-2xl border border-gray-200/70 bg-white/60 p-6 shadow-sm dark:border-gray-800 dark:bg-white/5">
+					{#if $siteContent.home.rulesTitle}
+						<h2
+							class="mb-4 text-2xl font-black tracking-tighter text-gray-900 uppercase dark:text-white"
+						>
+							{$siteContent.home.rulesTitle}
+						</h2>
+					{/if}
 
-			{#if $siteContent.home.rulesMarkdown}
-				<div class="prose prose-gray dark:prose-invert max-w-none">
-					{@html renderMarkdown($siteContent.home.rulesMarkdown)}
-				</div>
-			{/if}
-		</section>
-	{/if}
-
-	{#if hasSponsors}
-		<section class="w-full max-w-5xl">
-			{#if $siteContent.home.sponsorsTitle}
-				<h2 class="mb-4 text-center text-2xl font-black tracking-tighter text-gray-900 dark:text-white uppercase">
-					{$siteContent.home.sponsorsTitle}
-				</h2>
-			{/if}
-
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-				{#each $siteContent.home.sponsors as sponsor}
-					<a
-						href={sponsor.url || undefined}
-						class="rounded-2xl border border-gray-200/70 bg-white/60 p-5 text-left shadow-sm transition-colors hover:border-gray-300 dark:border-gray-800 dark:bg-white/5 dark:hover:border-gray-700"
-						target={sponsor.url ? '_blank' : undefined}
-						rel={sponsor.url ? 'noreferrer' : undefined}
-					>
-						<div class="flex items-center gap-4">
-							{#if sponsor.logo}
-								<img
-									src={sponsor.logo}
-									alt={sponsor.name}
-									class="h-12 w-12 rounded-lg object-contain"
-								/>
-							{/if}
-							<div>
-								<h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-									{sponsor.name}
-								</h3>
-								{#if sponsor.description}
-									<p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
-										{sponsor.description}
-									</p>
-								{/if}
-							</div>
+					{#if $siteContent.home.rulesMarkdown}
+						<div class="prose prose-gray dark:prose-invert max-w-none">
+							{@html renderMarkdown($siteContent.home.rulesMarkdown)}
 						</div>
-					</a>
-				{/each}
-			</div>
-		</section>
+					{/if}
+				</section>
+			{/if}
+
+			{#if hasSponsors}
+				<section class="w-full max-w-6xl">
+					{#if $siteContent.home.sponsorsTitle}
+						<h2
+							class="mb-6 text-center text-3xl font-black tracking-tighter text-gray-900 uppercase sm:text-4xl dark:text-white"
+						>
+							{$siteContent.home.sponsorsTitle}
+						</h2>
+					{/if}
+
+					<div class="flex flex-wrap justify-center gap-6">
+						{#each $siteContent.home.sponsors as sponsor}
+							<a
+								href={sponsor.url || undefined}
+								class="w-full max-w-xl rounded-3xl border border-gray-200/70 bg-white/60 p-6 text-left shadow-sm transition-colors hover:border-gray-300 sm:p-7 lg:max-w-[calc(50%-0.75rem)] xl:max-w-[calc(33.333%-1rem)] dark:border-gray-800 dark:bg-white/5 dark:hover:border-gray-700"
+								target={sponsor.url ? '_blank' : undefined}
+								rel={sponsor.url ? 'noreferrer' : undefined}
+							>
+								<div class="flex items-center gap-5">
+									{#if sponsor.logo}
+										<div
+											class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 dark:border-gray-700 dark:bg-white/10"
+										>
+											<img
+												src={sponsor.logo}
+												alt={sponsor.name}
+												class="h-14 w-14 rounded-xl object-contain sm:h-16 sm:w-16"
+											/>
+										</div>
+									{/if}
+									<div>
+										<h3
+											class="text-xl font-black uppercase tracking-tighter text-gray-900 sm:text-2xl dark:text-white"
+										>
+											{sponsor.name}
+										</h3>
+										{#if sponsor.description}
+											<p class="mt-2 text-base leading-relaxed text-gray-600 dark:text-gray-300">
+												{sponsor.description}
+											</p>
+										{/if}
+									</div>
+								</div>
+							</a>
+						{/each}
+					</div>
+				</section>
+			{/if}
+		</div>
 	{/if}
 
 	{#if isAdmin}
