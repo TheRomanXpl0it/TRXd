@@ -5,8 +5,8 @@
     "footerText": "TheRomanXpl0it \u00a9 2026",
     "logoAlt": "TRX Logo",
     "adminTitleSuffix": "Admin",
-    "heroSubtitle": "",
-    "discordUrl": ""
+    "heroSubtitle": "A CTF by TheRomanXpl0it",
+    "discordUrl": "https://discord.gg/Whrkync8"
   },
   "home": {
     "heroTitle": "TRX CTF 2026",
@@ -32,15 +32,7 @@
     "eventDurationLabel": "",
     "eventFormatValue": "",
     "eventFormatLabel": "",
-    "prize1Amount": "",
-    "prize1Label": "",
-    "prize1Desc": "",
-    "prize2Amount": "",
-    "prize2Label": "",
-    "prize2Desc": "",
-    "prize3Amount": "",
-    "prize3Label": "",
-    "prize3Desc": ""
+    "prizes": []
   },
   "auth": {
     "signUpDescription": "Sign in and start hacking"

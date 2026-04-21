@@ -9,11 +9,10 @@
 		$siteContent.home.eventFormatValue
 	].filter(Boolean).length;
 
-	$: activePrizesCount = [
-		$siteContent.home.prize1Amount,
-		$siteContent.home.prize2Amount,
-		$siteContent.home.prize3Amount
-	].filter(Boolean).length;
+	$: prizes = ($siteContent.home.prizes ?? []).filter((p: any) => p?.amount);
+	$: activePrizesCount = prizes.length;
+	$: heroSponsors = $siteContent.home.sponsors.slice(0, 2);
+	$: hasSingleHeroSponsor = heroSponsors.length === 1;
 
 	onMount(() => {
 		const canvas = document.getElementById('pixel-bg') as HTMLCanvasElement;
@@ -85,15 +84,42 @@
 				name: 'gosper',
 				weight: 1,
 				cells: [
-					[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-					[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-					[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-					[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
-					[1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-					[1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-					[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-					[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-					[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+					[
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0
+					],
+					[
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0
+					],
+					[
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 1, 1
+					],
+					[
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 1, 1
+					],
+					[
+						1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0
+					],
+					[
+						1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0
+					],
+					[
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0
+					],
+					[
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0
+					],
+					[
+						0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+						0, 0, 0, 0, 0, 0, 0
+					]
 				]
 			}
 		];
@@ -117,14 +143,14 @@
 		}
 
 		function rotatePattern(pattern: any[][]) {
-			return pattern[0].map((_, x) => pattern.map(row => row[x]).reverse());
+			return pattern[0].map((_, x) => pattern.map((row) => row[x]).reverse());
 		}
 
 		function transformPattern(pattern: any[][]) {
 			let p = pattern;
 			const rotations = Math.floor(Math.random() * 4);
 			for (let i = 0; i < rotations; i++) p = rotatePattern(p);
-			if (Math.random() > 0.5) p = p.map(row => [...row].reverse());
+			if (Math.random() > 0.5) p = p.map((row) => [...row].reverse());
 			return p;
 		}
 
@@ -202,8 +228,8 @@
 		}
 
 		function nextGeneration() {
-			const next = grid.map(row =>
-				row.map((cell: { state: any; age: any; glow: number; }) => ({
+			const next = grid.map((row) =>
+				row.map((cell: { state: any; age: any; glow: number }) => ({
 					state: cell.state,
 					age: cell.age,
 					glow: Math.max(0, cell.glow * 0.94)
@@ -241,7 +267,7 @@
 				? recentActivity.reduce((a, b) => a + b, 0) / recentActivity.length
 				: 0;
 
-			if (avgActivity < Math.max(3, (COLS * ROWS) * 0.004)) {
+			if (avgActivity < Math.max(3, COLS * ROWS * 0.004)) {
 				if (Math.random() > 0.45) injectSpecificPattern(next, 'glider');
 				if (Math.random() > 0.65) injectSpecificPattern(next, 'lwss');
 				if (Math.random() > 0.88) injectSpecificPattern(next, 'mwss');
@@ -264,11 +290,15 @@
 		}
 
 		function injectSpecificPattern(targetGrid: any[], name: string, gentle = false) {
-			const chosen = PATTERNS.find(p => p.name === name);
+			const chosen = PATTERNS.find((p) => p.name === name);
 			if (chosen) injectPatternObject(targetGrid, chosen, gentle);
 		}
 
-		function injectPatternObject(targetGrid: any[], patternObj: { name?: string; weight?: number; cells: any; }, gentle = false) {
+		function injectPatternObject(
+			targetGrid: any[],
+			patternObj: { name?: string; weight?: number; cells: any },
+			gentle = false
+		) {
 			const pattern = transformPattern(patternObj.cells);
 
 			const ph = pattern.length;
@@ -330,9 +360,13 @@
 
 		function hexToRgba(hex: string, alpha: number) {
 			const clean = hex.replace('#', '');
-			const full = clean.length === 3
-				? clean.split('').map(c => c + c).join('')
-				: clean;
+			const full =
+				clean.length === 3
+					? clean
+							.split('')
+							.map((c) => c + c)
+							.join('')
+					: clean;
 
 			const bigint = parseInt(full, 16);
 			const r = (bigint >> 16) & 255;
@@ -371,204 +405,237 @@
 	});
 </script>
 
-<canvas id="pixel-bg"></canvas>
-<div id="bg-overlay"></div>
+<div id="landing-page">
+	<canvas id="pixel-bg"></canvas>
+	<div id="bg-overlay"></div>
 
-<div class="container-custom">
-	<!-- Full-Screen Hero -->
-	<header class="hero-shell">
-		<div class="space-y-8 flex flex-col items-center">
-			<img src="/trx.svg" alt="TRX Logo" class="h-32 w-32" />
-			<div>
-				<h1 class="hero-title text-5xl sm:text-6xl font-black tracking-tighter uppercase mb-3 text-center">
-					{$siteContent.home.heroTitle}
-				</h1>
-				{#if $siteContent.brand.heroSubtitle}
-					<p
-						class="text-zinc-muted font-bold tracking-widest border-t border-zinc-800 pt-6 mt-4 inline-block px-12 text-xs uppercase opacity-80 text-center">
-						{$siteContent.brand.heroSubtitle}
+	<div class="container-custom">
+		<!-- Full-Screen Hero -->
+		<header class="hero-shell">
+			<div class="flex flex-col items-center space-y-8">
+				<img src="/trx.svg" alt="TRX Logo" class="h-32 w-32" />
+				<div>
+					<h1
+						class="hero-title mb-3 text-center text-5xl font-black uppercase tracking-tighter sm:text-6xl"
+					>
+						{$siteContent.home.heroTitle}
+					</h1>
+					{#if $siteContent.brand.heroSubtitle}
+						<p
+							class="text-zinc-muted mt-4 inline-block border-t border-zinc-800 px-12 pt-6 text-center text-xs font-bold uppercase tracking-widest opacity-80"
+						>
+							{$siteContent.brand.heroSubtitle}
+						</p>
+					{/if}
+				</div>
+			</div>
+
+			<!-- Integrated Actions -->
+			<div class="flex translate-y-4 flex-col items-center gap-8">
+				<a
+					href={$siteContent.home.primaryCtaHref}
+					class="ambient-button rounded-2xl px-14 py-5 font-black uppercase tracking-tight opacity-90 transition-all hover:opacity-100 active:scale-[0.98]"
+				>
+					{$siteContent.home.primaryCtaLabel}
+				</a>
+				{#if $siteContent.brand.discordUrl}
+					<p class="text-zinc-muted text-xs font-bold uppercase tracking-widest opacity-60">
+						Join the <a
+							href={$siteContent.brand.discordUrl}
+							class="decoration-[var(--alive-cell)]/30 text-[var(--lp-foreground)] underline decoration-2 underline-offset-8 transition-all hover:decoration-[var(--alive-cell)]"
+						>
+							Discord server
+						</a>
 					</p>
 				{/if}
 			</div>
-		</div>
 
-		<!-- Integrated Actions -->
-		<div class="flex flex-col items-center gap-8 translate-y-4">
-			<a href={$siteContent.home.primaryCtaHref}
-				class="ambient-button bg-[var(--foreground)] text-[var(--background)] px-14 py-5 rounded-2xl font-black uppercase tracking-tight opacity-90 hover:opacity-100 transition-all active:scale-[0.98]">
-				{$siteContent.home.primaryCtaLabel}
-			</a>
-			{#if $siteContent.brand.discordUrl}
-				<p class="text-xs text-zinc-muted font-bold tracking-widest uppercase opacity-60">
-					Join the <a href={$siteContent.brand.discordUrl}
-						class="text-[var(--foreground)] underline underline-offset-8 decoration-2 decoration-[var(--alive-cell)]/30 hover:decoration-[var(--alive-cell)] transition-all">
-						Discord server
-					</a>
-				</p>
-			{/if}
-		</div>
-
-		{#if $siteContent.home.sponsors.length > 0}
-			<div class="hero-footer-row" aria-label="Sponsors">
-				{#each $siteContent.home.sponsors.slice(0, 2) as sponsor, i}
-					<div class="hero-sponsor {i === 0 ? 'hero-sponsor--left' : 'hero-sponsor--right'}">
-						<div class="sponsor-logo-chip" aria-hidden="true">
-							{#if sponsor.logo}
-								<img src={sponsor.logo} alt="" class="h-full w-full object-contain" />
-							{:else}
-								Logo
-							{/if}
-						</div>
-						<div class="min-w-0">
-							<a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="sponsor-name hover:text-[var(--alive-cell)] transition-colors">
-								{sponsor.name}
-							</a>
-						</div>
-					</div>
-				{/each}
-			</div>
-		{/if}
-	</header>
-
-	<!-- Core Event Info -->
-	<main class="space-y-20">
-		<!-- About Section -->
-		<section class="max-w-2xl mx-auto text-center space-y-6 card-custom p-10 rounded-3xl">
-			<h2 class="text-zinc-muted text-xs font-black uppercase tracking-[0.3em]">The CTF</h2>
-			<p class="text-lg text-zinc-muted leading-relaxed">
-				{$siteContent.home.heroDescription}
-			</p>
-		</section>
-
-		{#if activeDetailsCount > 0}
-			<!-- Details Grid -->
-			<div class="grid grid-cols-1 {activeDetailsCount === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-8">
-				{#if $siteContent.home.eventTimelineValue}
-					<div class="card-custom p-8 rounded-2xl space-y-3">
-						<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Timeline</span>
-						<p class="text-lg font-bold">{$siteContent.home.eventTimelineValue}</p>
-						<p class="text-sm text-zinc-muted font-medium">{$siteContent.home.eventTimelineLabel}</p>
-					</div>
-				{/if}
-				{#if $siteContent.home.eventDurationValue}
-					<div class="card-custom p-8 rounded-2xl space-y-3">
-						<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Duration</span>
-						<p class="text-lg font-bold">{$siteContent.home.eventDurationValue}</p>
-						<p class="text-sm text-zinc-muted font-medium">{$siteContent.home.eventDurationLabel}</p>
-					</div>
-				{/if}
-				{#if $siteContent.home.eventFormatValue}
-					<div class="card-custom p-8 rounded-2xl space-y-3">
-						<span class="text-[10px] font-black uppercase tracking-widest text-zinc-muted">Format</span>
-						<p class="text-lg font-bold">{$siteContent.home.eventFormatValue}</p>
-						<p class="text-sm text-zinc-muted font-medium">{$siteContent.home.eventFormatLabel}</p>
-					</div>
-				{/if}
-			</div>
-		{/if}
-
-		{#if activePrizesCount > 0}
-			<!-- Prizes Section -->
-			<section class="space-y-10">
-				<div class="text-center space-y-2">
-					<p class="text-2xl font-black uppercase tracking-tighter">Prizes</p>
-				</div>
-				<!-- Unified Bunker Layout -->
-				<div class="card-custom rounded-3xl overflow-hidden shrink-0">
-					<div class="grid grid-cols-1 {activePrizesCount === 3 ? 'md:grid-cols-3 md:divide-x' : activePrizesCount === 2 ? 'md:grid-cols-2 md:divide-x' : 'md:grid-cols-1'} divide-zinc-800/10 dark:divide-white/5">
-						
-						{#if $siteContent.home.prize1Amount}
-							<!-- 1st Place Sector -->
-							<div class="p-10 text-center space-y-6 flex flex-col items-center">
-								<div class="space-y-1">
-									<p class="text-3xl font-black tracking-tighter">{$siteContent.home.prize1Amount}</p>
-									<p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">
-										{$siteContent.home.prize1Label}
-									</p>
-								</div>
-								<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">{$siteContent.home.prize1Desc}</p>
-							</div>
-						{/if}
-
-						{#if $siteContent.home.prize2Amount}
-							<!-- 2nd Place Sector -->
-							<div class="p-10 text-center space-y-6 flex flex-col items-center">
-								<div class="space-y-1">
-									<p class="text-3xl font-black tracking-tighter">{$siteContent.home.prize2Amount}</p>
-									<p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">
-										{$siteContent.home.prize2Label}
-									</p>
-								</div>
-								<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">{$siteContent.home.prize2Desc}</p>
-							</div>
-						{/if}
-
-						{#if $siteContent.home.prize3Amount}
-							<!-- 3rd Place Sector -->
-							<div class="p-10 text-center space-y-6 flex flex-col items-center">
-								<div class="space-y-1">
-									<p class="text-3xl font-black tracking-tighter">{$siteContent.home.prize3Amount}</p>
-									<p class="text-[10px] font-bold uppercase tracking-widest text-zinc-muted">
-										{$siteContent.home.prize3Label}
-									</p>
-								</div>
-								<p class="text-xs text-zinc-muted font-medium italic max-w-[140px]">{$siteContent.home.prize3Desc}</p>
-							</div>
-						{/if}
-					</div>
-				</div>
-			</section>
-		{/if}
-
-		{#if $siteContent.home.sponsors.length > 0}
-			<!-- Sponsors Section -->
-			<section class="space-y-10">
-				<div class="text-center space-y-2">
-					<h2 class="text-2xl font-black uppercase tracking-tighter">
-						{$siteContent.home.sponsorsTitle || 'Sponsors'}
-					</h2>
-				</div>
-				<div class="space-y-4 max-w-4xl mx-auto">
-					{#each $siteContent.home.sponsors as sponsor}
-						<div class="card-custom p-8 rounded-2xl flex items-center gap-10">
-							<div
-								class="h-20 w-20 bg-zinc-800/20 rounded-2xl flex items-center justify-center shrink-0 border border-white/5">
+			{#if heroSponsors.length > 0}
+				<div
+					class="hero-footer-row"
+					class:hero-footer-row--centered={hasSingleHeroSponsor}
+					aria-label="Sponsors"
+				>
+					{#each heroSponsors as sponsor, i}
+						<div
+							class="hero-sponsor {hasSingleHeroSponsor
+								? 'hero-sponsor--centered'
+								: i === 0
+									? 'hero-sponsor--left'
+									: 'hero-sponsor--right'}"
+						>
+							<div class="sponsor-logo-chip" aria-hidden="true">
 								{#if sponsor.logo}
-									<img src={sponsor.logo} alt={sponsor.name} class="h-12 w-12 object-contain" />
+									<img src={sponsor.logo} alt="" class="h-full w-full object-contain" />
 								{:else}
-									<span class="text-[10px] font-bold text-zinc-500 italic tracking-widest">LOGO</span>
+									Logo
 								{/if}
 							</div>
-							<div class="h-12 w-px bg-zinc-800/20 dark:bg-white/5"></div>
-							<div class="space-y-1">
-								<a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="text-sm font-black uppercase tracking-widest opacity-80 hover:text-[var(--alive-cell)] transition-colors">
+							<div class="min-w-0">
+								<a
+									href={sponsor.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="sponsor-name transition-colors hover:text-[var(--alive-cell)]"
+								>
 									{sponsor.name}
 								</a>
-								{#if sponsor.description}
-									<p class="text-md text-zinc-muted font-medium leading-relaxed italic">
-										{sponsor.description}
-									</p>
-								{/if}
 							</div>
 						</div>
 					{/each}
 				</div>
+			{/if}
+		</header>
+
+		<!-- Core Event Info -->
+		<main class="space-y-20">
+			<!-- About Section -->
+			<section class="card-custom mx-auto max-w-2xl space-y-6 rounded-3xl p-10 text-center">
+				<h2 class="text-zinc-muted text-xs font-black uppercase tracking-[0.3em]">The CTF</h2>
+				<p class="text-zinc-muted text-lg leading-relaxed">
+					{$siteContent.home.heroDescription}
+				</p>
 			</section>
-		{/if}
 
-	</main>
+			{#if activeDetailsCount > 0}
+				<!-- Details Grid -->
+				<div
+					class="grid grid-cols-1 {activeDetailsCount === 3
+						? 'md:grid-cols-3'
+						: 'md:grid-cols-2'} gap-8"
+				>
+					{#if $siteContent.home.eventTimelineValue}
+						<div class="card-custom space-y-3 rounded-2xl p-8">
+							<span class="text-zinc-muted text-[10px] font-black uppercase tracking-widest"
+								>Timeline</span
+							>
+							<p class="text-lg font-bold">{$siteContent.home.eventTimelineValue}</p>
+							<p class="text-zinc-muted text-sm font-medium">
+								{$siteContent.home.eventTimelineLabel}
+							</p>
+						</div>
+					{/if}
+					{#if $siteContent.home.eventDurationValue}
+						<div class="card-custom space-y-3 rounded-2xl p-8">
+							<span class="text-zinc-muted text-[10px] font-black uppercase tracking-widest"
+								>Duration</span
+							>
+							<p class="text-lg font-bold">{$siteContent.home.eventDurationValue}</p>
+							<p class="text-zinc-muted text-sm font-medium">
+								{$siteContent.home.eventDurationLabel}
+							</p>
+						</div>
+					{/if}
+					{#if $siteContent.home.eventFormatValue}
+						<div class="card-custom space-y-3 rounded-2xl p-8">
+							<span class="text-zinc-muted text-[10px] font-black uppercase tracking-widest"
+								>Format</span
+							>
+							<p class="text-lg font-bold">{$siteContent.home.eventFormatValue}</p>
+							<p class="text-zinc-muted text-sm font-medium">
+								{$siteContent.home.eventFormatLabel}
+							</p>
+						</div>
+					{/if}
+				</div>
+			{/if}
 
-	<footer class="text-center pt-20 pb-12 opacity-30">
-		<p class="text-[10px] font-bold uppercase tracking-widest">
-			{$siteContent.brand.footerText}
-		</p>
-	</footer>
+			{#if activePrizesCount > 0}
+				<!-- Prizes Section -->
+				<section class="space-y-10">
+					<div class="space-y-2 text-center">
+						<p class="text-2xl font-black uppercase tracking-tighter">Prizes</p>
+					</div>
+					<!-- Unified Bunker Layout -->
+					<div class="card-custom shrink-0 overflow-hidden rounded-3xl">
+						<div
+							class="grid grid-cols-1 {activePrizesCount >= 3
+								? 'md:grid-cols-3 md:divide-x'
+								: activePrizesCount === 2
+									? 'md:grid-cols-2 md:divide-x'
+									: 'md:grid-cols-1'} divide-zinc-800/10 dark:divide-white/5"
+						>
+							{#each prizes as prize}
+								<div class="flex flex-col items-center space-y-6 p-10 text-center">
+									<div class="space-y-1">
+										<p class="text-3xl font-black tracking-tighter">{prize.amount}</p>
+										{#if prize.label}
+											<p class="text-zinc-muted text-[10px] font-bold uppercase tracking-widest">
+												{prize.label}
+											</p>
+										{/if}
+									</div>
+									{#if prize.desc}
+										<p class="text-zinc-muted max-w-[140px] text-xs font-medium italic">
+											{prize.desc}
+										</p>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					</div>
+				</section>
+			{/if}
+
+			{#if $siteContent.home.sponsors.length > 0}
+				<!-- Sponsors Section -->
+				<section class="space-y-12">
+					<div class="space-y-2 text-center">
+						<h2 class="text-3xl font-black uppercase tracking-tighter sm:text-4xl">
+							{$siteContent.home.sponsorsTitle || 'Sponsors'}
+						</h2>
+					</div>
+					<div class="mx-auto max-w-5xl space-y-6">
+						{#each $siteContent.home.sponsors as sponsor}
+							<div
+								class="card-custom flex flex-col items-center gap-6 rounded-3xl p-8 text-center sm:flex-row sm:gap-10 sm:p-10 sm:text-left"
+							>
+								<div
+									class="flex h-28 w-28 shrink-0 items-center justify-center rounded-3xl border border-white/5 bg-zinc-800/20"
+								>
+									{#if sponsor.logo}
+										<img src={sponsor.logo} alt={sponsor.name} class="h-20 w-20 object-contain" />
+									{:else}
+										<span class="text-[10px] font-bold italic tracking-widest text-zinc-500"
+											>LOGO</span
+										>
+									{/if}
+								</div>
+								<div class="hidden h-16 w-px bg-zinc-800/20 dark:bg-white/5 sm:block"></div>
+								<div class="space-y-1">
+									<a
+										href={sponsor.url}
+										target="_blank"
+										rel="noopener noreferrer"
+										class="text-lg font-black uppercase tracking-tighter opacity-80 transition-colors hover:text-[var(--alive-cell)]"
+									>
+										{sponsor.name}
+									</a>
+									{#if sponsor.description}
+										<p class="text-zinc-muted text-lg font-medium italic leading-relaxed">
+											{sponsor.description}
+										</p>
+									{/if}
+								</div>
+							</div>
+						{/each}
+					</div>
+				</section>
+			{/if}
+		</main>
+
+		<footer class="pb-12 pt-20 text-center opacity-30">
+			<p class="text-[10px] font-bold uppercase tracking-widest">
+				{$siteContent.brand.footerText}
+			</p>
+		</footer>
+	</div>
 </div>
 
 <style>
-	:root {
-		--background: #f7f7f8;
-		--foreground: #18181b;
+	:global(:root) {
+		--lp-background: #f7f7f8;
+		--lp-foreground: #18181b;
 		--secondary-text: #71717a;
 
 		--alive-cell-light: #34d399;
@@ -585,10 +652,29 @@
 		--content-shadow: 0 24px 80px #00000014;
 	}
 
+	:global(.dark) {
+		--lp-background: #050505;
+		--lp-foreground: #fafafa;
+		--secondary-text: #a1a1aa;
+
+		--alive-cell-light: #2dd4bf;
+		--alive-cell: #14b8a6;
+		--alive-cell-dark: #0f766e;
+
+		--card-bg: #0a0a0cb8;
+		--card-border: #3f3f466b;
+		--badge-bg: #18181b;
+
+		--overlay-strong: #050505d6;
+		--overlay-soft: #05050533;
+
+		--content-shadow: 0 24px 80px #0000006b;
+	}
+
 	@media (prefers-color-scheme: dark) {
-		:root {
-			--background: #050505;
-			--foreground: #fafafa;
+		:global(html:not(.dark):not(.light)) {
+			--lp-background: #050505;
+			--lp-foreground: #fafafa;
 			--secondary-text: #a1a1aa;
 
 			--alive-cell-light: #2dd4bf;
@@ -604,6 +690,16 @@
 
 			--content-shadow: 0 24px 80px #0000006b;
 		}
+	}
+
+	:global(body:has(#landing-page)) {
+		background-color: var(--lp-background);
+	}
+
+	#landing-page {
+		min-height: 100vh;
+		position: relative;
+		color: var(--lp-foreground);
 	}
 
 	#pixel-bg {
@@ -626,16 +722,20 @@
 		z-index: -2;
 		pointer-events: none;
 		background:
-			radial-gradient(circle at 50% 9rem,
+			radial-gradient(
+				circle at 50% 9rem,
 				transparent 0,
 				transparent 10rem,
 				var(--overlay-soft) 24rem,
-				var(--overlay-strong) 44rem),
-			linear-gradient(to bottom,
+				var(--overlay-strong) 44rem
+			),
+			linear-gradient(
+				to bottom,
 				var(--overlay-strong) 0%,
 				transparent 22%,
 				transparent 78%,
-				var(--overlay-strong) 100%);
+				var(--overlay-strong) 100%
+			);
 	}
 
 	.container-custom {
@@ -660,6 +760,11 @@
 
 	.border-zinc-800 {
 		border-color: var(--card-border) !important;
+	}
+
+	.ambient-button {
+		background-color: var(--lp-foreground) !important;
+		color: var(--lp-background) !important;
 	}
 
 	header img {
@@ -699,13 +804,17 @@
 		pointer-events: none;
 	}
 
+	.hero-footer-row--centered {
+		justify-content: center;
+	}
+
 	.hero-sponsor {
 		display: flex;
 		align-items: center;
-		gap: 0.9rem;
+		gap: 1rem;
 		width: 100%;
-		max-width: 15rem;
-		padding: 1rem 1.15rem;
+		max-width: 17rem;
+		padding: 1.15rem 1.3rem;
 		border-radius: 1.5rem;
 		text-align: left;
 		pointer-events: auto;
@@ -720,14 +829,20 @@
 		text-align: right;
 	}
 
+	.hero-sponsor--centered {
+		justify-content: center;
+		text-align: center;
+		max-width: 20rem;
+	}
+
 	.sponsor-logo-chip {
-		height: 3.25rem;
-		width: 3.25rem;
+		height: 3.75rem;
+		width: 3.75rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		border-radius: 1rem;
+		border-radius: 1.15rem;
 		background: var(--badge-bg);
 		font-size: 0.56rem;
 		font-weight: 800;
@@ -737,9 +852,9 @@
 	}
 
 	.sponsor-name {
-		font-size: 0.7rem;
+		font-size: 0.95rem;
 		font-weight: 900;
-		letter-spacing: 0.16em;
+		letter-spacing: 0.04em;
 		text-transform: uppercase;
 		line-height: 1.35;
 	}
@@ -762,19 +877,31 @@
 			gap: 0.75rem;
 		}
 
+		.hero-footer-row.hero-footer-row--centered {
+			grid-template-columns: minmax(0, 1fr);
+			justify-content: center;
+		}
+
 		.hero-sponsor {
 			width: 100%;
 			min-width: 0;
-			gap: 0.7rem;
+			gap: 0.8rem;
 			margin-top: 0.5rem;
-			padding: 0.75rem 0.8rem;
+			padding: 0.85rem 0.9rem;
 			border-radius: 1.2rem;
 		}
 
 		.hero-footer-row > .hero-sponsor:nth-child(3) {
 			grid-column: 1 / -1;
 			justify-self: center;
-			max-width: 15rem;
+			max-width: 16rem;
+			flex-direction: row;
+			text-align: left;
+		}
+
+		.hero-footer-row.hero-footer-row--centered > .hero-sponsor {
+			justify-self: center;
+			max-width: 16rem;
 			flex-direction: row;
 			text-align: left;
 		}
@@ -784,15 +911,15 @@
 		}
 
 		.sponsor-logo-chip {
-			height: 2.7rem;
-			width: 2.7rem;
-			border-radius: 0.85rem;
-			font-size: 0.5rem;
+			height: 3rem;
+			width: 3rem;
+			border-radius: 1rem;
+			font-size: 0.52rem;
 		}
 
 		.sponsor-name {
-			font-size: 0.56rem;
-			letter-spacing: 0.11em;
+			font-size: 0.72rem;
+			letter-spacing: 0.05em;
 		}
 	}
 
@@ -817,9 +944,9 @@
 		}
 
 		.sponsor-logo-chip {
-			height: 2.45rem;
-			width: 2.45rem;
-			font-size: 0.44rem;
+			height: 2.7rem;
+			width: 2.7rem;
+			font-size: 0.46rem;
 			letter-spacing: 0.16em;
 		}
 	}

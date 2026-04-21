@@ -8,6 +8,12 @@ export interface SponsorContent {
 	description: string;
 }
 
+export interface PrizeContent {
+	amount: string;
+	label: string;
+	desc: string;
+}
+
 export interface SiteContent {
 	brand: {
 		shortName: string;
@@ -35,15 +41,7 @@ export interface SiteContent {
 		eventDurationLabel: string;
 		eventFormatValue: string;
 		eventFormatLabel: string;
-		prize1Amount: string;
-		prize1Label: string;
-		prize1Desc: string;
-		prize2Amount: string;
-		prize2Label: string;
-		prize2Desc: string;
-		prize3Amount: string;
-		prize3Label: string;
-		prize3Desc: string;
+		prizes: PrizeContent[];
 	};
 	auth: {
 		signUpDescription: string;
@@ -80,15 +78,23 @@ const defaultSiteContent: SiteContent = {
 		eventDurationLabel: 'Non-stop Hallucinations',
 		eventFormatValue: 'Jeopardy CTF',
 		eventFormatLabel: 'Multiple Skill Categories',
-		prize1Amount: '$2,048',
-		prize1Label: 'First Place',
-		prize1Desc: 'Sbrago',
-		prize2Amount: '$1,024',
-		prize2Label: 'Second Place',
-		prize2Desc: 'Sbrogo',
-		prize3Amount: '$512',
-		prize3Label: 'Third Place',
-		prize3Desc: 'Sbrugo'
+		prizes: [
+			{
+				amount: '$2,048',
+				label: 'First Place',
+				desc: 'Sbrago'
+			},
+			{
+				amount: '$1,024',
+				label: 'Second Place',
+				desc: 'Sbrogo'
+			},
+			{
+				amount: '$512',
+				label: 'Third Place',
+				desc: 'Sbrugo'
+			}
+		]
 	},
 	auth: {
 		signUpDescription: 'Join TRXD and start hacking'
@@ -124,6 +130,44 @@ function normalizeSponsor(value: unknown): SponsorContent | null {
 	};
 }
 
+function normalizePrize(value: unknown): PrizeContent | null {
+	if (!isRecord(value)) return null;
+
+	const amount = asString(value.amount, '').trim();
+	const label = asString(value.label, '');
+	const desc = asString(value.desc, '');
+
+	if (!amount && !label && !desc) return null;
+
+	return {
+		amount,
+		label,
+		desc
+	};
+}
+
+function normalizeLegacyPrizes(home: Record<string, unknown>): PrizeContent[] {
+	const legacyPrizes = [
+		{
+			amount: asString(home.prize1Amount, ''),
+			label: asString(home.prize1Label, ''),
+			desc: asString(home.prize1Desc, '')
+		},
+		{
+			amount: asString(home.prize2Amount, ''),
+			label: asString(home.prize2Label, ''),
+			desc: asString(home.prize2Desc, '')
+		},
+		{
+			amount: asString(home.prize3Amount, ''),
+			label: asString(home.prize3Label, ''),
+			desc: asString(home.prize3Desc, '')
+		}
+	];
+
+	return legacyPrizes.filter((prize) => prize.amount || prize.label || prize.desc);
+}
+
 export function normalizeSiteContent(value: unknown): SiteContent {
 	const source = isRecord(value) ? value : {};
 	const brand = isRecord(source.brand) ? source.brand : {};
@@ -134,6 +178,9 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 	const sponsors = Array.isArray(home.sponsors)
 		? home.sponsors.map(normalizeSponsor).filter((item): item is SponsorContent => item !== null)
 		: defaultSiteContent.home.sponsors;
+	const prizes = Array.isArray(home.prizes)
+		? home.prizes.map(normalizePrize).filter((item): item is PrizeContent => item !== null)
+		: normalizeLegacyPrizes(home);
 
 	return {
 		brand: {
@@ -180,15 +227,7 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 			),
 			eventFormatValue: asString(home.eventFormatValue, defaultSiteContent.home.eventFormatValue),
 			eventFormatLabel: asString(home.eventFormatLabel, defaultSiteContent.home.eventFormatLabel),
-			prize1Amount: asString(home.prize1Amount, defaultSiteContent.home.prize1Amount),
-			prize1Label: asString(home.prize1Label, defaultSiteContent.home.prize1Label),
-			prize1Desc: asString(home.prize1Desc, defaultSiteContent.home.prize1Desc),
-			prize2Amount: asString(home.prize2Amount, defaultSiteContent.home.prize2Amount),
-			prize2Label: asString(home.prize2Label, defaultSiteContent.home.prize2Label),
-			prize2Desc: asString(home.prize2Desc, defaultSiteContent.home.prize2Desc),
-			prize3Amount: asString(home.prize3Amount, defaultSiteContent.home.prize3Amount),
-			prize3Label: asString(home.prize3Label, defaultSiteContent.home.prize3Label),
-			prize3Desc: asString(home.prize3Desc, defaultSiteContent.home.prize3Desc)
+			prizes: prizes.length > 0 ? prizes : defaultSiteContent.home.prizes
 		},
 		auth: {
 			signUpDescription: asString(auth.signUpDescription, defaultSiteContent.auth.signUpDescription)

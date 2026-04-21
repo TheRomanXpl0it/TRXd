@@ -7,6 +7,18 @@ import type {
 	SearchTeamsResponse
 } from '$lib/types';
 
+function isTeamsArrayResponse(response: SearchTeamsResponse): response is { teams: Team[] } {
+	return typeof response === 'object' && response !== null && 'teams' in response;
+}
+
+function parseSearchTeamResponse(response: SearchTeamsResponse): Team | null {
+	if (isTeamsArrayResponse(response)) {
+		return response.teams?.[0] || null;
+	}
+
+	return response ?? null;
+}
+
 export async function getTeams(page = 1, limit = 20): Promise<PaginatedResponse<Team>> {
 	const offset = (page - 1) * limit;
 	const response = await api<{ total: number; teams: Team[] }>(
@@ -81,10 +93,10 @@ export async function joinTeamWithToken(token: string): Promise<BaseResponse> {
 
 export async function getTeamByEmail(email: string): Promise<Team | null> {
 	const response = await api<SearchTeamsResponse>(`/teams/search?email=${encodeURIComponent(email)}`);
-	return response.teams?.[0] || null;
+	return parseSearchTeamResponse(response);
 }
 
 export async function getTeamByName(name: string): Promise<Team | null> {
 	const response = await api<SearchTeamsResponse>(`/teams/search?name=${encodeURIComponent(name)}`);
-	return response.teams?.[0] || null;
+	return parseSearchTeamResponse(response);
 }

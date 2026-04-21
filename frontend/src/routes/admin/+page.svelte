@@ -13,19 +13,31 @@
 		Activity
 	} from '@lucide/svelte';
 	import { getAdminStats } from '$lib/challenges';
-	import { onMount } from 'svelte';
 
 	const user = $derived(authState.user);
+	const ready = $derived(authState.ready);
 	const isAdmin = $derived(user?.role === 'Admin');
+	const canViewStats = $derived(user?.role === 'Admin' || user?.role === 'Author');
 
 	let statsData = $state<any>(null);
+	let statsLoading = $state(false);
 
-	onMount(async () => {
-		if (isAdmin) {
-			try {
-				statsData = await getAdminStats();
-			} catch {}
+	async function loadStats() {
+		if (statsLoading || statsData) return;
+
+		statsLoading = true;
+		try {
+			statsData = await getAdminStats();
+		} catch {
+			statsData = null;
+		} finally {
+			statsLoading = false;
 		}
+	}
+
+	$effect(() => {
+		if (!ready || !canViewStats) return;
+		void loadStats();
 	});
 
 	const stats = $derived([

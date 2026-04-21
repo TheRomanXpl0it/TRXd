@@ -46,6 +46,22 @@
           "default": "TRXd Admin",
           "placeholder": "TRX CTF Admin",
           "help": "Appended to admin page browser titles."
+        },
+        {
+          "path": "brand.heroSubtitle",
+          "label": "Hero subtitle",
+          "type": "text",
+          "default": "",
+          "placeholder": "Capture The Flag - 2026",
+          "help": "Shown beneath the hero title on the landing page. Leave empty to hide."
+        },
+        {
+          "path": "brand.discordUrl",
+          "label": "Discord server URL",
+          "type": "url",
+          "default": "",
+          "placeholder": "https://discord.gg/yourserver",
+          "help": "When set, a \"Join the Discord server\" link appears on the hero. Leave empty to hide."
         }
       ]
     },
@@ -155,6 +171,86 @@
               "type": "textarea",
               "default": "",
               "placeholder": "Optional short sponsor blurb."
+            }
+          ]
+        },
+        {
+          "path": "home.eventTimelineValue",
+          "label": "Event timeline - value",
+          "type": "text",
+          "default": "",
+          "placeholder": "May 9-11, 2026",
+          "help": "Large value shown in the Timeline card. Leave empty to hide the card."
+        },
+        {
+          "path": "home.eventTimelineLabel",
+          "label": "Event timeline - label",
+          "type": "text",
+          "default": "",
+          "placeholder": "Competition window",
+          "help": "Small label shown below the timeline value."
+        },
+        {
+          "path": "home.eventDurationValue",
+          "label": "Event duration - value",
+          "type": "text",
+          "default": "",
+          "placeholder": "48 hours",
+          "help": "Large value shown in the Duration card. Leave empty to hide the card."
+        },
+        {
+          "path": "home.eventDurationLabel",
+          "label": "Event duration - label",
+          "type": "text",
+          "default": "",
+          "placeholder": "Non-stop hacking",
+          "help": "Small label shown below the duration value."
+        },
+        {
+          "path": "home.eventFormatValue",
+          "label": "Event format - value",
+          "type": "text",
+          "default": "",
+          "placeholder": "Jeopardy",
+          "help": "Large value shown in the Format card. Leave empty to hide the card."
+        },
+        {
+          "path": "home.eventFormatLabel",
+          "label": "Event format - label",
+          "type": "text",
+          "default": "",
+          "placeholder": "Standard CTF format",
+          "help": "Small label shown below the format value."
+        },
+        {
+          "path": "home.prizes",
+          "label": "Prizes",
+          "type": "list",
+          "default": [],
+          "itemLabel": "Prize",
+          "help": "Add one entry per prize tier. Leave empty to hide the prizes section.",
+          "fields": [
+            {
+              "key": "amount",
+              "label": "Amount / Value",
+              "type": "text",
+              "default": "",
+              "placeholder": "Top 10 qualify / $2,000",
+              "help": "The large text shown — can be a cash amount, a qualification slot, etc."
+            },
+            {
+              "key": "label",
+              "label": "Label",
+              "type": "text",
+              "default": "",
+              "placeholder": "1st Place"
+            },
+            {
+              "key": "desc",
+              "label": "Description",
+              "type": "textarea",
+              "default": "",
+              "placeholder": "Sponsored by ..."
             }
           ]
         }

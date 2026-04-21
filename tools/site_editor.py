@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import sys
 import threading
@@ -18,6 +19,10 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_PATH = ROOT / 'tools' / 'site-schema.json'
 CONTENT_PATH = ROOT / 'frontend' / 'static' / 'site-content.json'
+APP_HTML_PATH = ROOT / 'frontend' / 'src' / 'app.html'
+APP_TITLE_START = '		<!-- app-title:start -->'
+APP_TITLE_END = '		<!-- app-title:end -->'
+APP_TITLE_FALLBACK = 'TRXD'
 
 
 EDITOR_HTML = """<!doctype html>
@@ -897,6 +902,38 @@ def load_content(schema: dict[str, Any]) -> dict[str, Any]:
     return sync_with_schema(schema, content)
 
 
+def sync_app_html_title(content: Any) -> None:
+    if not APP_HTML_PATH.exists():
+        return
+
+    browser_title = APP_TITLE_FALLBACK
+    if isinstance(content, dict):
+        brand = content.get('brand')
+        if isinstance(brand, dict):
+            raw_title = brand.get('browserTitle')
+            if isinstance(raw_title, str) and raw_title.strip():
+                browser_title = raw_title.strip()
+
+    html_content = APP_HTML_PATH.read_text(encoding='utf-8')
+    managed_block = (
+        f'{APP_TITLE_START}\n'
+        f'		<title>{html.escape(browser_title, quote=True)}</title>\n'
+        f'{APP_TITLE_END}'
+    )
+
+    start_index = html_content.find(APP_TITLE_START)
+    end_index = html_content.find(APP_TITLE_END)
+
+    if start_index != -1 and end_index != -1 and end_index >= start_index:
+        end_index += len(APP_TITLE_END)
+        next_html = html_content[:start_index] + managed_block + html_content[end_index:]
+    else:
+        next_html = html_content.replace('		%sveltekit.head%', f'{managed_block}\n		%sveltekit.head%')
+
+    if next_html != html_content:
+        APP_HTML_PATH.write_text(next_html, encoding='utf-8')
+
+
 class SiteEditorHandler(BaseHTTPRequestHandler):
     server_version = 'SiteEditor/1.0'
 
@@ -957,6 +994,7 @@ class SiteEditorHandler(BaseHTTPRequestHandler):
             payload = json.loads(raw_body.decode('utf-8')) if raw_body else {}
             content = sync_with_schema(self.editor_server.schema, payload)
             write_json(CONTENT_PATH, content)
+            sync_app_html_title(content)
             self.send_json({'content': content}, HTTPStatus.OK)
         except json.JSONDecodeError as exc:
             self.send_json({'error': f'Invalid JSON payload: {exc}'}, HTTPStatus.BAD_REQUEST)
@@ -981,6 +1019,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     schema = load_schema()
+    sync_app_html_title(load_content(schema))
     server = SiteEditorServer((args.host, args.port), SiteEditorHandler, schema)
     actual_host, actual_port = server.server_address[:2]
     url = f'http://{actual_host}:{actual_port}'

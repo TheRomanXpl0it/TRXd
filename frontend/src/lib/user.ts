@@ -10,6 +10,18 @@ import { getTeamByEmail, getTeamByName } from '$lib/team';
 
 import { authState } from '$lib/stores/auth';
 
+function isUsersArrayResponse(response: SearchUsersResponse): response is { users: User[] } {
+	return typeof response === 'object' && response !== null && 'users' in response;
+}
+
+function parseSearchUserResponse(response: SearchUsersResponse): User | null {
+	if (isUsersArrayResponse(response)) {
+		return response.users?.[0] || null;
+	}
+
+	return response ?? null;
+}
+
 export async function getUsers(page = 1, limit = 20): Promise<PaginatedResponse<User>> {
 	const offset = (page - 1) * limit;
 	const isUserMode = authState.userMode;
@@ -94,7 +106,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 	}
 
 	const response = await api<SearchUsersResponse>(`/users/search?email=${encodeURIComponent(email)}`);
-	return response.users?.[0] || null;
+	return parseSearchUserResponse(response);
 }
 
 export async function getUserByName(name: string): Promise<User | null> {
@@ -104,5 +116,5 @@ export async function getUserByName(name: string): Promise<User | null> {
 	}
 
 	const response = await api<SearchUsersResponse>(`/users/search?name=${encodeURIComponent(name)}`);
-	return response.users?.[0] || null;
+	return parseSearchUserResponse(response);
 }
