@@ -1,7 +1,7 @@
 {
   "brand": {
-    "shortName": "CyberChallenge.IT",
-    "browserTitle": "CyberChallenge.IT",
+    "shortName": "TRX CTF 2026",
+    "browserTitle": "TRX CTF 2026",
     "footerText": "TheRomanXpl0it \u00a9 2026",
     "logoAlt": "TRX Logo",
     "adminTitleSuffix": "Admin",
@@ -9,14 +9,14 @@
     "discordUrl": ""
   },
   "home": {
-    "heroTitle": "CyberChallenge.IT 2026",
+    "heroTitle": "TRX CTF 2026",
     "heroDescription": "",
     "primaryCtaLabel": "View Challenges",
     "primaryCtaHref": "/challenges",
     "secondaryCtaLabel": "Scoreboard",
     "secondaryCtaHref": "/scoreboard",
     "rulesTitle": "",
-    "rulesMarkdown": "",
+    "rulesMarkdown": "Welcome to the second edition of TRX CTF!\n\nThis is a Jeopardy-style CTF featuring challenges in Web, Pwn, Rev, Crypto, Blockchain, and Misc categories. Top 8 eligible teams will qualify for the on-site finals to be held in Italy this September.\n\nThe use of AI tools is discouraged, as AI assistance will be restricted during the finals. Participants are encouraged to rely on their own skills to ensure fair preparation and consistency between stages.\n\nFlag format: TRX{...} unless specified otherwise.\n\nScoring: TBD\n\nRules:\n1. Do not attack the infrastructure or create multiple accounts.\n2. Do not attack or harass other players.\n3. Do not share flags or collaborate in any way with other teams.\n4. We reserve the right to ban any participant engaging in any misconduct or behavior that disrupts the competition.\n5. Eligibility of non-Schengen teams for the final competition is entirely at the organizers' discretion.\n6. The organizers' decisions are final.",
     "sponsorsTitle": "",
     "sponsors": [],
     "eventTimelineValue": "",

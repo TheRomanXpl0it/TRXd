@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import threading
 import webbrowser
@@ -16,8 +17,8 @@ from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_PATH = ROOT / 'tools' / 'site-schema.json'
 CONTENT_PATH = ROOT / 'frontend' / 'static' / 'site-content.json'
+RULES_PATH = ROOT / 'rules.md'
 
 
 EDITOR_HTML = """<!doctype html>
@@ -878,10 +879,42 @@ def sync_with_schema(schema: dict[str, Any], content: Any) -> dict[str, Any]:
     return merged
 
 
+def load_rules_content() -> tuple[str, str] | None:
+    if not RULES_PATH.exists():
+        print("[!] rules.md file not provided. skipping rules generation.")
+        return None
+
+    raw = RULES_PATH.read_text(encoding='utf-8').strip()
+    if not raw:
+        return '', ''
+
+    title = ''
+    markdown = raw
+
+    heading_match = re.match(r'^\s{0,3}(#{1,6})\s+(.+?)\s*#*\s*(?:\n|$)', raw)
+    if heading_match:
+        title = heading_match.group(2).strip()
+        markdown = raw[heading_match.end():].lstrip('\n')
+
+    return title, markdown
+
+
+def sync_rules_into_content(content: dict[str, Any]) -> dict[str, Any]:
+    rules_content = load_rules_content()
+    if rules_content is None:
+        return content
+
+    title, markdown = rules_content
+    merged = deepcopy(content)
+    set_path(merged, 'home.rulesTitle', title)
+    set_path(merged, 'home.rulesMarkdown', markdown)
+    return merged
+
+
 def load_schema() -> dict[str, Any]:
-    schema = read_json(SCHEMA_PATH)
+    schema = read_json(CONTENT_PATH)
     if not isinstance(schema, dict):
-        raise SiteEditorError(f'Expected an object in {SCHEMA_PATH}')
+        raise SiteEditorError(f'Expected an object in {CONTENT_PATH}')
     return schema
 
 
@@ -890,7 +923,8 @@ def load_content(schema: dict[str, Any]) -> dict[str, Any]:
         content = read_json(CONTENT_PATH)
     else:
         content = build_default_content(schema)
-    return sync_with_schema(schema, content)
+    synced = sync_with_schema(schema, content)
+    return sync_rules_into_content(synced)
 
 
 class SiteEditorHandler(BaseHTTPRequestHandler):
@@ -952,6 +986,7 @@ class SiteEditorHandler(BaseHTTPRequestHandler):
             raw_body = self.rfile.read(length)
             payload = json.loads(raw_body.decode('utf-8')) if raw_body else {}
             content = sync_with_schema(self.editor_server.schema, payload)
+            content = sync_rules_into_content(content)
             write_json(CONTENT_PATH, content)
             self.send_json({'content': content}, HTTPStatus.OK)
         except json.JSONDecodeError as exc:
@@ -982,7 +1017,7 @@ def main() -> None:
     url = f'http://{actual_host}:{actual_port}'
 
     print(f'Site editor ready at {url}')
-    print(f'Editing {CONTENT_PATH.relative_to(ROOT)} using {SCHEMA_PATH.relative_to(ROOT)}')
+    print(f'Editing {CONTENT_PATH.relative_to(ROOT)} using {CONTENT_PATH.relative_to(ROOT)}')
     print('Press Ctrl+C to stop.')
 
     if not args.no_browser:
