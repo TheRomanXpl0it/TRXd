@@ -17,7 +17,7 @@ import (
 
 // TODO: move these into consts
 const SUBJECT = "Email Verification Required"
-const BODY_TEMPLATE = "Hello,\n\nTo Confirm your email address, please click the link below:\nhttp://%s/verify?token=%s\n\nThank you!"
+const BODY_TEMPLATE = "Hello,\n\nTo Confirm your email address, please click the link below:\nhttps://%s/verify?token=%s\n\nThank you!"
 
 func verifyMailEnabled(c *fiber.Ctx) (bool, error) {
 	verification, err := db.GetConfig(c.Context(), "email-verification")
