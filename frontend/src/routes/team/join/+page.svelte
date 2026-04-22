@@ -79,7 +79,7 @@
 						<Label for="join-name" class="font-medium">Team Name</Label>
 						<Input
 							id="join-name"
-							placeholder="e.g. ZeroDayCats"
+							placeholder="e.g. TheRomanXpl0it"
 							bind:value={joinName}
 							required
 							class="bg-background/50 h-11"
