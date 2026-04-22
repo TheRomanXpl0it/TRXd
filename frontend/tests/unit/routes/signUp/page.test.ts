@@ -73,10 +73,7 @@ describe('Sign Up Page', () => {
 
 		renderWithProviders(Page);
 
-		await user.type(screen.getByLabelText(/username/i), 'tester');
 		await user.type(screen.getByLabelText(/^email$/i), 'tester@example.com');
-		await user.type(screen.getByLabelText(/^password$/i), 'password123');
-		await user.type(screen.getByLabelText(/confirm password/i), 'password123');
 		await user.click(screen.getByRole('button', { name: /send verification email/i }));
 
 		await waitFor(() =>
