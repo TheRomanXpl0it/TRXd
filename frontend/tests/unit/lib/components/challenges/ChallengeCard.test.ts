@@ -56,7 +56,7 @@ describe('ChallengeCard Component', () => {
 		expect(screen.getByText('forensics')).toBeInTheDocument();
 	});
 
-	it('applies solved styling when challenge is solved (emerald background)', () => {
+	it('applies solved styling when challenge is solved', () => {
 		const challenge = makeChallenge({ solved: true });
 
 		renderWithProviders(ChallengeCard, {
@@ -64,7 +64,8 @@ describe('ChallengeCard Component', () => {
 		});
 
 		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/bg-\[#05100a\]/);
+		expect(button.className).toMatch(/\bsolve-surface\b/);
+		expect(button.className).not.toMatch(/bg-\[#fafafa\]/);
 	});
 
 	it('does not apply solved styling when challenge is not solved', () => {
@@ -75,7 +76,7 @@ describe('ChallengeCard Component', () => {
 		});
 
 		const button = screen.getByRole('button');
-		expect(button.className).not.toMatch(/emerald/);
+		expect(button.className).not.toMatch(/\bsolve-surface\b/);
 	});
 
 	it('does not show instance icon for non-instance challenges', () => {
@@ -160,7 +161,7 @@ describe('ChallengeCard Component', () => {
 		).toBeInTheDocument();
 	});
 
-	it('applies solved styling (emerald) in any view', () => {
+	it('applies solved styling in any view', () => {
 		const challenge = makeChallenge({ solved: true });
 
 		renderWithProviders(ChallengeCard, {
@@ -168,8 +169,8 @@ describe('ChallengeCard Component', () => {
 		});
 
 		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/bg-\[#05100a\]/);
-		expect(button.className).toMatch(/dark:bg-\[#05100a\]/);
+		expect(button.className).toMatch(/\bsolve-surface\b/);
+		expect(button.className).not.toMatch(/dark:bg-\[#05100a\]/);
 	});
 
 	it('applies unsolved/default styling when not solved', () => {
@@ -180,8 +181,7 @@ describe('ChallengeCard Component', () => {
 		});
 
 		const button = screen.getByRole('button');
-		// Not solved → no emerald, uses default card style
-		expect(button.className).not.toMatch(/bg-emerald/);
+		expect(button.className).not.toMatch(/\bsolve-surface\b/);
 		expect(button.className).toMatch(/bg-\[#fafafa\]/);
 	});
 
