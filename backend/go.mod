@@ -23,6 +23,7 @@ require (
 	github.com/redis/go-redis/v9 v9.18.0
 	github.com/wneessen/go-mail v0.7.2
 	golang.org/x/crypto v0.49.0
+	golang.org/x/text v0.35.0
 )
 
 require (
@@ -164,7 +165,6 @@ require (
 	golang.org/x/sync v0.20.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.41.0 // indirect
-	golang.org/x/text v0.35.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251029180050-ab9386a59fda // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251029180050-ab9386a59fda // indirect

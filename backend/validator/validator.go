@@ -32,6 +32,7 @@ func init() {
 
 	validate.RegisterAlias("id", fmt.Sprintf("min=0,max=%d", math.MaxInt32))
 	validate.RegisterAlias("password", fmt.Sprintf("min=%d,max=%d", consts.MinPasswordLen, consts.MaxPasswordLen))
+	registerValidation("name", validString)
 	registerValidation("country", validCountry)
 
 	validate.RegisterAlias("category_name", fmt.Sprintf("max=%d", consts.MaxCategoryLen))
@@ -54,9 +55,9 @@ func init() {
 
 	validate.RegisterAlias("flag", fmt.Sprintf("max=%d", consts.MaxFlagLen))
 
-	validate.RegisterAlias("team_name", fmt.Sprintf("max=%d", consts.MaxTeamNameLen))
+	validate.RegisterAlias("team_name", fmt.Sprintf("min=1,max=%d,name", consts.MaxTeamNameLen))
 
-	validate.RegisterAlias("user_name", fmt.Sprintf("max=%d", consts.MaxUserNameLen))
+	validate.RegisterAlias("user_name", fmt.Sprintf("min=1,max=%d,name", consts.MaxUserNameLen))
 	validate.RegisterAlias("user_email", fmt.Sprintf("max=%d,email", consts.MaxEmailLen))
 	validate.RegisterAlias("user_role", "oneof="+strings.Join(consts.RolesStr, " "))
 }

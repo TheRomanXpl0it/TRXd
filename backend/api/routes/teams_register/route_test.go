@@ -51,9 +51,19 @@ var testData = []struct {
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Password", consts.MaxPasswordLen)),
 	},
 	{
+		testBody:         JSON{"name": " ", "password": "testpass"},
+		expectedStatus:   http.StatusBadRequest,
+		expectedResponse: errorf(consts.MissingRequiredFields),
+	},
+	{
 		testBody:         JSON{"name": strings.Repeat("a", consts.MaxTeamNameLen+1), "password": "testpass"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Name", consts.MaxTeamNameLen)),
+	},
+	{
+		testBody:         JSON{"name": "\u200e", "password": "testpass"},
+		expectedStatus:   http.StatusBadRequest,
+		expectedResponse: errorf(consts.InvalidName),
 	},
 	{
 		testBody:       JSON{"name": "test", "password": "testpass"},

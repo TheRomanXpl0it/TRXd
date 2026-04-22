@@ -111,11 +111,17 @@ func TestRoute(t *testing.T) {
 	session.Get("/teams/search?name=", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.MissingRequiredFields))
 
+	session.Get("/teams/search?name=%20", nil, http.StatusBadRequest)
+	session.CheckResponse(errorf(consts.MissingRequiredFields))
+
 	session.Get("/teams/search?name=AAA", nil, http.StatusNotFound)
 	session.CheckResponse(errorf(consts.TeamNotFound))
 
 	session.Get("/teams/search?name="+strings.Repeat("A", consts.MaxUserNameLen+1), nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(test_utils.Format(consts.MaxError, "team_name", consts.MaxUserNameLen)))
+
+	session.Get("/teams/search?name=%E2%80%8E", nil, http.StatusBadRequest)
+	session.CheckResponse(errorf(consts.InvalidName))
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Get(fmt.Sprintf("/teams/search?name=%s", adminName), nil, http.StatusNotFound)

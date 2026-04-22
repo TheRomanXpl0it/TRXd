@@ -103,6 +103,8 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}
 
+	data.Name = validator.NormalizeString(data.Name)
+
 	enabled, err := verifyMailEnabled(c)
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
@@ -119,13 +121,6 @@ func Route(c *fiber.Ctx) error {
 		}
 
 		data.Email = mail
-	}
-
-	if data.Name != "" {
-		data.Name, err = normalizeSignupName(data.Name)
-		if err != nil {
-			return utils.Error(c, fiber.StatusBadRequest, consts.InvalidUserName)
-		}
 	}
 
 	valid, err := validator.Struct(c, data)

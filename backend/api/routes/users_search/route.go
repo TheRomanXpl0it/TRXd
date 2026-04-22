@@ -59,6 +59,8 @@ func Route(c *fiber.Ctx) error {
 	userName := c.Query("name")
 	userEmail := c.Query("email")
 
+	userName = validator.NormalizeString(userName)
+
 	if userEmail == "" && userName == "" {
 		return utils.Error(c, fiber.StatusBadRequest, consts.MissingRequiredFields)
 	}

@@ -129,6 +129,7 @@ const (
 	InvalidJWTSecret        = "invalid JWT secret"
 	InvalidMaxCpu           = "Invalid Max CPU, must be a positive 32-bit integer"
 	InvalidMultipartForm    = "Invalid multipart form"
+	InvalidName             = "Invalid name"
 	InvalidParam            = "Invalid parameter"
 	InvalidRole             = "Invalid role"
 	InvalidSigningAlgorithm = "invalid signing algorithm"
@@ -137,7 +138,6 @@ const (
 	InvalidTeamID           = "Invalid team ID, must be non negative"
 	InvalidToken            = "invalid token"
 	InvalidUserID           = "Invalid user ID, must be non negative"
-	InvalidUserName         = "Invalid user name"
 
 	MaxError   = "{0} must not exceed {1}"
 	MinError   = "{0} must be at least {1}"

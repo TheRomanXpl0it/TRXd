@@ -93,11 +93,17 @@ func TestRoute(t *testing.T) {
 	session.Get("/users/search?name=", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.MissingRequiredFields))
 
+	session.Get("/users/search?name=%20", nil, http.StatusBadRequest)
+	session.CheckResponse(errorf(consts.MissingRequiredFields))
+
 	session.Get("/users/search?name=AAA", nil, http.StatusNotFound)
 	session.CheckResponse(errorf(consts.UserNotFound))
 
 	session.Get("/users/search?name="+strings.Repeat("A", consts.MaxUserNameLen+1), nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(test_utils.Format(consts.MaxError, "user_name", consts.MaxUserNameLen)))
+
+	session.Get("/users/search?name=%E2%80%8E", nil, http.StatusBadRequest)
+	session.CheckResponse(errorf(consts.InvalidName))
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Get(fmt.Sprintf("/users/search?name=%s", adminName), nil, http.StatusNotFound)

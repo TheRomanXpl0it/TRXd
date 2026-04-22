@@ -12,12 +12,14 @@ import (
 
 func Route(c *fiber.Ctx) error {
 	var data struct {
-		Name    string  `json:"name" validate:"team_name"`
+		Name    string  `json:"name" validate:"omitempty,team_name"`
 		Country *string `json:"country" validate:"omitempty,country"`
 	}
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}
+
+	data.Name = validator.NormalizeString(data.Name)
 
 	if data.Name == "" && data.Country == nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.MissingRequiredFields)

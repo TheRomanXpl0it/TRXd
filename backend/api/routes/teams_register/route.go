@@ -19,6 +19,8 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}
 
+	data.Name = validator.NormalizeString(data.Name)
+
 	valid, err := validator.Struct(c, data)
 	if err != nil || !valid {
 		return err

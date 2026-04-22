@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"math"
 	"strconv"
+	"unicode"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -39,4 +40,23 @@ func validFloat(fl validator.FieldLevel) bool {
 	}
 
 	return 0.0 < res && res <= math.MaxInt32
+}
+
+func validString(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	for _, r := range value {
+		switch {
+		case r == ' ':
+			continue
+		case unicode.IsControl(r):
+			return false
+		case unicode.In(r, unicode.Cf, unicode.Zl, unicode.Zp):
+			return false
+		case unicode.IsSpace(r):
+			return false
+		}
+	}
+
+	return true
 }

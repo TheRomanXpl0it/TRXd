@@ -51,6 +51,8 @@ func validateUserData(name string, email string, password string) error {
 		return errors.New("username, email, and password must not be empty")
 	}
 
+	name = validator.NormalizeString(name)
+
 	valid, err := validator.Var(nil, name, "user_name")
 	if err != nil {
 		return err
