@@ -19,7 +19,7 @@
 	<div class="bg-background flex min-h-screen flex-col">
 		<Navbar {user} {userMode} />
 
-		<main class="flex-1">
+		<main class="flex-1 min-h-0">
 			<div
 				class="router-content mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8"
 			>

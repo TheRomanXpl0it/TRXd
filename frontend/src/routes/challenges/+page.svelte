@@ -313,7 +313,10 @@
 		<p class="text-sm">{error}</p>
 	</div>
 {:else if challengeView === 'sidebar'}
-	<div class="flex h-[calc(100vh-80px)] w-full flex-col items-center justify-center">
+	<div
+		id="challenges-split-view"
+		class="-my-6 flex h-[calc(100dvh-5rem)] min-h-0 w-full flex-col overflow-hidden py-6"
+	>
 		<SidebarChallengeView
 			{grouped}
 			onOpenChallenge={openChallenge}
@@ -346,6 +349,12 @@
 		{/if}
 	</div>
 {/if}
+
+<style>
+	:global(body:has(#challenges-split-view)) {
+		overflow: hidden;
+	}
+</style>
 
 {#if selectedId}
 	<ChallengeModal

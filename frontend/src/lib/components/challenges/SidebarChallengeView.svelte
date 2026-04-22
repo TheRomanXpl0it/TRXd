@@ -163,7 +163,7 @@
 </script>
 
 <div
-	class="bg-card relative flex h-[800px] max-h-[calc(100vh-160px)] w-full gap-0 overflow-hidden rounded-xl border-0 shadow-sm"
+	class="bg-card relative flex h-full min-h-0 max-h-full w-full gap-0 overflow-hidden rounded-xl border-0 shadow-sm"
 >
 	<!-- Left Sidebar: Challenge List -->
 	<aside

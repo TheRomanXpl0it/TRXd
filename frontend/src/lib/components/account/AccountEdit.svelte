@@ -58,7 +58,7 @@
 
 		try {
 			saving = true;
-			await updateUser(user?.id ?? 0, name, trimmedCountry);
+		await updateUser(user?.id ?? 0, trimmedName, trimmedCountry);
 			open = false;
 			onupdated?.({ id: user?.id ?? 0 });
 			showSuccess('Profile updated.');

@@ -14,12 +14,21 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      traefik:
+        condition: service_started
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:Z
       - attachments_data:/app/attachments
 
   postgres:
+    image: postgres:18-alpine
+    restart: always
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: /var/lib/postgresql/data
     volumes:
       - postgres_data_local:/var/lib/postgresql/data
@@ -28,6 +37,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+    networks:
+      - internal
 
   redis:
     volumes:
@@ -37,10 +48,6 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
-
-  nginx:
-    profiles:
-      - disabled
 
   traefik:
     security_opt:

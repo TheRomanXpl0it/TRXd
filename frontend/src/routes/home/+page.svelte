@@ -79,7 +79,7 @@
 			{/if}
 
 			{#if hasSponsors}
-				<section class="w-full max-w-6xl">
+				<section class="w-full max-w-4xl">
 					{#if $siteContent.home.sponsorsTitle}
 						<h2
 							class="mb-6 text-center text-3xl font-black tracking-tighter text-gray-900 uppercase sm:text-4xl dark:text-white"
@@ -88,11 +88,11 @@
 						</h2>
 					{/if}
 
-					<div class="flex flex-wrap justify-center gap-6">
+					<div class="flex flex-col gap-6">
 						{#each $siteContent.home.sponsors as sponsor}
 							<a
 								href={sponsor.url || undefined}
-								class="w-full max-w-xl rounded-3xl border border-gray-200/70 bg-white/60 p-6 text-left shadow-sm transition-colors hover:border-gray-300 sm:p-7 lg:max-w-[calc(50%-0.75rem)] xl:max-w-[calc(33.333%-1rem)] dark:border-gray-800 dark:bg-white/5 dark:hover:border-gray-700"
+								class="w-full rounded-3xl border border-gray-200/70 bg-white/60 p-6 text-left shadow-sm transition-colors hover:border-gray-300 sm:p-7 dark:border-gray-800 dark:bg-white/5 dark:hover:border-gray-700"
 								target={sponsor.url ? '_blank' : undefined}
 								rel={sponsor.url ? 'noreferrer' : undefined}
 							>
