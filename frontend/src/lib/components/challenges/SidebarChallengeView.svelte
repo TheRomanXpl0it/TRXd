@@ -163,16 +163,16 @@
 </script>
 
 <div
-	class="bg-card relative flex h-full min-h-0 max-h-full w-full gap-0 overflow-hidden rounded-xl border-0 shadow-sm"
+	class="relative flex h-full min-h-0 max-h-full w-full gap-0 overflow-hidden rounded-[1.5rem] border border-border/30 bg-background/24 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-white/8 dark:bg-background/18"
 >
 	<!-- Left Sidebar: Challenge List -->
 	<aside
 		class={cn(
-			'bg-card w-full shrink-0 flex-col border-r transition-all duration-300 lg:w-80',
+			'w-full shrink-0 flex-col border-r border-border/18 bg-background/18 backdrop-blur-xl transition-all duration-300 dark:border-white/6 dark:bg-background/14 lg:w-80',
 			mobileShowSide ? 'flex' : 'hidden lg:flex'
 		)}
 	>
-		<div class="bg-card space-y-4 px-5 py-6">
+		<div class="border-border/15 bg-background/12 space-y-4 border-b px-5 py-6">
 			<h2 class="text-muted-foreground/40 px-1 text-[10px] font-black uppercase tracking-[0.2em]">
 				Challenges
 			</h2>
@@ -214,14 +214,14 @@
 									<button
 										onclick={() => selectChallenge(ch)}
 											class={cn(
-												'group flex w-full flex-col gap-1.5 rounded-xl px-4 py-3 text-left transition-colors duration-0',
-												activeChallenge?.id === ch.id
-													? 'bg-primary/10 text-foreground shadow-[inset_3px_0_0_0_hsl(var(--primary))]'
-													: ch.solved
-												? 'bg-emerald-500/10 dark:bg-[#05100a] text-emerald-600 dark:text-emerald-500/80 hover:bg-emerald-500/20 dark:hover:bg-[#081a11]'
-														: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
-											)}
-										>
+											'group flex w-full flex-col gap-1.5 rounded-xl px-4 py-3 text-left transition-colors duration-0',
+											activeChallenge?.id === ch.id
+												? 'bg-primary/10 text-foreground shadow-[inset_3px_0_0_0_hsl(var(--primary))]'
+												: ch.solved
+													? 'solve-surface solve-surface-hover solve-text'
+													: 'hover:bg-muted/50 text-muted-foreground hover:text-foreground'
+										)}
+									>
 										<div class="flex items-start justify-between gap-3">
 											<div class="flex items-center gap-2">
 												<span
@@ -237,7 +237,7 @@
 												{/if}
 											</div>
 											{#if ch.solved}
-												<CheckCircle class="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+												<CheckCircle class="solve-text-strong h-4 w-4 shrink-0" />
 											{/if}
 											{#if countdowns[ch.id] > 0}
 												<div
@@ -290,14 +290,14 @@
 	<!-- Right Content: Challenge Details -->
 	<main
 		class={cn(
-			'bg-background h-full min-w-0 flex-1 flex-col overflow-hidden transition-all duration-300',
+			'h-full min-w-0 flex-1 flex-col overflow-hidden bg-background/8 backdrop-blur-lg transition-all duration-300 dark:bg-background/6',
 			mobileShowSide ? 'hidden lg:flex' : 'flex'
 		)}
 	>
 		{#if activeChallenge}
 			<!-- Scrollable zone: header + tabs + content (excluding flag submission) -->
 			<div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
-				<header class="bg-background px-8 py-10">
+				<header class="border-border/12 bg-background/6 border-b px-8 py-10">
 					<div
 						class="mx-auto flex max-w-5xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
 					>
@@ -320,7 +320,7 @@
 								</Badge>
 								{#if activeChallenge.solved}
 									<Badge
-										class="border-none bg-emerald-500/10 dark:bg-[#05100a] px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-500/80"
+										class="solve-surface solve-text-strong border-none px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest"
 									>
 										Solved
 									</Badge>
@@ -392,15 +392,15 @@
 				</header>
 
 				<!-- Standard Tabs -->
-				<div class="bg-background px-8">
-					<div class="flex justify-center border-b pb-4 pt-4">
+				<div class="bg-background/4 px-8">
+					<div class="border-border/12 flex justify-center border-b pb-4 pt-4">
 						<div
-							class="bg-muted text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1"
+							class="bg-muted/40 text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1 backdrop-blur-sm"
 						>
 							<button
 								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 								'details'
-									? 'bg-background text-foreground shadow-sm'
+									? 'bg-background/45 text-foreground shadow-sm backdrop-blur-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
 								onclick={() => (activeTab = 'details')}
 							>
@@ -410,7 +410,7 @@
 							<button
 								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 								'solves'
-									? 'bg-background text-foreground shadow-sm'
+									? 'bg-background/45 text-foreground shadow-sm backdrop-blur-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
 								onclick={() => (activeTab = 'solves')}
 							>
@@ -500,7 +500,7 @@
 											class="bg-muted/20 flex items-center justify-between gap-4 rounded-xl border border-dashed p-5 font-mono text-sm"
 										>
 											<code
-												class="bg-background overflow-x-auto whitespace-nowrap rounded border px-3 py-1 text-base font-bold"
+												class="bg-background/38 overflow-x-auto whitespace-nowrap rounded border px-3 py-1 text-base font-bold backdrop-blur-sm"
 												>{connectionString}</code
 											>
 											{#if connectionString.startsWith('http')}
@@ -520,7 +520,7 @@
 							</div>
 						{:else if activeTab === 'solves'}
 							<div class="animate-in fade-in m-0 duration-300">
-								<div class="bg-card overflow-hidden rounded-xl border-0 shadow-sm">
+								<div class="bg-background/20 overflow-hidden rounded-xl border border-border/18 shadow-sm backdrop-blur-sm">
 									{#if loadingSolves}
 										<div class="flex flex-col items-center gap-6 p-20 text-center">
 											<Spinner class="h-8 w-8" />
@@ -544,7 +544,7 @@
 
 			<!-- Sticky flag submission footer (details tab only) -->
 			{#if activeTab === 'details'}
-				<div class="bg-background shrink-0 border-t-0 border-none px-8 pb-8 pt-2 shadow-none">
+				<div class="bg-background/8 shrink-0 border-t border-border/10 px-8 pb-8 pt-2 shadow-none">
 					<div class="mx-auto max-w-4xl">
 						{#key activeChallenge.id}
 							<FlagSubmission

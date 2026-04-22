@@ -37,6 +37,11 @@
 	--sidebar-accent-foreground: oklch(0.21 0.006 285.885);
 	--sidebar-border: oklch(0.92 0.004 286.32);
 	--sidebar-ring: oklch(0.705 0.015 286.067);
+	--solve-surface: #d5ffec;
+	--solve-surface-strong: #b2ffdb;
+	--solve-border: #00de72;
+	--solve-foreground: #00bf62;
+	--solve-foreground-strong: #009f52;
 }
 
 .dark {
@@ -71,6 +76,11 @@
 	--sidebar-accent-foreground: oklch(0.985 0 0);
 	--sidebar-border: oklch(1 0 0 / 10%);
 	--sidebar-ring: oklch(0.552 0.016 285.938);
+	--solve-surface: #071e12;
+	--solve-surface-strong: #0a2a18;
+	--solve-border: #29d97a;
+	--solve-foreground: #59ffab;
+	--solve-foreground-strong: #8dffcb;
 }
 
 @theme inline {
@@ -161,6 +171,28 @@
 	}
 	body {
 		@apply bg-background text-foreground;
+	}
+}
+
+@layer components {
+	.solve-surface {
+		background-color: var(--solve-surface);
+	}
+
+	.solve-surface-hover:hover {
+		background-color: var(--solve-surface-strong);
+	}
+
+	.solve-border {
+		border-color: var(--solve-border);
+	}
+
+	.solve-text {
+		color: var(--solve-foreground);
+	}
+
+	.solve-text-strong {
+		color: var(--solve-foreground-strong);
 	}
 }
 

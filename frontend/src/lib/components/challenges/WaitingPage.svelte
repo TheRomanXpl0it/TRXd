@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { Code, Database, Lock, Shield } from '@lucide/svelte';
-	import PixelBackground from '../ui/PixelBackground.svelte';
 
 	let { startTime, title = 'Starting soon' } = $props<{
 		startTime: string | null;
@@ -70,8 +69,6 @@
 		{ icon: Shield, top: '75%', left: '90%', delay: '2.2s', size: 20, speed: '18s' }
 	];
 </script>
-
-<PixelBackground />
 
 <div
 	class="relative flex min-h-[calc(100vh-100px)] w-full flex-col items-center justify-center overflow-hidden text-center"

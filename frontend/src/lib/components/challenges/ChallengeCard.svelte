@@ -21,7 +21,7 @@
 <button
 	type="button"
 	class="relative flex min-h-[136px] w-full cursor-pointer flex-col overflow-hidden rounded-[10px] border-2 border-transparent p-5 text-left shadow-md transition-all duration-300 hover:border-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:hover:border-zinc-800 {challenge.solved
-		? 'bg-emerald-500/10 dark:bg-[#05100a]'
+		? 'solve-surface'
 		: 'bg-[#fafafa] dark:bg-zinc-900'} {challenge.hidden && isPrivileged ? 'opacity-75' : ''}"
 	{onclick}
 	aria-label="View details for {challenge.name}"

@@ -9,7 +9,9 @@
 
 	const gitHash = __GIT_HASH__;
 	const isAdmin = $derived(authState.user?.role === 'Admin');
-	const hasRules = $derived(Boolean($siteContent.home.rulesTitle || $siteContent.home.rulesMarkdown));
+	const hasRules = $derived(
+		Boolean($siteContent.home.rulesTitle || $siteContent.home.rulesMarkdown)
+	);
 	const hasSponsors = $derived($siteContent.home.sponsors.length > 0);
 	const hasSecondaryContent = $derived(hasRules || hasSponsors);
 </script>
@@ -57,13 +59,15 @@
 		</div>
 	</div>
 
-		{#if hasSecondaryContent}
-			<div class="mt-12 flex w-full flex-col items-center gap-8 sm:mt-14 lg:mt-16">
+	{#if hasSecondaryContent}
+		<div class="mt-12 flex w-full flex-col items-center gap-8 sm:mt-14 lg:mt-16">
 			{#if hasRules}
-				<section class="w-full max-w-4xl rounded-2xl border border-gray-200/70 bg-white/60 p-6 shadow-sm dark:border-gray-800 dark:bg-white/5">
+				<section
+					class="w-full max-w-4xl rounded-2xl border border-gray-200/70 bg-white/60 p-6 shadow-sm dark:border-gray-800 dark:bg-white/5"
+				>
 					{#if $siteContent.home.rulesTitle}
 						<h2
-							class="mb-4 text-2xl font-black tracking-tighter text-gray-900 uppercase dark:text-white"
+							class="mb-4 text-2xl font-black uppercase tracking-tighter text-gray-900 dark:text-white"
 						>
 							{$siteContent.home.rulesTitle}
 						</h2>
@@ -82,20 +86,20 @@
 				<section class="w-full max-w-4xl">
 					{#if $siteContent.home.sponsorsTitle}
 						<h2
-							class="mb-6 text-center text-3xl font-black tracking-tighter text-gray-900 uppercase sm:text-4xl dark:text-white"
+							class="mb-6 text-center text-3xl font-black uppercase tracking-tighter text-gray-900 sm:text-4xl dark:text-white"
 						>
 							{$siteContent.home.sponsorsTitle}
 						</h2>
 					{/if}
 
-						<div class="flex flex-col gap-6">
-							{#each $siteContent.home.sponsors as sponsor}
-								<div
-									class="w-full rounded-3xl border border-gray-200/70 bg-white/60 p-6 text-left shadow-sm transition-colors hover:border-gray-300 sm:p-7 dark:border-gray-800 dark:bg-white/5 dark:hover:border-gray-700"
-								>
-									<div class="flex items-center gap-5">
-										{#if sponsor.logo}
-											<div
+					<div class="flex flex-col gap-6">
+						{#each $siteContent.home.sponsors as sponsor}
+							<div
+								class="w-full rounded-3xl border border-gray-200/70 bg-white/60 p-6 text-left shadow-sm transition-colors hover:border-gray-300 sm:p-7 dark:border-gray-800 dark:bg-white/5 dark:hover:border-gray-700"
+							>
+								<div class="flex items-center gap-5">
+									{#if sponsor.logo}
+										<div
 											class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 dark:border-gray-700 dark:bg-white/10"
 										>
 											<img
@@ -127,12 +131,12 @@
 												content={sponsor.description}
 												class="mt-2 text-base leading-relaxed text-gray-600 dark:text-gray-300"
 											/>
-											{/if}
-										</div>
+										{/if}
 									</div>
 								</div>
-							{/each}
-						</div>
+							</div>
+						{/each}
+					</div>
 				</section>
 			{/if}
 		</div>

@@ -1,14 +1,21 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import type { PixelBackgroundTheme } from '$lib/stores/pixel-background';
 
-	let { 
+	let {
 		opacity = 0.34,
 		overlayOpacity = 0.28,
-		theme = 'default' // 'default' or 'finished'
+		blurAmount = 4,
+		edgeOverlayOpacity = 0.92,
+		darkEdgeOverlayOpacity = 0.84,
+		theme = 'default'
 	} = $props<{
 		opacity?: number;
 		overlayOpacity?: number;
-		theme?: 'default' | 'finished' | 'mixed';
+		blurAmount?: number;
+		edgeOverlayOpacity?: number;
+		darkEdgeOverlayOpacity?: number;
+		theme?: PixelBackgroundTheme;
 	}>();
 
 	let canvas: HTMLCanvasElement;
@@ -122,7 +129,7 @@
 
 	function getThemeColorsByTheme(t: string) {
 		const isDark = document.documentElement.classList.contains('dark');
-		
+
 		if (t === 'finished') {
 			if (isDark) {
 				return {
@@ -214,9 +221,7 @@
 		COLS = newCols;
 		ROWS = newRows;
 
-		grid = Array.from({ length: ROWS }, () =>
-			Array.from({ length: COLS }, () => randomCell(0.03))
-		);
+		grid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => randomCell(0.03)));
 
 		seedInitialPatterns();
 		recentActivity = [];
@@ -343,10 +348,10 @@
 
 	function drawGrid() {
 		if (!ctx) return;
-		
+
 		const tealColors = getThemeColorsByTheme('default');
 		const grayColors = getThemeColorsByTheme('finished');
-		
+
 		const cellW = Math.ceil(window.innerWidth / COLS);
 		const cellH = Math.ceil(window.innerHeight / ROWS);
 
@@ -358,7 +363,7 @@
 				if (!cell.s && cell.g < 0.04) continue;
 
 				let alpha = 0;
-				
+
 				// Decide color palette
 				let palette;
 				if (theme === 'mixed') {
@@ -393,8 +398,12 @@
 
 	function hexToRgba(hex: string, alpha: number) {
 		const clean = hex.replace('#', '');
-		const full = clean.length === 3
-				? clean.split('').map((c) => c + c).join('')
+		const full =
+			clean.length === 3
+				? clean
+						.split('')
+						.map((c) => c + c)
+						.join('')
 				: clean;
 		const bigint = parseInt(full, 16);
 		const r = (bigint >> 16) & 255;
@@ -428,8 +437,12 @@
 	});
 </script>
 
-<canvas bind:this={canvas} id="pixel-bg" style="opacity: {opacity}"></canvas>
-<div id="bg-overlay" style="--overlay-opacity: {overlayOpacity}"></div>
+<canvas bind:this={canvas} id="pixel-bg" style="opacity: {opacity}; --bg-blur: {blurAmount}px"
+></canvas>
+<div
+	id="bg-overlay"
+	style="--overlay-opacity: {overlayOpacity}; --edge-overlay-opacity: {edgeOverlayOpacity}; --dark-edge-overlay-opacity: {darkEdgeOverlayOpacity}"
+></div>
 
 <style>
 	#pixel-bg {
@@ -441,7 +454,7 @@
 		image-rendering: pixelated;
 		pointer-events: none;
 		transform: scale(1.03);
-		filter: blur(4px) saturate(0.9);
+		filter: blur(var(--bg-blur, 4px)) saturate(0.9);
 		background: transparent;
 	}
 
@@ -450,36 +463,38 @@
 		inset: 0;
 		z-index: 2;
 		pointer-events: none;
-		background: radial-gradient(
+		background:
+			radial-gradient(
 				circle at 50% 50%,
 				transparent 0,
 				transparent 10rem,
-				rgb(247 247 248 / calc(var(--overlay-opacity) * 1.0)) 24rem,
-				rgb(247 247 248 / 0.92) 44rem
+				rgb(247 247 248 / calc(var(--overlay-opacity) * 1)) 24rem,
+				rgb(247 247 248 / var(--edge-overlay-opacity, 0.92)) 44rem
 			),
 			linear-gradient(
 				to bottom,
-				rgb(247 247 248 / 0.92) 0%,
+				rgb(247 247 248 / var(--edge-overlay-opacity, 0.92)) 0%,
 				transparent 22%,
 				transparent 78%,
-				rgb(247 247 248 / 0.92) 100%
+				rgb(247 247 248 / var(--edge-overlay-opacity, 0.92)) 100%
 			);
 	}
 
 	:global(.dark) #bg-overlay {
-		background: radial-gradient(
+		background:
+			radial-gradient(
 				circle at 50% 50%,
 				transparent 0,
 				transparent 10rem,
 				rgb(5 5 5 / calc(var(--overlay-opacity) * 0.71)) 24rem,
-				rgb(5 5 5 / 0.84) 44rem
+				rgb(5 5 5 / var(--dark-edge-overlay-opacity, 0.84)) 44rem
 			),
 			linear-gradient(
 				to bottom,
-				rgb(5 5 5 / 0.84) 0%,
+				rgb(5 5 5 / var(--dark-edge-overlay-opacity, 0.84)) 0%,
 				transparent 22%,
 				transparent 78%,
-				rgb(5 5 5 / 0.84) 100%
+				rgb(5 5 5 / var(--dark-edge-overlay-opacity, 0.84)) 100%
 			);
 	}
 </style>

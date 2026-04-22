@@ -17,10 +17,11 @@
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
 	import { Globe } from '@lucide/svelte';
 	import countries from '$lib/data/countries.json';
-	import PixelBackground from '$lib/components/ui/PixelBackground.svelte';
-	
+
 	// Pre-process countries into a map for O(1) lookups
-	const countryMap = new Map((countries as any[]).map(c => [c.iso3?.toUpperCase(), c.iso2?.toUpperCase()]));
+	const countryMap = new Map(
+		(countries as any[]).map((c) => [c.iso3?.toUpperCase(), c.iso2?.toUpperCase()])
+	);
 
 	let perPage = $state(20);
 	let currentPage = $state(1);
@@ -76,8 +77,6 @@
 		return countryMap.get(iso3.toUpperCase()) ?? null;
 	}
 </script>
-
-<PixelBackground theme="mixed" opacity={0.15} overlayOpacity={0.6} />
 
 <div class="relative z-10 mx-auto max-w-6xl space-y-12 px-4 py-8 sm:px-6 sm:py-12">
 	<!-- Compact Mode Toggle -->
@@ -165,9 +164,7 @@
 								{:else}
 									{#each pageRows as row, i (row.id)}
 										{@const rank = (currentPage - 1) * perPage + i + 1}
-										<Table.Row
-											class="hover:bg-muted/50 border-b-0 transition-colors"
-										>
+										<Table.Row class="hover:bg-muted/50 border-b-0 transition-colors">
 											<Table.Cell class="align-middle font-medium">
 												<div class="flex w-16 items-center gap-3">
 													<span
@@ -188,7 +185,7 @@
 											<Table.Cell class="py-3">
 												<a
 													href={authState.userMode ? `/account/${row.id}` : `/team/${row.id}`}
-													class="flex items-center gap-3 decoration-primary/50 underline-offset-4 hover:underline"
+													class="decoration-primary/50 flex items-center gap-3 underline-offset-4 hover:underline"
 												>
 													<div class="relative">
 														<div
@@ -213,12 +210,12 @@
 																	<Globe class="text-muted-foreground h-2 w-2" />
 																{/if}
 															</div>
-                                                            <span class="sr-only">{row.country}</span>
+															<span class="sr-only">{row.country}</span>
 														{/if}
 													</div>
-														<span class="text-foreground font-semibold">
-															{truncateName(row.name)}
-														</span>
+													<span class="text-foreground font-semibold">
+														{truncateName(row.name)}
+													</span>
 												</a>
 											</Table.Cell>
 

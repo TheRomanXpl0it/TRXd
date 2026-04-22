@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { Trophy, FlagOff, Medal, BarChart3, ChevronRight } from '@lucide/svelte';
-	import PixelBackground from '../ui/PixelBackground.svelte';
 	import { Button } from '../ui/button';
 	import { goto } from '$app/navigation';
+	import {
+		resetPixelBackgroundOverride,
+		setPixelBackgroundOverride
+	} from '$lib/stores/pixel-background';
 
 	let { endTime, title = 'CTF Ended' } = $props<{
 		endTime: string | null;
@@ -28,9 +31,21 @@
 		{ icon: FlagOff, top: '65%', left: '5%', delay: '0.8s', size: 24, speed: '10s' },
 		{ icon: BarChart3, top: '75%', left: '90%', delay: '2.2s', size: 26, speed: '18s' }
 	];
-</script>
 
-<PixelBackground theme="finished" opacity={0.2} overlayOpacity={0.4} />
+	const endPageBackground = {
+		theme: 'finished' as const,
+		opacity: 0.2,
+		overlayOpacity: 0.4
+	};
+
+	$effect(() => {
+		setPixelBackgroundOverride(endPageBackground);
+
+		return () => {
+			resetPixelBackgroundOverride();
+		};
+	});
+</script>
 
 <div
 	class="relative z-10 flex min-h-[calc(100vh-100px)] w-full flex-col items-center justify-center overflow-hidden text-center"

@@ -111,7 +111,7 @@
 					{/if}
 					{#if challenge?.solved}
 						<span
-							class="inline-flex items-center rounded-md bg-emerald-950/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"
+							class="solve-surface solve-text-strong inline-flex items-center rounded-md px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest"
 						>
 							Solved
 						</span>

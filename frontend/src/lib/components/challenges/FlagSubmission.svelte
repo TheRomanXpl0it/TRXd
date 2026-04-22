@@ -116,12 +116,12 @@
 			</Button>
 		{:else}
 			<div
-				class="flex items-center gap-2 rounded-lg border border-green-500 bg-green-50 px-6 py-3 dark:bg-green-950/30"
+				class="solve-surface solve-border flex items-center gap-2 rounded-lg border px-6 py-3"
 				role="status"
 				aria-live="polite"
 			>
-				<CheckCircle class="h-5 w-5 text-green-500" aria-hidden="true" />
-				<span class="font-semibold text-green-700 dark:text-green-400">Challenge solved!</span>
+				<CheckCircle class="solve-text-strong h-5 w-5" aria-hidden="true" />
+				<span class="solve-text-strong font-semibold">Challenge solved!</span>
 			</div>
 		{/if}
 	</form>

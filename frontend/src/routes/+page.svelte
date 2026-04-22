@@ -559,7 +559,7 @@
 										>
 									{/if}
 								</div>
-								<div class="hidden h-16 w-px bg-zinc-800/20 dark:bg-white/5 sm:block"></div>
+								<div class="hidden h-16 w-px bg-zinc-800/20 sm:block dark:bg-white/5"></div>
 								<div class="space-y-1">
 									{#if sponsor.url}
 										<a
@@ -763,7 +763,7 @@
 		padding-bottom: 3.5rem;
 	}
 
-		/* Unused hero sponsor/footer styles kept temporarily for reference.
+	/* Unused hero sponsor/footer styles kept temporarily for reference.
 		.hero-footer-row {
 			position: absolute;
 			left: 0;
@@ -848,7 +848,7 @@
 			padding-bottom: 2.75rem;
 		}
 
-			/* Unused hero sponsor/footer mobile styles kept temporarily for reference.
+		/* Unused hero sponsor/footer mobile styles kept temporarily for reference.
 			.hero-footer-row {
 				bottom: 2.5rem;
 				display: grid;
@@ -920,7 +920,7 @@
 			padding-bottom: 2.4rem;
 		}
 
-			/* Unused hero sponsor/footer narrow-mobile styles kept temporarily for reference.
+		/* Unused hero sponsor/footer narrow-mobile styles kept temporarily for reference.
 			.hero-footer-row {
 				bottom: 2rem;
 				gap: 0.6rem;
