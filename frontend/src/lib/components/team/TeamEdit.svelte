@@ -68,7 +68,7 @@
 
 		try {
 			saving = true;
-		await updateTeam(id, trimmedName, trimmedCountry, tags);
+			await updateTeam(id, trimmedName, trimmedCountry, tags);
 			open = false;
 			queryClient.invalidateQueries({ queryKey: ['teams'] });
 			onupdated?.({ id });
