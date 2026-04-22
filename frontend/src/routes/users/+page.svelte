@@ -218,9 +218,9 @@
 													>
 														<GeneratedAvatar seed={account.name} class="h-full w-full" />
 													</div>
-													<span class="text-foreground font-medium">
-														{truncateName(account.name)}
-													</span>
+														<span class="text-foreground font-semibold">
+															{truncateName(account.name)}
+														</span>
 												</a>
 											</Table.Cell>
 

@@ -202,9 +202,9 @@
 													>
 														<GeneratedAvatar seed={team.name} class="h-full w-full" />
 													</div>
-													<span class="text-foreground font-medium">
-														{truncateName(team.name)}
-													</span>
+														<span class="text-foreground font-semibold">
+															{truncateName(team.name)}
+														</span>
 												</a>
 											</Table.Cell>
 

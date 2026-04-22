@@ -216,9 +216,9 @@
                                                             <span class="sr-only">{row.country}</span>
 														{/if}
 													</div>
-													<span class="text-foreground font-medium">
-														{truncateName(row.name)}
-													</span>
+														<span class="text-foreground font-semibold">
+															{truncateName(row.name)}
+														</span>
 												</a>
 											</Table.Cell>
 
