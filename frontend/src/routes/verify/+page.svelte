@@ -34,8 +34,10 @@
 
 		name ||= pending.name;
 		email ||= pending.email;
-		password ||= pending.password;
-		confirm ||= pending.password;
+		if (pending.password) {
+			password ||= pending.password;
+			confirm ||= pending.password;
+		}
 	}
 
 	onMount(() => {

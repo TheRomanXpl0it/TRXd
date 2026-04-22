@@ -3,7 +3,7 @@ export const PENDING_SIGNUP_KEY = 'pending-signup';
 export type PendingSignup = {
 	email: string;
 	name: string;
-	password: string;
+	password?: string;
 };
 
 export function readPendingSignup(): PendingSignup | null {
@@ -13,12 +13,12 @@ export function readPendingSignup(): PendingSignup | null {
 
 	try {
 		const parsed = JSON.parse(raw) as Partial<PendingSignup>;
-		if (!parsed.email || !parsed.name || !parsed.password) return null;
+		if (!parsed.email || !parsed.name) return null;
 
 		return {
 			email: parsed.email,
 			name: parsed.name,
-			password: parsed.password
+			password: typeof parsed.password === 'string' ? parsed.password : undefined
 		};
 	} catch {
 		sessionStorage.removeItem(PENDING_SIGNUP_KEY);

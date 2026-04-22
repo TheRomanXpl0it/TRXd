@@ -49,8 +49,10 @@
 		if (!pending) return;
 		name ||= pending.name;
 		email ||= pending.email;
-		password ||= pending.password;
-		confirm ||= pending.password;
+		if (pending.password) {
+			password ||= pending.password;
+			confirm ||= pending.password;
+		}
 		verificationEmail ||= pending.email;
 		verificationRequested = true;
 	}
@@ -72,6 +74,7 @@
 	function validateInitialStep(): string | null {
 		if (!name.trim()) return 'Please enter your name.';
 		if (!email.trim()) return 'Please enter your email.';
+		if (emailVerificationEnabled) return null;
 		if (password.length < 8) return 'Password must be at least 8 characters.';
 		if (password !== confirm) return 'Passwords do not match.';
 		return null;
@@ -263,34 +266,36 @@
 						</div>
 					{/if}
 
-					<div class="space-y-2">
-						<Label for="password" class="font-medium">Password</Label>
-						<Input
-							id="password"
-							name="password"
-							type="password"
-							placeholder="********"
-							minlength={8}
-							bind:value={password}
-							required
-							class="bg-background/50"
-						/>
-						<p class="text-xs text-gray-500 dark:text-gray-400">At least 8 characters.</p>
-					</div>
+					{#if !emailVerificationEnabled || isVerificationStep}
+						<div class="space-y-2">
+							<Label for="password" class="font-medium">Password</Label>
+							<Input
+								id="password"
+								name="password"
+								type="password"
+								placeholder="********"
+								minlength={8}
+								bind:value={password}
+								required={!emailVerificationEnabled || isVerificationStep}
+								class="bg-background/50"
+							/>
+							<p class="text-xs text-gray-500 dark:text-gray-400">At least 8 characters.</p>
+						</div>
 
-					<div class="space-y-2">
-						<Label for="confirm" class="font-medium">Confirm password</Label>
-						<Input
-							id="confirm"
-							name="confirm"
-							type="password"
-							placeholder="********"
-							minlength={8}
-							bind:value={confirm}
-							required
-							class="bg-background/50"
-						/>
-					</div>
+						<div class="space-y-2">
+							<Label for="confirm" class="font-medium">Confirm password</Label>
+							<Input
+								id="confirm"
+								name="confirm"
+								type="password"
+								placeholder="********"
+								minlength={8}
+								bind:value={confirm}
+								required={!emailVerificationEnabled || isVerificationStep}
+								class="bg-background/50"
+							/>
+						</div>
+					{/if}
 				</div>
 
 				{#if errorMsg}
