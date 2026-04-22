@@ -1,17 +1,18 @@
-## Welcome to the 2nd edition of TRX CTF!
+# Welcome to the 2nd edition of TRX CTF!
 
-TRX CTF is a Jeopardy-style competition featuring challenges in Web, Pwn, Rev, Crypto, Blockchain, and Misc. The top 8 eligible teams will qualify for the on-site finals to be held in Italy this September.
+**TRX CTF** is a Jeopardy-style competition featuring challenges in **Web**, **Pwn**, **Rev**, **Crypto**,  **Misc**, and **Blockchain**.  
+The **top 8** eligible teams will qualify for the **on-site finals** to be held in Italy this September.
 
-### Flag format
+## Flag format
 `TRX{.+}`, unless otherwise specified.
 
-### Scoring
+## Scoring
 TBD
 
-### LLM policy
+## LLM policy
 The use of AI tools is discouraged during the online round. Since AI assistance will be restricted during the on-site finals, participants are strongly encouraged to rely on their own skills for fair preparation and consistency between stages.
 
-### Competition rules
+## Competition rules
 - Do not attack the competition infrastructure.
 - Each player must use a single account. Creating multiple accounts to gain any advantage is prohibited.
 - Do not attack, sabotage, or harass other players or teams.
