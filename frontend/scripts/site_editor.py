@@ -20,7 +20,6 @@ from urllib.parse import urlparse
 FRONTEND_ROOT = Path(__file__).resolve().parents[1]
 PROJECT_ROOT = FRONTEND_ROOT.parent
 CONTENT_PATH = FRONTEND_ROOT / 'static' / 'site-content.json'
-SCHEMA_PATH = PROJECT_ROOT / 'tools' / 'site-schema.json'
 APP_HTML_PATH = FRONTEND_ROOT / 'src' / 'app.html'
 APP_TITLE_START = '		<!-- app-title:start -->'
 APP_TITLE_END = '		<!-- app-title:end -->'
@@ -934,9 +933,9 @@ def sync_rules_into_content(content: dict[str, Any]) -> dict[str, Any]:
 
 
 def load_schema() -> dict[str, Any]:
-    schema = read_json(SCHEMA_PATH)
+    schema = read_json(CONTENT_PATH)
     if not isinstance(schema, dict):
-        raise SiteEditorError(f'Expected an object in {SCHEMA_PATH}')
+        raise SiteEditorError(f'Expected an object in {CONTENT_PATH}')
     return schema
 
 
@@ -950,8 +949,13 @@ def load_content(schema: dict[str, Any]) -> dict[str, Any]:
 
 
 def sync_site_content() -> dict[str, Any]:
-    schema = load_schema()
-    content = load_content(schema)
+    if CONTENT_PATH.exists():
+        raw_content = read_json(CONTENT_PATH)
+        content = raw_content if isinstance(raw_content, dict) else {}
+    else:
+        content = {}
+
+    content = sync_rules_into_content(content)
     write_json(CONTENT_PATH, content)
     sync_app_html_title(content)
     return content
@@ -1088,7 +1092,7 @@ def main() -> None:
     print(f'Site editor ready at {url}')
     print(
         f'Editing {CONTENT_PATH.relative_to(PROJECT_ROOT)} '
-        f'using {SCHEMA_PATH.relative_to(PROJECT_ROOT)}'
+        f'using {CONTENT_PATH.relative_to(PROJECT_ROOT)}'
     )
     print('Press Ctrl+C to stop.')
 

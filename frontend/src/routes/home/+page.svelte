@@ -3,9 +3,9 @@
 </script>
 
 <script lang="ts">
+	import Markdown from '$lib/components/Markdown.svelte';
 	import { siteContent } from '$lib/site-content';
 	import { authState } from '$lib/stores/auth';
-	import { renderMarkdown } from '$lib/utils/markdown';
 
 	const gitHash = __GIT_HASH__;
 	const isAdmin = $derived(authState.user?.role === 'Admin');
@@ -43,10 +43,10 @@
 
 		<div class="flex flex-wrap justify-center gap-4">
 			<a
-				href={$siteContent.home.primaryCtaHref}
+				href="/challenges"
 				class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-3 font-semibold transition-colors"
 			>
-				{$siteContent.home.primaryCtaLabel}
+				View Challenges
 			</a>
 			<a
 				href={$siteContent.home.secondaryCtaHref}
@@ -57,8 +57,8 @@
 		</div>
 	</div>
 
-	{#if hasSecondaryContent}
-		<div class="mt-20 flex w-full flex-col items-center gap-8 sm:mt-24 lg:mt-28">
+		{#if hasSecondaryContent}
+			<div class="mt-12 flex w-full flex-col items-center gap-8 sm:mt-14 lg:mt-16">
 			{#if hasRules}
 				<section class="w-full max-w-4xl rounded-2xl border border-gray-200/70 bg-white/60 p-6 shadow-sm dark:border-gray-800 dark:bg-white/5">
 					{#if $siteContent.home.rulesTitle}
@@ -70,9 +70,10 @@
 					{/if}
 
 					{#if $siteContent.home.rulesMarkdown}
-						<div class="prose prose-gray dark:prose-invert max-w-none">
-							{@html renderMarkdown($siteContent.home.rulesMarkdown)}
-						</div>
+						<Markdown
+							content={$siteContent.home.rulesMarkdown}
+							class="max-w-none text-gray-600 dark:text-gray-300"
+						/>
 					{/if}
 				</section>
 			{/if}

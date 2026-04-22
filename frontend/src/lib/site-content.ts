@@ -64,8 +64,8 @@ const defaultSiteContent: SiteContent = {
 	home: {
 		heroTitle: 'Welcome to TRXD',
 		heroDescription: 'A platform for hackers and cybersecurity enthusiasts',
-		primaryCtaLabel: 'View Challenges',
-		primaryCtaHref: '/challenges',
+		primaryCtaLabel: 'Play',
+		primaryCtaHref: '/home',
 		secondaryCtaLabel: 'Scoreboard',
 		secondaryCtaHref: '/scoreboard',
 		rulesTitle: '',
@@ -78,23 +78,7 @@ const defaultSiteContent: SiteContent = {
 		eventDurationLabel: 'Non-stop Hallucinations',
 		eventFormatValue: 'Jeopardy CTF',
 		eventFormatLabel: 'Multiple Skill Categories',
-		prizes: [
-			{
-				amount: '$2,048',
-				label: 'First Place',
-				desc: 'Sbrago'
-			},
-			{
-				amount: '$1,024',
-				label: 'Second Place',
-				desc: 'Sbrogo'
-			},
-			{
-				amount: '$512',
-				label: 'Third Place',
-				desc: 'Sbrugo'
-			}
-		]
+		prizes: []
 	},
 	auth: {
 		signUpDescription: 'Join TRXD and start hacking'
@@ -227,7 +211,7 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 			),
 			eventFormatValue: asString(home.eventFormatValue, defaultSiteContent.home.eventFormatValue),
 			eventFormatLabel: asString(home.eventFormatLabel, defaultSiteContent.home.eventFormatLabel),
-			prizes: prizes.length > 0 ? prizes : defaultSiteContent.home.prizes
+			prizes
 		},
 		auth: {
 			signUpDescription: asString(auth.signUpDescription, defaultSiteContent.auth.signUpDescription)

@@ -11,8 +11,9 @@
 
 	$: prizes = ($siteContent.home.prizes ?? []).filter((p: any) => p?.amount);
 	$: activePrizesCount = prizes.length;
-	$: heroSponsors = $siteContent.home.sponsors.slice(0, 2);
-	$: hasSingleHeroSponsor = heroSponsors.length === 1;
+	$: hasMainSectionsBeforeSponsors = activeDetailsCount > 0 || activePrizesCount > 0;
+	$: collapseSponsorsUnderHero =
+		$siteContent.home.sponsors.length > 0 && !hasMainSectionsBeforeSponsors;
 
 	onMount(() => {
 		const canvas = document.getElementById('pixel-bg') as HTMLCanvasElement;
@@ -411,7 +412,7 @@
 
 	<div class="container-custom">
 		<!-- Full-Screen Hero -->
-		<header class="hero-shell">
+		<header class:hero-shell--compact={collapseSponsorsUnderHero} class="hero-shell">
 			<div class="flex flex-col items-center space-y-8">
 				<img src="/trx.svg" alt="TRX Logo" class="h-32 w-32" />
 				<div>
@@ -449,54 +450,10 @@
 					</p>
 				{/if}
 			</div>
-
-			{#if heroSponsors.length > 0}
-				<div
-					class="hero-footer-row"
-					class:hero-footer-row--centered={hasSingleHeroSponsor}
-					aria-label="Sponsors"
-				>
-					{#each heroSponsors as sponsor, i}
-						<div
-							class="hero-sponsor {hasSingleHeroSponsor
-								? 'hero-sponsor--centered'
-								: i === 0
-									? 'hero-sponsor--left'
-									: 'hero-sponsor--right'}"
-						>
-							<div class="sponsor-logo-chip" aria-hidden="true">
-								{#if sponsor.logo}
-									<img src={sponsor.logo} alt="" class="h-full w-full object-contain" />
-								{:else}
-									Logo
-								{/if}
-							</div>
-							<div class="min-w-0">
-								<a
-									href={sponsor.url}
-									target="_blank"
-									rel="noopener noreferrer"
-									class="sponsor-name transition-colors hover:text-[var(--alive-cell)]"
-								>
-									{sponsor.name}
-								</a>
-							</div>
-						</div>
-					{/each}
-				</div>
-			{/if}
 		</header>
 
 		<!-- Core Event Info -->
 		<main class="space-y-20">
-			<!-- About Section -->
-			<section class="card-custom mx-auto max-w-2xl space-y-6 rounded-3xl p-10 text-center">
-				<h2 class="text-zinc-muted text-xs font-black uppercase tracking-[0.3em]">The CTF</h2>
-				<p class="text-zinc-muted text-lg leading-relaxed">
-					{$siteContent.home.heroDescription}
-				</p>
-			</section>
-
 			{#if activeDetailsCount > 0}
 				<!-- Details Grid -->
 				<div
@@ -792,6 +749,12 @@
 		padding: 4rem 0 9.5rem;
 	}
 
+	.hero-shell--compact {
+		min-height: auto;
+		margin-bottom: 1.25rem;
+		padding-bottom: 3.5rem;
+	}
+
 	.hero-footer-row {
 		position: absolute;
 		left: 0;
@@ -869,6 +832,12 @@
 			padding-bottom: 10.2rem;
 		}
 
+		.hero-shell--compact {
+			min-height: auto;
+			margin-bottom: 1rem;
+			padding-bottom: 2.75rem;
+		}
+
 		.hero-footer-row {
 			bottom: 2.5rem;
 			display: grid;
@@ -932,6 +901,11 @@
 		.hero-shell {
 			padding-top: 4rem;
 			padding-bottom: 10.8rem;
+		}
+
+		.hero-shell--compact {
+			margin-bottom: 0.85rem;
+			padding-bottom: 2.4rem;
 		}
 
 		.hero-footer-row {
