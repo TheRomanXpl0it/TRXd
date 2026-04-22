@@ -21,7 +21,7 @@
     "sponsors": [
       {
         "name": "Google",
-        "url": "goo.gle/ctfsponsorship",
+        "url": "https://goo.gle/ctfsponsorship",
         "logo": "/sponsors/google.svg",
         "description": "Infrastructure for this CTF is sponsored by Google through Google Cloud Platform credits"
       }
