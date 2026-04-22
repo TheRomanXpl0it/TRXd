@@ -1,4 +1,4 @@
-## Welcome to the second edition of TRX CTF!
+## Welcome to the 2nd edition of TRX CTF!
 
 TRX CTF is a Jeopardy-style competition featuring challenges in Web, Pwn, Rev, Crypto, Blockchain, and Misc. The top 8 eligible teams will qualify for the on-site finals to be held in Italy this September.
 
