@@ -109,11 +109,11 @@
 							class="relative h-12 w-12 drop-shadow-sm"
 						/>
 					</div>
-					<span
-						class="text-foreground hidden text-3xl font-black tracking-tighter truncate sm:block md:max-w-[100px] lg:max-w-none"
-						>{$siteContent.brand.shortName}</span
-					>
-				</a>
+						<span
+							class="text-foreground hidden shrink-0 pr-px text-3xl font-black leading-[1.05] tracking-tight truncate sm:block md:max-w-[100px] lg:max-w-none"
+							>{$siteContent.brand.shortName}</span
+						>
+					</a>
 
 				<div class="hidden items-center gap-1 md:flex">
 					{#each filteredNavItems as item}
