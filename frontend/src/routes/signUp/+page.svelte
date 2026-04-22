@@ -47,7 +47,9 @@
 	function syncPendingSignup() {
 		const pending = readPendingSignup();
 		if (!pending) return;
-		name ||= pending.name;
+		if (pending.name) {
+			name ||= pending.name;
+		}
 		email ||= pending.email;
 		if (pending.password) {
 			password ||= pending.password;
@@ -72,9 +74,9 @@
 	});
 
 	function validateInitialStep(): string | null {
-		if (!name.trim()) return 'Please enter your name.';
 		if (!email.trim()) return 'Please enter your email.';
 		if (emailVerificationEnabled) return null;
+		if (!name.trim()) return 'Please enter your name.';
 		if (password.length < 8) return 'Password must be at least 8 characters.';
 		if (password !== confirm) return 'Passwords do not match.';
 		return null;
@@ -112,15 +114,13 @@
 
 		loading = true;
 		try {
-			if (emailVerificationEnabled && !isVerificationStep) {
-				const trimmedEmail = email.trim();
-				savePendingSignup({
-					email: trimmedEmail,
-					name: name.trim(),
-					password
-				});
-				await requestRegistrationVerification(trimmedEmail);
-				verificationRequested = true;
+				if (emailVerificationEnabled && !isVerificationStep) {
+					const trimmedEmail = email.trim();
+					savePendingSignup({
+						email: trimmedEmail
+					});
+					await requestRegistrationVerification(trimmedEmail);
+					verificationRequested = true;
 				verificationEmail = trimmedEmail;
 				toast.success('Verification email sent. Finish creating the account with the token.');
 				return;
@@ -224,18 +224,20 @@
 						</div>
 					{/if}
 
-					<div class="space-y-2">
-						<Label for="name" class="font-medium">Username</Label>
-						<Input
-							id="name"
-							name="name"
-							type="text"
-							placeholder="Your username"
-							bind:value={name}
-							required
-							class="bg-background/50"
-						/>
-					</div>
+					{#if !emailVerificationEnabled || isVerificationStep}
+						<div class="space-y-2">
+							<Label for="name" class="font-medium">Username</Label>
+							<Input
+								id="name"
+								name="name"
+								type="text"
+								placeholder="Your username"
+								bind:value={name}
+								required={!emailVerificationEnabled || isVerificationStep}
+								class="bg-background/50"
+							/>
+						</div>
+					{/if}
 
 					{#if emailVerificationEnabled && isVerificationStep}
 						{#if verificationEmail || email.trim()}

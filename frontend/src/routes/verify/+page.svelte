@@ -32,7 +32,9 @@
 		const pending = readPendingSignup();
 		if (!pending) return;
 
-		name ||= pending.name;
+		if (pending.name) {
+			name ||= pending.name;
+		}
 		email ||= pending.email;
 		if (pending.password) {
 			password ||= pending.password;
