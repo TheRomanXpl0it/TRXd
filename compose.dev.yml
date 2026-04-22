@@ -14,6 +14,7 @@ services:
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     depends_on:
+      - postgres
       - redis
       - traefik
     volumes:
@@ -45,13 +46,32 @@ services:
       - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.period=60s"
       - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.sourcecriterion.requestheadername=CF-Connecting-IP"
 
-#  adminer:
-#    image: adminer:5
-#    restart: always
-#    ports:
-#      - 8000:8080
-#    networks:
-#      - default
+  postgres:
+    image: postgres:18-alpine
+    restart: always
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/18/data/pgdata
+    volumes:
+      - ./.data/pg_data:/var/lib/postgresql/18/data
+    networks:
+      - internal
+      - default #! Debugging
+
+  adminer:
+    image: adminer:5
+    restart: always
+    ports:
+      - 8000:8080
+    depends_on:
+      - postgres
+    networks:
+      - internal
+      - default
 
   redis:
     image: redis:8-alpine
@@ -63,11 +83,13 @@ services:
       - ./.data/redis_data:/data
     networks:
       - internal
+      - default #! Debugging
 
   traefik:
     image: traefik:v3.6
     restart: always
     command:
+      - "--api.insecure=true" #! Debugging
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.providersThrottleDuration=0s"
@@ -77,6 +99,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
