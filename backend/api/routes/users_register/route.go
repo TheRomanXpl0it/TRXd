@@ -121,6 +121,13 @@ func Route(c *fiber.Ctx) error {
 		data.Email = mail
 	}
 
+	if data.Name != "" {
+		data.Name, err = normalizeSignupName(data.Name)
+		if err != nil {
+			return utils.Error(c, fiber.StatusBadRequest, consts.InvalidUserName)
+		}
+	}
+
 	valid, err := validator.Struct(c, data)
 	if err != nil || !valid {
 		return err
