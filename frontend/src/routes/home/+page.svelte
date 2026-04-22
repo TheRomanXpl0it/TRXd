@@ -108,20 +108,32 @@
 											/>
 										</div>
 									{/if}
-									<div>
-										<h3
-											class="text-xl font-black uppercase tracking-tighter text-gray-900 sm:text-2xl dark:text-white"
-										>
-											{sponsor.name}
-										</h3>
+									<div class="min-w-0 flex-1">
+										{#if sponsor.url}
+											<a
+												href={sponsor.url}
+												target="_blank"
+												rel="noopener noreferrer"
+												class="inline-block text-xl font-black uppercase tracking-tighter text-gray-900 transition-colors hover:text-blue-700 sm:text-2xl dark:text-white dark:hover:text-blue-300"
+											>
+												{sponsor.name}
+											</a>
+										{:else}
+											<h3
+												class="text-xl font-black uppercase tracking-tighter text-gray-900 sm:text-2xl dark:text-white"
+											>
+												{sponsor.name}
+											</h3>
+										{/if}
 										{#if sponsor.description}
-											<p class="mt-2 text-base leading-relaxed text-gray-600 dark:text-gray-300">
-												{sponsor.description}
-											</p>
+											<Markdown
+												content={sponsor.description}
+												class="mt-2 text-base leading-relaxed text-gray-600 dark:text-gray-300"
+											/>
 										{/if}
 									</div>
 								</div>
-							</a>
+							</div>
 						{/each}
 					</div>
 				</section>

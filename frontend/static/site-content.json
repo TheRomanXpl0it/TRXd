@@ -20,6 +20,12 @@
     "sponsorsTitle": "Sponsors",
     "sponsors": [
       {
+        "name": "OtterSec",
+        "url": "https://osec.io/",
+        "logo": "/sponsors/ottersec.svg",
+        "description": "<a href=\"https://osec.io\">OtterSec</a> secures critical blockchain infrastructure — from custom compilers to novel virtual machines, we review a wide range of difficult targets. Our team consists largely of CTF players that enjoy solving hard problems. If that sounds like you, please apply through our <a href=\"https://osec.io/careers\">careers</a> page."
+      },
+      {
         "name": "Google",
         "url": "https://goo.gle/ctfsponsorship",
         "logo": "/sponsors/google.svg",

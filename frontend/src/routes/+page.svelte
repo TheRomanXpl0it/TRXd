@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Markdown from '$lib/components/Markdown.svelte';
 	import { siteContent } from '$lib/site-content';
 
 	// Reactive counts for conditional layout adjustment
@@ -560,18 +561,25 @@
 								</div>
 								<div class="hidden h-16 w-px bg-zinc-800/20 dark:bg-white/5 sm:block"></div>
 								<div class="space-y-1">
-									<a
-										href={sponsor.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										class="text-lg font-black uppercase tracking-tighter opacity-80 transition-colors hover:text-[var(--alive-cell)]"
-									>
-										{sponsor.name}
-									</a>
+									{#if sponsor.url}
+										<a
+											href={sponsor.url}
+											target="_blank"
+											rel="noopener noreferrer"
+											class="text-lg font-black uppercase tracking-tighter opacity-80 transition-colors hover:text-[var(--alive-cell)]"
+										>
+											{sponsor.name}
+										</a>
+									{:else}
+										<h3 class="text-lg font-black uppercase tracking-tighter opacity-80">
+											{sponsor.name}
+										</h3>
+									{/if}
 									{#if sponsor.description}
-										<p class="text-zinc-muted text-lg font-medium italic leading-relaxed">
-											{sponsor.description}
-										</p>
+										<Markdown
+											content={sponsor.description}
+											class="text-zinc-muted text-lg font-medium leading-relaxed"
+										/>
 									{/if}
 								</div>
 							</div>
@@ -603,8 +611,8 @@
 		--card-border: #e4e4e7b8;
 		--badge-bg: #f4f4f5;
 
-		--overlay-strong: #f7f7f8eb;
-		--overlay-soft: #f7f7f847;
+		--overlay-strong: #f7f7f8e0;
+		--overlay-soft: #f7f7f833;
 
 		--content-shadow: 0 24px 80px #00000014;
 	}
@@ -622,8 +630,8 @@
 		--card-border: #3f3f466b;
 		--badge-bg: #18181b;
 
-		--overlay-strong: #050505d6;
-		--overlay-soft: #05050533;
+		--overlay-strong: #050505cc;
+		--overlay-soft: #05050526;
 
 		--content-shadow: 0 24px 80px #0000006b;
 	}
@@ -642,8 +650,8 @@
 			--card-border: #3f3f466b;
 			--badge-bg: #18181b;
 
-			--overlay-strong: #050505d6;
-			--overlay-soft: #05050533;
+			--overlay-strong: #050505cc;
+			--overlay-soft: #05050526;
 
 			--content-shadow: 0 24px 80px #0000006b;
 		}
@@ -669,7 +677,7 @@
 		pointer-events: none;
 		opacity: 0.34;
 		transform: scale(1.03);
-		filter: blur(4px) saturate(0.9);
+		filter: blur(3px) saturate(0.9);
 		background: transparent;
 	}
 
