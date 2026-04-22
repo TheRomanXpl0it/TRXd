@@ -58,17 +58,17 @@
 		if (saving) return;
 
 		const id = team?.id ?? 0;
-		const n = name.trim();
-		const c = countryCode.trim();
+		const trimmedName = name.trim();
+		const trimmedCountry = countryCode.trim();
 
-		if (!n && !c) {
+		if (!trimmedName && !trimmedCountry) {
 			showError(null, 'Please fill at least one field.');
 			return;
 		}
 
 		try {
 			saving = true;
-			await updateTeam(id, n, c, tags);
+			await updateTeam(id, name, trimmedCountry, tags);
 			open = false;
 			queryClient.invalidateQueries({ queryKey: ['teams'] });
 			onupdated?.({ id });

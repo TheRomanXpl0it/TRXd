@@ -1,27 +1,5 @@
 import { api } from '$lib/api';
 
-function normalizeSignupName(name: string): string {
-	const value = name.trim().normalize('NFC');
-
-	if (!value) {
-		throw new Error('Invalid user name');
-	}
-
-	for (const ch of value) {
-		if (ch === ' ') continue;
-
-		if (/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u.test(ch)) {
-			throw new Error('Invalid user name');
-		}
-
-		if (/\s/u.test(ch)) {
-			throw new Error('Invalid user name');
-		}
-	}
-
-	return value;
-}
-
 export async function getInfo(): Promise<any | null> {
 	try {
 		return await api<any>('/info');
@@ -39,11 +17,10 @@ export async function login(email: string, password: string): Promise<any> {
 }
 
 export async function register(email: string, password: string, name: string): Promise<void> {
-	const normalizedName = normalizeSignupName(name);
 	await api<void>('/register', {
 		headers: { 'content-type': 'application/json' },
 		method: 'POST',
-		body: JSON.stringify({ email, password, name: normalizedName })
+		body: JSON.stringify({ email, password, name })
 	});
 }
 
@@ -60,11 +37,10 @@ export async function completeVerifiedRegistration(
 	name: string,
 	password: string
 ): Promise<void> {
-	const normalizedName = normalizeSignupName(name);
 	await api<void>('/register', {
 		headers: { 'content-type': 'application/json' },
 		method: 'POST',
-		body: JSON.stringify({ token, name: normalizedName, password })
+		body: JSON.stringify({ token, name, password })
 	});
 }
 

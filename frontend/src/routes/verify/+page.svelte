@@ -68,7 +68,7 @@
 
 		loading = true;
 		try {
-			await completeVerifiedRegistration(token.trim(), name.trim(), password);
+			await completeVerifiedRegistration(token.trim(), name, password);
 			clearPendingSignup();
 			clearVerificationTokenFromUrl();
 
@@ -80,15 +80,7 @@
 				goto('/team');
 			}
 		} catch (err: any) {
-			let message = 'Registration failed. Please try again.';
-			if (err?.message) {
-				try {
-					const parsed = JSON.parse(err.message);
-					message = parsed.error || message;
-				} catch {
-					message = err.message;
-				}
-			}
+			const message = err?.message ?? 'Registration failed. Please try again.';
 			errorMsg = message;
 			toast.error(message);
 		} finally {

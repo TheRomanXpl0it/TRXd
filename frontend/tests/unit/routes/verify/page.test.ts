@@ -101,4 +101,20 @@ describe('Verify Page', () => {
 		expect(loadUser).toHaveBeenCalled();
 		expect(goto).toHaveBeenCalledWith('/team');
 	});
+
+	it('shows backend verification errors to the user', async () => {
+		vi.mocked(completeVerifiedRegistration).mockRejectedValue(new Error('Invalid user name'));
+		window.history.replaceState({}, '', '/verify?token=test-token');
+		const user = userEvent.setup();
+
+		renderWithProviders(Page);
+
+		await user.type(screen.getByLabelText(/username/i), 'bad\u200bname');
+		await user.type(screen.getByLabelText(/^password$/i), 'password123');
+		await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+		await user.click(screen.getByRole('button', { name: /complete sign up/i }));
+
+		await waitFor(() => expect(screen.getByText('Invalid user name')).toBeInTheDocument());
+		expect(toast.error).toHaveBeenCalledWith('Invalid user name');
+	});
 });

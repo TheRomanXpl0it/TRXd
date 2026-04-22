@@ -38,7 +38,7 @@
 		if (!user) return;
 		savingProfile = true;
 		try {
-			await updateUser(user.id, name.trim(), countryCode.trim());
+			await updateUser(user.id, name, countryCode.trim());
 			await loadUser(true);
 			showSuccess('Profile updated successfully.');
 		} catch (err: any) {

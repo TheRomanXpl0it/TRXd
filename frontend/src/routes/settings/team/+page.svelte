@@ -47,7 +47,7 @@
 		if (!user?.team_id) return;
 		saving = true;
 		try {
-			await updateTeam(user.team_id, name.trim(), countryCode.trim());
+			await updateTeam(user.team_id, name, countryCode.trim());
 			await loadUser(true);
 			teamQuery.refetch();
 			showSuccess('Team profile updated successfully.');

@@ -755,72 +755,74 @@
 		padding-bottom: 3.5rem;
 	}
 
-	.hero-footer-row {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 4rem;
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 1rem;
-		pointer-events: none;
-	}
+		/* Unused hero sponsor/footer styles kept temporarily for reference.
+		.hero-footer-row {
+			position: absolute;
+			left: 0;
+			right: 0;
+			bottom: 4rem;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			gap: 1rem;
+			pointer-events: none;
+		}
 
-	.hero-footer-row--centered {
-		justify-content: center;
-	}
+		.hero-footer-row--centered {
+			justify-content: center;
+		}
 
-	.hero-sponsor {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		width: 100%;
-		max-width: 17rem;
-		padding: 1.15rem 1.3rem;
-		border-radius: 1.5rem;
-		text-align: left;
-		pointer-events: auto;
-	}
+		.hero-sponsor {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			width: 100%;
+			max-width: 17rem;
+			padding: 1.15rem 1.3rem;
+			border-radius: 1.5rem;
+			text-align: left;
+			pointer-events: auto;
+		}
 
-	.hero-sponsor--left {
-		justify-self: start;
-	}
+		.hero-sponsor--left {
+			justify-self: start;
+		}
 
-	.hero-sponsor--right {
-		flex-direction: row-reverse;
-		text-align: right;
-	}
+		.hero-sponsor--right {
+			flex-direction: row-reverse;
+			text-align: right;
+		}
 
-	.hero-sponsor--centered {
-		justify-content: center;
-		text-align: center;
-		max-width: 20rem;
-	}
+		.hero-sponsor--centered {
+			justify-content: center;
+			text-align: center;
+			max-width: 20rem;
+		}
 
-	.sponsor-logo-chip {
-		height: 3.75rem;
-		width: 3.75rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		border-radius: 1.15rem;
-		background: var(--badge-bg);
-		font-size: 0.56rem;
-		font-weight: 800;
-		letter-spacing: 0.22em;
-		text-transform: uppercase;
-		color: var(--secondary-text);
-	}
+		.sponsor-logo-chip {
+			height: 3.75rem;
+			width: 3.75rem;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			border-radius: 1.15rem;
+			background: var(--badge-bg);
+			font-size: 0.56rem;
+			font-weight: 800;
+			letter-spacing: 0.22em;
+			text-transform: uppercase;
+			color: var(--secondary-text);
+		}
 
-	.sponsor-name {
-		font-size: 0.95rem;
-		font-weight: 900;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		line-height: 1.35;
-	}
+		.sponsor-name {
+			font-size: 0.95rem;
+			font-weight: 900;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+			line-height: 1.35;
+		}
+		*/
 
 	@media (max-width: 767px) {
 		.hero-shell {
@@ -838,58 +840,60 @@
 			padding-bottom: 2.75rem;
 		}
 
-		.hero-footer-row {
-			bottom: 2.5rem;
-			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			align-items: stretch;
-			gap: 0.75rem;
-		}
+			/* Unused hero sponsor/footer mobile styles kept temporarily for reference.
+			.hero-footer-row {
+				bottom: 2.5rem;
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				align-items: stretch;
+				gap: 0.75rem;
+			}
 
-		.hero-footer-row.hero-footer-row--centered {
-			grid-template-columns: minmax(0, 1fr);
-			justify-content: center;
-		}
+			.hero-footer-row.hero-footer-row--centered {
+				grid-template-columns: minmax(0, 1fr);
+				justify-content: center;
+			}
 
-		.hero-sponsor {
-			width: 100%;
-			min-width: 0;
-			gap: 0.8rem;
-			margin-top: 0.5rem;
-			padding: 0.85rem 0.9rem;
-			border-radius: 1.2rem;
-		}
+			.hero-sponsor {
+				width: 100%;
+				min-width: 0;
+				gap: 0.8rem;
+				margin-top: 0.5rem;
+				padding: 0.85rem 0.9rem;
+				border-radius: 1.2rem;
+			}
 
-		.hero-footer-row > .hero-sponsor:nth-child(3) {
-			grid-column: 1 / -1;
-			justify-self: center;
-			max-width: 16rem;
-			flex-direction: row;
-			text-align: left;
-		}
+			.hero-footer-row > .hero-sponsor:nth-child(3) {
+				grid-column: 1 / -1;
+				justify-self: center;
+				max-width: 16rem;
+				flex-direction: row;
+				text-align: left;
+			}
 
-		.hero-footer-row.hero-footer-row--centered > .hero-sponsor {
-			justify-self: center;
-			max-width: 16rem;
-			flex-direction: row;
-			text-align: left;
-		}
+			.hero-footer-row.hero-footer-row--centered > .hero-sponsor {
+				justify-self: center;
+				max-width: 16rem;
+				flex-direction: row;
+				text-align: left;
+			}
 
-		.hero-sponsor .sponsor-logo-chip {
-			margin-top: 0.1rem;
-		}
+			.hero-sponsor .sponsor-logo-chip {
+				margin-top: 0.1rem;
+			}
 
-		.sponsor-logo-chip {
-			height: 3rem;
-			width: 3rem;
-			border-radius: 1rem;
-			font-size: 0.52rem;
-		}
+			.sponsor-logo-chip {
+				height: 3rem;
+				width: 3rem;
+				border-radius: 1rem;
+				font-size: 0.52rem;
+			}
 
-		.sponsor-name {
-			font-size: 0.72rem;
-			letter-spacing: 0.05em;
-		}
+			.sponsor-name {
+				font-size: 0.72rem;
+				letter-spacing: 0.05em;
+			}
+			*/
 	}
 
 	@media (max-width: 460px) {
@@ -908,20 +912,22 @@
 			padding-bottom: 2.4rem;
 		}
 
-		.hero-footer-row {
-			bottom: 2rem;
-			gap: 0.6rem;
-		}
+			/* Unused hero sponsor/footer narrow-mobile styles kept temporarily for reference.
+			.hero-footer-row {
+				bottom: 2rem;
+				gap: 0.6rem;
+			}
 
-		.hero-sponsor {
-			gap: 0.6rem;
-		}
+			.hero-sponsor {
+				gap: 0.6rem;
+			}
 
-		.sponsor-logo-chip {
-			height: 2.7rem;
-			width: 2.7rem;
-			font-size: 0.46rem;
-			letter-spacing: 0.16em;
-		}
+			.sponsor-logo-chip {
+				height: 2.7rem;
+				width: 2.7rem;
+				font-size: 0.46rem;
+				letter-spacing: 0.16em;
+			}
+			*/
 	}
 </style>

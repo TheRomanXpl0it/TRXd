@@ -143,4 +143,20 @@ describe('Sign Up Page', () => {
 		expect(completeVerifiedRegistration).not.toHaveBeenCalled();
 		expect(goto).toHaveBeenCalledWith('/team');
 	});
+
+	it('shows backend signup errors to the user', async () => {
+		vi.mocked(register).mockRejectedValue(new Error('Invalid user name'));
+		const user = userEvent.setup();
+
+		renderWithProviders(Page);
+
+		await user.type(screen.getByLabelText(/username/i), 'bad\u200bname');
+		await user.type(screen.getByLabelText(/^email$/i), 'tester@example.com');
+		await user.type(screen.getByLabelText(/^password$/i), 'password123');
+		await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+		await user.click(screen.getByRole('button', { name: /^sign up$/i }));
+
+		await waitFor(() => expect(screen.getByText('Invalid user name')).toBeInTheDocument());
+		expect(toast.error).toHaveBeenCalledWith('Invalid user name');
+	});
 });
