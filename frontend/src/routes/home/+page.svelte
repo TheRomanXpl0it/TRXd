@@ -88,17 +88,14 @@
 						</h2>
 					{/if}
 
-					<div class="flex flex-col gap-6">
-						{#each $siteContent.home.sponsors as sponsor}
-							<a
-								href={sponsor.url || undefined}
-								class="w-full rounded-3xl border border-gray-200/70 bg-white/60 p-6 text-left shadow-sm transition-colors hover:border-gray-300 sm:p-7 dark:border-gray-800 dark:bg-white/5 dark:hover:border-gray-700"
-								target={sponsor.url ? '_blank' : undefined}
-								rel={sponsor.url ? 'noreferrer' : undefined}
-							>
-								<div class="flex items-center gap-5">
-									{#if sponsor.logo}
-										<div
+						<div class="flex flex-col gap-6">
+							{#each $siteContent.home.sponsors as sponsor}
+								<div
+									class="w-full rounded-3xl border border-gray-200/70 bg-white/60 p-6 text-left shadow-sm transition-colors hover:border-gray-300 sm:p-7 dark:border-gray-800 dark:bg-white/5 dark:hover:border-gray-700"
+								>
+									<div class="flex items-center gap-5">
+										{#if sponsor.logo}
+											<div
 											class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-gray-200/80 bg-white/80 dark:border-gray-700 dark:bg-white/10"
 										>
 											<img
@@ -130,12 +127,12 @@
 												content={sponsor.description}
 												class="mt-2 text-base leading-relaxed text-gray-600 dark:text-gray-300"
 											/>
-										{/if}
+											{/if}
+										</div>
 									</div>
 								</div>
-							</div>
-						{/each}
-					</div>
+							{/each}
+						</div>
 				</section>
 			{/if}
 		</div>
