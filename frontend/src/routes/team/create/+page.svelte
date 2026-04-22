@@ -89,7 +89,7 @@
 						<Label for="reg-name" class="font-medium">Team Name</Label>
 						<Input
 							id="reg-name"
-							placeholder="e.g. TRX_Elite"
+							placeholder="e.g. TheRomanXpl0it"
 							bind:value={registerName}
 							required
 							class="bg-background/50 h-11"
