@@ -20,7 +20,7 @@ const config = {
 			directives: {
 				'script-src': ['self'],
 				'style-src': ['self', 'unsafe-inline'],
-				'img-src': ['self', 'data:'],
+				'img-src': ['self', 'data:', 'https://media.tenor.com'],
 				'connect-src': ['self'],
 				'form-action': ['self'],
 				'font-src': ['self'],
