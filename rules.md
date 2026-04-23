@@ -14,7 +14,7 @@ The use of AI tools is discouraged during the online round. Since AI assistance 
 
 ## Competition rules
 - Do not attack the competition infrastructure.
-- Each player must use a single account. Creating multiple accounts to gain any advantage is prohibited.
+- Each participant may use at most one account. Creating multiple accounts to gain any advantage is prohibited.
 - Do not attack, sabotage, or harass other players or teams.
 - Do not share flags or collaborate with other teams in any way.
 - Any participant who engages in misconduct or disrupts the competition may be disqualified or banned.
