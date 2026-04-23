@@ -5,12 +5,16 @@
 export async function copyToClipboard(text: string): Promise<void> {
 	if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-	if (navigator.clipboard && window.isSecureContext) {
+	console.log('[Clipboard] Attempting to copy text...');
+
+	// Try the modern API first
+	if (navigator?.clipboard?.writeText && window.isSecureContext) {
 		try {
 			await navigator.clipboard.writeText(text);
+			console.log('[Clipboard] Successfully copied using navigator.clipboard');
 			return;
 		} catch (err) {
-			console.error('Clipboard API failed, falling back', err);
+			console.warn('[Clipboard] navigator.clipboard failed, trying fallback:', err);
 		}
 	}
 
@@ -18,26 +22,33 @@ export async function copyToClipboard(text: string): Promise<void> {
 	const textArea = document.createElement('textarea');
 	textArea.value = text;
 
-	// Ensure it's not visible or interfering with the UI
+	// Avoid opacity: 0 and display: none as some browsers block copying from invisible elements
 	textArea.style.position = 'fixed';
 	textArea.style.left = '-9999px';
 	textArea.style.top = '0';
-	textArea.style.opacity = '0';
-	textArea.style.pointerEvents = 'none';
+	textArea.style.width = '2em';
+	textArea.style.height = '2em';
+	textArea.style.padding = '0';
+	textArea.style.border = 'none';
+	textArea.style.outline = 'none';
+	textArea.style.boxShadow = 'none';
+	textArea.style.background = 'transparent';
+
 	document.body.appendChild(textArea);
-
-	textArea.focus();
-	textArea.select();
-
+	
 	try {
+		textArea.focus({ preventScroll: true });
+		textArea.select();
 		const successful = document.execCommand('copy');
-		if (!successful) {
-			throw new Error('execCommand failed');
+		if (successful) {
+			console.log('[Clipboard] Successfully copied using execCommand fallback');
+		} else {
+			throw new Error('document.execCommand("copy") returned false');
 		}
 	} catch (err) {
-		console.error('Fallback clipboard copy failed', err);
+		console.error('[Clipboard] Fallback copy failed:', err);
 		throw new Error('Failed to copy to clipboard');
 	} finally {
-		textArea.remove();
+		document.body.removeChild(textArea);
 	}
 }
