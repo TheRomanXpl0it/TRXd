@@ -68,8 +68,8 @@
 	}
 </script>
 
-<div class="mb-4 flex w-full flex-wrap items-center gap-2 md:mb-8 md:gap-4">
-	<div class="relative min-w-0 flex-1 md:flex-[4] lg:flex-[10]">
+<div class="mb-4 flex w-full flex-col gap-3 md:mb-8 md:flex-row md:items-center md:gap-4">
+	<div class="relative min-w-0 flex-1">
 		<label for="search-challenges" class="sr-only">Search challenges</label>
 		<Input
 			id="search-challenges"
@@ -90,7 +90,7 @@
 		{/if}
 	</div>
 
-	<div class="flex shrink-0 flex-nowrap items-center gap-1.5 md:gap-2">
+	<div class="flex flex-wrap items-center gap-1.5 md:gap-2">
 		<Tooltip.Root>
 			<Tooltip.Trigger>
 				<Popover.Root bind:open={categoriesOpen}>

@@ -7,10 +7,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card';
 	import { toast } from 'svelte-sonner';
-	import {
-		updateChallenge,
-		uploadAttachments
-	} from '$lib/challenges';
+	import { updateChallenge, uploadAttachments, deleteAttachments } from '$lib/challenges';
 	import { createFlags, deleteFlags } from '$lib/flags';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -111,6 +108,7 @@
 					: !!data.challenge.instance_renewable;
 
 				tags = data.challenge.tags || [];
+				existingAttachments = data.challenge.attachments || [];
 				authorsCsv = (data.challenge.authors || []).join(', ');
 
 				if (data.challenge.docker_config?.envs) {
@@ -131,6 +129,7 @@
 	});
 
 	let attachments = $state<File[]>([]);
+	let existingAttachments = $state<string[]>([]);
 	let fileInputEl = $state<HTMLInputElement | null>(null);
 
 	function addFiles(files: FileList | null) {
@@ -141,6 +140,22 @@
 
 	function removeFile(index: number) {
 		attachments = attachments.filter((_, i) => i !== index);
+	}
+
+	async function deleteExistingFile(filePath: string) {
+		const fileName = filePath.split('/').pop();
+		if (!fileName) return;
+
+		if (!confirm(`Are you sure you want to delete ${fileName}?`)) return;
+
+		try {
+			const challId = Number($page.params.id);
+			await deleteAttachments(challId, [fileName]);
+			existingAttachments = existingAttachments.filter((f) => f !== filePath);
+			toast.success('Attachment deleted successfully');
+		} catch (err: any) {
+			toast.error(err?.message || 'Failed to delete attachment');
+		}
 	}
 
 	const challengeTypes = [
@@ -206,12 +221,12 @@
 
 			// Manage Flags
 			const currentFlags = flags.filter((f) => f.flag.trim());
-			
+
 			// Find flags to delete (in original but not in current)
 			const toDelete = originalFlags.filter(
 				(of) => of.flag && !currentFlags.some((cf) => cf.flag === of.flag)
 			);
-			
+
 			// Find flags to create (in current but not in original, or changed)
 			const toCreate = currentFlags.filter(
 				(cf) => !originalFlags.some((of) => of.flag === cf.flag && of.regex === cf.regex)
@@ -219,10 +234,10 @@
 
 			// First delete flags that were removed or changed
 			// (Note: if a flag changed its regex, we delete and recreate)
-			const changedToDelete = currentFlags.filter(
-				(cf) => originalFlags.some((of) => of.flag === cf.flag && of.regex !== cf.regex)
+			const changedToDelete = currentFlags.filter((cf) =>
+				originalFlags.some((of) => of.flag === cf.flag && of.regex !== cf.regex)
 			);
-			
+
 			const allToDelete = [...toDelete, ...changedToDelete];
 			if (allToDelete.length > 0) {
 				await deleteFlags(allToDelete, challId);
@@ -411,7 +426,9 @@
 					<Card.Header class="flex flex-row items-center justify-between">
 						<div>
 							<Card.Title>Flags</Card.Title>
-							<Card.Description>Manage correct answers for this challenge (Add new flags).</Card.Description>
+							<Card.Description
+								>Manage correct answers for this challenge (Add new flags).</Card.Description
+							>
 						</div>
 						<Button variant="outline" size="sm" onclick={addFlag}>Add Flag</Button>
 					</Card.Header>
@@ -631,21 +648,32 @@
 								</div>
 							</div>
 						{/if}
-						
-						{#if data.challenge.attachments && data.challenge.attachments.length > 0}
+
+						{#if existingAttachments.length > 0}
 							<div class="space-y-3 border-t pt-4">
 								<h5 class="text-muted-foreground text-xs font-black uppercase tracking-widest">
-									Existing Attachments ({data.challenge.attachments.length})
+									Existing Attachments ({existingAttachments.length})
 								</h5>
 								<div class="grid gap-2">
-									{#each data.challenge.attachments as existingFile}
+									{#each existingAttachments as existingFile}
 										<div
 											class="bg-muted/30 group flex items-center justify-between rounded-lg border p-3"
 										>
 											<div class="flex min-w-0 items-center gap-3">
 												<Paperclip class="h-4 w-4 shrink-0 opacity-40" />
-												<span class="truncate text-sm font-medium">{existingFile.split('/').pop()}</span>
+												<span class="truncate text-sm font-medium"
+													>{existingFile.split('/').pop()}</span
+												>
 											</div>
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon"
+												class="text-destructive h-8 w-8 transition-all"
+												onclick={() => deleteExistingFile(existingFile)}
+											>
+												<X class="h-4 w-4" />
+											</Button>
 										</div>
 									{/each}
 								</div>

@@ -28,7 +28,7 @@
 >
 	<div class="mb-2 flex items-start justify-between gap-4">
 		<h3
-			class="min-w-0 truncate text-[18px] font-black leading-snug tracking-tighter text-zinc-900 dark:text-zinc-100"
+			class="min-w-0 truncate py-0.5 text-[18px] font-black leading-normal text-zinc-900 dark:text-zinc-100"
 		>
 			{challenge.name}
 		</h3>
