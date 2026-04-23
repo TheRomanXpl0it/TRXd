@@ -325,6 +325,32 @@ def ensure_compose_images(
     return changed, warnings
 
 
+def warn_risky_compose_settings(compose_doc: dict[str, Any], compose_path: Path) -> list[str]:
+    warnings: list[str] = []
+    services = compose_doc.get("services") or {}
+    if isinstance(services, dict):
+        for service_name, service in services.items():
+            if not isinstance(service, dict):
+                continue
+            if service.get("privileged") is True:
+                warnings.append(
+                    f"Service '{service_name}' in {compose_path} has privileged: true."
+                )
+            volumes = service.get("volumes") or []
+            if volumes:
+                count = len(volumes) if isinstance(volumes, list) else 1
+                warnings.append(
+                    f"Service '{service_name}' in {compose_path} defines {count} volume mount(s)."
+                )
+
+    volumes = compose_doc.get("volumes") or {}
+    if volumes:
+        count = len(volumes) if isinstance(volumes, dict | list) else 1
+        warnings.append(f"{compose_path} defines {count} top-level volume(s).")
+
+    return warnings
+
+
 def build_output_data(
     template: dict[str, Any],
     meta: dict[str, Any],
@@ -381,6 +407,7 @@ def build_output_data(
         compose_doc = load_yaml(compose_path) or {}
         if not isinstance(compose_doc, dict):
             raise MigrationError(f"compose file {compose_path} must contain a mapping")
+        warnings.extend(warn_risky_compose_settings(compose_doc, compose_path))
 
         services = compose_doc.get("services") or {}
         if not isinstance(services, dict):
@@ -415,13 +442,15 @@ def build_output_data(
 
     deployment["image"] = image
     deployment["compose"] = make_relative_path(compose_path, challenge_dir) if compose_path else ""
+    deployment["renewable"] = False
 
     output = copy.deepcopy(template)
     output["name"] = title
     output["category"] = category
     output["description"] = description
     output["authors"] = authors
-    output["type"] = "Compose"
+    output["type"] = "Container"
+    output["max_points"] = 500
     output["score_type"] = "Dynamic"
     output["host"] = host
     output["port"] = port

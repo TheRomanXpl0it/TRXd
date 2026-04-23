@@ -27,6 +27,7 @@ deployment:
   compose: ./remote/compose.yml
   hash_domain: true
   lifetime: 900
+  renewable: false 
   envs: '{"key": "value"}'
   max_memory: 512
   max_cpu: 1.0
