@@ -138,7 +138,8 @@ func SetupFeatures(app *fiber.App) {
 	}))
 
 	app.Use(helmet.New(helmet.Config{
-		ContentSecurityPolicy: "",
+		ContentSecurityPolicy:     "",
+		CrossOriginEmbedderPolicy: "unsafe-none",
 	}))
 
 	app.Use(favicon.New(favicon.Config{

@@ -24,6 +24,7 @@
 	import SidebarChallengeView from '$lib/components/challenges/SidebarChallengeView.svelte';
 
 	import { uiStore } from '$lib/stores/ui.svelte';
+	import { copyToClipboard as copy } from '$lib/utils/clipboard';
 
 	// Use uiStore for reactive view preference
 	const challengeView = $derived(uiStore.challengeView);
@@ -227,12 +228,13 @@
 		}
 	});
 
-	function copyToClipboard(text: string) {
-		if (typeof navigator === 'undefined') return;
-		navigator.clipboard
-			.writeText(text)
-			.then(() => toast.success('Copied to clipboard!'))
-			.catch(() => toast.error('Failed to copy to clipboard.'));
+	async function copyToClipboard(text: string) {
+		try {
+			await copy(text);
+			toast.success('Copied to clipboard!');
+		} catch (err) {
+			toast.error('Failed to copy to clipboard.');
+		}
 	}
 
 	function updateCountdown(id: string | number, newCountdown: number) {

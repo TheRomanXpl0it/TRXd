@@ -9,6 +9,7 @@
 	import { config } from '$lib/env';
 	import { fmtTimeLeft } from '$lib/utils/time';
 	import { formatConnectionString } from '$lib/utils/connection';
+	import { copyToClipboard as copy } from '$lib/utils/clipboard';
 
 	let {
 		open = $bindable(false),
@@ -34,12 +35,13 @@
 		onInstanceChange?: (challenge?: any) => void;
 	} = $props();
 
-	function copyToClipboard(text: string) {
-		if (typeof navigator === 'undefined') return;
-		navigator.clipboard
-			.writeText(text)
-			.then(() => toast.success('Copied to clipboard!'))
-			.catch(() => toast.error('Failed to copy to clipboard.'));
+	async function copyToClipboard(text: string) {
+		try {
+			await copy(text);
+			toast.success('Copied to clipboard!');
+		} catch (err) {
+			toast.error('Failed to copy to clipboard.');
+		}
 	}
 
 	const isDynamicType = $derived(

@@ -50,6 +50,11 @@ describe('ChallengeModal Component', () => {
 			writable: true,
 			configurable: true
 		});
+		Object.defineProperty(window, 'isSecureContext', {
+			value: true,
+			writable: true,
+			configurable: true
+		});
 	});
 
 	it('renders challenge name and description', async () => {

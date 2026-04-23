@@ -26,31 +26,32 @@
 	{onclick}
 	aria-label="View details for {challenge.name}"
 >
-	<div class="absolute right-3 top-3 flex items-center gap-2">
-		{#if countdown > 0}
-			<div
-				class="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-tighter text-emerald-500 dark:bg-emerald-500/20"
-			>
-				<Clock class="h-3 w-3" />
-				{fmtTimeLeft(countdown)}
-			</div>
-		{/if}
-		{#if challenge.hidden && isPrivileged}
-			<div
-				class="flex items-center gap-1 rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:bg-zinc-400/10 dark:text-zinc-400"
-			>
-				<EyeOff class="h-3 w-3" />
-				Hidden
-			</div>
-		{/if}
-	</div>
+	<div class="mb-2 flex items-start justify-between gap-4">
+		<h3
+			class="min-w-0 truncate text-[18px] font-black leading-snug tracking-tighter text-zinc-900 dark:text-zinc-100"
+		>
+			{challenge.name}
+		</h3>
 
-	<!-- Title -->
-	<h3
-		class="mb-2 w-full truncate pr-16 text-[18px] font-black leading-snug tracking-tighter text-zinc-900 dark:text-zinc-100"
-	>
-		{challenge.name}
-	</h3>
+		<div class="flex shrink-0 items-center gap-2 pt-1">
+			{#if countdown > 0}
+				<div
+					class="flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-tighter text-emerald-500 dark:bg-emerald-500/20"
+				>
+					<Clock class="h-3 w-3" />
+					{fmtTimeLeft(countdown)}
+				</div>
+			{/if}
+			{#if challenge.hidden && isPrivileged}
+				<div
+					class="flex items-center gap-1 rounded-full bg-zinc-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:bg-zinc-400/10 dark:text-zinc-400"
+				>
+					<EyeOff class="h-3 w-3" />
+					Hidden
+				</div>
+			{/if}
+		</div>
+	</div>
 
 	<!-- Tags -->
 	{#if challenge.tags && challenge.tags.length > 0}

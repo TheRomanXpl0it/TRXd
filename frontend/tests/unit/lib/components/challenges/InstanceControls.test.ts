@@ -34,6 +34,11 @@ describe('InstanceControls Component', () => {
 			writable: true,
 			configurable: true
 		});
+		Object.defineProperty(window, 'isSecureContext', {
+			value: true,
+			writable: true,
+			configurable: true
+		});
 		// Suppress console.error for cleaner test output
 		console.error = vi.fn();
 	});

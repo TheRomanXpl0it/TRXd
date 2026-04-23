@@ -13,6 +13,7 @@
 	import { ShieldHalf, Lock, Globe, Link as LinkIcon, Users, Check } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { createQuery } from '@tanstack/svelte-query';
+	import { copyToClipboard } from '$lib/utils/clipboard';
 
 	let user = $derived(authState.user);
 
@@ -83,7 +84,7 @@
 		try {
 			const { token } = await getTeamInviteToken();
 			const url = `${window.location.origin}/join?token=${token}`;
-			await navigator.clipboard.writeText(url);
+			await copyToClipboard(url);
 			inviteCopied = true;
 			toast.success('Invite link copied to clipboard!');
 			setTimeout(() => (inviteCopied = false), 2000);

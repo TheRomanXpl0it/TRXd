@@ -42,7 +42,7 @@
 	let type = $state('Normal');
 	let points = $state(500);
 	let dynamicScore = $state(false);
-	let hidden = $state(false);
+	let hidden = $state(true);
 
 	let host = $state('');
 	let port = $state<number | undefined>(undefined);

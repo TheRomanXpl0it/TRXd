@@ -8,6 +8,7 @@
 	import { Clock } from '@lucide/svelte';
 	import { formatConnectionString } from '$lib/utils/connection';
 	import { updateChallengeCache } from '$lib/utils/challenge-cache';
+	import { copyToClipboard as copy } from '$lib/utils/clipboard';
 
 	let {
 		challenge,
@@ -30,12 +31,13 @@
 	let destroyingInstance = $state(false);
 	let renewingInstance = $state(false);
 
-	function copyToClipboard(text: string) {
-		if (typeof navigator === 'undefined') return;
-		navigator.clipboard
-			.writeText(text)
-			.then(() => toast.success('Copied to clipboard!'))
-			.catch(() => toast.error('Failed to copy to clipboard.'));
+	async function copyToClipboard(text: string) {
+		try {
+			await copy(text);
+			toast.success('Copied to clipboard!');
+		} catch (err) {
+			toast.error('Failed to copy to clipboard.');
+		}
 	}
 
 	function updateChallengeQueryCache(patch: Record<string, any>) {
