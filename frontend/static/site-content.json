@@ -26,6 +26,12 @@
         "description": "[OtterSec](https://osec.io) secures critical blockchain infrastructure \u2014 from custom compilers to novel virtual machines, we review a wide range of difficult targets. Our team consists largely of CTF players that enjoy solving hard problems. If that sounds like you, please apply through our [careers](https://osec.io/careers) page."
       },
       {
+        "name": "Zellic",
+        "url": "https://www.zellic.io/",
+        "logo": "/sponsors/zellic.svg",
+        "description": "Zellic is a security research firm. We hire talented hackers to break critical software, ranging from virtual machines to compilers and major web apps to proof systems. Before Zellic, we founded perfect blue, the #1 CTF team in 2020 and 2021. We offer a comprehensive benefits package and direct equity participation, as well as flexible hours, remote work, and both full-time and part-time roles.\nTo learn more about Zellic, check out our blog: zellic.io/auditooor-grindset\n\nWork at Zellic: [jobs@zellic.io](mailto:jobs@zellic.io) | @gf_256"
+      },
+      {
         "name": "Google",
         "url": "https://goo.gle/ctfsponsorship",
         "logo": "/sponsors/google.svg",
