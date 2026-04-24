@@ -5,12 +5,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import InstanceControls from '$lib/components/challenges/InstanceControls.svelte';
 import { startInstance, stopInstance } from '$lib/instances';
 import { toast } from 'svelte-sonner';
-import { tick } from 'svelte';
 
 // Mock the instances API
 vi.mock('$lib/instances', () => ({
 	startInstance: vi.fn(),
-	stopInstance: vi.fn()
+	stopInstance: vi.fn(),
+	renewInstance: vi.fn()
 }));
 
 // Mock svelte-sonner toast
@@ -54,11 +54,12 @@ describe('InstanceControls Component', () => {
 		const mockStart = vi.mocked(startInstance);
 		const mockToast = vi.mocked(toast);
 		const onCountdownUpdate = vi.fn();
+		const onInstanceChange = vi.fn();
 
 		mockStart.mockResolvedValueOnce({
-			host: 'ctf.example.com',
-			port: 1337,
-			timeout: 3600
+			host: 'abc123.ctf.example.com',
+			timeout: 3600,
+			hash_domain: true
 		});
 
 		const challenge = { id: challengeId, instance_host: null, instance_port: null, timeout: null };
@@ -66,7 +67,8 @@ describe('InstanceControls Component', () => {
 			props: {
 				challenge,
 				countdown: 0,
-				onCountdownUpdate
+				onCountdownUpdate,
+				onInstanceChange
 			}
 		});
 
@@ -85,6 +87,13 @@ describe('InstanceControls Component', () => {
 
 		// Verify countdown callback was called
 		expect(onCountdownUpdate).toHaveBeenCalledWith(challengeId, 3600);
+		expect(onInstanceChange).toHaveBeenCalledWith(
+			expect.objectContaining({
+				instance_host: 'abc123.ctf.example.com',
+				instance_port: null,
+				instance_hash_domain: true
+			})
+		);
 	});
 
 	it('stops instance when clicking stop button', async () => {
@@ -414,6 +423,48 @@ describe('InstanceControls Component', () => {
 
 		// Should show just host (no port)
 		expect(screen.getByText('ctf.example.com')).toBeInTheDocument();
+	});
+
+	it('displays ssl command for hash-domain tcp instances without a port', async () => {
+		const challengeId = Math.floor(Math.random() * 10000);
+		const challenge = {
+			id: challengeId,
+			conn_type: 'TCP',
+			instance_host: 'abc123.ctf.example.com',
+			instance_port: null,
+			instance_hash_domain: true,
+			timeout: 3600
+		};
+
+		renderWithProviders(InstanceControls, {
+			props: {
+				challenge,
+				countdown: 3600
+			}
+		});
+
+		expect(screen.getByText('ncat --ssl abc123.ctf.example.com 443')).toBeInTheDocument();
+	});
+
+	it('uses docker config hash-domain fallback when instance_hash_domain is absent', async () => {
+		const challengeId = Math.floor(Math.random() * 10000);
+		const challenge = {
+			id: challengeId,
+			conn_type: 'TCP',
+			instance_host: 'abc123.ctf.example.com',
+			instance_port: null,
+			docker_config: { hash_domain: true },
+			timeout: 3600
+		};
+
+		renderWithProviders(InstanceControls, {
+			props: {
+				challenge,
+				countdown: 3600
+			}
+		});
+
+		expect(screen.getByText('ncat --ssl abc123.ctf.example.com 443')).toBeInTheDocument();
 	});
 
 	it('handles clipboard copy failure gracefully', async () => {

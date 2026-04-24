@@ -14,9 +14,10 @@ import (
 )
 
 type InstanceInfo struct {
-	Host    string `json:"host"`
-	Port    *int32 `json:"port,omitempty"`
-	Timeout int    `json:"timeout"`
+	Host       string `json:"host"`
+	Port       *int32 `json:"port,omitempty"`
+	Timeout    int    `json:"timeout"`
+	HashDomain bool   `json:"hash_domain"`
 }
 
 func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, error) {
@@ -48,9 +49,10 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, er
 	}
 
 	return &InstanceInfo{
-		Host:    res.Host,
-		Port:    res.Port,
-		Timeout: max(int(time.Until(res.Expiration).Seconds()), 0),
+		Host:       res.Host,
+		Port:       res.Port,
+		Timeout:    max(int(time.Until(res.Expiration).Seconds()), 0),
+		HashDomain: chall.DockerConfig.HashDomain,
 	}, nil
 }
 

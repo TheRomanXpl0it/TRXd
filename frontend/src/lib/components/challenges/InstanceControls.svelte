@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { Container, X, Copy, ExternalLink, RefreshCw } from '@lucide/svelte';
+	import { Container, X, RefreshCw } from '@lucide/svelte';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { toast } from 'svelte-sonner';
 	import { stopInstance, startInstance, renewInstance } from '$lib/instances';
-	import { fmtTimeLeft } from '$lib/utils/time';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { Clock } from '@lucide/svelte';
 	import { formatConnectionString } from '$lib/utils/connection';
@@ -44,14 +43,20 @@
 		queryClient.setQueryData(['challenges'], (old: any) => updateChallengeCache(old, challenge.id, patch));
 	}
 
+	function usesHashDomain(ch: any) {
+		return ch?.instance_hash_domain === true || ch?.docker_config?.hash_domain === true;
+	}
+
 	async function createInstance() {
 		if (creatingInstance || !challenge?.id) return;
 		creatingInstance = true;
 		try {
-			const { host, port, timeout } = await startInstance(Number(challenge.id));
+			const { host, port, timeout, hash_domain } = await startInstance(Number(challenge.id));
+			const instanceHashDomain = hash_domain ?? usesHashDomain(challenge);
 			const patch = {
 				instance_host: host,
-				instance_port: port,
+				instance_port: port ?? null,
+				instance_hash_domain: instanceHashDomain,
 				timeout
 			};
 			const updated = { ...challenge, ...patch };
@@ -131,7 +136,7 @@
 			host: challenge.instance_host,
 			port: challenge.instance_port,
 			connType: challenge.conn_type,
-			sslWithoutPort: !!challenge.instance_hash_domain
+			sslWithoutPort: usesHashDomain(challenge)
 		});
 	});
 

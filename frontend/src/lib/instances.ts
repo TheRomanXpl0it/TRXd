@@ -1,9 +1,16 @@
 import { api } from './api';
 
+type StartInstanceResponse = {
+	host: string;
+	port?: number | null;
+	timeout: number;
+	hash_domain?: boolean;
+};
+
 export async function startInstance(
 	chall_id: number
-): Promise<{ host: string; port: number; timeout: number }> {
-	return api<{ host: string; port: number; timeout: number }>(`/instances`, {
+): Promise<StartInstanceResponse> {
+	return api<StartInstanceResponse>(`/instances`, {
 		headers: { 'content-type': 'application/json' },
 		method: 'POST',
 		body: JSON.stringify({ chall_id })

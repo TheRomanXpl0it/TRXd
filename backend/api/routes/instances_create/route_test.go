@@ -29,6 +29,10 @@ func Int32(val any) int32 {
 	return int32(val.(float64))
 }
 
+func Bool(val any) bool {
+	return val.(bool)
+}
+
 func TestMain(m *testing.M) {
 	test_utils.Main(m)
 }
@@ -106,6 +110,11 @@ func TestRoute(t *testing.T) {
 	if _, ok := Json(body)["timeout"]; !ok {
 		t.Fatalf("Expected timeout to be present in response: %+v", body)
 	}
+	if hashDomain, ok := Json(body)["hash_domain"]; !ok {
+		t.Fatalf("Expected hash_domain to be present in response: %+v", body)
+	} else if !Bool(hashDomain) {
+		t.Fatalf("Expected hash_domain to be true in response: %+v", body)
+	}
 
 	session.Post("/instances", JSON{"chall_id": challID3}, http.StatusConflict)
 	session.CheckResponse(errorf(consts.AlreadyAnActiveInstance))
@@ -136,6 +145,11 @@ func TestRoute(t *testing.T) {
 	if _, ok := Json(body)["timeout"]; !ok {
 		t.Fatalf("Expected timeout to be present in response: %+v", body)
 	}
+	if hashDomain, ok := Json(body)["hash_domain"]; !ok {
+		t.Fatalf("Expected hash_domain to be present in response: %+v", body)
+	} else if Bool(hashDomain) {
+		t.Fatalf("Expected hash_domain to be false in response: %+v", body)
+	}
 	session.Delete("/instances", JSON{"chall_id": challID3}, http.StatusOK)
 
 	session = test_utils.NewApiTestSession(t, app)
@@ -159,6 +173,11 @@ func TestRoute(t *testing.T) {
 	}
 	if _, ok := Json(body)["timeout"]; !ok {
 		t.Fatalf("Expected timeout to be present in response: %+v", body)
+	}
+	if hashDomain, ok := Json(body)["hash_domain"]; !ok {
+		t.Fatalf("Expected hash_domain to be present in response: %+v", body)
+	} else if !Bool(hashDomain) {
+		t.Fatalf("Expected hash_domain to be true in response: %+v", body)
 	}
 	session.Delete("/instances", JSON{"chall_id": challID3}, http.StatusOK)
 
@@ -195,5 +214,10 @@ func TestRoute(t *testing.T) {
 	}
 	if _, ok := Json(body)["timeout"]; !ok {
 		t.Fatalf("Expected timeout to be present in response: %+v", body)
+	}
+	if hashDomain, ok := Json(body)["hash_domain"]; !ok {
+		t.Fatalf("Expected hash_domain to be present in response: %+v", body)
+	} else if !Bool(hashDomain) {
+		t.Fatalf("Expected hash_domain to be true in response: %+v", body)
 	}
 }
