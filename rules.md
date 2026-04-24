@@ -7,7 +7,7 @@ The **top 8** eligible teams will qualify for the **on-site finals** to be held 
 `TRX{.+}`, unless otherwise specified.
 
 ## Scoring
-TBD
+We’re using a new scoring formula for this year’s event, check it out: https://colab.research.google.com/drive/1wN4KNs6jrRDova5ywZS-dVi0LXh6peX8?usp=sharing
 
 ## LLM policy
 The use of AI tools is discouraged during the online round. Since AI assistance will be restricted during the on-site finals, participants are strongly encouraged to rely on their own skills for fair preparation and consistency between stages.
