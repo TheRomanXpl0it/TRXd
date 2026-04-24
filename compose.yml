@@ -38,12 +38,25 @@ services:
       - "traefik.http.routers.app-instances.priority=10"
       - "traefik.http.routers.app-instances.service=app"
       - "traefik.http.routers.app-instances.middlewares=app-instances-ratelimit"
+      
+      # --- SUBMISSION ROUTER (rate limited) ---
+      - "traefik.http.routers.app-submissions.rule=Path(`/api/submissions`) && Method(`POST`)"
+      - "traefik.http.routers.app-submissions.entrypoints=web"
+      - "traefik.http.routers.app-submissions.priority=10"
+      - "traefik.http.routers.app-submissions.service=app"
+      - "traefik.http.routers.app-submissions.middlewares=app-submissions-ratelimit"
 
       # --- INSTANCES RATE LIMIT MIDDLEWARE ---
       - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.average=1"
       - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.burst=10"
       - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.period=60s"
       - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.sourcecriterion.requestheadername=CF-Connecting-IP"
+      
+      # --- SUBMISSION RATE LIMIT MIDDLEWARE ---
+      - "traefik.http.middlewares.app-submissions-ratelimit.ratelimit.average=2"
+      - "traefik.http.middlewares.app-submissions-ratelimit.ratelimit.burst=10"
+      - "traefik.http.middlewares.app-submissions-ratelimit.ratelimit.period=10s"
+      - "traefik.http.middlewares.app-submissions-ratelimit.ratelimit.sourcecriterion.requestheadername=CF-Connecting-IP"
 
 #  adminer:
 #    image: adminer:5
