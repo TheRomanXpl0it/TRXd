@@ -313,7 +313,7 @@ SELECT
     ON i.chall_id = c.id
       AND i.team_id = (SELECT team_id FROM tid)
   GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id, d.hash_domain, d.renewable
-  ORDER BY c.points ASC, c.id ASC
+  ORDER BY c.hidden ASC, c.points ASC, c.solves DESC, c.id ASC
 `
 
 type GetAllChallengesInfoRow struct {
