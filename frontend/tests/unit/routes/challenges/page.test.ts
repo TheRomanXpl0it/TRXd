@@ -103,6 +103,31 @@ describe('Challenges Page', () => {
 		expect(screen.queryByText(/Prepare your horses/i)).not.toBeInTheDocument();
 	});
 
+	it('keeps challenges visible after the competition ends for players', async () => {
+		authState.ready = true;
+		authState.startTime = new Date(Date.now() - 200000).toISOString();
+		authState.endTime = new Date(Date.now() - 100000).toISOString();
+		authState.user = { role: 'Player' } as any;
+
+		(createQuery as any)
+			.mockReturnValueOnce({
+				data: [{ id: 1, name: 'Post CTF Chall', category: 'Web', points: 100 }],
+				isLoading: false,
+				error: null
+			})
+			.mockReturnValueOnce({
+				data: [],
+				isLoading: false,
+				error: null
+			});
+
+		renderWithProviders(Page);
+
+		expect(await screen.findByText('Post CTF Chall')).toBeInTheDocument();
+		expect(screen.getByText(/flag submissions are closed/i)).toBeInTheDocument();
+		expect(screen.queryByText(/the final flag has been submitted/i)).not.toBeInTheDocument();
+	});
+
 	it('does not auto-open a challenge from the URL hash', async () => {
 		window.location.hash = '#challenge-1';
 

@@ -16,6 +16,7 @@
 		challenge = $bindable(),
 		countdown = 0,
 		isAdmin = false,
+		submissionsClosed = false,
 		onEdit,
 		onDelete,
 		onSolved,
@@ -27,6 +28,7 @@
 		challenge: any;
 		countdown?: number;
 		isAdmin?: boolean;
+		submissionsClosed?: boolean;
 		onEdit?: (challenge: any) => void;
 		onDelete?: (challenge: any) => void;
 		onSolved?: () => void;
@@ -71,7 +73,7 @@
 
 <Dialog.Root bind:open>
 	<Dialog.Content
-		class="max-h-[95vh] max-w-[95vw] overflow-y-auto p-4 sm:max-w-[800px] sm:p-6"
+		class="max-h-[95vh] max-w-[95vw] overflow-x-hidden overflow-y-auto p-4 sm:max-w-[800px] sm:p-6"
 		aria-describedby="challenge-description"
 	>
 		<Dialog.Header class="pb-4 sm:pb-6">
@@ -168,7 +170,7 @@
 		<section class="mb-6" aria-labelledby="description-heading">
 			<h3 id="description-heading" class="mb-2 text-sm font-semibold opacity-70">Description</h3>
 			{#if challenge?.description}
-				<Markdown content={challenge.description} class="text-base leading-relaxed" />
+				<Markdown content={challenge.description} class="text-base leading-relaxed break-words" />
 			{:else}
 				<div class="text-base leading-relaxed opacity-60">No description available.</div>
 			{/if}
@@ -247,6 +249,7 @@
 		<!-- Submit Flag -->
 		<FlagSubmission
 			{challenge}
+			{submissionsClosed}
 			onSolved={() => {
 				if (challenge) challenge.solved = true;
 				if (onSolved) onSolved();

@@ -5,14 +5,15 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { toast } from 'svelte-sonner';
 	import { submitFlag } from '$lib/challenges';
-	import { onMount } from 'svelte';
 
 	let {
 		challenge,
-		onSolved
+		onSolved,
+		submissionsClosed = false
 	}: {
 		challenge: any;
 		onSolved?: () => void;
+		submissionsClosed?: boolean;
 	} = $props();
 
 	let locallySolved = $state(false);
@@ -32,6 +33,10 @@
 
 	async function onSubmitFlag(ev: SubmitEvent) {
 		ev.preventDefault();
+		if (submissionsClosed) {
+			toast.error('Flag submissions are closed');
+			return;
+		}
 		if (!challenge?.id) {
 			toast.error('No challenge selected');
 			return;
@@ -67,10 +72,28 @@
 <div class="pt-6">
 	<form
 		class="flex w-full items-center gap-2 sm:gap-3"
-		class:justify-center={solved}
+		class:justify-center={solved || submissionsClosed}
 		onsubmit={onSubmitFlag}
 	>
-		{#if !solved}
+		{#if solved}
+			<div
+				class="solve-surface solve-border flex items-center gap-2 rounded-lg border px-6 py-3"
+				role="status"
+				aria-live="polite"
+			>
+				<CheckCircle class="solve-text-strong h-5 w-5" aria-hidden="true" />
+				<span class="solve-text-strong font-semibold">Challenge solved!</span>
+			</div>
+		{:else if submissionsClosed}
+			<div
+				class="border-border bg-muted/40 text-muted-foreground flex items-center gap-2 rounded-lg border px-6 py-3"
+				role="status"
+				aria-live="polite"
+			>
+				<AlertCircle class="h-5 w-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+				<span class="font-semibold">Flag submissions are closed.</span>
+			</div>
+		{:else}
 			<div class="relative flex-1">
 				{#if flagError}
 					<AlertCircle
@@ -114,15 +137,6 @@
 					Submit
 				{/if}
 			</Button>
-		{:else}
-			<div
-				class="solve-surface solve-border flex items-center gap-2 rounded-lg border px-6 py-3"
-				role="status"
-				aria-live="polite"
-			>
-				<CheckCircle class="solve-text-strong h-5 w-5" aria-hidden="true" />
-				<span class="solve-text-strong font-semibold">Challenge solved!</span>
-			</div>
 		{/if}
 	</form>
 </div>

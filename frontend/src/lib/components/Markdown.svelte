@@ -127,6 +127,7 @@
 	.markdown-content :global(img) {
 		max-width: 100%;
 		height: auto;
+		display: block;
 		border-radius: 0.375rem;
 		margin: 0.75rem 0;
 	}

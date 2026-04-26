@@ -136,6 +136,23 @@ describe('FlagSubmission Component - User Workflow', () => {
 		expect(mockSubmit).not.toHaveBeenCalled();
 	});
 
+	it('shows a locked state when submissions are closed', () => {
+		const mockSubmit = vi.mocked(submitFlag);
+
+		renderWithProviders(FlagSubmission, {
+			props: {
+				challenge: { id: 1337, solved: false },
+				submissionsClosed: true,
+				onSolved: vi.fn()
+			}
+		});
+
+		expect(screen.getByText(/flag submissions are closed/i)).toBeInTheDocument();
+		expect(screen.queryByPlaceholderText(/TRX\{/i)).not.toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: /submit/i })).not.toBeInTheDocument();
+		expect(mockSubmit).not.toHaveBeenCalled();
+	});
+
 	it('handles API errors gracefully', async () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const testFlag = generateRandomFlag();

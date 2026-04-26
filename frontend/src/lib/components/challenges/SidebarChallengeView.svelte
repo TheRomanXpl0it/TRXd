@@ -37,13 +37,15 @@
 		onSolved,
 		onOpenChallenge,
 		countdowns = {} as Record<string | number, number>,
-		onCountdownUpdate
+		onCountdownUpdate,
+		submissionsClosed = false
 	}: {
 		grouped: [string, Challenge[]][];
 		onSolved?: () => void;
 		onOpenChallenge?: (ch: Challenge) => void;
 		countdowns?: Record<string | number, number>;
 		onCountdownUpdate?: (id: string | number, newCountdown: number) => void;
+		submissionsClosed?: boolean;
 	} = $props();
 
 	import { uiStore } from '$lib/stores/ui.svelte';
@@ -434,7 +436,7 @@
 									<div class="prose prose-neutral dark:prose-invert max-w-none">
 										<Markdown
 											content={activeChallenge.description}
-											class="text-lg font-medium leading-relaxed tracking-tight"
+											class="text-lg font-medium leading-relaxed tracking-tight break-words"
 										/>
 									</div>
 								</section>
@@ -549,6 +551,7 @@
 						{#key activeChallenge.id}
 							<FlagSubmission
 								challenge={activeChallenge}
+								{submissionsClosed}
 								onSolved={() => {
 									if (activeChallenge) activeChallenge.solved = true;
 									if (onSolved) onSolved();

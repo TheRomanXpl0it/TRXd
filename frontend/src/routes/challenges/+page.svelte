@@ -13,7 +13,6 @@
 	import ChallengeCard from '$lib/components/challenges/ChallengeCard.svelte';
 	import ChallengeModal from '$lib/components/challenges/ChallengeModal.svelte';
 	import WaitingPage from '$lib/components/challenges/WaitingPage.svelte';
-	import EndPage from '$lib/components/challenges/EndPage.svelte';
 	import { Flag, Users, Trophy, ChevronDown, Search, Monitor } from '@lucide/svelte';
 	import { slide } from 'svelte/transition';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -39,6 +38,7 @@
 		if (!authState.ready || !authState.endTime) return false;
 		return new Date(authState.endTime).getTime() < Date.now();
 	});
+	const submissionsClosed = $derived(ended && !isAdmin);
 	const isMissingTeam = $derived(
 		authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin
 	);
@@ -264,7 +264,7 @@
 	}
 </script>
 
-{#if ((!upcoming && !ended) || isAdmin) && challengeView !== 'sidebar'}
+{#if !upcoming && challengeView !== 'sidebar'}
 	<div class="mb-10 w-full">
 		<ChallengeFilters
 			bind:search
@@ -274,6 +274,14 @@
 			{allTags}
 			{activeFiltersCount}
 		/>
+	</div>
+{/if}
+
+{#if submissionsClosed}
+	<div
+		class="mb-6 rounded-xl border border-amber-300/60 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 dark:border-amber-600/40 dark:bg-amber-950/25 dark:text-amber-100"
+	>
+		Flag submissions are closed. Challenges and instances remain available for post-CTF access.
 	</div>
 {/if}
 
@@ -298,8 +306,6 @@
 	</div>
 {:else if upcoming && !isAdmin}
 	<WaitingPage startTime={authState.startTime} />
-{:else if ended && !isAdmin}
-	<EndPage endTime={authState.endTime} />
 {:else if loading}
 	<div class="flex flex-col items-center justify-center py-12">
 		<div
@@ -324,6 +330,7 @@
 			onOpenChallenge={openChallenge}
 			{countdowns}
 			onCountdownUpdate={updateCountdown}
+			{submissionsClosed}
 		/>
 	</div>
 {:else}
@@ -366,6 +373,7 @@
 		onCountdownUpdate={updateCountdown}
 		onOpenSolves={() => (openSolves = true)}
 		countdown={countdowns[selectedId] ?? 0}
+		{submissionsClosed}
 	/>
 	{#if sortedChallenges.find((c) => c.id === selectedId)}
 		<SolveListSheet
