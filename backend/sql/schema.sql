@@ -1,5 +1,4 @@
 CREATE TYPE user_role AS ENUM (
-  'Spectator',
   'Player',
   'Author',
   'Admin'

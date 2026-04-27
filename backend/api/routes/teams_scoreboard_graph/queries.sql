@@ -9,6 +9,7 @@ SELECT
     s."timestamp"
   FROM (
       SELECT * FROM teams t
+      WHERE t.score > 0
       ORDER BY t.score DESC
       LIMIT CAST((SELECT value FROM configs WHERE key='scoreboard-top') AS INT)
     ) AS t

@@ -67,15 +67,8 @@ func TestRoute(t *testing.T) {
 				"name":    "B",
 				"score":   998,
 			},
-			{
-				"badges":  []JSON{},
-				"country": "",
-				"id":      C.ID,
-				"name":    "C",
-				"score":   0,
-			},
 		},
-		"total": 3,
+		"total": 2,
 	}
 
 	session := test_utils.NewApiTestSession(t, app)

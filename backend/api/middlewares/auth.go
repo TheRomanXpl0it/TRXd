@@ -43,11 +43,7 @@ func withUser(c *fiber.Ctx, requireAuth bool, allowedRoles []sqlc.UserRole) erro
 }
 
 func NoAuth(c *fiber.Ctx) error {
-	return withUser(c, false, []sqlc.UserRole{sqlc.UserRoleSpectator, sqlc.UserRolePlayer, sqlc.UserRoleAuthor, sqlc.UserRoleAdmin})
-}
-
-func Spectator(c *fiber.Ctx) error {
-	return withUser(c, true, []sqlc.UserRole{sqlc.UserRoleSpectator, sqlc.UserRolePlayer, sqlc.UserRoleAuthor, sqlc.UserRoleAdmin})
+	return withUser(c, false, []sqlc.UserRole{sqlc.UserRolePlayer, sqlc.UserRoleAuthor, sqlc.UserRoleAdmin})
 }
 
 func Player(c *fiber.Ctx) error {

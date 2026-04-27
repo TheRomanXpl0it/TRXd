@@ -3,7 +3,6 @@
  - ctf ended not able to see the challs
  - add a red drop if challenge is first blodded
  - maybe change the color a bit for the solved challenges
- - make the challs hidden by default in the frontend
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
@@ -17,13 +16,9 @@
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 
 ## Ideas / Features
- - show teams with score > 0
  - reclaimer python tests
- - remove spectator role
  - make badges as views
  - split /challenges/:id into player and author endpoints
- - submission page accessible for authors (delete admin only)
- - instances page accessible for authors (delete admin only)
  - team / user page author only with trigram search (pg_trgm)
  - instancer container restart policy editable
  - instancer container ingress only bool
@@ -32,8 +27,6 @@
  - no instances with tcp hash domain support
  - multi port & domain support for instances
  - rename "hash domain" (not an hash anymore, only rand bytes)
- - make retries on registration with email
- - editable homepage & theme
  - submissions page filers (first bloods, only wrong, group filter [correct, repeated])
  - extract data for ctftime
  - ban user/team support

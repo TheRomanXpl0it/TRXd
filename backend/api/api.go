@@ -65,11 +65,10 @@ import (
 )
 
 var (
-	noAuth    = middlewares.NoAuth
-	spectator = middlewares.Spectator
-	player    = middlewares.Player
-	author    = middlewares.Author
-	admin     = middlewares.Admin
+	noAuth = middlewares.NoAuth
+	player = middlewares.Player
+	author = middlewares.Author
+	admin  = middlewares.Admin
 
 	team = middlewares.Team
 
@@ -88,7 +87,7 @@ func SetupApp(ctx context.Context) *fiber.App {
 
 	app.Static("/", "./frontend")
 
-	app.Use("/attachments", spectator, team, start, middlewares.Attachments)
+	app.Use("/attachments", player, team, start, middlewares.Attachments)
 	app.Static("/attachments", "./attachments", fiber.Static{
 		Download: true,
 	})
@@ -158,6 +157,7 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 		log.Error("Failed to get user-mode config:", "err", err)
 		mode = "false"
 	}
+	userMode := mode == "true"
 
 	var api fiber.Router
 	if log.GetLevel() == log.DebugLevel {
@@ -175,19 +175,19 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 
 	api.Patch("/users", player, users_update.Route)
 	api.Patch("/users/role", admin, users_role.Route)
-	api.Patch("/users/password", spectator, users_password.Route)
-	if mode != "true" {
+	api.Patch("/users/password", player, users_password.Route)
+	if !userMode {
 		api.Get("/users", noAuth, users_all_get.Route)
 		api.Get("/users/search", noAuth, users_search.Route)
 		api.Get("/users/:id", noAuth, users_get.Route)
 	}
 
-	if mode != "true" {
+	if !userMode {
 		api.Post("/teams/register", player, teams_register.Route)
 		api.Post("/teams/join", player, teams_join.Route)
 		api.Get("/teams/join", player, teams_join_get.Route)
 		api.Patch("/teams", player, team, teams_update.Route)
-		api.Patch("/teams/password", spectator, team, teams_password.Route)
+		api.Patch("/teams/password", player, team, teams_password.Route)
 	}
 	api.Get("/teams", noAuth, teams_all_get.Route)
 	api.Get("/teams/search", noAuth, teams_search.Route)
@@ -196,22 +196,22 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 	api.Post("/categories", author, categories_create.Route)
 	api.Patch("/categories", author, categories_update.Route)
 	api.Delete("/categories", author, categories_delete.Route)
-	api.Get("/categories", spectator, team, start, categories_get.Route)
+	api.Get("/categories", player, team, start, categories_get.Route)
 
 	api.Post("/challenges", author, challenges_create.Route)
 	api.Patch("/challenges", author, challenges_update.Route)
 	api.Patch("/challenges/hidden", author, challenges_hidden.Route)
 	api.Delete("/challenges", author, challenges_delete.Route)
-	api.Get("/challenges", spectator, team, start, challenges_all_get.Route)
-	api.Get("/challenges/:id", spectator, team, start, challenges_get.Route)
+	api.Get("/challenges", player, team, start, challenges_all_get.Route)
+	api.Get("/challenges/:id", player, team, start, challenges_get.Route)
 
 	api.Post("/instances", player, team, start, instances_create.Route)
 	api.Patch("/instances", player, team, start, instances_update.Route)
 	api.Delete("/instances", player, team, start, instances_delete.Route)
-	api.Get("/instances", admin, instances_get.Route)
+	api.Get("/instances", author, instances_get.Route)
 
-	api.Post("/submissions", spectator, team, start, end, submissions_create.Route)
-	api.Get("/submissions", admin, submissions_get.Route)
+	api.Post("/submissions", player, team, start, end, submissions_create.Route)
+	api.Get("/submissions", author, submissions_get.Route)
 	api.Delete("/submissions", admin, submissions_delete.Route)
 
 	api.Post("/attachments", author, attachments_create.Route)

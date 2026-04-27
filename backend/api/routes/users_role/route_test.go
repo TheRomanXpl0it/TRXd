@@ -120,17 +120,6 @@ func TestRoute(t *testing.T) {
 		t.Fatalf("Expected score to be 0, got %v", Json(body)["score"])
 	}
 
-	session.Patch("/users/role", JSON{"user_id": uid, "new_role": "Spectator"}, http.StatusOK)
-	session.CheckResponse(nil)
-	session.Get(fmt.Sprintf("/users/%d", uid), nil, http.StatusOK)
-	body = session.Body()
-	if Json(body)["role"] != "Spectator" {
-		t.Fatalf("Expected role to be 'Spectator', got '%v'", Json(body)["role"])
-	}
-	if Int(Json(body)["score"]) != 0 {
-		t.Fatalf("Expected score to be 0, got %v", Json(body)["score"])
-	}
-
 	session.Patch("/users/role", JSON{"user_id": uid, "new_role": "Player"}, http.StatusOK)
 	session.CheckResponse(nil)
 	session.Get(fmt.Sprintf("/users/%d", uid), nil, http.StatusOK)

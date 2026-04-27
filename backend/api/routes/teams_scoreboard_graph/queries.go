@@ -18,6 +18,7 @@ type Top struct {
 	TeamID      int          `json:"team_id"`
 	TeamName    string       `json:"team_name"`
 	Submissions []Submission `json:"submissions"`
+	// TODO: put ctf start and ctf end as omitempty
 }
 
 func QueryTeamScoreboardGraph(ctx context.Context) ([]Top, error) {

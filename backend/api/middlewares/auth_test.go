@@ -16,32 +16,32 @@ var testAuthMiddlewares = []struct {
 	{
 		method:           http.MethodPost,
 		endpoint:         "/login",
-		expectedStatuses: []int{http.StatusBadRequest, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden},
+		expectedStatuses: []int{http.StatusBadRequest, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden},
 	},
 	{
 		method:           http.MethodGet,
 		endpoint:         "/info",
-		expectedStatuses: []int{http.StatusOK, http.StatusOK, http.StatusOK, http.StatusOK, http.StatusOK, http.StatusOK},
+		expectedStatuses: []int{http.StatusOK, http.StatusOK, http.StatusOK, http.StatusOK, http.StatusOK},
 	},
 	{
 		method:           http.MethodGet,
 		endpoint:         "/challenges",
-		expectedStatuses: []int{http.StatusUnauthorized, http.StatusOK, http.StatusForbidden, http.StatusOK, http.StatusOK, http.StatusOK},
+		expectedStatuses: []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusOK, http.StatusOK, http.StatusOK},
 	},
 	{
 		method:           http.MethodPost,
 		endpoint:         "/teams/register",
-		expectedStatuses: []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusBadRequest, http.StatusBadRequest, http.StatusBadRequest, http.StatusBadRequest},
+		expectedStatuses: []int{http.StatusUnauthorized, http.StatusBadRequest, http.StatusBadRequest, http.StatusBadRequest, http.StatusBadRequest},
 	},
 	{
 		method:           http.MethodPost,
 		endpoint:         "/categories",
-		expectedStatuses: []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden, http.StatusBadRequest, http.StatusBadRequest},
+		expectedStatuses: []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusForbidden, http.StatusBadRequest, http.StatusBadRequest},
 	},
 	{
 		method:           http.MethodPatch,
 		endpoint:         "/configs",
-		expectedStatuses: []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden, http.StatusBadRequest},
+		expectedStatuses: []int{http.StatusUnauthorized, http.StatusForbidden, http.StatusForbidden, http.StatusForbidden, http.StatusBadRequest},
 	},
 }
 
@@ -49,13 +49,12 @@ func TestAuthMiddlewares(t *testing.T) {
 	app := api.SetupApp(t.Context())
 	defer api.Shutdown(app)
 
-	users := [6]*sqlc.User{}
-	users[1] = test_utils.RegisterUser(t, "spectator", "spectator@test.test", "testpass", sqlc.UserRoleSpectator)
-	users[2] = test_utils.RegisterUser(t, "player", "player@test.test", "testpass", sqlc.UserRolePlayer)
-	users[3] = test_utils.RegisterUser(t, "team_player", "team@test.test", "testpass", sqlc.UserRolePlayer)
-	test_utils.RegisterTeam(t, "team1", "teampass", users[3].ID)
-	users[4] = test_utils.RegisterUser(t, "author", "author@test.test", "testpass", sqlc.UserRoleAuthor)
-	users[5] = test_utils.RegisterUser(t, "admin", "admin@test.test", "testpass", sqlc.UserRoleAdmin)
+	users := [5]*sqlc.User{}
+	users[1] = test_utils.RegisterUser(t, "player", "player@test.test", "testpass", sqlc.UserRolePlayer)
+	users[2] = test_utils.RegisterUser(t, "team_player", "team@test.test", "testpass", sqlc.UserRolePlayer)
+	test_utils.RegisterTeam(t, "team1", "teampass", users[2].ID)
+	users[3] = test_utils.RegisterUser(t, "author", "author@test.test", "testpass", sqlc.UserRoleAuthor)
+	users[4] = test_utils.RegisterUser(t, "admin", "admin@test.test", "testpass", sqlc.UserRoleAdmin)
 
 	for _, test := range testAuthMiddlewares {
 		for j, user := range users {

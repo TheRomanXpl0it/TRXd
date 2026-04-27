@@ -394,13 +394,6 @@ BEGIN
   PERFORM assert(solves=0) FROM challenges WHERE name='chall-3';
   PERFORM assert(solves=0) FROM challenges WHERE name='chall-4';
   PERFORM assert(solves=1) FROM challenges WHERE name='chall-1';
-  
-  -- if user 'a' goes from a non-player role to another non-player role, nothing should change
-  UPDATE users SET role='Spectator' WHERE id=(SELECT id FROM users WHERE name='a');
-  PERFORM assert(score=0) FROM teams WHERE name='A';
-  PERFORM assert(solves=0) FROM challenges WHERE name='chall-3';
-  PERFORM assert(solves=0) FROM challenges WHERE name='chall-4';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-1';
 
   -- if user 'a' goes from a non-player role to another non-player role, nothing should change
   UPDATE users SET role='Admin' WHERE id=(SELECT id FROM users WHERE name='a');

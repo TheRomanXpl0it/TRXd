@@ -187,10 +187,9 @@ func (ns NullSubmissionStatus) Value() (driver.Value, error) {
 type UserRole string
 
 const (
-	UserRoleSpectator UserRole = "Spectator"
-	UserRolePlayer    UserRole = "Player"
-	UserRoleAuthor    UserRole = "Author"
-	UserRoleAdmin     UserRole = "Admin"
+	UserRolePlayer UserRole = "Player"
+	UserRoleAuthor UserRole = "Author"
+	UserRoleAdmin  UserRole = "Admin"
 )
 
 func (e *UserRole) Scan(src interface{}) error {

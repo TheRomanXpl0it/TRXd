@@ -1,3 +1,7 @@
+-- name: GetTeamsScoreboardCount :one
+-- Get the total count of teams with a score greater than 0
+SELECT COUNT(*) FROM teams WHERE score > 0;
+
 -- name: GetTeamsScoreboard :many
 -- Retrieve all teams or a subset if specified, ordered by score and last correct submission time
 SELECT
@@ -31,6 +35,7 @@ SELECT
       WHERE u.role = 'Player'
       GROUP BY u.team_id
     ) lc ON lc.team_id = t.id
+  WHERE t.score > 0
   ORDER BY
     t.score DESC,
     lc.last_correct_at ASC NULLS LAST

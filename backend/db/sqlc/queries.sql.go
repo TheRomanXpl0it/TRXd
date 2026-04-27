@@ -1075,6 +1075,7 @@ SELECT
       WHERE u.role = 'Player'
       GROUP BY u.team_id
     ) lc ON lc.team_id = t.id
+  WHERE t.score > 0
   ORDER BY
     t.score DESC,
     lc.last_correct_at ASC NULLS LAST
@@ -1127,6 +1128,18 @@ func (q *Queries) GetTeamsScoreboard(ctx context.Context, arg GetTeamsScoreboard
 	return items, nil
 }
 
+const getTeamsScoreboardCount = `-- name: GetTeamsScoreboardCount :one
+SELECT COUNT(*) FROM teams WHERE score > 0
+`
+
+// Get the total count of teams with a score greater than 0
+func (q *Queries) GetTeamsScoreboardCount(ctx context.Context) (int64, error) {
+	row := q.queryRow(ctx, q.getTeamsScoreboardCountStmt, getTeamsScoreboardCount)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getTeamsScoreboardGraph = `-- name: GetTeamsScoreboardGraph :many
 SELECT
     t.id AS team_id,
@@ -1137,6 +1150,7 @@ SELECT
     s."timestamp"
   FROM (
       SELECT id, name, password_hash, password_salt, score, country FROM teams t
+      WHERE t.score > 0
       ORDER BY t.score DESC
       LIMIT CAST((SELECT value FROM configs WHERE key='scoreboard-top') AS INT)
     ) AS t

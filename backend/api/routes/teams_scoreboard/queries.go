@@ -16,8 +16,20 @@ type TeamData struct {
 	Badges  json.RawMessage `json:"badges"`
 }
 
+func GetTotalScoreboardTeams(ctx context.Context) (int64, error) {
+	total, err := db.Sql.GetTeamsScoreboardCount(ctx)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return 0, nil
+		}
+		return 0, err
+	}
+
+	return total, nil
+}
+
 func GetTeamScoreboard(ctx context.Context, offset int32, limit int32) (int64, []TeamData, error) {
-	total, err := db.GetTotalTeams(ctx)
+	total, err := GetTotalScoreboardTeams(ctx)
 	if err != nil {
 		return 0, nil, err
 	}

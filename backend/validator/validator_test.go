@@ -199,7 +199,6 @@ func TestValidators(t *testing.T) {
 	varTest(t, "user_email", strings.Repeat("a", consts.MaxEmailLen+1), test_utils.Format(consts.MaxError, "user_email", consts.MaxEmailLen))
 
 	varTest(t, "user_role", "", test_utils.Format(consts.OneOfError, "user_role", strings.Join(consts.RolesStr, " ")))
-	varTest(t, "user_role", sqlc.UserRoleSpectator)
 	varTest(t, "user_role", sqlc.UserRolePlayer)
 	varTest(t, "user_role", sqlc.UserRoleAuthor)
 	varTest(t, "user_role", sqlc.UserRoleAdmin)
