@@ -34,18 +34,20 @@ for chall in r.json():
 		chall_id_4 = chall['id']
 
 
-def update_challenge(session, chall_id, hash_domain=None, lifetime=None):
+def update_challenge(session, chall_id, hash_domain=None, lifetime=None, conn_type=None):
 	data = {"chall_id": chall_id}
 	if hash_domain is not None:
 		data["hash_domain"] = hash_domain
 	if lifetime is not None:
 		data["lifetime"] = lifetime
+	if conn_type is not None:
+		data["conn_type"] = conn_type
 	r = session.patch(f'{url}/challenges', json=data,
 		headers={'X-CSRF-Token': session.cookies.get('csrf_'),})
 	assert r.status_code == 200, r.text
 
-update_challenge(admin, chall_id_3, False, 5)
-update_challenge(admin, chall_id_4, False, 5)
+update_challenge(admin, chall_id_3, False, 5, 'HTTP')
+update_challenge(admin, chall_id_4, False, 5, 'HTTP')
 
 
 def spawn_instance(session, chall_id):
@@ -215,9 +217,8 @@ LOCAL_HOSTS = {}
 original_getaddrinfo = socket.getaddrinfo
 def custom_getaddrinfo(host, *args, **kwargs):
 	# wait for traefik to update its config
-	# (on WSL on laptop I get 0.3s while plugged and 0.5s while unplugged)
 	if proxy == 'traefik':
-		time.sleep(0.5)
+		time.sleep(1)
 
 	if host in LOCAL_HOSTS:
 		return original_getaddrinfo(LOCAL_HOSTS[host], *args, **kwargs)

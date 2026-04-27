@@ -1,12 +1,5 @@
 # TODO
  - resolve TODOs left into the code
- - rate limiters:
-  - instances
-  - flag submit
-  - registration
-  - attachments download
-  - check mail server provider rate limits
- - ncat button not copying to clipboard
  - ctf ended not able to see the challs
  - add a red drop if challenge is first blodded
  - maybe change the color a bit for the solved challenges
@@ -24,11 +17,26 @@
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 
 ## Ideas / Features
+ - show teams with score > 0
+ - reclaimer python tests
+ - remove spectator role
+ - make badges as views
+ - split /challenges/:id into player and author endpoints
+ - submission page accessible for authors (delete admin only)
+ - instances page accessible for authors (delete admin only)
+ - team / user page author only with trigram search (pg_trgm)
+ - instancer container restart policy editable
+ - instancer container ingress only bool
+ - instancer container disk space limit
+ - rename "type" to "instance_type" (Normal -> None)
+ - no instances with tcp hash domain support
+ - multi port & domain support for instances
  - rename "hash domain" (not an hash anymore, only rand bytes)
  - make retries on registration with email
  - editable homepage & theme
  - submissions page filers (first bloods, only wrong, group filter [correct, repeated])
  - extract data for ctftime
+ - ban user/team support
  - N instance limit per team
  - scoreboard freeze (idea: use a table or a view to take a snapshot of the scoreboard, update it every time someone solves if not in freeze time (or just prefetch and compute if not exists))
  - telegram bot for first bloods (and webhook generalization) + pipeline tests

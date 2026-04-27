@@ -125,9 +125,8 @@ LOCAL_HOSTS = {}
 original_getaddrinfo = socket.getaddrinfo
 def custom_getaddrinfo(host, *args, **kwargs):
 	# wait for traefik to update its config
-	# (on WSL on laptop I get 0.3s while plugged and 0.5s while unplugged)
 	if proxy == 'traefik':
-		sleep(0.5)
+		sleep(1)
 
 	if host in LOCAL_HOSTS:
 		return original_getaddrinfo(LOCAL_HOSTS[host], *args, **kwargs)
@@ -263,4 +262,8 @@ kill_instance(s1, chall_id_4)
 kill_instance(s3, chall_id_4)
 
 
+update_challenge(admin, chall_id_3, conn_type="HTTP")
+update_challenge(admin, chall_id_4, conn_type="HTTP")
+
 socket.getaddrinfo = original_getaddrinfo
+
