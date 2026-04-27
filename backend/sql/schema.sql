@@ -82,15 +82,6 @@ CREATE TABLE IF NOT EXISTS categories (
   PRIMARY KEY(name)
 );
 
-CREATE TABLE IF NOT EXISTS team_category_solves (
-  team_id INTEGER NOT NULL,
-  category VARCHAR(32) NOT NULL,
-  solves INTEGER NOT NULL DEFAULT 0,
-  PRIMARY KEY (team_id, category),
-  FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-  FOREIGN KEY (category) REFERENCES categories(name) ON DELETE CASCADE
-);
-
 CREATE TABLE IF NOT EXISTS challenges (
   id SERIAL NOT NULL,
   name VARCHAR(128) UNIQUE NOT NULL,

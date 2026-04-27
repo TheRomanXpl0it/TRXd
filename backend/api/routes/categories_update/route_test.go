@@ -79,6 +79,12 @@ func TestRoute(t *testing.T) {
 
 	test_utils.RegisterUser(t, "author", "author@test.test", "authorpass", sqlc.UserRoleAuthor)
 
+	session := test_utils.NewApiTestSession(t, app)
+	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
+	session.Get("/scoreboard", nil, http.StatusOK)
+	badges := Json(List(Json(session.Body())["teams"])[0])["badges"]
+	cat_1_badge_old := Json(List(badges)[0])["name"].(string)
+
 	for _, test := range testData {
 		session := test_utils.NewApiTestSession(t, app)
 		session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
@@ -86,7 +92,21 @@ func TestRoute(t *testing.T) {
 		session.CheckResponse(test.expectedResponse)
 	}
 
-	session := test_utils.NewApiTestSession(t, app)
+	session = test_utils.NewApiTestSession(t, app)
+	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
+	session.Get("/scoreboard", nil, http.StatusOK)
+
+	badges = Json(List(Json(session.Body())["teams"])[0])["badges"]
+	if len(List(badges)) != 1 {
+		t.Fatalf("Unexpected number of badges: expected 1, got %d", len(List(badges)))
+	}
+
+	cat_1_badge_new := Json(List(badges)[0])["name"].(string)
+	if cat_1_badge_old == cat_1_badge_new || cat_1_badge_new != "challs-1" {
+		t.Fatalf("Badge name did not update correctly: old: %s, new: %s", cat_1_badge_old, cat_1_badge_new)
+	}
+
+	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
 	session.Get("/challenges", nil, http.StatusOK)
 	body := session.Body()

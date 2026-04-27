@@ -62,39 +62,3 @@ AFTER UPDATE ON challenges
 FOR EACH ROW
 WHEN (NEW.hidden != OLD.hidden OR NEW.category != OLD.category)
 EXECUTE FUNCTION fn_categories_update_chall();
-
-
--- tr_categories_add
-
-CREATE OR REPLACE FUNCTION fn_categories_add()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO team_category_solves (team_id, category)
-    SELECT id, NEW.name
-    FROM teams;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER tr_categories_add
-AFTER INSERT ON categories
-FOR EACH ROW
-EXECUTE FUNCTION fn_categories_add();
-
-
--- tr_categories_add_team
-
-CREATE OR REPLACE FUNCTION fn_categories_add_team()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO team_category_solves (team_id, category)
-    SELECT NEW.id, name
-    FROM categories;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER tr_categories_add_team
-AFTER INSERT ON teams
-FOR EACH ROW
-EXECUTE FUNCTION fn_categories_add_team();

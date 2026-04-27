@@ -19,7 +19,6 @@ BEGIN
   DELETE FROM attachments;
   DELETE FROM docker_configs;
   DELETE FROM challenges;
-  DELETE FROM team_category_solves;
   DELETE FROM categories;
   DELETE FROM badges;
   DELETE FROM users;
@@ -385,29 +384,29 @@ BEGIN
   PERFORM assert(count(s)=1, 'new_user_firstblood_count') FROM submissions s WHERE s.first_blood=TRUE AND s.user_id=(SELECT id FROM users WHERE name='c');
 
   -- changes user 'a' role to non-player so the solves should be subtracted and points removed
-  PERFORM assert(score>0) FROM teams WHERE name='A';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-3';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-4';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-1';
+  PERFORM assert(score>0, 'role_change_team_A_has_score') FROM teams WHERE name='A';
+  PERFORM assert(solves=1, 'role_change_chall-3_has_one_solve') FROM challenges WHERE name='chall-3';
+  PERFORM assert(solves=1, 'role_change_chall-4_has_one_solve') FROM challenges WHERE name='chall-4';
+  PERFORM assert(solves=1, 'role_change_chall-1_has_one_solve') FROM challenges WHERE name='chall-1';
   UPDATE users SET role='Author' WHERE id=(SELECT id FROM users WHERE name='a');
-  PERFORM assert(score=0) FROM teams WHERE name='A';
-  PERFORM assert(solves=0) FROM challenges WHERE name='chall-3';
-  PERFORM assert(solves=0) FROM challenges WHERE name='chall-4';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-1';
+  PERFORM assert(score=0, 'role_change_team_A_has_no_score') FROM teams WHERE name='A';
+  PERFORM assert(solves=0, 'role_change_chall-3_has_no_solves') FROM challenges WHERE name='chall-3';
+  PERFORM assert(solves=0, 'role_change_chall-4_has_no_solves') FROM challenges WHERE name='chall-4';
+  PERFORM assert(solves=1, 'role_change_chall-1_has_one_solve') FROM challenges WHERE name='chall-1';
 
   -- if user 'a' goes from a non-player role to another non-player role, nothing should change
   UPDATE users SET role='Admin' WHERE id=(SELECT id FROM users WHERE name='a');
-  PERFORM assert(score=0) FROM teams WHERE name='A';
-  PERFORM assert(solves=0) FROM challenges WHERE name='chall-3';
-  PERFORM assert(solves=0) FROM challenges WHERE name='chall-4';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-1';
+  PERFORM assert(score=0, 'role_change_team_A_has_no_score') FROM teams WHERE name='A';
+  PERFORM assert(solves=0, 'role_change_chall-3_has_no_solves') FROM challenges WHERE name='chall-3';
+  PERFORM assert(solves=0, 'role_change_chall-4_has_no_solves') FROM challenges WHERE name='chall-4';
+  PERFORM assert(solves=1, 'role_change_chall-1_has_one_solve') FROM challenges WHERE name='chall-1';
 
   -- changes user 'a' role back to player, so the solves should be added back and points restored
   UPDATE users SET role='Player' WHERE id=(SELECT id FROM users WHERE name='a');
-  PERFORM assert(score>0) FROM teams WHERE name='A';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-3';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-4';
-  PERFORM assert(solves=1) FROM challenges WHERE name='chall-1';
+  PERFORM assert(score>0, 'role_change_team_A_has_score') FROM teams WHERE name='A';
+  PERFORM assert(solves=1, 'role_change_chall-3_has_one_solve') FROM challenges WHERE name='chall-3';
+  PERFORM assert(solves=1, 'role_change_chall-4_has_one_solve') FROM challenges WHERE name='chall-4';
+  PERFORM assert(solves=1, 'role_change_chall-1_has_one_solve') FROM challenges WHERE name='chall-1';
 END;
 $$ LANGUAGE plpgsql;
 
@@ -424,7 +423,6 @@ SELECT * FROM flags;
 SELECT * FROM attachments;
 SELECT * FROM docker_configs;
 SELECT * FROM challenges;
-SELECT * FROM team_category_solves;
 SELECT * FROM categories;
 SELECT * FROM badges;
 SELECT * FROM users;
