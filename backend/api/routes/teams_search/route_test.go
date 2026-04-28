@@ -1,11 +1,9 @@
 package teams_search_test
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 	"trxd/api"
 	"trxd/db/sqlc"
 	"trxd/utils/consts"
@@ -40,70 +38,16 @@ func TestRoute(t *testing.T) {
 
 	// SEARCH NAME
 
-	playerName := "A"
-	adminName := "admin"
+	test_utils.RegisterUser(t, "admin", "admin@test.com", "testpass", sqlc.UserRoleAdmin)
+	test_utils.RegisterUser(t, "bob", "other@test.com", "testpass", sqlc.UserRolePlayer)
 
-	test_utils.RegisterUser(t, adminName, "admin@test.com", "testpass", sqlc.UserRoleAdmin)
-
-	selfName := "self"
 	session := test_utils.NewApiTestSession(t, app)
-	session.Post("/register", JSON{"name": selfName, "email": "self@test.com", "password": "testpass"}, http.StatusOK)
-
-	expectedNoAuth := JSON{
-		"badges": []JSON{
-			{
-				"description": "Completed all cat-1 challenges",
-				"name":        "cat-1",
-			},
-		},
-		"country": "",
-		"members": []JSON{
-			{
-				"name":  "a",
-				"role":  "Player",
-				"score": 1498,
-			},
-			{
-				"name":  "b",
-				"role":  "Player",
-				"score": 0,
-			},
-		},
-		"name":  playerName,
-		"score": 1498,
-		"solves": []JSON{
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-1",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-3",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-4",
-				"points":      498,
-			},
-		},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
-		},
-	}
+	session.Post("/login", JSON{"email": "other@test.com", "password": "testpass"}, http.StatusOK)
+	session.Post("/teams/register", JSON{"name": "bab", "password": "testpass"}, http.StatusOK)
 
 	session = test_utils.NewApiTestSession(t, app)
+	session.Post("/login", JSON{"email": "admin@test.com", "password": "testpass"}, http.StatusOK)
+	session.Post("/teams/register", JSON{"name": "admin", "password": "testpass"}, http.StatusOK)
 
 	session.Get("/teams/search", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.MissingRequiredFields))
@@ -114,251 +58,64 @@ func TestRoute(t *testing.T) {
 	session.Get("/teams/search?name=%20", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.MissingRequiredFields))
 
-	session.Get("/teams/search?name=AAA", nil, http.StatusNotFound)
-	session.CheckResponse(errorf(consts.TeamNotFound))
-
 	session.Get("/teams/search?name="+strings.Repeat("A", consts.MaxUserNameLen+1), nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(test_utils.Format(consts.MaxError, "team_name", consts.MaxUserNameLen)))
 
 	session.Get("/teams/search?name=%E2%80%8E", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.InvalidName))
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", adminName), nil, http.StatusNotFound)
-	session.CheckResponse(errorf(consts.TeamNotFound))
+	session.Get("/teams/search?name=AAA", nil, http.StatusOK)
+	session.CheckResponse([]JSON{})
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", playerName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedNoAuth, "id", "user_id", "timestamp")
-
-	expectedPlayer := JSON{
-		"badges": []JSON{
-			{
-				"description": "Completed all cat-1 challenges",
-				"name":        "cat-1",
-			},
+	expected := []JSON{
+		{
+			"country": "",
+			"name":    "A",
 		},
-		"country": "",
-		"members": []JSON{
-			{
-				"name":  "a",
-				"role":  "Player",
-				"score": 1498,
-			},
-			{
-				"name":  "b",
-				"role":  "Player",
-				"score": 0,
-			},
+		{
+			"country": "",
+			"name":    "admin",
 		},
-		"name":  playerName,
-		"score": 1498,
-		"solves": []JSON{
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-1",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-3",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-4",
-				"points":      498,
-			},
-		},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
+		{
+			"country": "",
+			"name":    "bab",
 		},
 	}
-	expectedSelf := JSON{
-		"badges":  []JSON{},
-		"country": "",
-		"members": []JSON{
-			{
-				"name":  selfName,
-				"role":  "Player",
-				"score": 0,
-			},
-		},
-		"name":   selfName,
-		"score":  0,
-		"solves": []JSON{},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
+	session.Get("/teams/search?name="+"A", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
+
+	expected = []JSON{
+		{
+			"country": "",
+			"name":    "admin",
 		},
 	}
+	session.Get("/teams/search?name="+"admin", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "self@test.com", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", adminName), nil, http.StatusNotFound)
+	session.Get("/teams/search?name="+"admir", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "self@test.com", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", playerName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayer, "id", "user_id", "timestamp")
+	session.Get("/teams/search?name="+"admi", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "self@test.com", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", selfName), nil, http.StatusNotFound)
-	session.CheckResponse(errorf(consts.TeamNotFound))
+	session.Get("/teams/search?name="+"bo", nil, http.StatusOK)
+	session.CheckFilteredResponse([]JSON{}, "id")
 
-	session.Post("/teams/register", JSON{"name": selfName, "password": "testpass"}, http.StatusOK)
-	session.CheckResponse(nil)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", selfName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedSelf, "id", "user_id", "timestamp")
-
-	expectedPlayerAdmin := JSON{
-		"badges": []JSON{
-			{
-				"description": "Completed all cat-1 challenges",
-				"name":        "cat-1",
-			},
-		},
-		"country": "",
-		"members": []JSON{
-			{
-				"name":  "a",
-				"role":  "Player",
-				"score": 1498,
-			},
-			{
-				"name":  "b",
-				"role":  "Player",
-				"score": 0,
-			},
-			{
-				"name":  "e",
-				"role":  "Admin",
-				"score": 0,
-			},
-		},
-		"name":  "A",
-		"score": 1498,
-		"solves": []JSON{
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-1",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-3",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-4",
-				"points":      498,
-			},
-		},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
+	expected = []JSON{
+		{
+			"country": "",
+			"name":    "bab",
 		},
 	}
-	expectedAdmin := JSON{
-		"badges":  []JSON{},
-		"country": "",
-		"members": []JSON{
-			{
-				"name":  adminName,
-				"role":  "Admin",
-				"score": 0,
-			},
-		},
-		"name":   adminName,
-		"score":  0,
-		"solves": []JSON{},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
-		},
-	}
-
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "admin@test.com", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", playerName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayerAdmin, "id", "user_id", "timestamp")
-
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "admin@test.com", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", adminName), nil, http.StatusNotFound)
-	session.CheckResponse(errorf(consts.TeamNotFound))
-
-	session.Post("/teams/register", JSON{"name": adminName, "password": "testpass"}, http.StatusOK)
-	session.CheckResponse(nil)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", adminName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedAdmin, "id", "user_id", "timestamp")
-
-	test_utils.UpdateConfig(t, "start-time", time.Now().Add(10*time.Hour).Format(time.RFC3339))
-	delete(expectedPlayerAdmin, "total_category_challenges")
-	delete(expectedAdmin, "total_category_challenges")
-
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "admin@test.com", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", playerName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayerAdmin, "id", "user_id", "timestamp")
-
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "admin@test.com", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", adminName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedAdmin, "id", "user_id", "timestamp")
-
-	test_utils.UpdateConfig(t, "start-time", "")
+	session.Get("/teams/search?name="+"ba", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
 
 	// SEARCH EMAIL
 
-	unregisteredEmail := "invalid@email.com"
-	playerEmail := "a@a.a"
-	adminEmail := "admin@test2.com"
-
+	test_utils.RegisterUser(t, "admin2", "admin@test2.com", "testpass", sqlc.UserRoleAdmin)
 	session = test_utils.NewApiTestSession(t, app)
-	session.Get("/teams/search?email=AAA", nil, http.StatusUnauthorized)
-	session.CheckResponse(errorf(consts.Unauthorized))
-
-	session.Post("/login", JSON{"email": "self@test.com", "password": "testpass"}, http.StatusOK)
-	session.Get("/teams/search?email=AAA", nil, http.StatusUnauthorized)
-	session.CheckResponse(errorf(consts.Unauthorized))
-
-	test_utils.RegisterUser(t, "admin2", adminEmail, "testpass", sqlc.UserRoleAdmin)
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": adminEmail, "password": "testpass"}, http.StatusOK)
+	session.Post("/login", JSON{"email": "admin@test2.com", "password": "testpass"}, http.StatusOK)
 
 	session.Get("/teams/search", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.MissingRequiredFields))
@@ -366,242 +123,180 @@ func TestRoute(t *testing.T) {
 	session.Get("/teams/search?email=", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.MissingRequiredFields))
 
-	session.Get("/teams/search?email=AAA", nil, http.StatusBadRequest)
+	session.Get("/teams/search?email="+strings.Repeat("A", consts.MaxEmailLen+1), nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.InvalidEmail))
 
-	session.Get("/teams/search?email="+strings.Repeat("A", consts.MaxEmailLen+1), nil, http.StatusBadRequest)
-	session.CheckResponse(errorf(test_utils.Format(consts.MaxError, "user_email", consts.MaxEmailLen)))
+	session.Get("/teams/search?email=AAA", nil, http.StatusOK)
+	session.CheckResponse([]JSON{})
 
-	session.Get(fmt.Sprintf("/teams/search?email=%s", unregisteredEmail), nil, http.StatusNotFound)
-	session.CheckResponse(errorf(consts.TeamNotFound))
-
-	expectedPlayerAdmin = JSON{
-		"badges": []JSON{
-			{
-				"description": "Completed all cat-1 challenges",
-				"name":        "cat-1",
-			},
-		},
-		"country": "",
-		"members": []JSON{
-			{
-				"name":  "a",
-				"role":  "Player",
-				"score": 1498,
-			},
-			{
-				"name":  "b",
-				"role":  "Player",
-				"score": 0,
-			},
-			{
-				"name":  "e",
-				"role":  "Admin",
-				"score": 0,
-			},
-		},
-		"name":  "A",
-		"score": 1498,
-		"solves": []JSON{
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-1",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-3",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-4",
-				"points":      498,
-			},
-		},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
+	expected = []JSON{
+		{
+			"country": "",
+			"name":    "A",
 		},
 	}
-	expectedAdmin = JSON{
-		"badges":  []JSON{},
-		"country": "",
-		"members": []JSON{
-			{
-				"name":  "admin2",
-				"role":  "Admin",
-				"score": 0,
-			},
+	session.Get("/teams/search?email="+"a@a.a", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
+
+	expected = []JSON{
+		{
+			"country": "",
+			"name":    "admin",
 		},
-		"name":   "admin2",
-		"score":  0,
-		"solves": []JSON{},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
+		{
+			"country": "",
+			"name":    "A",
+		},
+		{
+			"country": "",
+			"name":    "bab",
 		},
 	}
+	session.Get("/teams/search?email="+"admin@test2.com", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
 
-	session.Get(fmt.Sprintf("/teams/search?email=%s", playerEmail), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayerAdmin, "id", "user_id", "timestamp")
-
-	session.Get(fmt.Sprintf("/teams/search?email=%s", adminEmail), nil, http.StatusNotFound)
-	session.CheckResponse(errorf(consts.TeamNotFound))
-
+	expected = []JSON{
+		{
+			"country": "",
+			"name":    "admin2",
+		},
+		{
+			"country": "",
+			"name":    "admin",
+		},
+		{
+			"country": "",
+			"name":    "A",
+		},
+		{
+			"country": "",
+			"name":    "bab",
+		},
+	}
 	session.Post("/teams/register", JSON{"name": "admin2", "password": "testpass"}, http.StatusOK)
 	session.CheckResponse(nil)
-	session.Get(fmt.Sprintf("/teams/search?email=%s", adminEmail), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedAdmin, "id", "user_id", "timestamp")
+	session.Get("/teams/search?email="+"admin@test2.com", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
 
-	test_utils.UpdateConfig(t, "start-time", time.Now().Add(10*time.Hour).Format(time.RFC3339))
-	delete(expectedPlayerAdmin, "total_category_challenges")
-	delete(expectedAdmin, "total_category_challenges")
-
-	session.Get(fmt.Sprintf("/teams/search?email=%s", playerEmail), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayerAdmin, "id", "user_id", "timestamp")
-
-	session.Get(fmt.Sprintf("/teams/search?email=%s", adminEmail), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedAdmin, "id", "user_id", "timestamp")
-
-	test_utils.UpdateConfig(t, "start-time", "")
+	expected = []JSON{
+		{
+			"country": "",
+			"name":    "admin",
+		},
+		{
+			"country": "",
+			"name":    "A",
+		},
+		{
+			"country": "",
+			"name":    "admin2",
+		},
+	}
+	session.Get("/teams/search?email="+"min", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id")
 
 	// USER MODE
 
 	test_utils.UpdateConfig(t, "user-mode", "true")
 
-	userName := "user1"
-	userEmail := "user1@example.com"
-
 	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/register", JSON{"name": userName, "email": userEmail, "password": "testpass"}, http.StatusOK)
+	session.Post("/register", JSON{"name": "user1", "email": "user1@example.com", "password": "testpass"}, http.StatusOK)
 	session.CheckResponse(nil)
 
-	expected := JSON{
-		"badges":  []JSON{},
-		"country": "",
-		"email":   userEmail,
-		"name":    userName,
-		"role":    "Player",
-		"score":   0,
-		"solves":  []JSON{},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
-		},
-	}
-
-	expectedPlayer = JSON{
-		"badges": []JSON{
-			{
-				"description": "Completed all cat-1 challenges",
-				"name":        "cat-1",
-			},
-		},
-		"country": "",
-		"name":    "A",
-		"role":    "Player",
-		"score":   1498,
-		"solves": []JSON{
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-1",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-3",
-				"points":      500,
-			},
-			{
-				"category":    "cat-1",
-				"first_blood": true,
-				"name":        "chall-4",
-				"points":      498,
-			},
-		},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
-		},
-	}
-
-	session.Get(fmt.Sprintf("/teams/search?name=%s", userName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expected, "id", "user_id", "timestamp")
-
-	session.Get(fmt.Sprintf("/teams/search?email=%s", userEmail), nil, http.StatusUnauthorized)
-	session.CheckResponse(errorf(consts.Unauthorized))
-
-	session.Get(fmt.Sprintf("/teams/search?name=%s", playerName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayer, "id", "user_id", "timestamp")
-
 	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": adminEmail, "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/teams/search?name=%s", userName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expected, "id", "user_id", "timestamp")
+	session.Post("/login", JSON{"email": "admin@test2.com", "password": "testpass"}, http.StatusOK)
 
-	session.Get(fmt.Sprintf("/teams/search?email=%s", userEmail), nil, http.StatusOK)
-	session.CheckFilteredResponse(expected, "id", "user_id", "timestamp")
-
-	expectedPlayer["email"] = playerEmail
-	session.Get(fmt.Sprintf("/teams/search?name=%s", playerName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayer, "id", "user_id", "timestamp")
-
-	session.Get(fmt.Sprintf("/teams/search?email=%s", playerEmail), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayer, "id", "user_id", "timestamp")
-
-	expectedAdmin = JSON{
-		"badges":  []JSON{},
-		"country": "",
-		"email":   "admin@test.com",
-		"name":    "admin",
-		"role":    "Admin",
-		"score":   0,
-		"solves":  []JSON{},
-		"total_category_challenges": []JSON{
-			{
-				"category": "cat-1",
-				"count":    3,
-			},
-			{
-				"category": "cat-2",
-				"count":    1,
-			},
+	expected = []JSON{
+		{
+			"country": "",
+			"email":   "user1@example.com",
+			"name":    "user1",
+			"role":    "Player",
 		},
 	}
+	session.Get("/teams/search?name="+"user1", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id", "user_id")
 
-	session.Get(fmt.Sprintf("/teams/search?name=%s", adminName), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedAdmin, "id", "user_id", "timestamp")
+	session.Get("/teams/search?email="+"user1@example.com", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id", "user_id")
 
-	session.Get(fmt.Sprintf("/teams/search?email=%s", expectedAdmin["email"]), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedAdmin, "id", "user_id", "timestamp")
+	expected = []JSON{
+		{
+			"country": "",
+			"email":   "a@a.a",
+			"name":    "A",
+			"role":    "Player",
+		},
+		{
+			"country": "",
+			"email":   "admin@test.com",
+			"name":    "admin",
+			"role":    "Admin",
+		},
+		{
+			"country": "",
+			"email":   "admin@test2.com",
+			"name":    "admin2",
+			"role":    "Admin",
+		},
+		{
+			"country": "",
+			"email":   "other@test.com",
+			"name":    "bab",
+			"role":    "Player",
+		},
+	}
+	session.Get("/teams/search?name="+"A", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id", "user_id")
+
+	expected = []JSON{
+		{
+			"country": "",
+			"email":   "a@a.a",
+			"name":    "A",
+			"role":    "Player",
+		},
+	}
+	session.Get("/teams/search?email="+"a@a.a", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id", "user_id")
+
+	expected = []JSON{
+		{
+			"country": "",
+			"email":   "admin@test.com",
+			"name":    "admin",
+			"role":    "Admin",
+		},
+		{
+			"country": "",
+			"email":   "admin@test2.com",
+			"name":    "admin2",
+			"role":    "Admin",
+		},
+	}
+	session.Get("/teams/search?name="+"admin", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id", "user_id")
+
+	expected = []JSON{
+		{
+			"country": "",
+			"email":   "admin@test.com",
+			"name":    "admin",
+			"role":    "Admin",
+		},
+		{
+			"country": "",
+			"email":   "admin@email.com",
+			"name":    "A",
+			"role":    "Admin",
+		},
+		{
+			"country": "",
+			"email":   "admin@test2.com",
+			"name":    "admin2",
+			"role":    "Admin",
+		},
+	}
+	session.Get("/teams/search?email="+"admin", nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id", "user_id")
 }

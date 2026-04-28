@@ -17,9 +17,7 @@
 
 ## Ideas / Features
  - reclaimer python tests
- - make badges as views
  - split /challenges/:id into player and author endpoints
- - team / user page author only with trigram search (pg_trgm)
  - instancer container restart policy editable
  - instancer container ingress only bool
  - instancer container disk space limit

@@ -188,6 +188,11 @@ func initDB(test ...bool) (bool, error) {
 		return false, err
 	}
 
+	success, err = ExecSQLFile("sql/extensions.sql")
+	if err != nil || !success {
+		return false, err
+	}
+
 	success, err = ExecSQLFile("sql/functions.sql")
 	if err != nil || !success {
 		return false, err

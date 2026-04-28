@@ -36,8 +36,6 @@ $$ LANGUAGE plpgsql;
 
 -- generate_instance_remote
 
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-
 CREATE OR REPLACE FUNCTION generate_instance_remote(chall_id INTEGER, hash_domain BOOLEAN)
 RETURNS TABLE(host TEXT, port INTEGER) AS $$
 DECLARE

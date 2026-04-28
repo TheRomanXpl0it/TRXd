@@ -3,49 +3,94 @@ package teams_search
 import (
 	"context"
 	"database/sql"
-	"trxd/api/routes/teams_get"
 	"trxd/db"
+	"trxd/db/sqlc"
 )
 
-func GetTeamByEmail(ctx context.Context, email string) (*teams_get.TeamData, error) {
-	idNull, err := db.Sql.GetTeamIDByEmail(ctx, email)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	if !idNull.Valid {
-		return nil, nil
-	}
-	id := idNull.Int32
-
-	data, err := teams_get.GetTeam(ctx, id, true)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
+type SearchTeam struct {
+	ID      int32         `json:"id"`
+	Name    string        `json:"name"`
+	Email   string        `json:"email,omitempty"`
+	Role    sqlc.UserRole `json:"role,omitempty"`
+	Country string        `json:"country"`
+	UserID  *int32        `json:"user_id,omitempty"`
 }
 
-func GetTeamByName(ctx context.Context, name string, tid interface{}, allData bool) (*teams_get.TeamData, error) {
-	id, err := db.Sql.GetTeamIDByName(ctx, name)
+func SearchTeamsByName(ctx context.Context, name string) ([]SearchTeam, error) {
+	userModeStr, err := db.GetConfig(ctx, "user-mode")
+	if err != nil {
+		return nil, err
+	}
+	userMode := userModeStr == "true"
+
+	data, err := db.Sql.SearchTeamsByName(ctx, name)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return []SearchTeam{}, nil
 		}
 		return nil, err
 	}
 
-	if tidInt32, ok := tid.(int32); ok {
-		allData = allData || tidInt32 == id
+	teams := make([]SearchTeam, len(data))
+	for i, team := range data {
+		teams[i] = SearchTeam{
+			ID:   team.ID,
+			Name: team.Name,
+		}
+
+		if team.Country.Valid {
+			teams[i].Country = team.Country.String
+		}
+
+		if !userMode {
+			continue
+		}
+
+		teams[i].Email = team.Email
+		teams[i].Role = team.Role
+		teams[i].UserID = &team.UserID
 	}
 
-	data, err := teams_get.GetTeam(ctx, id, allData)
+	return teams, nil
+}
+
+func SearchTeamsByEmail(ctx context.Context, email string) ([]SearchTeam, error) {
+	userModeStr, err := db.GetConfig(ctx, "user-mode")
 	if err != nil {
 		return nil, err
 	}
+	userMode := userModeStr == "true"
 
-	return data, nil
+	data, err := db.Sql.SearchTeamsByEmail(ctx, email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return []SearchTeam{}, nil
+		}
+		return nil, err
+	}
+
+	teams := make([]SearchTeam, len(data))
+	for i, team := range data {
+		teams[i] = SearchTeam{}
+
+		if team.ID.Valid {
+			teams[i].ID = team.ID.Int32
+		}
+		if team.Name.Valid {
+			teams[i].Name = team.Name.String
+		}
+		if team.Country.Valid {
+			teams[i].Country = team.Country.String
+		}
+
+		if !userMode {
+			continue
+		}
+
+		teams[i].Email = team.Email
+		teams[i].Role = team.Role
+		teams[i].UserID = &team.UserID
+	}
+
+	return teams, nil
 }

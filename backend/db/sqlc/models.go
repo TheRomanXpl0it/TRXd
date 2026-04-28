@@ -318,12 +318,6 @@ type Team struct {
 	Country      sql.NullString `json:"country"`
 }
 
-type TeamCategorySolf struct {
-	TeamID   int32  `json:"team_id"`
-	Category string `json:"category"`
-	Solves   int32  `json:"solves"`
-}
-
 type User struct {
 	ID           int32          `json:"id"`
 	Name         string         `json:"name"`

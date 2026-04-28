@@ -3,44 +3,66 @@ package users_search
 import (
 	"context"
 	"database/sql"
-	"trxd/api/routes/users_get"
 	"trxd/db"
+	"trxd/db/sqlc"
 )
 
-func GetUserByEmail(ctx context.Context, email string) (*users_get.UserData, error) {
-	id, err := db.Sql.GetUserIDByEmail(ctx, email)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	data, err := users_get.GetUser(ctx, id, true)
-	if err != nil {
-		return nil, err
-	}
-
-	return data, nil
+type SearchUser struct {
+	ID      int32         `json:"id"`
+	Name    string        `json:"name"`
+	Email   string        `json:"email"`
+	Role    sqlc.UserRole `json:"role"`
+	Country string        `json:"country"`
 }
 
-func GetUserByName(ctx context.Context, name string, uid interface{}, allData bool) (*users_get.UserData, error) {
-	id, err := db.Sql.GetUserIDByName(ctx, name)
+func SearchUsersByName(ctx context.Context, name string) ([]SearchUser, error) {
+	data, err := db.Sql.SearchUsersByName(ctx, name)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return []SearchUser{}, nil
 		}
 		return nil, err
 	}
 
-	if uidInt32, ok := uid.(int32); ok {
-		allData = allData || uidInt32 == id
+	users := make([]SearchUser, len(data))
+	for i, user := range data {
+		users[i] = SearchUser{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+			Role:  user.Role,
+		}
+
+		if user.Country.Valid {
+			users[i].Country = user.Country.String
+		}
 	}
 
-	data, err := users_get.GetUser(ctx, id, allData)
+	return users, nil
+}
+
+func SearchUsersByEmail(ctx context.Context, email string) ([]SearchUser, error) {
+	data, err := db.Sql.SearchUsersByEmail(ctx, email)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return []SearchUser{}, nil
+		}
 		return nil, err
 	}
 
-	return data, nil
+	users := make([]SearchUser, len(data))
+	for i, user := range data {
+		users[i] = SearchUser{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+			Role:  user.Role,
+		}
+
+		if user.Country.Valid {
+			users[i].Country = user.Country.String
+		}
+	}
+
+	return users, nil
 }

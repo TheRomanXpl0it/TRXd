@@ -1,8 +1,6 @@
 package users_search
 
 import (
-	"trxd/api/routes/users_get"
-	"trxd/db/sqlc"
 	"trxd/utils"
 	"trxd/utils/consts"
 	"trxd/validator"
@@ -10,75 +8,56 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func FetchEmail(c *fiber.Ctx, role interface{}, email string) (*users_get.UserData, error) {
-	if role == nil || role.(sqlc.UserRole) != sqlc.UserRoleAdmin {
-		return nil, utils.Error(c, fiber.StatusUnauthorized, consts.Unauthorized)
-	}
-
-	valid, err := validator.Var(c, email, "user_email")
-	if err != nil || !valid {
-		return nil, err
-	}
-
-	userData, err := GetUserByEmail(c.Context(), email)
-	if err != nil {
-		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingUser, err)
-	}
-	if userData == nil {
-		return nil, utils.Error(c, fiber.StatusNotFound, consts.UserNotFound)
-	}
-
-	return userData, nil
-}
-
-func FetchName(c *fiber.Ctx, uid interface{}, role interface{}, name string) (*users_get.UserData, error) {
+func FetchName(c *fiber.Ctx, name string) ([]SearchUser, error) {
 	valid, err := validator.Var(c, name, "user_name")
 	if err != nil || !valid {
 		return nil, err
 	}
 
-	allData := false
-	if role != nil {
-		allData = utils.In(role.(sqlc.UserRole), []sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin})
-	}
-	userData, err := GetUserByName(c.Context(), name, uid, allData)
+	users, err := SearchUsersByName(c.Context(), name)
 	if err != nil {
 		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingUser, err)
 	}
-	if userData == nil {
-		return nil, utils.Error(c, fiber.StatusNotFound, consts.UserNotFound)
+
+	return users, nil
+}
+
+func FetchEmail(c *fiber.Ctx, email string) ([]SearchUser, error) {
+	if len(email) > consts.MaxEmailLen {
+		return nil, utils.Error(c, fiber.StatusBadRequest, consts.InvalidEmail)
 	}
 
-	return userData, nil
+	users, err := SearchUsersByEmail(c.Context(), email)
+	if err != nil {
+		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingUser, err)
+	}
+
+	return users, nil
 }
 
 func Route(c *fiber.Ctx) error {
-	uid := c.Locals("uid")
-	role := c.Locals("role")
-
 	userName := c.Query("name")
 	userEmail := c.Query("email")
 
 	userName = validator.NormalizeString(userName)
+	userEmail = validator.NormalizeString(userEmail)
 
-	if userEmail == "" && userName == "" {
+	if userName == "" && userEmail == "" {
 		return utils.Error(c, fiber.StatusBadRequest, consts.MissingRequiredFields)
 	}
 
-	var userData *users_get.UserData
+	var users []SearchUser
 	var err error
 
-	if userEmail != "" {
-		userData, err = FetchEmail(c, role, userEmail)
-		if err != nil || userData == nil {
-			return err
-		}
-	} else if userName != "" {
-		userData, err = FetchName(c, uid, role, userName)
-		if err != nil || userData == nil {
-			return err
-		}
+	if userName != "" {
+		users, err = FetchName(c, userName)
+	} else if userEmail != "" {
+		users, err = FetchEmail(c, userEmail)
 	}
 
-	return c.Status(fiber.StatusOK).JSON(userData)
+	if err != nil || users == nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(users)
 }

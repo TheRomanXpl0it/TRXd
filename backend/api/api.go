@@ -132,7 +132,7 @@ func SetupFeatures(app *fiber.App) {
 		KeyLookup:         "header:X-CSRF-Token",
 		CookieSameSite:    fiber.CookieSameSiteLaxMode,
 		CookieSessionOnly: true,
-		Expiration:        1 * time.Hour,
+		Expiration:        48 * time.Hour,
 		Session:           db.Store,
 	}))
 
@@ -178,7 +178,7 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 	api.Patch("/users/password", player, users_password.Route)
 	if !userMode {
 		api.Get("/users", noAuth, users_all_get.Route)
-		api.Get("/users/search", noAuth, users_search.Route)
+		api.Get("/users/search", author, users_search.Route)
 		api.Get("/users/:id", noAuth, users_get.Route)
 	}
 
@@ -190,7 +190,7 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 		api.Patch("/teams/password", player, team, teams_password.Route)
 	}
 	api.Get("/teams", noAuth, teams_all_get.Route)
-	api.Get("/teams/search", noAuth, teams_search.Route)
+	api.Get("/teams/search", author, teams_search.Route)
 	api.Get("/teams/:id", noAuth, teams_get.Route)
 
 	api.Post("/categories", author, categories_create.Route)

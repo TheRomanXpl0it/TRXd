@@ -844,28 +844,6 @@ func (q *Queries) GetSubmissions(ctx context.Context, arg GetSubmissionsParams) 
 	return items, nil
 }
 
-const getTeamIDByEmail = `-- name: GetTeamIDByEmail :one
-SELECT team_id FROM users WHERE email = $1
-`
-
-func (q *Queries) GetTeamIDByEmail(ctx context.Context, email string) (sql.NullInt32, error) {
-	row := q.queryRow(ctx, q.getTeamIDByEmailStmt, getTeamIDByEmail, email)
-	var team_id sql.NullInt32
-	err := row.Scan(&team_id)
-	return team_id, err
-}
-
-const getTeamIDByName = `-- name: GetTeamIDByName :one
-SELECT id FROM teams WHERE name = $1
-`
-
-func (q *Queries) GetTeamIDByName(ctx context.Context, name string) (int32, error) {
-	row := q.queryRow(ctx, q.getTeamIDByNameStmt, getTeamIDByName, name)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
-}
-
 const getTeamMembers = `-- name: GetTeamMembers :many
 SELECT id, name, role, score FROM users WHERE team_id = $1 ORDER BY id
 `
@@ -1269,28 +1247,6 @@ func (q *Queries) GetUserByTeamID(ctx context.Context, teamID sql.NullInt32) (Ge
 	return i, err
 }
 
-const getUserIDByEmail = `-- name: GetUserIDByEmail :one
-SELECT id FROM users WHERE email = $1
-`
-
-func (q *Queries) GetUserIDByEmail(ctx context.Context, email string) (int32, error) {
-	row := q.queryRow(ctx, q.getUserIDByEmailStmt, getUserIDByEmail, email)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
-}
-
-const getUserIDByName = `-- name: GetUserIDByName :one
-SELECT id FROM users WHERE name = $1
-`
-
-func (q *Queries) GetUserIDByName(ctx context.Context, name string) (int32, error) {
-	row := q.queryRow(ctx, q.getUserIDByNameStmt, getUserIDByName, name)
-	var id int32
-	err := row.Scan(&id)
-	return id, err
-}
-
 const getUserSolves = `-- name: GetUserSolves :many
 SELECT c.id, c.name, c.category, c.points, s.first_blood, s.timestamp
   FROM submissions s
@@ -1496,6 +1452,202 @@ type ResetUserPasswordParams struct {
 func (q *Queries) ResetUserPassword(ctx context.Context, arg ResetUserPasswordParams) error {
 	_, err := q.exec(ctx, q.resetUserPasswordStmt, resetUserPassword, arg.ID, arg.PasswordHash, arg.PasswordSalt)
 	return err
+}
+
+const searchTeamsByEmail = `-- name: SearchTeamsByEmail :many
+SELECT
+  t.id, t.name, u.email, u.role, t.country, u.id AS user_id
+FROM users u
+LEFT JOIN teams t ON u.team_id = t.id
+WHERE u.team_id IS NOT NULL AND
+  (u.email % $1 OR u.email ILIKE ('%' || $1 || '%'))
+ORDER BY similarity(u.email, $1) DESC
+`
+
+type SearchTeamsByEmailRow struct {
+	ID      sql.NullInt32  `json:"id"`
+	Name    sql.NullString `json:"name"`
+	Email   string         `json:"email"`
+	Role    UserRole       `json:"role"`
+	Country sql.NullString `json:"country"`
+	UserID  int32          `json:"user_id"`
+}
+
+// Fuzzy search for teams by email using trigram similarity and ILIKE for partial matches.
+func (q *Queries) SearchTeamsByEmail(ctx context.Context, email string) ([]SearchTeamsByEmailRow, error) {
+	rows, err := q.query(ctx, q.searchTeamsByEmailStmt, searchTeamsByEmail, email)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchTeamsByEmailRow
+	for rows.Next() {
+		var i SearchTeamsByEmailRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Role,
+			&i.Country,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchTeamsByName = `-- name: SearchTeamsByName :many
+SELECT
+  t.id, t.name, u.email, u.role, t.country, u.id AS user_id
+FROM teams t
+JOIN (
+  SELECT DISTINCT ON (team_id)
+    id, email, role, team_id
+  FROM users
+  WHERE team_id IS NOT NULL
+) u ON t.id = u.team_id
+WHERE t.name % $1 OR t.name ILIKE ('%' || $1 || '%')
+ORDER BY similarity(t.name, $1) DESC
+`
+
+type SearchTeamsByNameRow struct {
+	ID      int32          `json:"id"`
+	Name    string         `json:"name"`
+	Email   string         `json:"email"`
+	Role    UserRole       `json:"role"`
+	Country sql.NullString `json:"country"`
+	UserID  int32          `json:"user_id"`
+}
+
+// Fuzzy search for teams by name using trigram similarity and ILIKE for partial matches.
+func (q *Queries) SearchTeamsByName(ctx context.Context, name string) ([]SearchTeamsByNameRow, error) {
+	rows, err := q.query(ctx, q.searchTeamsByNameStmt, searchTeamsByName, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchTeamsByNameRow
+	for rows.Next() {
+		var i SearchTeamsByNameRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Role,
+			&i.Country,
+			&i.UserID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsersByEmail = `-- name: SearchUsersByEmail :many
+SELECT
+  id, name, email, role, country
+FROM users
+WHERE email % $1 OR email ILIKE ('%' || $1 || '%')
+ORDER BY similarity(email, $1) DESC
+`
+
+type SearchUsersByEmailRow struct {
+	ID      int32          `json:"id"`
+	Name    string         `json:"name"`
+	Email   string         `json:"email"`
+	Role    UserRole       `json:"role"`
+	Country sql.NullString `json:"country"`
+}
+
+// Fuzzy search for users by email using trigram similarity and ILIKE for partial matches.
+func (q *Queries) SearchUsersByEmail(ctx context.Context, email string) ([]SearchUsersByEmailRow, error) {
+	rows, err := q.query(ctx, q.searchUsersByEmailStmt, searchUsersByEmail, email)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchUsersByEmailRow
+	for rows.Next() {
+		var i SearchUsersByEmailRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Role,
+			&i.Country,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchUsersByName = `-- name: SearchUsersByName :many
+SELECT
+  id, name, email, role, country
+FROM users
+WHERE name % $1 OR name ILIKE ('%' || $1 || '%')
+ORDER BY similarity(name, $1) DESC
+`
+
+type SearchUsersByNameRow struct {
+	ID      int32          `json:"id"`
+	Name    string         `json:"name"`
+	Email   string         `json:"email"`
+	Role    UserRole       `json:"role"`
+	Country sql.NullString `json:"country"`
+}
+
+// Fuzzy search for users by name using trigram similarity and ILIKE for partial matches.
+func (q *Queries) SearchUsersByName(ctx context.Context, name string) ([]SearchUsersByNameRow, error) {
+	rows, err := q.query(ctx, q.searchUsersByNameStmt, searchUsersByName, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchUsersByNameRow
+	for rows.Next() {
+		var i SearchUsersByNameRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.Role,
+			&i.Country,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const submit = `-- name: Submit :one
