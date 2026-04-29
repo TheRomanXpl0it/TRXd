@@ -128,6 +128,8 @@
 					{/each}
 				</div>
 
+
+
 				<!-- Mobile Quick Links -->
 				<div class="flex items-center gap-1 md:hidden">
 					{#each filteredNavItems.slice(0, 2) as item}

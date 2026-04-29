@@ -51,13 +51,14 @@
 		if (creatingInstance || !challenge?.id) return;
 		creatingInstance = true;
 		try {
-			const { host, port, timeout, hash_domain } = await startInstance(Number(challenge.id));
+			const { host, port, timeout, hash_domain, instance_renewable } = await startInstance(Number(challenge.id));
 			const instanceHashDomain = hash_domain ?? usesHashDomain(challenge);
 			const patch = {
 				instance_host: host,
 				instance_port: port ?? null,
 				instance_hash_domain: instanceHashDomain,
-				timeout
+				timeout,
+				instance_renewable
 			};
 			const updated = { ...challenge, ...patch };
 
@@ -107,9 +108,10 @@
 		if (renewingInstance || !challenge?.id) return;
 		renewingInstance = true;
 		try {
-			const { timeout } = await renewInstance(Number(challenge.id));
+			const { timeout, instance_renewable } = await renewInstance(Number(challenge.id));
 			const patch = {
-				timeout
+				timeout,
+				instance_renewable
 			};
 			const updated = { ...challenge, ...patch };
 

@@ -9,7 +9,18 @@ marked.setOptions({
 export function renderMarkdown(markdown: string): string {
 	if (!markdown) return '';
 
-	const rawHtml = marked.parse(markdown, { async: false }) as string;
+	const renderer = new marked.Renderer();
+	const originalLink = renderer.link.bind(renderer);
+	renderer.link = (token) => {
+		const html = originalLink(token);
+		if (token.href && token.href.startsWith('http')) {
+			return html.replace('<a ', '<a target="_blank" rel="noopener noreferrer" ');
+		}
+		return html;
+	};
+
+	const result = marked.parse(markdown, { renderer, async: false });
+	const rawHtml = (typeof result === 'string' ? result : '') as string;
 
 	return DOMPurify.sanitize(rawHtml, {
 		ALLOWED_TAGS: [

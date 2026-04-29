@@ -6,6 +6,7 @@
 	import Markdown from '$lib/components/Markdown.svelte';
 	import { siteContent } from '$lib/site-content';
 	import { authState } from '$lib/stores/auth';
+	import CountdownTimer from '$lib/components/CountdownTimer.svelte';
 
 	const gitHash = __GIT_HASH__;
 	const isAdmin = $derived(authState.user?.role === 'Admin');
@@ -57,6 +58,12 @@
 				{$siteContent.home.secondaryCtaLabel}
 			</a>
 		</div>
+
+		{#if authState.endTime && !$siteContent.features.hideCountdown}
+			<div class="mt-8 flex justify-center">
+				<CountdownTimer endTime={authState.endTime} label="Ends in" />
+			</div>
+		{/if}
 	</div>
 
 	{#if hasSecondaryContent}

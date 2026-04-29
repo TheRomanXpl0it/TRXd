@@ -49,6 +49,10 @@ export interface SiteContent {
 	settings: {
 		appearanceDescription: string;
 	};
+	features: {
+		noLandingPage: boolean;
+		hideCountdown: boolean;
+	};
 }
 
 const defaultSiteContent: SiteContent = {
@@ -85,6 +89,10 @@ const defaultSiteContent: SiteContent = {
 	},
 	settings: {
 		appearanceDescription: 'Customize how TRXd looks for you.'
+	},
+	features: {
+		noLandingPage: false,
+		hideCountdown: false
 	}
 };
 
@@ -158,6 +166,7 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 	const home = isRecord(source.home) ? source.home : {};
 	const auth = isRecord(source.auth) ? source.auth : {};
 	const settings = isRecord(source.settings) ? source.settings : {};
+	const features = isRecord(source.features) ? source.features : {};
 
 	const sponsors = Array.isArray(home.sponsors)
 		? home.sponsors.map(normalizeSponsor).filter((item): item is SponsorContent => item !== null)
@@ -221,6 +230,10 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 				settings.appearanceDescription,
 				defaultSiteContent.settings.appearanceDescription
 			)
+		},
+		features: {
+			noLandingPage: !!features.noLandingPage,
+			hideCountdown: !!features.hideCountdown
 		}
 	};
 }

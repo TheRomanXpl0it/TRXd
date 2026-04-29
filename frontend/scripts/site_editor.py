@@ -28,6 +28,7 @@ RULES_PATHS = (
     FRONTEND_ROOT / 'rules.md',
     PROJECT_ROOT / 'rules.md',
 )
+SCHEMA_PATH = FRONTEND_ROOT / 'scripts' / 'site-schema.json'
 
 
 EDITOR_HTML = """<!doctype html>
@@ -155,30 +156,38 @@ EDITOR_HTML = """<!doctype html>
     }
 
     .sections {
-      padding: 1.5rem;
+      padding: 2.5rem;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 3rem;
     }
 
-    .section-group {
+    .section-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      padding: 2rem;
       display: flex;
       flex-direction: column;
-      gap: 1rem;
+      gap: 1.5rem;
     }
 
-    .section-group h2 {
+    .section-card h2 {
       margin: 0;
       font-size: 1.5rem;
       font-weight: 700;
       letter-spacing: -0.01em;
+      color: var(--accent);
     }
 
-    .section-description {
-      margin: -0.5rem 0 0.5rem;
-      font-size: 0.875rem;
-      color: var(--muted);
-      line-height: 1.5;
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .field.markdown {
+      grid-column: 1 / -1;
     }
 
     /* Form Fields */
@@ -331,6 +340,20 @@ EDITOR_HTML = """<!doctype html>
     .array-actions {
       display: flex;
       gap: 0.5rem;
+    }
+
+    .array-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin: 0;
     }
 
     /* Preview Sidebar */
@@ -545,10 +568,38 @@ EDITOR_HTML = """<!doctype html>
 
       return wrapper;
     }
-
     function bindSimpleField(field) {
       const wrapper = createFieldWrapper(field);
       const currentValue = getByPath(state.content, field.path) ?? '';
+
+      if (field.type === 'boolean') {
+        const label = wrapper.querySelector('label');
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.gap = '0.75rem';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.style.width = 'auto';
+        checkbox.checked = !!currentValue;
+        checkbox.addEventListener('change', () => {
+          setByPath(state.content, field.path, checkbox.checked);
+          updatePreview();
+        });
+
+        row.appendChild(checkbox);
+        if (label) row.appendChild(label);
+        
+        // Clear wrapper but preserve help text if present
+        const help = wrapper.querySelector('small');
+        wrapper.innerHTML = '';
+        wrapper.appendChild(row);
+        if (help) wrapper.appendChild(help);
+        
+        return wrapper;
+      }
+
       const isTextArea = field.type === 'textarea' || field.type === 'markdown';
       const input = isTextArea ? document.createElement('textarea') : document.createElement('input');
 
@@ -920,22 +971,29 @@ def load_rules_content() -> tuple[str, str] | None:
     return title, markdown
 
 
-def sync_rules_into_content(content: dict[str, Any]) -> dict[str, Any]:
+def sync_rules_into_content(content: dict[str, Any], force: bool = False) -> dict[str, Any]:
     rules_content = load_rules_content()
     if rules_content is None:
         return content
 
     title, markdown = rules_content
     merged = deepcopy(content)
-    set_path(merged, 'home.rulesTitle', title)
-    set_path(merged, 'home.rulesMarkdown', markdown)
+    
+    # Only sync if forced or if current content is empty
+    current_title = get_path(merged, 'home.rulesTitle')
+    current_md = get_path(merged, 'home.rulesMarkdown')
+    
+    if force or (not current_title and not current_md):
+        set_path(merged, 'home.rulesTitle', title)
+        set_path(merged, 'home.rulesMarkdown', markdown)
+        
     return merged
 
 
 def load_schema() -> dict[str, Any]:
-    schema = read_json(CONTENT_PATH)
+    schema = read_json(SCHEMA_PATH)
     if not isinstance(schema, dict):
-        raise SiteEditorError(f'Expected an object in {CONTENT_PATH}')
+        raise SiteEditorError(f'Expected an object in {SCHEMA_PATH}')
     return schema
 
 
@@ -955,7 +1013,7 @@ def sync_site_content() -> dict[str, Any]:
     else:
         content = {}
 
-    content = sync_rules_into_content(content)
+    content = sync_rules_into_content(content, force=True)
     write_json(CONTENT_PATH, content)
     sync_app_html_title(content)
     return content
@@ -1051,7 +1109,7 @@ class SiteEditorHandler(BaseHTTPRequestHandler):
             raw_body = self.rfile.read(length)
             payload = json.loads(raw_body.decode('utf-8')) if raw_body else {}
             content = sync_with_schema(self.editor_server.schema, payload)
-            content = sync_rules_into_content(content)
+            # We DON'T sync rules here, because the user just saved their version from the editor
             write_json(CONTENT_PATH, content)
             sync_app_html_title(content)
             self.send_json({'content': content}, HTTPStatus.OK)
@@ -1092,7 +1150,7 @@ def main() -> None:
     print(f'Site editor ready at {url}')
     print(
         f'Editing {CONTENT_PATH.relative_to(PROJECT_ROOT)} '
-        f'using {CONTENT_PATH.relative_to(PROJECT_ROOT)}'
+        f'using {SCHEMA_PATH.relative_to(PROJECT_ROOT)}'
     )
     print('Press Ctrl+C to stop.')
 

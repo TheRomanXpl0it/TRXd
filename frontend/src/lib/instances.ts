@@ -9,12 +9,15 @@ type StartInstanceResponse = {
 
 export async function startInstance(
 	chall_id: number
-): Promise<StartInstanceResponse> {
-	return api<StartInstanceResponse>(`/instances`, {
-		headers: { 'content-type': 'application/json' },
-		method: 'POST',
-		body: JSON.stringify({ chall_id })
-	});
+): Promise<{ host: string; port: number | null; timeout: number; hash_domain: boolean; instance_renewable: boolean }> {
+	return api<{ host: string; port: number | null; timeout: number; hash_domain: boolean; instance_renewable: boolean }>(
+		`/instances`,
+		{
+			headers: { 'content-type': 'application/json' },
+			method: 'POST',
+			body: JSON.stringify({ chall_id })
+		}
+	);
 }
 
 export async function stopInstance(chall_id: number): Promise<void> {

@@ -66,7 +66,8 @@
 	const challengesQuery = createQuery(() => ({
 		queryKey: ['challenges'],
 		queryFn: getChallenges,
-		enabled: authState.ready && !!authState.user
+		enabled: authState.ready && !!authState.user,
+		refetchInterval: 30000
 	}));
 
 	const categoriesQuery = createQuery(() => ({
