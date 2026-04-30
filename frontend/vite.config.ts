@@ -15,9 +15,6 @@ export default defineConfig({
 	},
 	publicDir: 'static',
 	plugins: [tailwindcss(), sveltekit()],
-	optimizeDeps: {
-		include: ['@iconify/svelte', '@iconify-json/circle-flags']
-	},
 	resolve: {
 		alias: {
 			$lib: resolve(dirname(fileURLToPath(import.meta.url)), 'src/lib'),
@@ -34,9 +31,17 @@ export default defineConfig({
 		}
 	},
 	ssr: {
-		noExternal: ['bits-ui', 'vaul-svelte', 'svelte-sonner', 'svelte-motion', 'paneforge', '@lucide/svelte']
+		noExternal: [
+			'bits-ui',
+			'vaul-svelte',
+			'svelte-sonner',
+			'svelte-motion',
+			'paneforge',
+			'@lucide/svelte'
+		]
 	},
 	build: {
+		reportCompressedSize: false,
 		rollupOptions: {
 			output: {
 				experimentalMinChunkSize: 10 * 1024 // 10KB

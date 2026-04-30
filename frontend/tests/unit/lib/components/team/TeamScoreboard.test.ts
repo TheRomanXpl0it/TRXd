@@ -30,10 +30,10 @@ const team = {
 };
 
 describe('TeamScoreboard', () => {
-	it('renders rows and total points', () => {
+	it('renders rows without a footer total', () => {
 		renderWithProviders(TeamScoreboard, { props: { team } });
 		expect(screen.queryByText('No solves yet.')).not.toBeInTheDocument();
-		expect(screen.getByText(/300 pts total/)).toBeInTheDocument();
+		expect(screen.queryByText(/pts total/)).not.toBeInTheDocument();
 		expect(screen.getByText('Alice')).toBeInTheDocument();
 		expect(screen.getByText('Bob')).toBeInTheDocument();
 	});

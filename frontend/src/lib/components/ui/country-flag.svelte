@@ -1,16 +1,15 @@
 <script lang="ts">
-	// Load all flag SVGs using Vite's glob import
 	const flags = import.meta.glob('/node_modules/country-flag-icons/3x2/*.svg', {
 		query: '?url',
-		eager: true
-	}) as Record<string, { default: string }>;
+		import: 'default'
+	}) as Record<string, () => Promise<string>>;
 
-	const getFlagUrl = (iso: string) => {
-		// Handle both ISO2 and ISO3 codes
-		const code = iso?.toUpperCase() || '';
-		const key = `/node_modules/country-flag-icons/3x2/${code}.svg`;
-		return flags[key]?.default || '';
+	const normalizeCode = (iso2: string) => {
+		const code = iso2?.trim().toUpperCase() ?? '';
+		return /^[A-Z]{2}$/.test(code) ? code : '';
 	};
+
+	const cssSize = (value: number | string) => (typeof value === 'number' ? `${value}px` : value);
 
 	let {
 		country,
@@ -24,12 +23,46 @@
 		height?: number | string;
 	}>();
 
-	const flagUrl = $derived(getFlagUrl(country));
+	let flagUrl = $state('');
+	let loadId = 0;
+
+	const widthValue = $derived(cssSize(width));
+	const heightValue = $derived(cssSize(height));
+	const widthAttr = $derived(typeof width === 'number' ? width : undefined);
+	const heightAttr = $derived(typeof height === 'number' ? height : undefined);
+	const stringSizeStyle = $derived(
+		typeof width === 'string' || typeof height === 'string'
+			? `width: ${widthValue}; height: ${heightValue};`
+			: undefined
+	);
+	const fallbackStyle = $derived(
+		className ? undefined : `width: ${widthValue}; height: ${heightValue};`
+	);
+
+	$effect(() => {
+		const code = normalizeCode(country);
+		const loader = flags[`/node_modules/country-flag-icons/3x2/${code}.svg`];
+		const currentLoad = ++loadId;
+		flagUrl = '';
+
+		if (!loader) return;
+
+		loader().then((url) => {
+			if (currentLoad === loadId) flagUrl = url;
+		});
+	});
 </script>
 
 {#if flagUrl}
-	<img src={flagUrl} alt={`${country} flag`} class={className} {width} {height} />
+	<img
+		src={flagUrl}
+		alt={`${country} flag`}
+		class={className}
+		width={widthAttr}
+		height={heightAttr}
+		style={stringSizeStyle}
+	/>
 {:else}
 	<!-- Fallback for missing flags -->
-	<div class="bg-muted {className}" style="width: {width}px; height: {height}px;"></div>
+	<div class={`bg-muted ${className}`} style={fallbackStyle}></div>
 {/if}

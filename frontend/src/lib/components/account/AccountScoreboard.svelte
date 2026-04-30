@@ -3,6 +3,7 @@
 	import EmptyState from '$lib/components/ui/empty-state.svelte';
 	import StatusBadge from '$lib/components/ui/status-badge.svelte';
 	import { ChartLine, Trophy } from '@lucide/svelte';
+	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { formatDate, formatTimeSince, formatNumber } from '$lib/utils/formatting';
 
 	let { solves } = $props<{ solves: any[] | undefined }>();
@@ -55,8 +56,6 @@
 			return 0;
 		});
 	});
-
-	const totalPoints = $derived(sortedSolves.reduce((acc, s) => acc + getPoints(s), 0));
 </script>
 
 <div class="flex w-full flex-col">
@@ -88,9 +87,10 @@
 						Points{getSortArrow('points')}
 					</Table.Head>
 					<Table.Head
-						class="text-muted-foreground/70 w-[25%] text-right text-[10px] font-bold uppercase tracking-wider"
+						class="text-muted-foreground/70 w-[25%] cursor-pointer text-right text-[10px] font-bold uppercase tracking-wider"
+						onclick={() => toggleSort('timestamp')}
 					>
-						Ago
+						Ago{getSortArrow('timestamp')}
 					</Table.Head>
 				</Table.Row>
 			</Table.Header>
@@ -119,7 +119,14 @@
 								</div>
 							</Table.Cell>
 							<Table.Cell class="text-right">
-								{formatTimeSince(solve.timestamp)}
+								<Tooltip.Root>
+									<Tooltip.Trigger>
+										<span class="cursor-help">{formatTimeSince(solve.timestamp)}</span>
+									</Tooltip.Trigger>
+									<Tooltip.Content>
+										<p>{formatDate(solve.timestamp)}</p>
+									</Tooltip.Content>
+								</Tooltip.Root>
 							</Table.Cell>
 						</Table.Row>
 					{/each}

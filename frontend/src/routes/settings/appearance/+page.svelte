@@ -1,27 +1,59 @@
 <script lang="ts">
-	import { setMode, mode, userPrefersMode } from 'mode-watcher';
+	import { setMode } from 'mode-watcher';
 	import { uiStore } from '$lib/stores/ui.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as Card from '$lib/components/ui/card';
 	import { Sun, Moon, Laptop, LayoutGrid, SquareSplitHorizontal } from '@lucide/svelte';
+	import { toast } from 'svelte-sonner';
 
-	const themes = [
+	type ThemeId = 'light' | 'dark' | 'system';
+	type LayoutId = 'normal' | 'sidebar';
+
+	const themes: { id: ThemeId; name: string; icon: typeof Sun }[] = [
 		{ id: 'light', name: 'Light', icon: Sun },
 		{ id: 'dark', name: 'Dark', icon: Moon },
 		{ id: 'system', name: 'System', icon: Laptop }
 	];
 
-	const layouts = [
-		{ id: 'normal', name: 'Grid View', icon: LayoutGrid, description: 'Classic responsive grid of challenge cards.' },
-		{ id: 'sidebar', name: 'Split View', icon: SquareSplitHorizontal, description: 'Sidebar navigation with integrated challenge details.' }
+	const layouts: { id: LayoutId; name: string; icon: typeof LayoutGrid; description: string }[] = [
+		{
+			id: 'normal',
+			name: 'Grid View',
+			icon: LayoutGrid,
+			description: 'Classic responsive grid of challenge cards.'
+		},
+		{
+			id: 'sidebar',
+			name: 'Split View',
+			icon: SquareSplitHorizontal,
+			description: 'Sidebar navigation with integrated challenge details.'
+		}
 	];
 
-	// Sync local selection state
-	let selectedTheme = $state(typeof document !== 'undefined' ? localStorage.getItem('mode-watcher-mode') || 'system' : 'system');
+	const savedTheme =
+		typeof document !== 'undefined' ? localStorage.getItem('mode-watcher-mode') : null;
+	const initialTheme: ThemeId =
+		savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system'
+			? savedTheme
+			: 'system';
 
-	function updateTheme(id: string) {
+	let appliedTheme = $state<ThemeId>(initialTheme);
+	let selectedTheme = $state<ThemeId>(initialTheme);
+	let selectedLayout = $state<LayoutId>(uiStore.challengeView);
+
+	const hasChanges = $derived(
+		selectedTheme !== appliedTheme || selectedLayout !== uiStore.challengeView
+	);
+
+	function selectTheme(id: ThemeId) {
 		selectedTheme = id;
-		setMode(id as any);
+	}
+
+	function applySettings() {
+		setMode(selectedTheme);
+		uiStore.setChallengeView(selectedLayout);
+		appliedTheme = selectedTheme;
+		toast.success('Appearance settings applied.');
 	}
 </script>
 
@@ -37,14 +69,21 @@
 			<Card.Description>Select your preferred color theme.</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 				{#each themes as theme}
 					<button
-						onclick={() => updateTheme(theme.id)}
-						class="flex flex-col items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all {(selectedTheme === theme.id) ? 'border-primary bg-primary/5' : 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'}"
+						onclick={() => selectTheme(theme.id)}
+						class="flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 p-4 transition-all {selectedTheme ===
+						theme.id
+							? 'border-primary bg-primary/5'
+							: 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'}"
 					>
-						<theme.icon class="h-6 w-6 {(selectedTheme === theme.id) ? 'text-primary' : 'text-muted-foreground'}" />
-						<span class="font-medium text-sm">{theme.name}</span>
+						<theme.icon
+							class="h-6 w-6 {selectedTheme === theme.id
+								? 'text-primary'
+								: 'text-muted-foreground'}"
+						/>
+						<span class="text-sm font-medium">{theme.name}</span>
 					</button>
 				{/each}
 			</div>
@@ -57,22 +96,32 @@
 			<Card.Description>Choose how you want to browse and solve challenges.</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 				{#each layouts as layout}
 					<button
-						onclick={() => uiStore.setChallengeView(layout.id as any)}
-						class="flex items-start gap-4 p-4 rounded-xl border-2 text-left cursor-pointer transition-all {uiStore.challengeView === layout.id ? 'border-primary bg-primary/5' : 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'}"
+						onclick={() => (selectedLayout = layout.id)}
+						class="flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 text-left transition-all {selectedLayout ===
+						layout.id
+							? 'border-primary bg-primary/5'
+							: 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'}"
 					>
-						<div class="mt-1 p-2 rounded-lg {uiStore.challengeView === layout.id ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}">
+						<div
+							class="mt-1 rounded-lg p-2 {selectedLayout === layout.id
+								? 'bg-primary/10 text-primary'
+								: 'bg-muted text-muted-foreground'}"
+						>
 							<layout.icon class="h-5 w-5" />
 						</div>
 						<div class="space-y-1">
-							<p class="font-bold text-sm">{layout.name}</p>
-							<p class="text-xs text-muted-foreground leading-relaxed">{layout.description}</p>
+							<p class="text-sm font-bold">{layout.name}</p>
+							<p class="text-muted-foreground text-xs leading-relaxed">{layout.description}</p>
 						</div>
 					</button>
 				{/each}
 			</div>
 		</Card.Content>
+		<Card.Footer class="bg-muted/20 mt-4 flex justify-end border-t px-6 py-4">
+			<Button onclick={applySettings} disabled={!hasChanges}>Save / Apply</Button>
+		</Card.Footer>
 	</Card.Root>
 </div>

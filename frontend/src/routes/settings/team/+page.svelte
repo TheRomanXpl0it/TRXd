@@ -171,7 +171,7 @@
 			</Card.Content>
 			<Card.Footer>
 				<Button onclick={handleSaveTeam} disabled={saving}>
-					{#if saving}Saving...{:else}Update Team Profile{/if}
+					{#if saving}Saving...{:else}Save / Apply{/if}
 				</Button>
 			</Card.Footer>
 		</Card.Root>

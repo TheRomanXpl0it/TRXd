@@ -15,7 +15,8 @@ vi.mock('svelte-sonner', () => ({
 
 // Mock API functions used by child components
 vi.mock('$lib/challenges', () => ({
-	submitFlag: vi.fn()
+	submitFlag: vi.fn(),
+	getSolves: vi.fn(() => Promise.resolve([]))
 }));
 
 vi.mock('$lib/instances', () => ({
@@ -122,25 +123,23 @@ describe('ChallengeModal Component', () => {
 		expect(solvesButton).toBeInTheDocument();
 	});
 
-	it('calls onOpenSolves when solves button is clicked', async () => {
+	it('opens the solves tab when solves button is clicked', async () => {
 		const challenge = generateRandomChallenge({
 			solves: 3
 		});
-		const onOpenSolves = vi.fn();
 		const user = userEvent.setup();
 
 		renderWithProviders(ChallengeModal, {
 			props: {
 				open: true,
-				challenge,
-				onOpenSolves
+				challenge
 			}
 		});
 
 		const solvesButton = screen.getByRole('button', { name: /view 3 solves/i });
 		await user.click(solvesButton);
 
-		expect(onOpenSolves).toHaveBeenCalledTimes(1);
+		expect(await screen.findByText(/no solves yet/i)).toBeInTheDocument();
 	});
 
 	it('displays challenge authors', async () => {
@@ -171,6 +170,21 @@ describe('ChallengeModal Component', () => {
 
 		expect(await screen.findByRole('button', { name: /edit challenge/i })).toBeInTheDocument();
 		expect(await screen.findByRole('button', { name: /delete challenge/i })).toBeInTheDocument();
+	});
+
+	it('shows an edit link near the title when editing is allowed', async () => {
+		const challenge = generateRandomChallenge({ id: 42, name: 'Editable Challenge' });
+
+		renderWithProviders(ChallengeModal, {
+			props: {
+				open: true,
+				challenge,
+				canEdit: true
+			}
+		});
+
+		const editLink = await screen.findByRole('link', { name: /edit challenge/i });
+		expect(editLink).toHaveAttribute('href', '/admin/challenges/42/edit');
 	});
 
 	it('hides admin controls when isAdmin is false', () => {
@@ -291,7 +305,7 @@ describe('ChallengeModal Component', () => {
 				challenge
 			}
 		});
-		
+
 		expect(await screen.findByText(/connection/i)).toBeInTheDocument();
 		expect(await screen.findByText('ctf.example.com:1337')).toBeInTheDocument();
 	});

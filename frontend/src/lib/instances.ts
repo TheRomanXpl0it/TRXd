@@ -5,19 +5,20 @@ type StartInstanceResponse = {
 	port?: number | null;
 	timeout: number;
 	hash_domain?: boolean;
+	instance_renewable?: boolean;
 };
 
-export async function startInstance(
-	chall_id: number
-): Promise<{ host: string; port: number | null; timeout: number; hash_domain: boolean; instance_renewable: boolean }> {
-	return api<{ host: string; port: number | null; timeout: number; hash_domain: boolean; instance_renewable: boolean }>(
-		`/instances`,
-		{
-			headers: { 'content-type': 'application/json' },
-			method: 'POST',
-			body: JSON.stringify({ chall_id })
-		}
-	);
+type RenewInstanceResponse = {
+	timeout: number;
+	instance_renewable?: boolean;
+};
+
+export async function startInstance(chall_id: number): Promise<StartInstanceResponse> {
+	return api<StartInstanceResponse>(`/instances`, {
+		headers: { 'content-type': 'application/json' },
+		method: 'POST',
+		body: JSON.stringify({ chall_id })
+	});
 }
 
 export async function stopInstance(chall_id: number): Promise<void> {
@@ -42,10 +43,8 @@ export async function adminStopInstance(teamId: number, challId: number): Promis
 	});
 }
 
-export async function renewInstance(
-	chall_id: number
-): Promise<{ timeout: number }> {
-	return api<{ timeout: number }>(`/instances`, {
+export async function renewInstance(chall_id: number): Promise<RenewInstanceResponse> {
+	return api<RenewInstanceResponse>(`/instances`, {
 		headers: { 'content-type': 'application/json' },
 		method: 'PATCH',
 		body: JSON.stringify({ chall_id })

@@ -45,6 +45,8 @@
 			return true;
 		})
 	);
+
+	let isSidebarOpen = $state(false);
 </script>
 
 <nav
@@ -52,11 +54,11 @@
 >
 	<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 		<div class="flex h-20 items-center justify-between">
-			<!-- Left side: Logo + Mobile Toggle + Links -->
-			<div class="flex items-center gap-4 md:gap-10">
+			<!-- Left side: Mobile Toggle (Mobile) / Logo + Links (Desktop) -->
+			<div class="flex flex-1 items-center gap-4 md:flex-none md:gap-6 lg:gap-10">
 				<!-- Mobile Menu Toggle -->
 				<div class="md:hidden">
-					<Sheet.Root>
+					<Sheet.Root bind:open={isSidebarOpen}>
 						<Sheet.Trigger>
 							{#snippet child({ props })}
 								<Button variant="ghost" size="icon" {...props} class="h-10 w-10">
@@ -83,6 +85,7 @@
 										<Button
 											variant="ghost"
 											href={item.url}
+											onclick={() => (isSidebarOpen = false)}
 											class="w-full justify-start gap-4 rounded-xl px-4 py-6 text-base font-bold transition-all"
 										>
 											<item.icon class="h-5 w-5" />
@@ -101,46 +104,33 @@
 					</Sheet.Root>
 				</div>
 
-				<a href="/home" class="flex items-center gap-4">
-					<div class="relative">
-						<img
-							src="/trx.svg"
-							alt={$siteContent.brand.logoAlt}
-							class="relative h-12 w-12 drop-shadow-sm"
-						/>
-					</div>
+				<!-- Logo -->
+				<div class="flex items-center justify-start">
+					<a href="/home" class="flex items-center gap-3">
+						<div class="relative">
+							<img
+								src="/trx.svg"
+								alt={$siteContent.brand.logoAlt}
+								class="relative h-10 w-10 drop-shadow-sm sm:h-12 sm:w-12"
+							/>
+						</div>
 						<span
-							class="text-foreground hidden shrink-0 pr-px text-3xl font-black leading-[1.05] tracking-tight truncate sm:block md:max-w-[100px] lg:max-w-none"
+							class="text-foreground hidden shrink-0 text-2xl font-black tracking-tight lg:block lg:text-3xl"
 							>{$siteContent.brand.shortName}</span
 						>
 					</a>
+				</div>
 
+				<!-- Desktop Nav -->
 				<div class="hidden items-center gap-1 md:flex">
 					{#each filteredNavItems as item}
 						<Button
 							variant="ghost"
 							href={item.url}
-							class="group relative flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-all"
+							class="group relative flex items-center gap-1.5 px-2 py-2.5 text-sm font-semibold transition-all lg:gap-2.5 lg:px-4"
 						>
 							<item.icon class="h-4.5 w-4.5" />
 							{item.title}
-						</Button>
-					{/each}
-				</div>
-
-
-
-				<!-- Mobile Quick Links -->
-				<div class="flex items-center gap-1 md:hidden">
-					{#each filteredNavItems.slice(0, 2) as item}
-						<Button
-							variant="ghost"
-							size="icon"
-							href={item.url}
-							class="h-10 w-10 rounded-xl transition-all"
-							title={item.title}
-						>
-							<item.icon class="h-5 w-5" />
 						</Button>
 					{/each}
 				</div>
@@ -155,7 +145,7 @@
 								<Button
 									variant="ghost"
 									{...props}
-									class="group relative flex h-14 w-auto items-center justify-end rounded-2xl border border-transparent px-3 transition-all active:scale-[0.98] sm:h-20 sm:w-60 sm:justify-between sm:px-5"
+									class="group relative flex h-14 w-auto items-center justify-end rounded-2xl border border-transparent px-2 transition-all active:scale-[0.98] sm:h-20 sm:justify-between sm:px-4 lg:w-60 lg:px-5"
 								>
 									<div class="flex items-center gap-2 sm:gap-4">
 										<div
@@ -177,7 +167,7 @@
 										</div>
 										<div class="hidden flex-col items-start text-left sm:flex">
 											<span
-												class="max-w-[120px] truncate text-base font-bold leading-none tracking-tight"
+												class="max-w-[120px] truncate text-base font-bold leading-normal tracking-tight"
 												>{user.name}</span
 											>
 										</div>

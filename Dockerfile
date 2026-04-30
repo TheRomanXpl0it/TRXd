@@ -1,12 +1,11 @@
 FROM node:24-alpine AS frontend
 
-ARG GIT_HASH=unknown
-ENV VITE_GIT_HASH=${GIT_HASH}
-
 WORKDIR /app
 COPY ./frontend/package*.json ./
 RUN npm install
 COPY ./frontend ./
+ARG GIT_HASH=unknown
+ENV VITE_GIT_HASH=${GIT_HASH}
 RUN npm run build
 
 

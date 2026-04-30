@@ -2,13 +2,13 @@
 	import {
 		Table,
 		TableBody,
-		TableCaption,
 		TableCell,
 		TableHead,
 		TableHeader,
 		TableRow
 	} from '@/components/ui/table';
 	import { ChartLine } from '@lucide/svelte';
+	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { formatTimeSince } from '$lib/utils/formatting';
 
 	// Prop (team contains solves[] and members[])
@@ -23,7 +23,6 @@
 	let sortKey = $state<SortKey>('timestamp');
 	let sortDir = $state<'asc' | 'desc'>('desc');
 	let rows: any[] = $state([]); // what we actually render
-	let totalPoints = $state(0);
 
 	// Helpers
 	const getPoints = (s: any) => Number(s?.points ?? s?.value ?? s?.score ?? 0);
@@ -101,7 +100,6 @@
 		});
 
 		rows = arr;
-		totalPoints = arr.reduce((acc: number, s: any) => acc + getPoints(s), 0);
 	});
 </script>
 
@@ -112,10 +110,6 @@
 	</div>
 	<div class="mx-4 px-4 sm:mx-8 sm:px-6">
 		<Table class="w-full">
-			<TableCaption class="text-sm">
-				{#if totalPoints > 0}{totalPoints} pts total{/if}
-			</TableCaption>
-
 			<TableHeader class="bg-transparent [&_tr]:border-b-0">
 				<TableRow class="hover:bg-transparent">
 					<TableHead
@@ -144,9 +138,10 @@
 					</TableHead>
 
 					<TableHead
-						class="text-muted-foreground/70 w-[10%] text-right text-[10px] font-bold uppercase tracking-wider"
+						class="text-muted-foreground/70 w-[10%] cursor-pointer text-right text-[10px] font-bold uppercase tracking-wider"
+						onclick={() => toggleSort('timestamp')}
 					>
-						Ago
+						Ago {arrow('timestamp')}
 					</TableHead>
 				</TableRow>
 			</TableHeader>
@@ -174,7 +169,16 @@
 							</TableCell>
 							<TableCell>{truncateName(solverName(s.user_id))}</TableCell>
 
-							<TableCell class="text-right">{formatTimeSince(s.timestamp)}</TableCell>
+							<TableCell class="text-right">
+								<Tooltip.Root>
+									<Tooltip.Trigger>
+										<span class="cursor-help">{formatTimeSince(s.timestamp)}</span>
+									</Tooltip.Trigger>
+									<Tooltip.Content>
+										<p>{fmtDate(s.timestamp)}</p>
+									</Tooltip.Content>
+								</Tooltip.Root>
+							</TableCell>
 						</TableRow>
 					{/each}
 				{/if}

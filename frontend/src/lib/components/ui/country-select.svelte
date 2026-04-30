@@ -9,17 +9,7 @@
 	import { Search } from '@lucide/svelte';
 	import { getCountryItems, filterCountries, type CountryItem } from '$lib/utils/countries';
 	import { tick } from 'svelte';
-
-	// Load all flag SVGs using Vite's glob import
-	const flags = import.meta.glob('/node_modules/country-flag-icons/3x2/*.svg', {
-		query: '?url',
-		eager: true
-	}) as Record<string, { default: string }>;
-
-	const getFlagUrl = (iso2: string) => {
-		const key = `/node_modules/country-flag-icons/3x2/${iso2.toUpperCase()}.svg`;
-		return flags[key]?.default || '';
-	};
+	import CountryFlag from '$lib/components/ui/country-flag.svelte';
 
 	let {
 		value = $bindable(''),
@@ -39,12 +29,7 @@
 	let triggerRef = $state<HTMLButtonElement>(null!);
 
 	const filteredCountries = $derived.by(() => {
-		const items = filterCountries(countryItems, countrySearch);
-		// Pre-calculate URLs to avoid re-computation during virtual scrolling
-		return items.map((c) => ({
-			...c,
-			flagUrl: getFlagUrl(c.iso2)
-		}));
+		return filterCountries(countryItems, countrySearch);
 	});
 	const selectedCountry = $derived(countryItems.find((c) => c.value === value));
 
@@ -74,9 +59,10 @@
 			>
 				{#if selectedCountry}
 					<span class="flex items-center gap-2">
-						<img
-							src={getFlagUrl(selectedCountry.iso2)}
-							alt={selectedCountry.label}
+						<CountryFlag
+							country={selectedCountry.iso2}
+							width={24}
+							height={16}
 							class="h-4 w-6 object-cover"
 						/>
 						<span class="uppercase">{value}</span>
@@ -123,10 +109,10 @@
 										<CheckIcon class="h-4 w-4" />
 									{/if}
 								</div>
-								<img
-									src={item.flagUrl}
-									alt={item.label}
-									loading="lazy"
+								<CountryFlag
+									country={item.iso2}
+									width={20}
+									height={14}
 									class="h-3.5 w-5 rounded-[2px] object-cover shadow-sm"
 								/>
 								<span class="truncate">{item.label}</span>
@@ -151,10 +137,10 @@
 										<CheckIcon class="h-4 w-4" />
 									{/if}
 								</div>
-								<img
-									src={item.flagUrl}
-									alt={item.label}
-									loading="lazy"
+								<CountryFlag
+									country={item.iso2}
+									width={20}
+									height={14}
 									class="h-3.5 w-5 rounded-[2px] object-cover shadow-sm"
 								/>
 								<span class="truncate">{item.label}</span>

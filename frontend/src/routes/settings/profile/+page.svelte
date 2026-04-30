@@ -118,7 +118,7 @@
 		</Card.Content>
 		<Card.Footer>
 			<Button onclick={handleSaveProfile} disabled={savingProfile}>
-				{#if savingProfile}Saving...{:else}Update Profile{/if}
+				{#if savingProfile}Saving...{:else}Save / Apply{/if}
 			</Button>
 		</Card.Footer>
 	</Card.Root>

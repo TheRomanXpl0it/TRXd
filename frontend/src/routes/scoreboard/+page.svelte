@@ -106,7 +106,13 @@
 	{:else}
 		<!-- Graph Container -->
 		<div class="mb-12">
-			<ScoreHistory data={graphData} userMode={authState.userMode} compact={isCompact} />
+			<ScoreHistory
+				data={graphData}
+				userMode={authState.userMode}
+				compact={isCompact}
+				timeMin={authState.startTime}
+				timeMax={authState.endTime}
+			/>
 		</div>
 		<Card.Root class="mt-8 overflow-hidden border-0 shadow-sm">
 			<Card.Content class="p-0">

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import type monaco from 'monaco-editor';
-	type Monaco = typeof import('monaco-editor');
+	import type * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
+	type Monaco = typeof monaco;
 	type Editor = monaco.editor.IStandaloneCodeEditor;
 
 	let {
@@ -27,7 +27,11 @@
 	onMount(async () => {
 		if (!editorContainer) return;
 
-		monacoLib = await import('monaco-editor');
+		const [monacoApi] = await Promise.all([
+			import('monaco-editor/esm/vs/editor/editor.api'),
+			import('monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution')
+		]);
+		monacoLib = monacoApi;
 
 		editor = monacoLib.editor.create(editorContainer, {
 			value: value || '',

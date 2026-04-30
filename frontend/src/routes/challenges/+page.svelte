@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import SolveListSheet from '$lib/components/challenges/SolvelistSheet.svelte';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { goto } from '$app/navigation';
 	import { getChallenges, deleteChallenge } from '$lib/challenges';
@@ -42,8 +41,6 @@
 	const isMissingTeam = $derived(
 		authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin
 	);
-
-	let openSolves = $state(false);
 
 	let createChallengeOpen = $state(false);
 	let selectedId = $state<number | null>(null);
@@ -360,26 +357,20 @@
 	</div>
 {/if}
 
+{#if selectedId}
+	<ChallengeModal
+		challenge={sortedChallenges.find((c) => c.id === selectedId)}
+		bind:open={openModal}
+		canEdit={isAdmin}
+		onSolved={handleChallengeSolved}
+		onCountdownUpdate={updateCountdown}
+		countdown={countdowns[selectedId] ?? 0}
+		{submissionsClosed}
+	/>
+{/if}
+
 <style>
 	:global(body:has(#challenges-split-view)) {
 		overflow: hidden;
 	}
 </style>
-
-{#if selectedId}
-	<ChallengeModal
-		challenge={sortedChallenges.find((c) => c.id === selectedId)}
-		bind:open={openModal}
-		onSolved={handleChallengeSolved}
-		onCountdownUpdate={updateCountdown}
-		onOpenSolves={() => (openSolves = true)}
-		countdown={countdowns[selectedId] ?? 0}
-		{submissionsClosed}
-	/>
-	{#if sortedChallenges.find((c) => c.id === selectedId)}
-		<SolveListSheet
-			bind:open={openSolves}
-			challenge={sortedChallenges.find((c) => c.id === selectedId)!}
-		/>
-	{/if}
-{/if}

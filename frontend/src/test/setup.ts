@@ -25,19 +25,6 @@ console.error = (...args: Parameters<typeof console.error>) => {
 	originalConsoleError(...args);
 };
 
-// Mock ApexCharts globally — it requires a real browser and fails in JSDOM
-vi.mock('apexcharts', () => {
-	return {
-		default: class ApexCharts {
-			render() { return Promise.resolve(); }
-			destroy() {}
-			updateOptions() { return Promise.resolve(); }
-			updateSeries() { return Promise.resolve(); }
-			static exec() { return Promise.resolve(); }
-		}
-	};
-});
-
 // Mock window.matchMedia for components that use media queries
 Object.defineProperty(window, 'matchMedia', {
 	writable: true,

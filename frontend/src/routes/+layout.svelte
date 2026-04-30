@@ -6,12 +6,8 @@
 	import { siteContent } from '$lib/site-content';
 	import { authState, loadUser } from '$lib/stores/auth';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
-	import { addCollection } from '@iconify/svelte';
-	import circleFlagsData from '@iconify-json/circle-flags/icons.json';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { page } from '$app/state';
-
-	addCollection(circleFlagsData);
 
 	let { children } = $props();
 

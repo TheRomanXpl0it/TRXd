@@ -11,12 +11,16 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}', 'tests/**/*.{test,spec}.{js,ts}'],
 		server: {
 			deps: {
-				inline: ['@lucide/svelte', 'bits-ui', 'svelte-sonner', 'clsx', 'tailwind-merge', 'layerchart', 'd3-scale']
+				inline: ['@lucide/svelte', 'bits-ui', 'svelte-sonner', 'clsx', 'tailwind-merge']
 			}
 		}
 	},
 	resolve: {
 		alias: {
+			'monaco-editor/esm/vs/editor/editor.api': resolve('./src/test/mocks/monaco-editor.ts'),
+			'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution': resolve(
+				'./src/test/mocks/monaco-yaml-contribution.ts'
+			),
 			'monaco-editor': resolve('./src/test/mocks/monaco-editor.ts'),
 			$lib: resolve('./src/lib'),
 			'@': resolve('./src/lib'),
