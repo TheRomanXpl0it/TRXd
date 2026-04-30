@@ -121,7 +121,7 @@
 			</div>
 		</Card.Content>
 		<Card.Footer class="bg-muted/20 mt-4 flex justify-end border-t px-6 py-4">
-			<Button onclick={applySettings} disabled={!hasChanges}>Save / Apply</Button>
+			<Button onclick={applySettings} disabled={!hasChanges}>Apply</Button>
 		</Card.Footer>
 	</Card.Root>
 </div>

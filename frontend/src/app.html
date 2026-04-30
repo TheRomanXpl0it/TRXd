@@ -7,6 +7,18 @@
 	<!-- app-title:start -->
 	<title>TRX CTF 2026</title>
 	<!-- app-title:end -->
+	<script>
+		(function() {
+			try {
+				var theme = localStorage.getItem('mode-watcher-mode') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+				if (theme === 'dark') document.documentElement.classList.add('dark');
+			} catch (e) {}
+		})();
+	</script>
+	<style>
+		html { background-color: white; color-scheme: light; }
+		html.dark { background-color: oklch(0.141 0.005 285.823); color-scheme: dark; }
+	</style>
 	%sveltekit.head%
 </head>
 

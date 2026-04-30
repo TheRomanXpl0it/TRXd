@@ -19,7 +19,7 @@
 	$effect(() => {
 		const id = setInterval(() => {
 			now = Date.now();
-		}, 10_000);
+		}, 1000);
 		return () => clearInterval(id);
 	});
 
@@ -146,7 +146,9 @@
 										<span class="text-muted-foreground text-xs">({inst.chall_id})</span>
 									</Table.Cell>
 									<Table.Cell class="max-w-[180px] truncate" title={inst.docker_id || ''}>
-										<code class="bg-muted rounded px-1.5 py-0.5 text-xs">{inst.docker_id || '-'}</code>
+										<code class="bg-muted rounded px-1.5 py-0.5 text-xs"
+											>{inst.docker_id || '-'}</code
+										>
 									</Table.Cell>
 									<Table.Cell>
 										<code class="bg-muted rounded px-1.5 py-0.5 text-xs">{formatConn(inst)}</code>

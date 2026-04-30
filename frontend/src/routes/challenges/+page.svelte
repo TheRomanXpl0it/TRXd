@@ -44,7 +44,8 @@
 
 	let createChallengeOpen = $state(false);
 	let selectedId = $state<number | null>(null);
-	let countdowns: Record<string, number> = $state({});
+	let countdownEnds: Record<string, number> = $state({});
+	let now = $state(Date.now());
 	const queryClient = useQueryClient();
 
 	const challengeTypes = [
@@ -123,6 +124,21 @@
 		return () => clearTimeout(t);
 	});
 
+	$effect(() => {
+		const id = setInterval(() => {
+			now = Date.now();
+		}, 1000);
+		return () => clearInterval(id);
+	});
+
+	const countdowns = $derived.by(() => {
+		const res: Record<string, number> = {};
+		for (const id in countdownEnds) {
+			res[id] = Math.max(0, Math.floor((countdownEnds[id] - now) / 1000));
+		}
+		return res;
+	});
+
 	const activeFiltersCount = $derived((filterCategories?.length ?? 0) + (filterTags?.length ?? 0));
 
 	// delete confirmation modal state
@@ -130,26 +146,26 @@
 	let deleting = $state(false);
 	let toDelete: any = $state(null);
 
-	// Update countdowns when challenges data changes
+	// Update countdown ends when challenges data changes
 	$effect(() => {
 		const currentChallenges = challenges;
 		untrack(() => {
 			let changed = false;
-			const next: Record<string, number> = { ...countdowns };
+			const nextEnds: Record<string, number> = { ...countdownEnds };
 
 			for (const c of currentChallenges) {
 				if (typeof c?.timeout === 'number' && c.timeout > 0) {
-					if (next[c.id] === undefined) {
-						next[c.id] = c.timeout;
+					if (nextEnds[c.id] === undefined) {
+						nextEnds[c.id] = Date.now() + c.timeout * 1000;
 						changed = true;
 					}
-				} else if (next[c.id] !== undefined) {
-					delete next[c.id];
+				} else if (nextEnds[c.id] !== undefined) {
+					delete nextEnds[c.id];
 					changed = true;
 				}
 			}
 
-			if (changed) countdowns = next;
+			if (changed) countdownEnds = nextEnds;
 		});
 	});
 
@@ -167,35 +183,7 @@
 		}
 	});
 
-	let countdownTimer: ReturnType<typeof setInterval> | undefined;
 
-	function startCountdownTimer() {
-		if (countdownTimer) return;
-		countdownTimer = setInterval(() => {
-			let hasActive = false;
-			for (const id in countdowns) {
-				if (countdowns[id] > 0) {
-					countdowns[id] = countdowns[id] - 1;
-					hasActive = true;
-				}
-			}
-			if (!hasActive) {
-				clearInterval(countdownTimer);
-				countdownTimer = undefined;
-			}
-		}, 1000);
-	}
-
-	// Start timer whenever a non-zero countdown appears; stop when all expire.
-	$effect(() => {
-		if (Object.values(countdowns).some((v) => v > 0)) {
-			startCountdownTimer();
-		}
-		return () => {
-			clearInterval(countdownTimer);
-			countdownTimer = undefined;
-		};
-	});
 
 	function groupByCategory(list: Challenge[]) {
 		const map: Record<string, Challenge[]> = {};
@@ -236,7 +224,11 @@
 	}
 
 	function updateCountdown(id: string | number, newCountdown: number) {
-		countdowns[id] = newCountdown;
+		if (newCountdown <= 0) {
+			delete countdownEnds[id];
+		} else {
+			countdownEnds[id] = Date.now() + newCountdown * 1000;
+		}
 	}
 
 	function handleChallengeSolved() {

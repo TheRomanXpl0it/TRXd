@@ -366,33 +366,6 @@
 							</Card.Content>
 						</Card.Root>
 
-						<!-- Basic Stats Cards -->
-						<div class="grid gap-4 sm:grid-cols-2">
-							<Card.Root class="bg-card border-0 shadow-sm">
-								<Card.Header class="pb-2">
-									<Card.Title class="text-muted-foreground text-sm font-medium uppercase tracking-wider"
-										>Total Score</Card.Title
-									>
-								</Card.Header>
-								<Card.Content>
-									<div class="font-mono text-2xl font-bold">
-										{userVerboseData?.score?.toLocaleString() ?? 0} pts
-									</div>
-								</Card.Content>
-							</Card.Root>
-
-							<Card.Root class="bg-card border-0 shadow-sm">
-								<Card.Header class="pb-2">
-									<Card.Title class="text-muted-foreground text-sm font-medium uppercase tracking-wider"
-										>Challenges Solved</Card.Title
-									>
-								</Card.Header>
-								<Card.Content>
-									<div class="font-mono text-2xl font-bold">{solveCount}</div>
-									<p class="text-muted-foreground mt-1 text-xs">Across all categories</p>
-								</Card.Content>
-							</Card.Root>
-						</div>
 					</div>
 				{/if}
 			</div>

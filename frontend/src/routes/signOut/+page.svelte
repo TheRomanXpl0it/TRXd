@@ -16,7 +16,7 @@
 				console.error('Logout failed', e);
 			} finally {
 				loading = false;
-				goto('/');
+				window.location.href = '/';
 			}
 		})();
 	});

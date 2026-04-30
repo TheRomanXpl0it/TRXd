@@ -228,7 +228,7 @@
 											<div class="flex items-center gap-2">
 												<span
 													class={cn(
-														'text-zinc-900 dark:text-zinc-100 truncate text-sm font-bold tracking-tight',
+														'text-zinc-900 dark:text-zinc-100 block truncate py-0.5 leading-normal text-sm font-bold',
 														ch.hidden && isPrivileged ? 'opacity-50' : ''
 													)}
 												>
@@ -350,7 +350,7 @@
 								{/if}
 							</div>
 							<h1
-								class="text-foreground truncate text-3xl font-black leading-[1.1] tracking-tighter sm:text-5xl"
+								class="text-foreground break-words pb-1 text-3xl font-black leading-tight tracking-tighter sm:text-5xl"
 							>
 								{activeChallenge.name}
 							</h1>
@@ -371,7 +371,7 @@
 									Points
 								</p>
 								<p
-									class="text-foreground text-3xl font-black tabular-nums leading-none tracking-tighter"
+									class="text-foreground text-3xl font-black tabular-nums leading-tight tracking-tighter"
 								>
 									{activeChallenge.points}
 								</p>
@@ -384,7 +384,7 @@
 									Solves
 								</p>
 								<p
-									class="text-foreground text-3xl font-black tabular-nums leading-none tracking-tighter"
+									class="text-foreground text-3xl font-black tabular-nums leading-tight tracking-tighter"
 								>
 									{activeChallenge.solves || 0}
 								</p>
@@ -397,12 +397,12 @@
 				<div class="bg-background/4 px-8">
 					<div class="border-border/12 flex justify-center border-b pb-4 pt-4">
 						<div
-							class="bg-muted/40 text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1 backdrop-blur-sm"
+							class="bg-muted text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1"
 						>
 							<button
 								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 								'details'
-									? 'bg-background/45 text-foreground shadow-sm backdrop-blur-sm'
+									? 'bg-background text-foreground shadow-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
 								onclick={() => (activeTab = 'details')}
 							>
@@ -412,7 +412,7 @@
 							<button
 								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 								'solves'
-									? 'bg-background/45 text-foreground shadow-sm backdrop-blur-sm'
+									? 'bg-background text-foreground shadow-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
 								onclick={() => (activeTab = 'solves')}
 							>

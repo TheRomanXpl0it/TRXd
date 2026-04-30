@@ -285,26 +285,6 @@
 							</Card.Content>
 						</Card.Root>
 
-						<!-- Team Status -->
-						<Card.Root class="bg-card border-0 shadow-sm">
-							<Card.Header class="pb-2">
-								<Card.Title class="text-muted-foreground text-sm font-medium uppercase tracking-wider"
-									>Team Status</Card.Title
-								>
-							</Card.Header>
-							<Card.Content>
-								<div class="grid grid-cols-2 gap-4">
-									<div>
-										<p class="text-muted-foreground text-xs uppercase">Score</p>
-										<p class="font-mono text-xl font-bold">{team.score}</p>
-									</div>
-									<div>
-										<p class="text-muted-foreground text-xs uppercase">Solves</p>
-										<p class="font-mono text-xl font-bold">{team.solves?.length ?? 0}</p>
-									</div>
-								</div>
-							</Card.Content>
-						</Card.Root>
 					</div>
 				{/if}
 
