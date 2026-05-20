@@ -42,7 +42,9 @@ func extractValidatedAttachments(c *fiber.Ctx, multipartForm *multipart.Form, da
 		}
 	}
 
-	valid, err = validator.Var(c, names, "attachments")
+	valid, err = validator.Struct(c, struct {
+		Attachments []string `validate:"required,attachments"`
+	}{Attachments: names})
 	if err != nil || !valid {
 		return nil, nil, err
 	}
@@ -106,6 +108,20 @@ func saveFiles(c *fiber.Ctx, challID int32, headers []*multipart.FileHeader) ([]
 	return hashes, nil
 }
 
+// @Summary [Author+] Creates new attachments for a challenge
+// @Description Requires **Author** privileges or higher.
+// @Description Creates new attachments for an existing challenge with the provided files.
+// @Tags attachments
+// @Accept mpfd
+// @Produce json
+// @Param data body Data true "all fields are required"
+// @Param files formData []file true "the list of files to upload (at least one file is required)"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid multipart form` | `Invalid form data` | `Missing required fields` | `ChallID must be at least 0` | `Attachments[i] must not exceed 128`"
+// @Failure 404 {object} models.Error "Possible errors: `Challenge not found`"
+// @Failure 409 {object} models.Error "Possible errors: `Attachment already exists`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error creating attachments` | `Internal server error`"
+// @Router /api/attachments [post]
 func Route(c *fiber.Ctx) error {
 	multipartForm, err := c.MultipartForm()
 	if err != nil {

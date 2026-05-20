@@ -26,10 +26,6 @@ func decodeJSONBody(body []byte) string {
 }
 
 func Debug(c *fiber.Ctx) error {
-	if c.Path() == "/countries" {
-		return c.Next()
-	}
-
 	reqBody := c.BodyRaw()
 	body := decodeJSONBody(reqBody)
 	log.Debug("Request:", "method", c.Method(), "path", c.Path(), "body", body)

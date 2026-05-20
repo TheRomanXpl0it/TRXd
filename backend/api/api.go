@@ -155,6 +155,7 @@ func SetupFeatures(app *fiber.App) {
 		Title: consts.Name + " Monitor",
 	}))
 
+	// app.Static("/swagger/doc.json", "./docs/swagger.json")
 	// app.Get("/swagger/*", admin, swagger.HandlerDefault)
 	app.Get("/swagger/*", swagger.HandlerDefault)
 }

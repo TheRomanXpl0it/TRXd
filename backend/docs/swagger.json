@@ -6,6 +6,289 @@
     },
     "basePath": "/",
     "paths": {
+        "/api/attachments": {
+            "post": {
+                "description": "Requires **Author** privileges or higher.\nCreates new attachments for an existing challenge with the provided files.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "[Author+] Creates new attachments for a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attachments_create.Data"
+                        }
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "file"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "the list of files to upload (at least one file is required)",
+                        "name": "files",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid multipart form` | `Invalid form data` | `Missing required fields` | `ChallID must be at least 0` | `Attachments[i] must not exceed 128`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Attachment already exists`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge` | `Error creating attachments` | `Internal server error`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Requires **Author** privileges or higher.\nDeletes attachments for an existing challenge with the provided names.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "attachments"
+                ],
+                "summary": "[Author+] Deletes attachments for a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/attachments_delete.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Names[i] must not exceed 128`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Attachment not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching attachment` | `Error deleting attachment` | `Internal server error`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/categories": {
+            "get": {
+                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).\nRetrieves a list of all categories (with role **Player** only visible one are returned).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "[Player+] Gets all categories",
+                "responses": {
+                    "200": {
+                        "description": "List of category names",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching categories` | `Internal server error`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Requires **Author** privileges or higher.\nCreates a new category with the provided name.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "[Author+] Creates a new category",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/categories_create.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Category already exists`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error creating category` | `Internal server error`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Requires **Author** privileges or higher.\nDeletes an existing category with the provided name.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "[Author+] Deletes a category",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/categories_delete.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error deleting category` | `Internal server error`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Requires **Author** privileges or higher.\nUpdates an existing category with the provided name (also updates its own challenges categories).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "categories"
+                ],
+                "summary": "[Author+] Updates a category",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/categories_update.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `NewName must not exceed 32`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Category not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Category already exists`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching category` | `Error creating category` | `Error updating category` | `Error deleting category` | `Internal server error`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/challenges": {
             "patch": {
                 "description": "Requires **Author** privileges or higher.\nUpdates an existing challenge with the provided fields, only the `chall_id` is required.",
@@ -22,7 +305,7 @@
                 "parameters": [
                     {
                         "description": "`chall_id` is required, the rest of the fields are optional, only provide the fields you want to update",
-                        "name": "challenge",
+                        "name": "data",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -63,6 +346,72 @@
         }
     },
     "definitions": {
+        "attachments_create.Data": {
+            "type": "object",
+            "required": [
+                "chall_id"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "attachments_delete.Data": {
+            "type": "object",
+            "required": [
+                "chall_id",
+                "names"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "names": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "categories_create.Data": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "categories_delete.Data": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "categories_update.Data": {
+            "type": "object",
+            "required": [
+                "name",
+                "new_name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "new_name": {
+                    "type": "string"
+                }
+            }
+        },
         "challenges_update.UpdateChallParams": {
             "type": "object",
             "required": [

@@ -1,5 +1,48 @@
 basePath: /
 definitions:
+  attachments_create.Data:
+    properties:
+      chall_id:
+        type: integer
+    required:
+    - chall_id
+    type: object
+  attachments_delete.Data:
+    properties:
+      chall_id:
+        type: integer
+      names:
+        items:
+          type: string
+        type: array
+    required:
+    - chall_id
+    - names
+    type: object
+  categories_create.Data:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  categories_delete.Data:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  categories_update.Data:
+    properties:
+      name:
+        type: string
+      new_name:
+        type: string
+    required:
+    - name
+    - new_name
+    type: object
   challenges_update.UpdateChallParams:
     properties:
       authors:
@@ -90,6 +133,218 @@ info:
   contact: {}
   title: TRXd API
 paths:
+  /api/attachments:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Deletes attachments for an existing challenge with the provided names.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/attachments_delete.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `Names[i] must not exceed 128`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Attachment not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching attachment` | `Error deleting
+            attachment` | `Internal server error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Deletes attachments for a challenge'
+      tags:
+      - attachments
+    post:
+      consumes:
+      - multipart/form-data
+      description: |-
+        Requires **Author** privileges or higher.
+        Creates new attachments for an existing challenge with the provided files.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/attachments_create.Data'
+      - collectionFormat: csv
+        description: the list of files to upload (at least one file is required)
+        in: formData
+        items:
+          type: file
+        name: files
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid multipart form` | `Invalid form
+            data` | `Missing required fields` | `ChallID must be at least 0` | `Attachments[i]
+            must not exceed 128`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Attachment already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error creating
+            attachments` | `Internal server error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Creates new attachments for a challenge'
+      tags:
+      - attachments
+  /api/categories:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Deletes an existing category with the provided name.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/categories_delete.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Name must not exceed 32`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error deleting category` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Deletes a category'
+      tags:
+      - categories
+    get:
+      description: |-
+        Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+        Retrieves a list of all categories (with role **Player** only visible one are returned).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of category names
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: 'Possible errors: `Error fetching categories` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Gets all categories'
+      tags:
+      - categories
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Updates an existing category with the provided name (also updates its own challenges categories).
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/categories_update.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Name must not exceed 32` | `NewName must not exceed 32`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Category not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Category already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching category` | `Error creating
+            category` | `Error updating category` | `Error deleting category` | `Internal
+            server error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Updates a category'
+      tags:
+      - categories
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Creates a new category with the provided name.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/categories_create.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Name must not exceed 32`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Category already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error creating category` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Creates a new category'
+      tags:
+      - categories
   /api/challenges:
     patch:
       consumes:
@@ -101,7 +356,7 @@ paths:
       - description: '`chall_id` is required, the rest of the fields are optional,
           only provide the fields you want to update'
         in: body
-        name: challenge
+        name: data
         required: true
         schema:
           $ref: '#/definitions/challenges_update.UpdateChallParams'

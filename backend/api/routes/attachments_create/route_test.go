@@ -5,6 +5,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"trxd/api"
 	"trxd/db/sqlc"
@@ -80,6 +81,12 @@ var testData = []struct {
 		expectedResponse: errorf(consts.InvalidFormData),
 	},
 	{
+		testBody:         JSON{"chall_id": ""},
+		testFiles:        []string{strings.Repeat("a", consts.MaxAttachmentNameLen+1)},
+		expectedStatus:   http.StatusBadRequest,
+		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Attachments[0]", consts.MaxAttachmentNameLen)),
+	},
+	{
 		testBody:       JSON{"chall_id": ""},
 		testFiles:      []string{"f1.txt", "f2.txt", "f3.txt"},
 		expectedStatus: http.StatusOK,
@@ -90,9 +97,12 @@ func TestRoute(t *testing.T) {
 	app := api.SetupApp(t.Context())
 	defer api.Shutdown(app)
 
+	longName := strings.Repeat("a", consts.MaxAttachmentNameLen+1)
+
 	module := test_utils.GetModuleName(t)
 	dir := "/tmp/" + module + "/"
 	test_utils.CreateDir(t, dir)
+	test_utils.CreateFile(t, dir+longName, "a")
 	test_utils.CreateFile(t, dir+"f1.txt", "test-line 1\ntest-line 2")
 	test_utils.CreateFile(t, dir+"f2.txt", "")
 	test_utils.CreateFile(t, dir+"f3.txt", string([]byte{0, 0, 255, 255, 127, 97}))
