@@ -2,7 +2,7 @@ import requests
 import yaml
 import os
 
-url = "https://cyberchallenge.diag.uniroma1.it/api"
+url = "https://localhost/api"
 email = ""
 password = ""
 
@@ -73,7 +73,7 @@ for category, challs in challenges.items():
 				data[key] = chall_info[key]
 		deployment = chall_info.get("deployment", None)
 		if deployment is not None:
-			for key in ['image', 'compose', 'hash_domain', 'lifetime', 'envs', 'max_memory', 'max_cpu']:
+			for key in ['image', 'compose', 'hash_domain', 'lifetime', 'renewable', 'envs', 'max_memory', 'max_cpu']:
 				if key in deployment:
 					data[key] = deployment[key]
 		print(data)

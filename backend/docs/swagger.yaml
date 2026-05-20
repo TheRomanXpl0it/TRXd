@@ -1,0 +1,142 @@
+basePath: /
+definitions:
+  challenges_update.UpdateChallParams:
+    properties:
+      authors:
+        items:
+          type: string
+        type: array
+      category:
+        type: string
+      chall_id:
+        type: integer
+      compose:
+        type: string
+      conn_type:
+        $ref: '#/definitions/sqlc.ConnType'
+      description:
+        type: string
+      envs:
+        type: string
+      hash_domain:
+        type: boolean
+      hidden:
+        type: boolean
+      host:
+        type: string
+      image:
+        type: string
+      lifetime:
+        type: integer
+      max_cpu:
+        type: string
+      max_memory:
+        type: integer
+      max_points:
+        type: integer
+      name:
+        type: string
+      port:
+        type: integer
+      renewable:
+        type: boolean
+      score_type:
+        $ref: '#/definitions/sqlc.ScoreType'
+      tags:
+        items:
+          type: string
+        type: array
+      type:
+        $ref: '#/definitions/sqlc.DeployType'
+    required:
+    - chall_id
+    type: object
+  models.Error:
+    properties:
+      error:
+        type: string
+    type: object
+  sqlc.ConnType:
+    enum:
+    - NONE
+    - TCP
+    - HTTP
+    - HTTPS
+    type: string
+    x-enum-varnames:
+    - ConnTypeNONE
+    - ConnTypeTCP
+    - ConnTypeHTTP
+    - ConnTypeHTTPS
+  sqlc.DeployType:
+    enum:
+    - Normal
+    - Container
+    - Compose
+    type: string
+    x-enum-varnames:
+    - DeployTypeNormal
+    - DeployTypeContainer
+    - DeployTypeCompose
+  sqlc.ScoreType:
+    enum:
+    - Static
+    - Dynamic
+    type: string
+    x-enum-varnames:
+    - ScoreTypeStatic
+    - ScoreTypeDynamic
+info:
+  contact: {}
+  title: TRXd API
+paths:
+  /api/challenges:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Updates an existing challenge with the provided fields, only the `chall_id` is required.
+      parameters:
+      - description: '`chall_id` is required, the rest of the fields are optional,
+          only provide the fields you want to update'
+        in: body
+        name: challenge
+        required: true
+        schema:
+          $ref: '#/definitions/challenges_update.UpdateChallParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `No data provided to update` | `Name must not exceed 128` |
+            `Category must not exceed 32` | `Description must not exceed 10240` |
+            `Authors[i] must not exceed 64` | `Tags[i] must not exceed 32` | `Type
+            must be one of: Normal Container Compose` | `MaxPoints must be at least
+            0` | `ScoreType must be one of: Static Dynamic` | `Port must be at least
+            0` | `Port must not exceed 65535` | `ConnType must be one of: NONE TCP
+            HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment variables`
+            | `MaxMemory must be at least 0` | `Invalid Max CPU, must be a positive
+            32-bit integer` | `ChallID must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found` | `Category not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Challenge name already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error updating
+            challenge` | `Internal server error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Updates details of an existing challenge'
+      tags:
+      - challenges
+swagger: "2.0"

@@ -53,8 +53,9 @@ import (
 	"trxd/db"
 	"trxd/utils"
 	"trxd/utils/consts"
-
 	"trxd/utils/log"
+
+	_ "trxd/docs" // swag docs
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -62,7 +63,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/favicon"
 	"github.com/gofiber/fiber/v2/middleware/helmet"
 	"github.com/gofiber/fiber/v2/middleware/monitor"
+	"github.com/gofiber/swagger"
 )
+
+// @title TRXd API
+// @BasePath /
 
 var (
 	noAuth = middlewares.NoAuth
@@ -149,6 +154,9 @@ func SetupFeatures(app *fiber.App) {
 	app.Get("/monitor", admin, monitor.New(monitor.Config{
 		Title: consts.Name + " Monitor",
 	}))
+
+	// app.Get("/swagger/*", admin, swagger.HandlerDefault)
+	app.Get("/swagger/*", swagger.HandlerDefault)
 }
 
 func SetupApi(ctx context.Context, app *fiber.App) {

@@ -9,6 +9,13 @@ sqlc:
 	@sqlc generate
 sql: sqlc
 
+sqlc-diff:
+	@sqlc diff
+sql-diff: sqlc-diff
+
+docs:
+	@swag init -g ./api/api.go -o ./docs
+
 run:
 	@ALLOW_REGISTER=true RECLAIM_INSTANCE_INTERVAL=1 go run . -test-data-WARNING-DO-NOT-USE-IN-PRODUCTION
 	@go run .
@@ -30,4 +37,7 @@ lint:
 cyclo:
 	@gocyclo -ignore "sqlc|_test|test_" -top 15 .
 
-pipe: lint test py-test
+pipe: sqlc-diff docs lint test py-test
+
+
+.PHONY: default sqlc sql sqlc-diff sql-diff docs run test py-test lint cyclo pipe

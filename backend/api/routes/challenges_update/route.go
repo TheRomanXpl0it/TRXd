@@ -11,6 +11,7 @@ import (
 	"github.com/lib/pq"
 )
 
+// swagger:model UpdateChallParams
 type UpdateChallParams struct {
 	ChallID     *int32           `json:"chall_id" validate:"required,id"`
 	Name        string           `json:"name" validate:"challenge_name"`
@@ -36,6 +37,19 @@ type UpdateChallParams struct {
 	MaxCpu     *string `json:"max_cpu" validate:"omitempty,challenge_max_cpu"`
 }
 
+// @Summary [Author+] Updates details of an existing challenge
+// @Description Requires **Author** privileges or higher.
+// @Description Updates an existing challenge with the provided fields, only the `chall_id` is required.
+// @Tags challenges
+// @Accept json
+// @Produce json
+// @Param challenge body UpdateChallParams true "`chall_id` is required, the rest of the fields are optional, only provide the fields you want to update"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `No data provided to update` | `Name must not exceed 128` | `Category must not exceed 32` | `Description must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must not exceed 32` | `Type must be one of: Normal Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port must be at least 0` | `Port must not exceed 65535` | `ConnType must be one of: NONE TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment variables` | `MaxMemory must be at least 0` | `Invalid Max CPU, must be a positive 32-bit integer` | `ChallID must be at least 0`"
+// @Failure 404 {object} models.Error "Possible errors: `Challenge not found` | `Category not found`"
+// @Failure 409 {object} models.Error "Possible errors: `Challenge name already exists`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error updating challenge` | `Internal server error`"
+// @Router /api/challenges [patch]
 func Route(c *fiber.Ctx) error {
 	var data UpdateChallParams
 	if err := c.BodyParser(&data); err != nil {

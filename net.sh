@@ -30,6 +30,7 @@ list_rules() {
 }
 
 rules=(
+	"DOCKER-USER -d 169.254.169.254 -j DROP"
 	"DOCKER-USER -s $SUBNET -d $SUBNET -j DROP"
 	"DOCKER-USER -s $PROXY_IP -d $SUBNET -j ACCEPT"
 	"DOCKER-USER -s $SUBNET -d $SUBNET -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT"
