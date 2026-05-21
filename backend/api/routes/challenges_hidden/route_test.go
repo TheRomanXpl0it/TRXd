@@ -56,8 +56,8 @@ func TestRoute(t *testing.T) {
 	session.Patch("/challenges/hidden", JSON{"chall_ids": []int32{}}, http.StatusOK)
 	session.CheckResponse(nil)
 
-	session.Patch("/challenges/hidden", JSON{"chall_ids": []int32{-1}}, http.StatusOK)
-	session.CheckResponse(nil)
+	session.Patch("/challenges/hidden", JSON{"chall_ids": []int32{-1}}, http.StatusBadRequest)
+	session.CheckResponse(errorf(test_utils.Format(consts.MinError, "ChallIDs[0]", 0)))
 
 	session.Patch("/challenges/hidden", JSON{"chall_ids": []int32{99999}}, http.StatusOK)
 	session.CheckResponse(nil)

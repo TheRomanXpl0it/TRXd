@@ -8,10 +8,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Data struct {
+	ChallIDs []int32 `json:"chall_ids" validate:"required,dive,id"`
+}
+
+// @Summary [Author+] Toggles a list of challenges between hidden and visible
+// @Description Requires **Author** privileges or higher.
+// @Description Toggles the hidden status of the specified challenges.
+// @Tags challenges
+// @Accept json
+// @Produce json
+// @Param data body Data true "a list of challenge IDs to toggle hidden status"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallIDs[i] must be at least 0`"
+// @Failure 500 {object} models.Error "Possible errors: `Error updating challenge` | `Internal server error`"
+// @Router /api/challenges/hidden [patch]
 func Route(c *fiber.Ctx) error {
-	var data struct {
-		ChallIDs []int32 `json:"chall_ids" validate:"required,id"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}

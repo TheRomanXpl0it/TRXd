@@ -50,7 +50,7 @@ func nullConnType(src *sqlc.ConnType) sqlc.NullConnType {
 	return sqlc.NullConnType{ConnType: *src, Valid: true}
 }
 
-func IsChallEmpty(data *UpdateChallParams) bool {
+func IsChallEmpty(data *Data) bool {
 	if data.Name == "" && data.Category == "" && data.Description == nil && data.Authors == nil &&
 		data.Tags == nil && data.Type == nil && data.Hidden == nil && data.MaxPoints == nil &&
 		data.ScoreType == nil && data.Host == nil && data.Port == nil && data.ConnType == nil {
@@ -59,7 +59,7 @@ func IsChallEmpty(data *UpdateChallParams) bool {
 	return false
 }
 
-func IsDockerConfigsEmpty(data *UpdateChallParams) bool {
+func IsDockerConfigsEmpty(data *Data) bool {
 	if data.Image == nil && data.Compose == nil && data.HashDomain == nil && data.Lifetime == nil &&
 		data.Renewable == nil && data.Envs == nil && data.MaxMemory == nil && data.MaxCpu == nil {
 		return true
@@ -67,7 +67,7 @@ func IsDockerConfigsEmpty(data *UpdateChallParams) bool {
 	return false
 }
 
-func UpdateChallenge(ctx context.Context, data *UpdateChallParams) error {
+func UpdateChallenge(ctx context.Context, data *Data) error {
 	if data.ChallID == nil {
 		return fmt.Errorf("missing challenge ID")
 	}

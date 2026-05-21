@@ -8,6 +8,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// @Summary [Player+] Gets all challenges
+// @Description Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+// @Description Retrieves a list of all challenges (with role **Player** only visible one are returned).
+// @Tags challenges
+// @Produce json
+// @Success 200 {object} []Chall "List of challenges with all dysplayable details (except solves)"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenges` | `Internal server error`"
+// @Router /api/challenges [get]
 func Route(c *fiber.Ctx) error {
 	uid := c.Locals("uid").(int32)
 	tid := c.Locals("tid").(int32)

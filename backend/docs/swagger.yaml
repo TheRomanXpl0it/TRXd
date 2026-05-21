@@ -43,7 +43,163 @@ definitions:
     - name
     - new_name
     type: object
-  challenges_update.UpdateChallParams:
+  challenges_all_get.Chall:
+    properties:
+      attachments:
+        items:
+          type: string
+        type: array
+      authors:
+        items:
+          type: string
+        type: array
+      category:
+        type: string
+      conn_type:
+        $ref: '#/definitions/sqlc.ConnType'
+      description:
+        type: string
+      first_blood:
+        type: boolean
+      hidden:
+        type: boolean
+      host:
+        type: string
+      id:
+        type: integer
+      instance:
+        type: boolean
+      instance_hash_domain:
+        type: boolean
+      instance_host:
+        type: string
+      instance_port:
+        type: integer
+      instance_renewable:
+        type: boolean
+      max_points:
+        type: integer
+      name:
+        type: string
+      points:
+        type: integer
+      port:
+        type: integer
+      score_type:
+        $ref: '#/definitions/sqlc.ScoreType'
+      solved:
+        type: boolean
+      solves:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      timeout:
+        type: integer
+    type: object
+  challenges_create.Data:
+    properties:
+      category:
+        type: string
+      description:
+        type: string
+      max_points:
+        type: integer
+      name:
+        type: string
+      score_type:
+        $ref: '#/definitions/sqlc.ScoreType'
+      type:
+        $ref: '#/definitions/sqlc.DeployType'
+    required:
+    - category
+    - max_points
+    - name
+    - score_type
+    - type
+    type: object
+  challenges_delete.Data:
+    properties:
+      chall_id:
+        type: integer
+    required:
+    - chall_id
+    type: object
+  challenges_get.Chall:
+    properties:
+      attachments:
+        items:
+          type: string
+        type: array
+      authors:
+        items:
+          type: string
+        type: array
+      category:
+        type: string
+      conn_type:
+        $ref: '#/definitions/sqlc.ConnType'
+      description:
+        type: string
+      docker_config:
+        $ref: '#/definitions/challenges_get.DockerConfig'
+      flags:
+        items:
+          $ref: '#/definitions/sqlc.GetFlagsByChallengeRow'
+        type: array
+      hidden:
+        type: boolean
+      host:
+        type: string
+      max_points:
+        type: integer
+      name:
+        type: string
+      port:
+        type: integer
+      score_type:
+        $ref: '#/definitions/sqlc.ScoreType'
+      solves_list:
+        items:
+          $ref: '#/definitions/sqlc.GetChallengeSolvesRow'
+        type: array
+      tags:
+        items:
+          type: string
+        type: array
+      type:
+        $ref: '#/definitions/sqlc.DeployType'
+    type: object
+  challenges_get.DockerConfig:
+    properties:
+      compose:
+        type: string
+      envs:
+        type: string
+      hash_domain:
+        type: boolean
+      image:
+        type: string
+      lifetime:
+        type: integer
+      max_cpu:
+        type: string
+      max_memory:
+        type: integer
+      renewable:
+        type: boolean
+    type: object
+  challenges_hidden.Data:
+    properties:
+      chall_ids:
+        items:
+          type: integer
+        type: array
+    required:
+    - chall_ids
+    type: object
+  challenges_update.Data:
     properties:
       authors:
         items:
@@ -121,6 +277,22 @@ definitions:
     - DeployTypeNormal
     - DeployTypeContainer
     - DeployTypeCompose
+  sqlc.GetChallengeSolvesRow:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      timestamp:
+        type: string
+    type: object
+  sqlc.GetFlagsByChallengeRow:
+    properties:
+      flag:
+        type: string
+      regex:
+        type: boolean
+    type: object
   sqlc.ScoreType:
     enum:
     - Static
@@ -346,6 +518,58 @@ paths:
       tags:
       - categories
   /api/challenges:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Deletes a challenge with the provided ID.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/challenges_delete.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error deleting challenge` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Deletes a challenge'
+      tags:
+      - challenges
+    get:
+      description: |-
+        Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+        Retrieves a list of all challenges (with role **Player** only visible one are returned).
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of challenges with all dysplayable details (except solves)
+          schema:
+            items:
+              $ref: '#/definitions/challenges_all_get.Chall'
+            type: array
+        "500":
+          description: 'Possible errors: `Error fetching challenges` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Gets all challenges'
+      tags:
+      - challenges
     patch:
       consumes:
       - application/json
@@ -359,7 +583,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/challenges_update.UpdateChallParams'
+          $ref: '#/definitions/challenges_update.Data'
       produces:
       - application/json
       responses:
@@ -367,15 +591,15 @@ paths:
           description: OK
         "400":
           description: 'Possible errors: `Invalid JSON format` | `Missing required
-            fields` | `No data provided to update` | `Name must not exceed 128` |
-            `Category must not exceed 32` | `Description must not exceed 10240` |
-            `Authors[i] must not exceed 64` | `Tags[i] must not exceed 32` | `Type
-            must be one of: Normal Container Compose` | `MaxPoints must be at least
-            0` | `ScoreType must be one of: Static Dynamic` | `Port must be at least
-            0` | `Port must not exceed 65535` | `ConnType must be one of: NONE TCP
-            HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment variables`
-            | `MaxMemory must be at least 0` | `Invalid Max CPU, must be a positive
-            32-bit integer` | `ChallID must be at least 0`'
+            fields` | `No data provided to update` | `ChallID must be at least 0`
+            | `Name must not exceed 128` | `Category must not exceed 32` | `Description
+            must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must
+            not exceed 32` | `Type must be one of: Normal Container Compose` | `MaxPoints
+            must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port
+            must be at least 0` | `Port must not exceed 65535` | `ConnType must be
+            one of: NONE TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid
+            environment variables` | `MaxMemory must be at least 0` | `Invalid Max
+            CPU, must be a positive 32-bit integer`'
           schema:
             $ref: '#/definitions/models.Error'
         "404":
@@ -392,6 +616,116 @@ paths:
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Updates details of an existing challenge'
+      tags:
+      - challenges
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Creates a new challenge with the provided details.
+      parameters:
+      - description: all fields are required except **description**
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/challenges_create.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Name must not exceed 32` | `Category must not exceed 32` |
+            `Description must not exceed 10240` | `Type must be one of: Normal Container
+            Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of:
+            Static Dynamic`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Category not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Challenge already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error creating challenge` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Creates a new challenge'
+      tags:
+      - challenges
+  /api/challenges/:id:
+    get:
+      description: |-
+        Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+        Retrieves challenge details (with role **Player** only solves if the challenge is visible).
+      parameters:
+      - description: Challenge ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: solves is only included if the requester has Player role, otherwise
+            all the challenge details are included except the solves
+          schema:
+            $ref: '#/definitions/challenges_get.Chall'
+        "400":
+          description: 'Possible errors: `Invalid challenge ID, must be non negative`
+            | `id must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Gets challenge details'
+      tags:
+      - challenges
+  /api/challenges/hidden:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Toggles the hidden status of the specified challenges.
+      parameters:
+      - description: a list of challenge IDs to toggle hidden status
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/challenges_hidden.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallIDs[i] must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error updating challenge` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Toggles a list of challenges between hidden and visible'
       tags:
       - challenges
 swagger: "2.0"

@@ -299,6 +299,127 @@ const docTemplate = `{
             }
         },
         "/api/challenges": {
+            "get": {
+                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).\nRetrieves a list of all challenges (with role **Player** only visible one are returned).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "[Player+] Gets all challenges",
+                "responses": {
+                    "200": {
+                        "description": "List of challenges with all dysplayable details (except solves)",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/challenges_all_get.Chall"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: ` + "`" + `Error fetching challenges` + "`" + ` | ` + "`" + `Internal server error` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Requires **Author** privileges or higher.\nCreates a new challenge with the provided details.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "[Author+] Creates a new challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required except **description**",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/challenges_create.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `Name must not exceed 32` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Type must be one of: Normal Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: ` + "`" + `Category not found` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: ` + "`" + `Challenge already exists` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: ` + "`" + `Error creating challenge` + "`" + ` | ` + "`" + `Internal server error` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Requires **Author** privileges or higher.\nDeletes a challenge with the provided ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "[Author+] Deletes a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/challenges_delete.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: ` + "`" + `Error deleting challenge` + "`" + ` | ` + "`" + `Internal server error` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
             "patch": {
                 "description": "Requires **Author** privileges or higher.\nUpdates an existing challenge with the provided fields, only the ` + "`" + `chall_id` + "`" + ` is required.",
                 "consumes": [
@@ -318,7 +439,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/challenges_update.UpdateChallParams"
+                            "$ref": "#/definitions/challenges_update.Data"
                         }
                     }
                 ],
@@ -327,7 +448,7 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `No data provided to update` + "`" + ` | ` + "`" + `Name must not exceed 128` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Authors[i] must not exceed 64` + "`" + ` | ` + "`" + `Tags[i] must not exceed 32` + "`" + ` | ` + "`" + `Type must be one of: Normal Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + ` | ` + "`" + `Port must be at least 0` + "`" + ` | ` + "`" + `Port must not exceed 65535` + "`" + ` | ` + "`" + `ConnType must be one of: NONE TCP HTTP HTTPS` + "`" + ` | ` + "`" + `Lifetime must be at least 0` + "`" + ` | ` + "`" + `Invalid environment variables` + "`" + ` | ` + "`" + `MaxMemory must be at least 0` + "`" + ` | ` + "`" + `Invalid Max CPU, must be a positive 32-bit integer` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + `",
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `No data provided to update` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + ` | ` + "`" + `Name must not exceed 128` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Authors[i] must not exceed 64` + "`" + ` | ` + "`" + `Tags[i] must not exceed 32` + "`" + ` | ` + "`" + `Type must be one of: Normal Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + ` | ` + "`" + `Port must be at least 0` + "`" + ` | ` + "`" + `Port must not exceed 65535` + "`" + ` | ` + "`" + `ConnType must be one of: NONE TCP HTTP HTTPS` + "`" + ` | ` + "`" + `Lifetime must be at least 0` + "`" + ` | ` + "`" + `Invalid environment variables` + "`" + ` | ` + "`" + `MaxMemory must be at least 0` + "`" + ` | ` + "`" + `Invalid Max CPU, must be a positive 32-bit integer` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -346,6 +467,96 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Possible errors: ` + "`" + `Error fetching challenge` + "`" + ` | ` + "`" + `Error updating challenge` + "`" + ` | ` + "`" + `Internal server error` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/challenges/:id": {
+            "get": {
+                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).\nRetrieves challenge details (with role **Player** only solves if the challenge is visible).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "[Player+] Gets challenge details",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Challenge ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "solves is only included if the requester has Player role, otherwise all the challenge details are included except the solves",
+                        "schema": {
+                            "$ref": "#/definitions/challenges_get.Chall"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: ` + "`" + `Invalid challenge ID, must be non negative` + "`" + ` | ` + "`" + `id must be at least 0` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: ` + "`" + `Challenge not found` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: ` + "`" + `Error fetching challenge` + "`" + ` | ` + "`" + `Internal server error` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/challenges/hidden": {
+            "patch": {
+                "description": "Requires **Author** privileges or higher.\nToggles the hidden status of the specified challenges.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "[Author+] Toggles a list of challenges between hidden and visible",
+                "parameters": [
+                    {
+                        "description": "a list of challenge IDs to toggle hidden status",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/challenges_hidden.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `ChallIDs[i] must be at least 0` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: ` + "`" + `Error updating challenge` + "`" + ` | ` + "`" + `Internal server error` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -421,7 +632,242 @@ const docTemplate = `{
                 }
             }
         },
-        "challenges_update.UpdateChallParams": {
+        "challenges_all_get.Chall": {
+            "type": "object",
+            "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "authors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "category": {
+                    "type": "string"
+                },
+                "conn_type": {
+                    "$ref": "#/definitions/sqlc.ConnType"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "first_blood": {
+                    "type": "boolean"
+                },
+                "hidden": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "instance": {
+                    "type": "boolean"
+                },
+                "instance_hash_domain": {
+                    "type": "boolean"
+                },
+                "instance_host": {
+                    "type": "string"
+                },
+                "instance_port": {
+                    "type": "integer"
+                },
+                "instance_renewable": {
+                    "type": "boolean"
+                },
+                "max_points": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "score_type": {
+                    "$ref": "#/definitions/sqlc.ScoreType"
+                },
+                "solved": {
+                    "type": "boolean"
+                },
+                "solves": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "timeout": {
+                    "type": "integer"
+                }
+            }
+        },
+        "challenges_create.Data": {
+            "type": "object",
+            "required": [
+                "category",
+                "max_points",
+                "name",
+                "score_type",
+                "type"
+            ],
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "max_points": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "score_type": {
+                    "$ref": "#/definitions/sqlc.ScoreType"
+                },
+                "type": {
+                    "$ref": "#/definitions/sqlc.DeployType"
+                }
+            }
+        },
+        "challenges_delete.Data": {
+            "type": "object",
+            "required": [
+                "chall_id"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "challenges_get.Chall": {
+            "type": "object",
+            "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "authors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "category": {
+                    "type": "string"
+                },
+                "conn_type": {
+                    "$ref": "#/definitions/sqlc.ConnType"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "docker_config": {
+                    "$ref": "#/definitions/challenges_get.DockerConfig"
+                },
+                "flags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sqlc.GetFlagsByChallengeRow"
+                    }
+                },
+                "hidden": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "max_points": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "score_type": {
+                    "$ref": "#/definitions/sqlc.ScoreType"
+                },
+                "solves_list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sqlc.GetChallengeSolvesRow"
+                    }
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "$ref": "#/definitions/sqlc.DeployType"
+                }
+            }
+        },
+        "challenges_get.DockerConfig": {
+            "type": "object",
+            "properties": {
+                "compose": {
+                    "type": "string"
+                },
+                "envs": {
+                    "type": "string"
+                },
+                "hash_domain": {
+                    "type": "boolean"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "lifetime": {
+                    "type": "integer"
+                },
+                "max_cpu": {
+                    "type": "string"
+                },
+                "max_memory": {
+                    "type": "integer"
+                },
+                "renewable": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "challenges_hidden.Data": {
+            "type": "object",
+            "required": [
+                "chall_ids"
+            ],
+            "properties": {
+                "chall_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "challenges_update.Data": {
             "type": "object",
             "required": [
                 "chall_id"
@@ -533,6 +979,31 @@ const docTemplate = `{
                 "DeployTypeContainer",
                 "DeployTypeCompose"
             ]
+        },
+        "sqlc.GetChallengeSolvesRow": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "sqlc.GetFlagsByChallengeRow": {
+            "type": "object",
+            "properties": {
+                "flag": {
+                    "type": "string"
+                },
+                "regex": {
+                    "type": "boolean"
+                }
+            }
         },
         "sqlc.ScoreType": {
             "type": "string",

@@ -10,15 +10,30 @@ import (
 	"github.com/lib/pq"
 )
 
+type Data struct {
+	Name        string          `json:"name" validate:"required,challenge_name"`
+	Category    string          `json:"category" validate:"required,category_name"`
+	Description string          `json:"description" validate:"challenge_description"`
+	Type        sqlc.DeployType `json:"type" validate:"required,challenge_type"`
+	MaxPoints   int32           `json:"max_points" validate:"required,challenge_max_points"`
+	ScoreType   sqlc.ScoreType  `json:"score_type" validate:"required,challenge_score_type"`
+}
+
+// @Summary [Author+] Creates a new challenge
+// @Description Requires **Author** privileges or higher.
+// @Description Creates a new challenge with the provided details.
+// @Tags challenges
+// @Accept json
+// @Produce json
+// @Param data body Data true "all fields are required except **description**"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `Category must not exceed 32` | `Description must not exceed 10240` | `Type must be one of: Normal Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic`"
+// @Failure 404 {object} models.Error "Possible errors: `Category not found`"
+// @Failure 409 {object} models.Error "Possible errors: `Challenge already exists`"
+// @Failure 500 {object} models.Error "Possible errors: `Error creating challenge` | `Internal server error`"
+// @Router /api/challenges [post]
 func Route(c *fiber.Ctx) error {
-	var data struct {
-		Name        string          `json:"name" validate:"required,challenge_name"`
-		Category    string          `json:"category" validate:"required,category_name"`
-		Description string          `json:"description" validate:"challenge_description"`
-		Type        sqlc.DeployType `json:"type" validate:"required,challenge_type"`
-		MaxPoints   int32           `json:"max_points" validate:"required,challenge_max_points"`
-		ScoreType   sqlc.ScoreType  `json:"score_type" validate:"required,challenge_score_type"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}

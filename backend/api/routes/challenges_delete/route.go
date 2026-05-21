@@ -8,10 +8,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Data struct {
+	ChallID *int32 `json:"chall_id" validate:"required,id"`
+}
+
+// @Summary [Author+] Deletes a challenge
+// @Description Requires **Author** privileges or higher.
+// @Description Deletes a challenge with the provided ID.
+// @Tags challenges
+// @Accept json
+// @Produce json
+// @Param data body Data true "all fields are required"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0`"
+// @Failure 500 {object} models.Error "Possible errors: `Error deleting challenge` | `Internal server error`"
+// @Router /api/challenges [delete]
 func Route(c *fiber.Ctx) error {
-	var data struct {
-		ChallID *int32 `json:"chall_id" validate:"required,id"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}

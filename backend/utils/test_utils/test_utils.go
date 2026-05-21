@@ -181,7 +181,7 @@ func TryCreateChallenge(t *testing.T, name string, category string, description 
 }
 
 func UnveilChallenge(t *testing.T, id int32) {
-	err := challenges_update.UpdateChallenge(t.Context(), &challenges_update.UpdateChallParams{
+	err := challenges_update.UpdateChallenge(t.Context(), &challenges_update.Data{
 		ChallID: &id,
 		Hidden:  new(false),
 	})
