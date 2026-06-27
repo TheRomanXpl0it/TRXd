@@ -11,11 +11,26 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Data struct {
+	Key   string  `json:"key" validate:"required"`
+	Value *string `json:"value" validate:"required"`
+}
+
+// @Summary [Admin] Updates details of an existing config
+// @Description Requires **Admin** privileges.
+// @Description Updates an existing config's value.
+// @Description Note: if `user-mode` is updated, the server will automatically shut down and restart to apply the change.
+// @Tags configs
+// @Accept json
+// @Produce json
+// @Param data body Data true "all fields are required"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields`"
+// @Failure 404 {object} models.Error "Possible errors: `Configuration not found`"
+// @Failure 500 {object} models.Error "Possible errors: `Error updating configuration`"
+// @Router /api/configs [patch]
 func Route(c *fiber.Ctx) error {
-	var data struct {
-		Key   string  `json:"key" validate:"required"`
-		Value *string `json:"value" validate:"required"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}

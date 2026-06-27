@@ -7,6 +7,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// @Summary [Admin] Gets all configs
+// @Description Requires **Admin** privileges.
+// @Description Retrieves a list of all configs.
+// @Tags configs
+// @Produce json
+// @Success 200 {object} []sqlc.Config "List of configs with all displayable details"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching configurations`"
+// @Router /api/configs [get]
 func Route(c *fiber.Ctx) error {
 	configs, err := GetConfigs(c.Context())
 	if err != nil {
