@@ -18,7 +18,7 @@ import (
 // @Success 200 {object} Chall "solves is only included if the requester has Player role, otherwise all the challenge details are included except the solves"
 // @Failure 400 {object} models.Error "Possible errors: `Invalid challenge ID, must be non negative` | `id must be at least 0`"
 // @Failure 404 {object} models.Error "Possible errors: `Challenge not found`"
-// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge`"
 // @Router /api/challenges/:id [get]
 func Route(c *fiber.Ctx) error {
 	uid := c.Locals("uid").(int32)

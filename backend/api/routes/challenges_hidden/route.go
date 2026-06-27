@@ -21,7 +21,7 @@ type Data struct {
 // @Param data body Data true "a list of challenge IDs to toggle hidden status"
 // @Success 200
 // @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallIDs[i] must be at least 0`"
-// @Failure 500 {object} models.Error "Possible errors: `Error updating challenge` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error updating challenge`"
 // @Router /api/challenges/hidden [patch]
 func Route(c *fiber.Ctx) error {
 	var data Data

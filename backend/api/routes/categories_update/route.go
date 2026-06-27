@@ -26,7 +26,7 @@ type Data struct {
 // @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `NewName must not exceed 32`"
 // @Failure 404 {object} models.Error "Possible errors: `Category not found`"
 // @Failure 409 {object} models.Error "Possible errors: `Category already exists`"
-// @Failure 500 {object} models.Error "Possible errors: `Error fetching category` | `Error creating category` | `Error updating category` | `Error deleting category` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching category` | `Error creating category` | `Error updating category` | `Error deleting category`"
 // @Router /api/categories [patch]
 func Route(c *fiber.Ctx) error {
 	var data Data

@@ -47,7 +47,7 @@ type Data struct {
 // @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `No data provided to update` | `ChallID must be at least 0` | `Name must not exceed 128` | `Category must not exceed 32` | `Description must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must not exceed 32` | `Type must be one of: Normal Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port must be at least 0` | `Port must not exceed 65535` | `ConnType must be one of: NONE TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment variables` | `MaxMemory must be at least 0` | `Invalid Max CPU, must be a positive 32-bit integer`"
 // @Failure 404 {object} models.Error "Possible errors: `Challenge not found` | `Category not found`"
 // @Failure 409 {object} models.Error "Possible errors: `Challenge name already exists`"
-// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error updating challenge` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error updating challenge`"
 // @Router /api/challenges [patch]
 func Route(c *fiber.Ctx) error {
 	var data Data

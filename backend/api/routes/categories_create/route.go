@@ -22,7 +22,7 @@ type Data struct {
 // @Success 200
 // @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32`"
 // @Failure 409 {object} models.Error "Possible errors: `Category already exists`"
-// @Failure 500 {object} models.Error "Possible errors: `Error creating category` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error creating category`"
 // @Router /api/categories [post]
 func Route(c *fiber.Ctx) error {
 	var data Data

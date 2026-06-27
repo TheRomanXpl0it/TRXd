@@ -25,7 +25,7 @@ type Data struct {
 // @Success 200
 // @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Names[i] must not exceed 128`"
 // @Failure 404 {object} models.Error "Possible errors: `Attachment not found`"
-// @Failure 500 {object} models.Error "Possible errors: `Error fetching attachment` | `Error deleting attachment` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching attachment` | `Error deleting attachment`"
 // @Router /api/attachments [delete]
 func Route(c *fiber.Ctx) error {
 	var data Data

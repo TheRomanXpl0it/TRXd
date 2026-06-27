@@ -14,7 +14,7 @@ import (
 // @Tags challenges
 // @Produce json
 // @Success 200 {object} []Chall "List of challenges with all dysplayable details (except solves)"
-// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenges` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenges`"
 // @Router /api/challenges [get]
 func Route(c *fiber.Ctx) error {
 	uid := c.Locals("uid").(int32)

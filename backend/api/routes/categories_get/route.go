@@ -14,7 +14,7 @@ import (
 // @Tags categories
 // @Produce json
 // @Success 200 {object} []string "List of category names"
-// @Failure 500 {object} models.Error "Possible errors: `Error fetching categories` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching categories`"
 // @Router /api/categories [get]
 func Route(c *fiber.Ctx) error {
 	role := c.Locals("role").(sqlc.UserRole)

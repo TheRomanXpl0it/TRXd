@@ -250,9 +250,95 @@ definitions:
     required:
     - chall_id
     type: object
+  configs_update.Data:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    required:
+    - key
+    - value
+    type: object
+  flags_create.Data:
+    properties:
+      chall_id:
+        type: integer
+      flag:
+        type: string
+      regex:
+        type: boolean
+    required:
+    - chall_id
+    - flag
+    type: object
+  flags_delete.Data:
+    properties:
+      chall_id:
+        type: integer
+      flag:
+        type: string
+    required:
+    - chall_id
+    - flag
+    type: object
+  flags_update.Data:
+    properties:
+      chall_id:
+        type: integer
+      flag:
+        type: string
+      new_flag:
+        type: string
+      regex:
+        type: boolean
+    required:
+    - chall_id
+    - flag
+    type: object
+  instances_create.Data:
+    properties:
+      chall_id:
+        type: integer
+    required:
+    - chall_id
+    type: object
+  instances_delete.Data:
+    properties:
+      chall_id:
+        type: integer
+      team_id:
+        type: integer
+    required:
+    - chall_id
+    type: object
+  instances_update.Data:
+    properties:
+      chall_id:
+        type: integer
+    required:
+    - chall_id
+    type: object
   models.Error:
     properties:
       error:
+        type: string
+    type: object
+  sqlc.Config:
+    properties:
+      category:
+        type: string
+      description:
+        type: string
+      key:
+        type: string
+      name:
+        type: string
+      secret:
+        type: boolean
+      type:
+        type: string
+      value:
         type: string
     type: object
   sqlc.ConnType:
@@ -277,6 +363,23 @@ definitions:
     - DeployTypeNormal
     - DeployTypeContainer
     - DeployTypeCompose
+  sqlc.GetAdminStatsRow:
+    properties:
+      total_challenges:
+        type: integer
+      total_correct_submissions:
+        type: integer
+      total_players:
+        type: integer
+      total_released_challenges:
+        type: integer
+      total_submissions:
+        type: integer
+      total_teams:
+        type: integer
+      total_users:
+        type: integer
+    type: object
   sqlc.GetChallengeSolvesRow:
     properties:
       id:
@@ -293,6 +396,27 @@ definitions:
       regex:
         type: boolean
     type: object
+  sqlc.GetInstancesRow:
+    properties:
+      chall_id:
+        type: integer
+      chall_name:
+        type: string
+      conn_type:
+        $ref: '#/definitions/sqlc.ConnType'
+      docker_id:
+        type: string
+      expires_at:
+        type: string
+      host:
+        type: string
+      port:
+        type: integer
+      team_id:
+        type: integer
+      team_name:
+        type: string
+    type: object
   sqlc.ScoreType:
     enum:
     - Static
@@ -301,6 +425,76 @@ definitions:
     x-enum-varnames:
     - ScoreTypeStatic
     - ScoreTypeDynamic
+  sqlc.SubmissionStatus:
+    enum:
+    - Wrong
+    - Correct
+    - Repeated
+    - Invalid
+    type: string
+    x-enum-varnames:
+    - SubmissionStatusWrong
+    - SubmissionStatusCorrect
+    - SubmissionStatusRepeated
+    - SubmissionStatusInvalid
+  submissions_create.Data:
+    properties:
+      chall_id:
+        type: integer
+      flag:
+        type: string
+    required:
+    - chall_id
+    - flag
+    type: object
+  submissions_create.Response:
+    properties:
+      first_blood:
+        type: boolean
+      status:
+        $ref: '#/definitions/sqlc.SubmissionStatus'
+    type: object
+  submissions_delete.Data:
+    properties:
+      sub_id:
+        type: integer
+    required:
+    - sub_id
+    type: object
+  submissions_get.Response:
+    properties:
+      submissions:
+        items:
+          $ref: '#/definitions/submissions_get.Submissions'
+        type: array
+      total:
+        type: integer
+    type: object
+  submissions_get.Submissions:
+    properties:
+      chall_id:
+        type: integer
+      chall_name:
+        type: string
+      first_blood:
+        type: boolean
+      flag:
+        type: string
+      id:
+        type: integer
+      status:
+        $ref: '#/definitions/sqlc.SubmissionStatus'
+      team_id:
+        type: integer
+      team_name:
+        type: string
+      timestamp:
+        type: string
+      user_id:
+        type: integer
+      user_name:
+        type: string
+    type: object
 info:
   contact: {}
   title: TRXd API
@@ -335,7 +529,7 @@ paths:
             $ref: '#/definitions/models.Error'
         "500":
           description: 'Possible errors: `Error fetching attachment` | `Error deleting
-            attachment` | `Internal server error`'
+            attachment`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Deletes attachments for a challenge'
@@ -383,7 +577,7 @@ paths:
             $ref: '#/definitions/models.Error'
         "500":
           description: 'Possible errors: `Error fetching challenge` | `Error creating
-            attachments` | `Internal server error`'
+            attachments`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Creates new attachments for a challenge'
@@ -414,8 +608,7 @@ paths:
           schema:
             $ref: '#/definitions/models.Error'
         "500":
-          description: 'Possible errors: `Error deleting category` | `Internal server
-            error`'
+          description: 'Possible errors: `Error deleting category`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Deletes a category'
@@ -435,8 +628,7 @@ paths:
               type: string
             type: array
         "500":
-          description: 'Possible errors: `Error fetching categories` | `Internal server
-            error`'
+          description: 'Possible errors: `Error fetching categories`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Player+] Gets all categories'
@@ -475,8 +667,7 @@ paths:
             $ref: '#/definitions/models.Error'
         "500":
           description: 'Possible errors: `Error fetching category` | `Error creating
-            category` | `Error updating category` | `Error deleting category` | `Internal
-            server error`'
+            category` | `Error updating category` | `Error deleting category`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Updates a category'
@@ -510,8 +701,7 @@ paths:
           schema:
             $ref: '#/definitions/models.Error'
         "500":
-          description: 'Possible errors: `Error creating category` | `Internal server
-            error`'
+          description: 'Possible errors: `Error creating category`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Creates a new category'
@@ -542,8 +732,7 @@ paths:
           schema:
             $ref: '#/definitions/models.Error'
         "500":
-          description: 'Possible errors: `Error deleting challenge` | `Internal server
-            error`'
+          description: 'Possible errors: `Error deleting challenge`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Deletes a challenge'
@@ -563,8 +752,7 @@ paths:
               $ref: '#/definitions/challenges_all_get.Chall'
             type: array
         "500":
-          description: 'Possible errors: `Error fetching challenges` | `Internal server
-            error`'
+          description: 'Possible errors: `Error fetching challenges`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Player+] Gets all challenges'
@@ -612,7 +800,7 @@ paths:
             $ref: '#/definitions/models.Error'
         "500":
           description: 'Possible errors: `Error fetching challenge` | `Error updating
-            challenge` | `Internal server error`'
+            challenge`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Updates details of an existing challenge'
@@ -653,8 +841,7 @@ paths:
           schema:
             $ref: '#/definitions/models.Error'
         "500":
-          description: 'Possible errors: `Error creating challenge` | `Internal server
-            error`'
+          description: 'Possible errors: `Error creating challenge`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Creates a new challenge'
@@ -689,8 +876,7 @@ paths:
           schema:
             $ref: '#/definitions/models.Error'
         "500":
-          description: 'Possible errors: `Error fetching challenge` | `Internal server
-            error`'
+          description: 'Possible errors: `Error fetching challenge`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Player+] Gets challenge details'
@@ -721,11 +907,457 @@ paths:
           schema:
             $ref: '#/definitions/models.Error'
         "500":
-          description: 'Possible errors: `Error updating challenge` | `Internal server
-            error`'
+          description: 'Possible errors: `Error updating challenge`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Toggles a list of challenges between hidden and visible'
       tags:
       - challenges
+  /api/configs:
+    get:
+      description: |-
+        Requires **Admin** privileges.
+        Retrieves a list of all configs.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of configs with all displayable details
+          schema:
+            items:
+              $ref: '#/definitions/sqlc.Config'
+            type: array
+        "500":
+          description: 'Possible errors: `Error fetching configurations`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Admin] Gets all configs'
+      tags:
+      - configs
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Admin** privileges.
+        Updates an existing config's value.
+        Note: if `user-mode` is updated, the server will automatically shut down and restart to apply the change.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/configs_update.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Configuration not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error updating configuration`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Admin] Updates details of an existing config'
+      tags:
+      - configs
+  /api/flags:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Deletes a flag of a challenge.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/flags_delete.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `Flag must not exceed 256`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error deleting
+            flag`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Deletes a flag for a challenge'
+      tags:
+      - flags
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Updates a flag of a challenge.
+      parameters:
+      - description: '`chall_id` and `flag` are required, at least one of `regex`
+          or `new_flag` must be provided'
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/flags_update.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `Flag must not exceed 256` |
+            `NewFlag must not exceed 256`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Flag already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error updating
+            flag`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Updates a flag for a challenge'
+      tags:
+      - flags
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Creates a new flag of a challenge.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/flags_create.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `Flag must not exceed 256`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Flag already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error creating
+            flag`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Creates a new flag for a challenge'
+      tags:
+      - flags
+  /api/instances:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+        Deletes an instance of a challenge for a team (if **Player**, only visible challenges), with **Admin** role is also possible to delete instances for other teams.
+        Note: This endpoint uses docker, so it's critical, remember that all 500 errors will log the full error message.
+      parameters:
+      - description: '`chall_id` is required, `team_id` is optional and only for admins'
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/instances_delete.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `TeamID must be at least 0` |
+            `Challenge is not instanciable`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: 'Possible errors: `Team not Found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Already an active instance`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error fetching
+            instance` | `Error deleting instance`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Deletes an instance of a challenge'
+      tags:
+      - instances
+    get:
+      description: |-
+        Requires **Author** privileges or higher.
+        Retrieves a list of all instances.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of instances details
+          schema:
+            items:
+              $ref: '#/definitions/sqlc.GetInstancesRow'
+            type: array
+        "500":
+          description: 'Possible errors: `Error fetching instances`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Gets all instances'
+      tags:
+      - instances
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+        Updates the lifetime of an existing instance of a challenge for a team (if **Player**, only visible challenges).
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/instances_update.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `Challenge is not instanciable`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: 'Possible errors: `Team not Found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found` | `Instance not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Already an active instance`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error fetching
+            instance` | `global lifetime is missing` | `Error updating instance`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Updates the lifetime of an existing instance of a challenge'
+      tags:
+      - instances
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+        Creates a new instance of a challenge for a team (if **Player**, only visible challenges).
+        Note: This endpoint uses docker, so it's critical, remember that all 500 errors will log the full error message.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/instances_create.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `Challenge is not instanciable`
+            | `Invalid image`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: 'Possible errors: `Team not Found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Already an active instance`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error fetching
+            instance` | `Error creating instance`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Spawns a new instance of a challenge'
+      tags:
+      - instances
+  /api/stats:
+    get:
+      description: |-
+        Requires **Author** privileges or higher.
+        Retrieves a list useful stats.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of stats
+          schema:
+            $ref: '#/definitions/sqlc.GetAdminStatsRow'
+        "500":
+          description: 'Possible errors: `Error fetching stats`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Gets stats'
+      tags:
+      - stats
+  /api/submissions:
+    delete:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Admin** privileges.
+        Deletes a submission specified by the submission ID.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/submissions_delete.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `SubID must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error deleting submission`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Admin+] Delete a submission'
+      tags:
+      - submissions
+    get:
+      description: |-
+        Requires **Author** privileges or higher.
+        Retrieves a list of all submissions, can be paginated by using the `offset` and `limit` query parameters.
+      parameters:
+      - description: Number of items to skip before starting to collect the result
+          set. Default is 0.
+        in: query
+        name: offset
+        type: integer
+      - description: Number of items to return. Default is 0, which means no limit.
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of submissions details
+          schema:
+            $ref: '#/definitions/submissions_get.Response'
+        "400":
+          description: 'Possible errors: `Invalid parameter`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching submissions`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Gets all submissions'
+      tags:
+      - submissions
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+        Creates submission for a challenge for the player's team (if **Player**, only on visible challenges).
+        If **Author** role or higher the submission is not created the flag is only validated.
+        If the discord webhook is configured and the submission is a first blood, a message will be sent to the discord channel.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/submissions_create.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Submission status and if it's a first blood
+          schema:
+            $ref: '#/definitions/submissions_create.Response'
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `Flag must not exceed 256 `'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge` | `Error submitting
+            flag`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Create a new submission for a challenge'
+      tags:
+      - submissions
 swagger: "2.0"

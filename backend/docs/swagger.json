@@ -64,7 +64,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error fetching challenge` | `Error creating attachments` | `Internal server error`",
+                        "description": "Possible errors: `Error fetching challenge` | `Error creating attachments`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -111,7 +111,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error fetching attachment` | `Error deleting attachment` | `Internal server error`",
+                        "description": "Possible errors: `Error fetching attachment` | `Error deleting attachment`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -140,7 +140,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error fetching categories` | `Internal server error`",
+                        "description": "Possible errors: `Error fetching categories`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -187,7 +187,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error creating category` | `Internal server error`",
+                        "description": "Possible errors: `Error creating category`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -228,7 +228,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error deleting category` | `Internal server error`",
+                        "description": "Possible errors: `Error deleting category`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -281,7 +281,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error fetching category` | `Error creating category` | `Error updating category` | `Error deleting category` | `Internal server error`",
+                        "description": "Possible errors: `Error fetching category` | `Error creating category` | `Error updating category` | `Error deleting category`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -310,7 +310,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error fetching challenges` | `Internal server error`",
+                        "description": "Possible errors: `Error fetching challenges`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -363,7 +363,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error creating challenge` | `Internal server error`",
+                        "description": "Possible errors: `Error creating challenge`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -404,7 +404,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error deleting challenge` | `Internal server error`",
+                        "description": "Possible errors: `Error deleting challenge`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -457,7 +457,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error fetching challenge` | `Error updating challenge` | `Internal server error`",
+                        "description": "Possible errors: `Error fetching challenge` | `Error updating challenge`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -504,7 +504,7 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error fetching challenge` | `Internal server error`",
+                        "description": "Possible errors: `Error fetching challenge`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -547,7 +547,607 @@
                         }
                     },
                     "500": {
-                        "description": "Possible errors: `Error updating challenge` | `Internal server error`",
+                        "description": "Possible errors: `Error updating challenge`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/configs": {
+            "get": {
+                "description": "Requires **Admin** privileges.\nRetrieves a list of all configs.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "configs"
+                ],
+                "summary": "[Admin] Gets all configs",
+                "responses": {
+                    "200": {
+                        "description": "List of configs with all displayable details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sqlc.Config"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching configurations`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Requires **Admin** privileges.\nUpdates an existing config's value.\nNote: if `user-mode` is updated, the server will automatically shut down and restart to apply the change.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "configs"
+                ],
+                "summary": "[Admin] Updates details of an existing config",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/configs_update.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Configuration not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error updating configuration`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/flags": {
+            "post": {
+                "description": "Requires **Author** privileges or higher.\nCreates a new flag of a challenge.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flags"
+                ],
+                "summary": "[Author+] Creates a new flag for a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/flags_create.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Flag must not exceed 256`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Flag already exists`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge` | `Error creating flag`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Requires **Author** privileges or higher.\nDeletes a flag of a challenge.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flags"
+                ],
+                "summary": "[Author+] Deletes a flag for a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/flags_delete.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Flag must not exceed 256`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge` | `Error deleting flag`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Requires **Author** privileges or higher.\nUpdates a flag of a challenge.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "flags"
+                ],
+                "summary": "[Author+] Updates a flag for a challenge",
+                "parameters": [
+                    {
+                        "description": "`chall_id` and `flag` are required, at least one of `regex` or `new_flag` must be provided",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/flags_update.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Flag must not exceed 256` | `NewFlag must not exceed 256`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Flag already exists`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge` | `Error updating flag`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/instances": {
+            "get": {
+                "description": "Requires **Author** privileges or higher.\nRetrieves a list of all instances.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instances"
+                ],
+                "summary": "[Author+] Gets all instances",
+                "responses": {
+                    "200": {
+                        "description": "List of instances details",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sqlc.GetInstancesRow"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching instances`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).\nCreates a new instance of a challenge for a team (if **Player**, only visible challenges).\nNote: This endpoint uses docker, so it's critical, remember that all 500 errors will log the full error message.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instances"
+                ],
+                "summary": "[Player+] Spawns a new instance of a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/instances_create.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Challenge is not instanciable` | `Invalid image`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Possible errors: `Team not Found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Already an active instance`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge` | `Error fetching instance` | `Error creating instance`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).\nDeletes an instance of a challenge for a team (if **Player**, only visible challenges), with **Admin** role is also possible to delete instances for other teams.\nNote: This endpoint uses docker, so it's critical, remember that all 500 errors will log the full error message.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instances"
+                ],
+                "summary": "[Player+] Deletes an instance of a challenge",
+                "parameters": [
+                    {
+                        "description": "`chall_id` is required, `team_id` is optional and only for admins",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/instances_delete.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `TeamID must be at least 0` | `Challenge is not instanciable`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Possible errors: `Team not Found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Already an active instance`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge` | `Error fetching instance` | `Error deleting instance`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).\nUpdates the lifetime of an existing instance of a challenge for a team (if **Player**, only visible challenges).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "instances"
+                ],
+                "summary": "[Player+] Updates the lifetime of an existing instance of a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/instances_update.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Challenge is not instanciable`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Possible errors: `Team not Found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found` | `Instance not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Already an active instance`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge` | `Error fetching instance` | `global lifetime is missing` | `Error updating instance`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/stats": {
+            "get": {
+                "description": "Requires **Author** privileges or higher.\nRetrieves a list useful stats.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stats"
+                ],
+                "summary": "[Author+] Gets stats",
+                "responses": {
+                    "200": {
+                        "description": "List of stats",
+                        "schema": {
+                            "$ref": "#/definitions/sqlc.GetAdminStatsRow"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching stats`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/submissions": {
+            "get": {
+                "description": "Requires **Author** privileges or higher.\nRetrieves a list of all submissions, can be paginated by using the `offset` and `limit` query parameters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "summary": "[Author+] Gets all submissions",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of items to skip before starting to collect the result set. Default is 0.",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items to return. Default is 0, which means no limit.",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of submissions details",
+                        "schema": {
+                            "$ref": "#/definitions/submissions_get.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid parameter`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching submissions`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).\nCreates submission for a challenge for the player's team (if **Player**, only on visible challenges).\nIf **Author** role or higher the submission is not created the flag is only validated.\nIf the discord webhook is configured and the submission is a first blood, a message will be sent to the discord channel.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "summary": "[Player+] Create a new submission for a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/submissions_create.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Submission status and if it's a first blood",
+                        "schema": {
+                            "$ref": "#/definitions/submissions_create.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Flag must not exceed 256 `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge` | `Error submitting flag`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Requires **Admin** privileges.\nDeletes a submission specified by the submission ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "summary": "[Admin+] Delete a submission",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/submissions_delete.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `SubID must be at least 0`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error deleting submission`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -935,10 +1535,141 @@
                 }
             }
         },
+        "configs_update.Data": {
+            "type": "object",
+            "required": [
+                "key",
+                "value"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "flags_create.Data": {
+            "type": "object",
+            "required": [
+                "chall_id",
+                "flag"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "flag": {
+                    "type": "string"
+                },
+                "regex": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "flags_delete.Data": {
+            "type": "object",
+            "required": [
+                "chall_id",
+                "flag"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "flag": {
+                    "type": "string"
+                }
+            }
+        },
+        "flags_update.Data": {
+            "type": "object",
+            "required": [
+                "chall_id",
+                "flag"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "flag": {
+                    "type": "string"
+                },
+                "new_flag": {
+                    "type": "string"
+                },
+                "regex": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "instances_create.Data": {
+            "type": "object",
+            "required": [
+                "chall_id"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "instances_delete.Data": {
+            "type": "object",
+            "required": [
+                "chall_id"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "team_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "instances_update.Data": {
+            "type": "object",
+            "required": [
+                "chall_id"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.Error": {
             "type": "object",
             "properties": {
                 "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "sqlc.Config": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "key": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "secret": {
+                    "type": "boolean"
+                },
+                "type": {
+                    "type": "string"
+                },
+                "value": {
                     "type": "string"
                 }
             }
@@ -971,6 +1702,32 @@
                 "DeployTypeCompose"
             ]
         },
+        "sqlc.GetAdminStatsRow": {
+            "type": "object",
+            "properties": {
+                "total_challenges": {
+                    "type": "integer"
+                },
+                "total_correct_submissions": {
+                    "type": "integer"
+                },
+                "total_players": {
+                    "type": "integer"
+                },
+                "total_released_challenges": {
+                    "type": "integer"
+                },
+                "total_submissions": {
+                    "type": "integer"
+                },
+                "total_teams": {
+                    "type": "integer"
+                },
+                "total_users": {
+                    "type": "integer"
+                }
+            }
+        },
         "sqlc.GetChallengeSolvesRow": {
             "type": "object",
             "properties": {
@@ -996,6 +1753,38 @@
                 }
             }
         },
+        "sqlc.GetInstancesRow": {
+            "type": "object",
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "chall_name": {
+                    "type": "string"
+                },
+                "conn_type": {
+                    "$ref": "#/definitions/sqlc.ConnType"
+                },
+                "docker_id": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "team_name": {
+                    "type": "string"
+                }
+            }
+        },
         "sqlc.ScoreType": {
             "type": "string",
             "enum": [
@@ -1006,6 +1795,110 @@
                 "ScoreTypeStatic",
                 "ScoreTypeDynamic"
             ]
+        },
+        "sqlc.SubmissionStatus": {
+            "type": "string",
+            "enum": [
+                "Wrong",
+                "Correct",
+                "Repeated",
+                "Invalid"
+            ],
+            "x-enum-varnames": [
+                "SubmissionStatusWrong",
+                "SubmissionStatusCorrect",
+                "SubmissionStatusRepeated",
+                "SubmissionStatusInvalid"
+            ]
+        },
+        "submissions_create.Data": {
+            "type": "object",
+            "required": [
+                "chall_id",
+                "flag"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "flag": {
+                    "type": "string"
+                }
+            }
+        },
+        "submissions_create.Response": {
+            "type": "object",
+            "properties": {
+                "first_blood": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "$ref": "#/definitions/sqlc.SubmissionStatus"
+                }
+            }
+        },
+        "submissions_delete.Data": {
+            "type": "object",
+            "required": [
+                "sub_id"
+            ],
+            "properties": {
+                "sub_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "submissions_get.Response": {
+            "type": "object",
+            "properties": {
+                "submissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/submissions_get.Submissions"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "submissions_get.Submissions": {
+            "type": "object",
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "chall_name": {
+                    "type": "string"
+                },
+                "first_blood": {
+                    "type": "boolean"
+                },
+                "flag": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/sqlc.SubmissionStatus"
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "team_name": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                },
+                "user_name": {
+                    "type": "string"
+                }
+            }
         }
     }
 }

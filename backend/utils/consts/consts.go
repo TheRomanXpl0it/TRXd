@@ -110,6 +110,8 @@ const (
 	ErrorUpdatingCategory         = "Error updating category"
 	ErrorUpdatingChallenge        = "Error updating challenge"
 	ErrorUpdatingConfig           = "Error updating configuration"
+	ErrorUpdatingFlag             = "Error updating flag"
+	ErrorUpdatingInstance         = "Error updating instance"
 	ErrorUpdatingTeam             = "Error updating team"
 	ErrorUpdatingUser             = "Error updating user"
 

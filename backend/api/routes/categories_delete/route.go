@@ -21,7 +21,7 @@ type Data struct {
 // @Param data body Data true "all fields are required"
 // @Success 200
 // @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32`"
-// @Failure 500 {object} models.Error "Possible errors: `Error deleting category` | `Internal server error`"
+// @Failure 500 {object} models.Error "Possible errors: `Error deleting category`"
 // @Router /api/categories [delete]
 func Route(c *fiber.Ctx) error {
 	var data Data
