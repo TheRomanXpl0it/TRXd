@@ -13,6 +13,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Data struct {
+	ChallID *int32 `json:"chall_id" validate:"required,id"`
+}
+
 type InstanceInfo struct {
 	Host       string `json:"host"`
 	Port       *int32 `json:"port,omitempty"`
@@ -42,7 +46,7 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, er
 		case "[race condition]":
 			return nil, utils.Error(c, fiber.StatusConflict, consts.AlreadyAnActiveInstance)
 		case "[no image or compose]":
-			return nil, utils.Error(c, fiber.StatusBadRequest, consts.InvalidImage)
+			return nil, utils.Error(c, fiber.StatusBadRequest, consts.InvalidImage) // TODO: change this status code
 		default:
 			return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorCreatingInstance, err)
 		}
@@ -56,6 +60,21 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, er
 	}, nil
 }
 
+// @Summary [Player+] Spawns a new instance of a challenge
+// @Description Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+// @Description Creates a new instance of a challenge for a team (if **Player**, only visible challenges).
+// @Description Note: This endpoint uses docker, so it's critical, remember that all 500 errors will log the full error message.
+// @Tags instances
+// @Accept json
+// @Produce json
+// @Param data body Data true "all fields are required"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Challenge is not instanciable` | `Invalid image`"
+// @Failure 403 {object} models.Error "Possible errors: `Team not Found`"
+// @Failure 404 {object} models.Error "Possible errors: `Challenge not found`"
+// @Failure 409 {object} models.Error "Possible errors: `Already an active instance`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error fetching instance` | `Error creating instance`"
+// @Router /api/instances [post]
 func Route(c *fiber.Ctx) error {
 	role := c.Locals("role").(sqlc.UserRole)
 	tid := c.Locals("tid").(int32)
@@ -63,9 +82,7 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusForbidden, consts.TeamNotFound)
 	}
 
-	var data struct {
-		ChallID *int32 `json:"chall_id" validate:"required,id"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}

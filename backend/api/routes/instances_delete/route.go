@@ -11,11 +11,28 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Data struct {
+	TeamID  *int32 `json:"team_id" validate:"omitnil,id"`
+	ChallID *int32 `json:"chall_id" validate:"required,id"`
+}
+
+// @Summary [Player+] Deletes an instance of a challenge
+// @Description Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+// @Description Deletes an instance of a challenge for a team (if **Player**, only visible challenges), with **Admin** role is also possible to delete instances for other teams.
+// @Description Note: This endpoint uses docker, so it's critical, remember that all 500 errors will log the full error message.
+// @Tags instances
+// @Accept json
+// @Produce json
+// @Param data body Data true "`chall_id` is required, `team_id` is optional and only for admins"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `TeamID must be at least 0` | `Challenge is not instanciable`"
+// @Failure 403 {object} models.Error "Possible errors: `Team not Found`"
+// @Failure 404 {object} models.Error "Possible errors: `Challenge not found`"
+// @Failure 409 {object} models.Error "Possible errors: `Already an active instance`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error fetching instance` | `Error deleting instance`"
+// @Router /api/instances [delete]
 func Route(c *fiber.Ctx) error {
-	var data struct {
-		TeamID  *int32 `json:"team_id" validate:"omitnil,id"`
-		ChallID *int32 `json:"chall_id" validate:"required,id"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}

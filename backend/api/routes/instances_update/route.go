@@ -13,6 +13,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Data struct {
+	ChallID *int32 `json:"chall_id" validate:"required,id"`
+}
+
 func canRenewInstance(c *fiber.Ctx, chall *db.Chall, role sqlc.UserRole, tid int32, challID int32) (bool, error) {
 	if chall.Info.Hidden &&
 		!utils.In(role, []sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}) {
@@ -38,6 +42,20 @@ func canRenewInstance(c *fiber.Ctx, chall *db.Chall, role sqlc.UserRole, tid int
 	return true, nil
 }
 
+// @Summary [Player+] Updates the lifetime of an existing instance of a challenge
+// @Description Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
+// @Description Updates the lifetime of an existing instance of a challenge for a team (if **Player**, only visible challenges).
+// @Tags instances
+// @Accept json
+// @Produce json
+// @Param data body Data true "all fields are required"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Challenge is not instanciable`"
+// @Failure 403 {object} models.Error "Possible errors: `Team not Found`"
+// @Failure 404 {object} models.Error "Possible errors: `Challenge not found` | `Instance not found`"
+// @Failure 409 {object} models.Error "Possible errors: `Already an active instance`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error fetching instance` | `global lifetime is missing` | `Error updating instance`"
+// @Router /api/instances [patch]
 func Route(c *fiber.Ctx) error {
 	role := c.Locals("role").(sqlc.UserRole)
 	tid := c.Locals("tid").(int32)
@@ -45,9 +63,7 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusForbidden, consts.TeamNotFound)
 	}
 
-	var data struct {
-		ChallID *int32 `json:"chall_id" validate:"required,id"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}
@@ -78,7 +94,7 @@ func Route(c *fiber.Ctx) error {
 
 	err = instancer.UpdateInstanceExpire(c.Context(), tid, *data.ChallID, expires_at)
 	if err != nil {
-		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorCreatingInstance, err)
+		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorUpdatingInstance, err)
 	}
 
 	timeout := int(time.Until(expires_at).Seconds())
