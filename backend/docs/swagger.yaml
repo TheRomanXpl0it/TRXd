@@ -380,6 +380,13 @@ definitions:
       total_users:
         type: integer
     type: object
+  sqlc.GetBadgesFromTeamRow:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+    type: object
   sqlc.GetChallengeSolvesRow:
     properties:
       id:
@@ -417,6 +424,39 @@ definitions:
       team_name:
         type: string
     type: object
+  sqlc.GetTeamMembersRow:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/sqlc.UserRole'
+      score:
+        type: integer
+    type: object
+  sqlc.GetTotalCategoryChallengesRow:
+    properties:
+      category:
+        type: string
+      count:
+        type: integer
+    type: object
+  sqlc.GetUserSolvesRow:
+    properties:
+      category:
+        type: string
+      first_blood:
+        type: boolean
+      id:
+        type: integer
+      name:
+        type: string
+      points:
+        type: integer
+      timestamp:
+        type: string
+    type: object
   sqlc.ScoreType:
     enum:
     - Static
@@ -437,6 +477,16 @@ definitions:
     - SubmissionStatusCorrect
     - SubmissionStatusRepeated
     - SubmissionStatusInvalid
+  sqlc.UserRole:
+    enum:
+    - Player
+    - Author
+    - Admin
+    type: string
+    x-enum-varnames:
+    - UserRolePlayer
+    - UserRoleAuthor
+    - UserRoleAdmin
   submissions_create.Data:
     properties:
       chall_id:
@@ -493,6 +543,315 @@ definitions:
       user_id:
         type: integer
       user_name:
+        type: string
+    type: object
+  teams_all_get.Response:
+    properties:
+      teams:
+        items:
+          $ref: '#/definitions/teams_all_get.TeamData'
+        type: array
+      total:
+        type: integer
+    type: object
+  teams_all_get.TeamData:
+    properties:
+      badges:
+        type: object
+      country:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        type: string
+      score:
+        type: integer
+    type: object
+  teams_get.Solve:
+    properties:
+      category:
+        type: string
+      first_blood:
+        type: boolean
+      id:
+        type: integer
+      name:
+        type: string
+      points:
+        type: integer
+      timestamp:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  teams_get.TeamData:
+    properties:
+      badges:
+        items:
+          $ref: '#/definitions/sqlc.GetBadgesFromTeamRow'
+        type: array
+      country:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      members:
+        items:
+          $ref: '#/definitions/sqlc.GetTeamMembersRow'
+        type: array
+      name:
+        type: string
+      role:
+        type: string
+      score:
+        type: integer
+      solves:
+        items:
+          $ref: '#/definitions/teams_get.Solve'
+        type: array
+      total_category_challenges:
+        items:
+          $ref: '#/definitions/sqlc.GetTotalCategoryChallengesRow'
+        type: array
+      user_id:
+        type: integer
+    type: object
+  teams_join.Data:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - name
+    - password
+    type: object
+  teams_password.Data:
+    properties:
+      new_password:
+        type: string
+      team_id:
+        type: integer
+    type: object
+  teams_password.Response:
+    properties:
+      new_password:
+        type: string
+    type: object
+  teams_register.Data:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - name
+    - password
+    type: object
+  teams_scoreboard.Response:
+    properties:
+      teams:
+        items:
+          $ref: '#/definitions/teams_scoreboard.TeamData'
+        type: array
+      total:
+        type: integer
+    type: object
+  teams_scoreboard.TeamData:
+    properties:
+      badges:
+        type: object
+      country:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      score:
+        type: integer
+    type: object
+  teams_scoreboard_graph.Submission:
+    properties:
+      chall_id:
+        type: integer
+      first_blood:
+        type: boolean
+      score:
+        type: integer
+      timestamp:
+        type: string
+    type: object
+  teams_scoreboard_graph.Top:
+    properties:
+      submissions:
+        items:
+          $ref: '#/definitions/teams_scoreboard_graph.Submission'
+        type: array
+      team_id:
+        type: integer
+      team_name:
+        type: string
+    type: object
+  teams_search.SearchTeam:
+    properties:
+      country:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/sqlc.UserRole'
+      user_id:
+        type: integer
+    type: object
+  teams_update.Data:
+    properties:
+      country:
+        type: string
+      name:
+        type: string
+    type: object
+  users_all_get.Response:
+    properties:
+      total:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/users_all_get.UserData'
+        type: array
+    type: object
+  users_all_get.UserData:
+    properties:
+      country:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        type: string
+      score:
+        type: integer
+    type: object
+  users_get.UserData:
+    properties:
+      country:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      joined_at:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+      score:
+        type: integer
+      solves:
+        items:
+          $ref: '#/definitions/sqlc.GetUserSolvesRow'
+        type: array
+      team_id:
+        type: integer
+      total_category_challenges:
+        items:
+          $ref: '#/definitions/sqlc.GetTotalCategoryChallengesRow'
+        type: array
+    type: object
+  users_info.Response:
+    properties:
+      country:
+        type: string
+      email_verification:
+        type: boolean
+      end_time:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        type: string
+      start_time:
+        type: string
+      team_id:
+        type: integer
+      user_mode:
+        type: boolean
+    type: object
+  users_login.Data:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  users_password.Data:
+    properties:
+      new_password:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  users_password.Response:
+    properties:
+      new_password:
+        type: string
+    type: object
+  users_register.Data:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      token:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  users_role.Data:
+    properties:
+      new_role:
+        $ref: '#/definitions/sqlc.UserRole'
+      user_id:
+        type: integer
+    required:
+    - new_role
+    - user_id
+    type: object
+  users_search.SearchUser:
+    properties:
+      country:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        $ref: '#/definitions/sqlc.UserRole'
+    type: object
+  users_update.Data:
+    properties:
+      country:
+        type: string
+      name:
         type: string
     type: object
 info:
@@ -1085,6 +1444,28 @@ paths:
       summary: '[Author+] Creates a new flag for a challenge'
       tags:
       - flags
+  /api/info:
+    get:
+      description: |-
+        Requires no privileges.
+        Retrieves various infos about the current user and the CTF.
+        It includes email verification status, start and end times if not logged in
+        Otherwise it also includes user ID, name, role, user mode, country, and team ID.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the various infos about the current user and the CTF
+          schema:
+            $ref: '#/definitions/users_info.Response'
+        "500":
+          description: 'Possible errors: `Error fetching configuration` | `Error fetching
+            user`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Gets various infos about the current user and the CTF'
+      tags:
+      - users
   /api/instances:
     delete:
       consumes:
@@ -1239,6 +1620,177 @@ paths:
       summary: '[Player+] Spawns a new instance of a challenge'
       tags:
       - instances
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires no privileges.
+        Creates a new user session if the credentials are valid and the client is not already logged in.
+      parameters:
+      - description: the email and password of the user to log in
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/users_login.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Email must not exceed 256` | `Invalid email format` | `Password
+            must be at least 8` | `Password must not exceed 64`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: 'Possible errors: `Invalid email or password`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: 'Possible errors: `Already logged in`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error logging in` | `Error fetching session`
+            | `Error regenerating session` | `Error saving session`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Logs in the current user given the credentials.'
+      tags:
+      - users
+  /api/logout:
+    post:
+      description: |-
+        Requires no privileges.
+        Destroys the current user session.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "500":
+          description: 'Possible errors: `Error fetching session` | `Error destroying
+            session`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Logs out the current user'
+      tags:
+      - users
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires no privileges.
+        Creates a new user account if the provided information is valid.
+        If the `allow-register` configuration is set to false, registration will be disabled.
+        If the `user-mode` configuration is set to true, a new team will also be created for the user.
+        If the `mail-enabled` configuration is set to true, a valid JWT token must be provided for registration, it will be sent via the specified Email, then the endpoint will accept the JWT with also the Name and Password.
+      parameters:
+      - description: the name, email and password of the user to register; or the
+          email and then the JWT, name and password
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/users_register.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Email must not exceed 256` | `Invalid email format` | `Name
+            must not exceed 64` | `Invalid name` | `Password must be at least 8` |
+            `Password must not exceed 64` | `invalid JWT`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: 'Possible errors: `invalid email` | `invalid token` | `token
+            is unverifiable: error while executing keyfunc: invalid signing method`
+            | `token is unverifiable: error while executing keyfunc: invalid signing
+            algorithm`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "403":
+          description: 'Possible errors: `Registrations are disabled` | `Already registered`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `User already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching configuration` | `Error beginning
+            transaction` | `Invalid email expiration` | `Error signing verification
+            token` | `Invalid domain` | `Error sending verification email` | `Error
+            registering user` | `Error registering team` | `Team already exists` |
+            `Error committing transaction` | `Error fetching session` | `Error regenerating
+            session` | `Error saving session`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Registers a new user.'
+      tags:
+      - users
+  /api/scoreboard:
+    get:
+      description: |-
+        Requires no privileges.
+        Retrieves a list of all teams with score > 0, sorted by score in descending order and by last player submission time.
+        Can be paginated by using the `offset` and `limit` query parameters.
+      parameters:
+      - description: Number of items to skip before starting to collect the result
+          set. Default is 0.
+        in: query
+        name: offset
+        type: integer
+      - description: Number of items to return. Default is 0, which means no limit.
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The total number of teams and the queried teams from the scoreboard.
+          schema:
+            $ref: '#/definitions/teams_scoreboard.Response'
+        "400":
+          description: 'Possible errors: `Invalid parameter`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching scoreboard`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Gets the scoreboard of all teams'
+      tags:
+      - teams
+  /api/scoreboard/graph:
+    get:
+      description: |-
+        Requires no privileges.
+        Retrieves a list of the top N teams with score > 0, sorted by score in descending order and by last player submission time, and their submissions history.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: The total number of teams and the queried teams from the scoreboard.
+          schema:
+            items:
+              $ref: '#/definitions/teams_scoreboard_graph.Top'
+            type: array
+        "500":
+          description: 'Possible errors: `Error fetching scoreboard graph`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Gets the scoreboard graph data of the top N teams'
+      tags:
+      - teams
   /api/stats:
     get:
       description: |-
@@ -1360,4 +1912,513 @@ paths:
       summary: '[Player+] Create a new submission for a challenge'
       tags:
       - submissions
+  /api/teams:
+    get:
+      description: |-
+        Requires no privileges.
+        Retrieves a list of all teams, can be paginated by using the `offset` and `limit` query parameters.
+      parameters:
+      - description: Number of items to skip before starting to collect the result
+          set. Default is 0.
+        in: query
+        name: offset
+        type: integer
+      - description: Number of items to return. Default is 0, which means no limit.
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of teams
+          schema:
+            $ref: '#/definitions/teams_all_get.Response'
+        "400":
+          description: 'Possible errors: `Invalid parameter`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching teams`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Gets all teams'
+      tags:
+      - teams
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (the user is also required to be in a team).
+        Updates the name and/or country of the team the user is currently in.
+        If the name is already taken, the request will fail with a `409 Conflict` status code.
+      parameters:
+      - description: the new team name and/or country
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/teams_update.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Name must not exceed 64` | `Invalid name` | `Invalid country
+            code, must be ISO3166-1 alpha-3`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Name already taken`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching team` | `Error beginning
+            transaction` | `Error updating team` | `Error committing transaction`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Updates a player own team''s name and/or country'
+      tags:
+      - teams
+  /api/teams/:id:
+    get:
+      description: |-
+        Requires no privileges.
+        Retrieves all team details by ID.
+      parameters:
+      - description: Team ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of teams
+          schema:
+            $ref: '#/definitions/teams_get.TeamData'
+        "400":
+          description: 'Possible errors: `Invalid team ID, must be non negative` |
+            `id must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Team not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching team`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Gets all team details by ID'
+      tags:
+      - teams
+  /api/teams/join:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher.
+        Makes a user join a team given the JWT in the `token` parameter, or it generates the token for the user's team.
+      parameters:
+      - description: the JWT to join a team
+        in: query
+        name: token
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `invalid token`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Team not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Already in a team`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching team` | `Error joining team`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Creates a jwt team token / Joins a team with a JWT'
+      tags:
+      - teams
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (the user is also required to NOT be in a team).
+        Makes a user join a team given the credentials.
+      parameters:
+      - description: all fields are required
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/teams_join.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Name must not exceed 64` | `Password must be at least 8` |
+            `Password must not exceed 64`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "401":
+          description: 'Possible errors: `Invalid name or password`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Team not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Already in a team`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching team` | `Error joining team`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Create a new submission for a challenge'
+      tags:
+      - teams
+  /api/teams/password:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (the user is also required to be in a team).
+        Resets a team's password given the credentials.
+        A user can reset their own team's password, while an admin can reset any team's password by providing the team ID in the request body.
+        If the new password is not provided, a random password will be generated and returned in the response.
+      parameters:
+      - description: the team ID to reset the password for (only required if the user
+          is an admin and wants to reset the password for a specific team) and the
+          new password (if not provided, a random password will be generated)
+        in: body
+        name: data
+        schema:
+          $ref: '#/definitions/teams_password.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the new password if it was generated, otherwise an empty response
+          schema:
+            $ref: '#/definitions/teams_password.Response'
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `TeamID must be at least 0` | `Invalid team ID, must be non
+            negative` | `NewPassword must be at least 8` | `NewPassword must not exceed
+            64`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error generating random password` | `Error
+            resetting team password`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Reset a team''s password'
+      tags:
+      - teams
+  /api/teams/register:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (the user is also required to be in a team).
+        Registers a new team with the provided name and password.
+        A user can register a new team, while an admin can register a team on behalf of another user.
+        If the name is already taken, the request will fail with a `409 Conflict` status code.
+      parameters:
+      - description: the team name and password
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/teams_register.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Name must not exceed 64` | `Invalid name` | `Password must
+            be at least 8` | `Password must not exceed 64`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Already in a team` | `Team already exists`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching team` | `Error beginning
+            transaction` | `Error registering team` | `Error committing transaction`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Register a new team'
+      tags:
+      - teams
+  /api/teams/search:
+    get:
+      description: |-
+        Requires **Author** privileges or higher.
+        Retrieves a list of all teams with matching **name** or **email**.
+        The search is done through a case-insensitive substring match and trigrams matching.
+      parameters:
+      - description: The name of the team to search for
+        in: query
+        name: name
+        type: string
+      - description: The email of the team to search for
+        in: query
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the result of the search, a list of teams
+          schema:
+            items:
+              $ref: '#/definitions/teams_search.SearchTeam'
+            type: array
+        "400":
+          description: 'Possible errors: `Missing required fields` | `Name must not
+            exceed 64` | `Invalid name` | `Invalid email format`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching teams`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Gets a list of searched teams'
+      tags:
+      - teams
+  /api/users:
+    get:
+      description: |-
+        Requires no privileges.
+        Retrieves a list of all users, can be paginated by using the `offset` and `limit` query parameters.
+      parameters:
+      - description: Number of items to skip before starting to collect the result
+          set. Default is 0.
+        in: query
+        name: offset
+        type: integer
+      - description: Number of items to return. Default is 0, which means no limit.
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of users
+          schema:
+            $ref: '#/definitions/users_all_get.Response'
+        "400":
+          description: 'Possible errors: `Invalid parameter`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching users`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Gets all users'
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher.
+        Updates the name and/or country of the user.
+        If the name is already taken, the request will fail with a `409 Conflict` status code.
+        In single-user mode, the user's team name and/or country will also be updated to match the user's new name and/or country.
+      parameters:
+      - description: the new user name and/or country
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/users_update.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `Name must not exceed 64` | `Invalid name` | `Invalid country
+            code, must be ISO3166-1 alpha-3`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "409":
+          description: 'Possible errors: `Name already taken`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching user` | `Error beginning
+            transaction` | `Error updating user` | `Error updating team` | `Error
+            committing transaction`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Updates a player own name and/or country'
+      tags:
+      - users
+  /api/users/:id:
+    get:
+      description: |-
+        Requires no privileges.
+        Retrieves all user details by ID.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of users
+          schema:
+            $ref: '#/definitions/users_get.UserData'
+        "400":
+          description: 'Possible errors: `Invalid user ID, must be non negative` |
+            `id must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `User not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching user`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[No Auth] Gets all user details by ID'
+      tags:
+      - users
+  /api/users/password:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Player** privileges or higher (the user is also required to be in a user).
+        Resets a user's password given the credentials.
+        A user can reset their own user's password, while an admin can reset any user's password by providing the user ID in the request body.
+        If the new password is not provided, a random password will be generated and returned in the response.
+      parameters:
+      - description: the user ID to reset the password for (only required if the user
+          is an admin and wants to reset the password for a specific user) and the
+          new password (if not provided, a random password will be generated)
+        in: body
+        name: data
+        schema:
+          $ref: '#/definitions/users_password.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the new password if it was generated, otherwise an empty response
+          schema:
+            $ref: '#/definitions/users_password.Response'
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `UserID must be at least 0` | `Invalid user ID, must be non
+            negative` | `NewPassword must be at least 8` | `NewPassword must not exceed
+            64`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error generating random password` | `Error
+            resetting user password`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Reset a user''s password'
+      tags:
+      - users
+  /api/users/role:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Admin** privileges.
+        Changes a user's role given the user ID and new role (only **Player** and **Author**).
+      parameters:
+      - description: the user ID to change the role for and the new role
+        in: body
+        name: data
+        schema:
+          $ref: '#/definitions/users_role.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `UserID must be at least 0` | `NewRole must be one of: Player
+            Author Admin` | `Invalid role`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error changing user role`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Admin] Change a user''s role'
+      tags:
+      - users
+  /api/users/search:
+    get:
+      description: |-
+        Requires **Author** privileges or higher.
+        Retrieves a list of all users with matching **name** or **email**.
+        The search is done through a case-insensitive substring match and trigrams matching.
+      parameters:
+      - description: The name of the user to search for
+        in: query
+        name: name
+        type: string
+      - description: The email of the user to search for
+        in: query
+        name: email
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: the result of the search, a list of users
+          schema:
+            items:
+              $ref: '#/definitions/users_search.SearchUser'
+            type: array
+        "400":
+          description: 'Possible errors: `Missing required fields` | `Name must not
+            exceed 64` | `Invalid name` | `Invalid email format`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching users`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Gets a list of searched users'
+      tags:
+      - users
 swagger: "2.0"

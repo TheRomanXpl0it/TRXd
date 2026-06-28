@@ -786,6 +786,32 @@
                 }
             }
         },
+        "/api/info": {
+            "get": {
+                "description": "Requires no privileges.\nRetrieves various infos about the current user and the CTF.\nIt includes email verification status, start and end times if not logged in\nOtherwise it also includes user ID, name, role, user mode, country, and team ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[No Auth] Gets various infos about the current user and the CTF",
+                "responses": {
+                    "200": {
+                        "description": "the various infos about the current user and the CTF",
+                        "schema": {
+                            "$ref": "#/definitions/users_info.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching configuration` | `Error fetching user`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/instances": {
             "get": {
                 "description": "Requires **Author** privileges or higher.\nRetrieves a list of all instances.",
@@ -992,6 +1018,220 @@
                 }
             }
         },
+        "/api/login": {
+            "post": {
+                "description": "Requires no privileges.\nCreates a new user session if the credentials are valid and the client is not already logged in.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[No Auth] Logs in the current user given the credentials.",
+                "parameters": [
+                    {
+                        "description": "the email and password of the user to log in",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/users_login.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Email must not exceed 256` | `Invalid email format` | `Password must be at least 8` | `Password must not exceed 64`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Possible errors: `Invalid email or password`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Possible errors: `Already logged in`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error logging in` | `Error fetching session` | `Error regenerating session` | `Error saving session`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "description": "Requires no privileges.\nDestroys the current user session.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[No Auth] Logs out the current user",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching session` | `Error destroying session`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/register": {
+            "post": {
+                "description": "Requires no privileges.\nCreates a new user account if the provided information is valid.\nIf the `allow-register` configuration is set to false, registration will be disabled.\nIf the `user-mode` configuration is set to true, a new team will also be created for the user.\nIf the `mail-enabled` configuration is set to true, a valid JWT token must be provided for registration, it will be sent via the specified Email, then the endpoint will accept the JWT with also the Name and Password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[No Auth] Registers a new user.",
+                "parameters": [
+                    {
+                        "description": "the name, email and password of the user to register; or the email and then the JWT, name and password",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/users_register.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Email must not exceed 256` | `Invalid email format` | `Name must not exceed 64` | `Invalid name` | `Password must be at least 8` | `Password must not exceed 64` | `invalid JWT`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Possible errors: `invalid email` | `invalid token` | `token is unverifiable: error while executing keyfunc: invalid signing method` | `token is unverifiable: error while executing keyfunc: invalid signing algorithm`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "403": {
+                        "description": "Possible errors: `Registrations are disabled` | `Already registered`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `User already exists`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching configuration` | `Error beginning transaction` | `Invalid email expiration` | `Error signing verification token` | `Invalid domain` | `Error sending verification email` | `Error registering user` | `Error registering team` | `Team already exists` | `Error committing transaction` | `Error fetching session` | `Error regenerating session` | `Error saving session`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scoreboard": {
+            "get": {
+                "description": "Requires no privileges.\nRetrieves a list of all teams with score \u003e 0, sorted by score in descending order and by last player submission time.\nCan be paginated by using the `offset` and `limit` query parameters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[No Auth] Gets the scoreboard of all teams",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of items to skip before starting to collect the result set. Default is 0.",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items to return. Default is 0, which means no limit.",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "The total number of teams and the queried teams from the scoreboard.",
+                        "schema": {
+                            "$ref": "#/definitions/teams_scoreboard.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid parameter`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching scoreboard`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/scoreboard/graph": {
+            "get": {
+                "description": "Requires no privileges.\nRetrieves a list of the top N teams with score \u003e 0, sorted by score in descending order and by last player submission time, and their submissions history.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[No Auth] Gets the scoreboard graph data of the top N teams",
+                "responses": {
+                    "200": {
+                        "description": "The total number of teams and the queried teams from the scoreboard.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/teams_scoreboard_graph.Top"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching scoreboard graph`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/stats": {
             "get": {
                 "description": "Requires **Author** privileges or higher.\nRetrieves a list useful stats.",
@@ -1148,6 +1388,676 @@
                     },
                     "500": {
                         "description": "Possible errors: `Error deleting submission`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/teams": {
+            "get": {
+                "description": "Requires no privileges.\nRetrieves a list of all teams, can be paginated by using the `offset` and `limit` query parameters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[No Auth] Gets all teams",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of items to skip before starting to collect the result set. Default is 0.",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items to return. Default is 0, which means no limit.",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of teams",
+                        "schema": {
+                            "$ref": "#/definitions/teams_all_get.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid parameter`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching teams`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Requires **Player** privileges or higher (the user is also required to be in a team).\nUpdates the name and/or country of the team the user is currently in.\nIf the name is already taken, the request will fail with a `409 Conflict` status code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[Player+] Updates a player own team's name and/or country",
+                "parameters": [
+                    {
+                        "description": "the new team name and/or country",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/teams_update.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 64` | `Invalid name` | `Invalid country code, must be ISO3166-1 alpha-3`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Name already taken`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching team` | `Error beginning transaction` | `Error updating team` | `Error committing transaction`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/teams/:id": {
+            "get": {
+                "description": "Requires no privileges.\nRetrieves all team details by ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[No Auth] Gets all team details by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Team ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of teams",
+                        "schema": {
+                            "$ref": "#/definitions/teams_get.TeamData"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid team ID, must be non negative` | `id must be at least 0`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Team not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching team`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/teams/join": {
+            "get": {
+                "description": "Requires **Player** privileges or higher.\nMakes a user join a team given the JWT in the `token` parameter, or it generates the token for the user's team.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[Player+] Creates a jwt team token / Joins a team with a JWT",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "the JWT to join a team",
+                        "name": "token",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `invalid token`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Team not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Already in a team`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching team` | `Error joining team`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Requires **Player** privileges or higher (the user is also required to NOT be in a team).\nMakes a user join a team given the credentials.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[Player+] Create a new submission for a challenge",
+                "parameters": [
+                    {
+                        "description": "all fields are required",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/teams_join.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 64` | `Password must be at least 8` | `Password must not exceed 64`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "401": {
+                        "description": "Possible errors: `Invalid name or password`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Team not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Already in a team`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching team` | `Error joining team`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/teams/password": {
+            "patch": {
+                "description": "Requires **Player** privileges or higher (the user is also required to be in a team).\nResets a team's password given the credentials.\nA user can reset their own team's password, while an admin can reset any team's password by providing the team ID in the request body.\nIf the new password is not provided, a random password will be generated and returned in the response.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[Player+] Reset a team's password",
+                "parameters": [
+                    {
+                        "description": "the team ID to reset the password for (only required if the user is an admin and wants to reset the password for a specific team) and the new password (if not provided, a random password will be generated)",
+                        "name": "data",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/teams_password.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the new password if it was generated, otherwise an empty response",
+                        "schema": {
+                            "$ref": "#/definitions/teams_password.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `TeamID must be at least 0` | `Invalid team ID, must be non negative` | `NewPassword must be at least 8` | `NewPassword must not exceed 64`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error generating random password` | `Error resetting team password`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/teams/register": {
+            "post": {
+                "description": "Requires **Player** privileges or higher (the user is also required to be in a team).\nRegisters a new team with the provided name and password.\nA user can register a new team, while an admin can register a team on behalf of another user.\nIf the name is already taken, the request will fail with a `409 Conflict` status code.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[Player+] Register a new team",
+                "parameters": [
+                    {
+                        "description": "the team name and password",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/teams_register.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 64` | `Invalid name` | `Password must be at least 8` | `Password must not exceed 64`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Already in a team` | `Team already exists`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching team` | `Error beginning transaction` | `Error registering team` | `Error committing transaction`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/teams/search": {
+            "get": {
+                "description": "Requires **Author** privileges or higher.\nRetrieves a list of all teams with matching **name** or **email**.\nThe search is done through a case-insensitive substring match and trigrams matching.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "teams"
+                ],
+                "summary": "[Author+] Gets a list of searched teams",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The name of the team to search for",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The email of the team to search for",
+                        "name": "email",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the result of the search, a list of teams",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/teams_search.SearchTeam"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Missing required fields` | `Name must not exceed 64` | `Invalid name` | `Invalid email format`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching teams`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users": {
+            "get": {
+                "description": "Requires no privileges.\nRetrieves a list of all users, can be paginated by using the `offset` and `limit` query parameters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[No Auth] Gets all users",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Number of items to skip before starting to collect the result set. Default is 0.",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items to return. Default is 0, which means no limit.",
+                        "name": "limit",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of users",
+                        "schema": {
+                            "$ref": "#/definitions/users_all_get.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid parameter`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching users`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Requires **Player** privileges or higher.\nUpdates the name and/or country of the user.\nIf the name is already taken, the request will fail with a `409 Conflict` status code.\nIn single-user mode, the user's team name and/or country will also be updated to match the user's new name and/or country.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[Player+] Updates a player own name and/or country",
+                "parameters": [
+                    {
+                        "description": "the new user name and/or country",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/users_update.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 64` | `Invalid name` | `Invalid country code, must be ISO3166-1 alpha-3`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "409": {
+                        "description": "Possible errors: `Name already taken`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching user` | `Error beginning transaction` | `Error updating user` | `Error updating team` | `Error committing transaction`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/:id": {
+            "get": {
+                "description": "Requires no privileges.\nRetrieves all user details by ID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[No Auth] Gets all user details by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of users",
+                        "schema": {
+                            "$ref": "#/definitions/users_get.UserData"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid user ID, must be non negative` | `id must be at least 0`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `User not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching user`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/password": {
+            "patch": {
+                "description": "Requires **Player** privileges or higher (the user is also required to be in a user).\nResets a user's password given the credentials.\nA user can reset their own user's password, while an admin can reset any user's password by providing the user ID in the request body.\nIf the new password is not provided, a random password will be generated and returned in the response.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[Player+] Reset a user's password",
+                "parameters": [
+                    {
+                        "description": "the user ID to reset the password for (only required if the user is an admin and wants to reset the password for a specific user) and the new password (if not provided, a random password will be generated)",
+                        "name": "data",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/users_password.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the new password if it was generated, otherwise an empty response",
+                        "schema": {
+                            "$ref": "#/definitions/users_password.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `UserID must be at least 0` | `Invalid user ID, must be non negative` | `NewPassword must be at least 8` | `NewPassword must not exceed 64`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error generating random password` | `Error resetting user password`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/role": {
+            "patch": {
+                "description": "Requires **Admin** privileges.\nChanges a user's role given the user ID and new role (only **Player** and **Author**).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[Admin] Change a user's role",
+                "parameters": [
+                    {
+                        "description": "the user ID to change the role for and the new role",
+                        "name": "data",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/users_role.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `UserID must be at least 0` | `NewRole must be one of: Player Author Admin` | `Invalid role`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error changing user role`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/users/search": {
+            "get": {
+                "description": "Requires **Author** privileges or higher.\nRetrieves a list of all users with matching **name** or **email**.\nThe search is done through a case-insensitive substring match and trigrams matching.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "[Author+] Gets a list of searched users",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The name of the user to search for",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "The email of the user to search for",
+                        "name": "email",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "the result of the search, a list of users",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/users_search.SearchUser"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Missing required fields` | `Name must not exceed 64` | `Invalid name` | `Invalid email format`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching users`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -1728,6 +2638,17 @@
                 }
             }
         },
+        "sqlc.GetBadgesFromTeamRow": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "sqlc.GetChallengeSolvesRow": {
             "type": "object",
             "properties": {
@@ -1785,6 +2706,57 @@
                 }
             }
         },
+        "sqlc.GetTeamMembersRow": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/sqlc.UserRole"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "sqlc.GetTotalCategoryChallengesRow": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "sqlc.GetUserSolvesRow": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "first_blood": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
         "sqlc.ScoreType": {
             "type": "string",
             "enum": [
@@ -1809,6 +2781,19 @@
                 "SubmissionStatusCorrect",
                 "SubmissionStatusRepeated",
                 "SubmissionStatusInvalid"
+            ]
+        },
+        "sqlc.UserRole": {
+            "type": "string",
+            "enum": [
+                "Player",
+                "Author",
+                "Admin"
+            ],
+            "x-enum-varnames": [
+                "UserRolePlayer",
+                "UserRoleAuthor",
+                "UserRoleAdmin"
             ]
         },
         "submissions_create.Data": {
@@ -1896,6 +2881,479 @@
                     "type": "integer"
                 },
                 "user_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "teams_all_get.Response": {
+            "type": "object",
+            "properties": {
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/teams_all_get.TeamData"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_all_get.TeamData": {
+            "type": "object",
+            "properties": {
+                "badges": {
+                    "type": "object"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_get.Solve": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "first_blood": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_get.TeamData": {
+            "type": "object",
+            "properties": {
+                "badges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sqlc.GetBadgesFromTeamRow"
+                    }
+                },
+                "country": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sqlc.GetTeamMembersRow"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "solves": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/teams_get.Solve"
+                    }
+                },
+                "total_category_challenges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sqlc.GetTotalCategoryChallengesRow"
+                    }
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_join.Data": {
+            "type": "object",
+            "required": [
+                "name",
+                "password"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "teams_password.Data": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "team_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_password.Response": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "teams_register.Data": {
+            "type": "object",
+            "required": [
+                "name",
+                "password"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "teams_scoreboard.Response": {
+            "type": "object",
+            "properties": {
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/teams_scoreboard.TeamData"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_scoreboard.TeamData": {
+            "type": "object",
+            "properties": {
+                "badges": {
+                    "type": "object"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_scoreboard_graph.Submission": {
+            "type": "object",
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "first_blood": {
+                    "type": "boolean"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "teams_scoreboard_graph.Top": {
+            "type": "object",
+            "properties": {
+                "submissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/teams_scoreboard_graph.Submission"
+                    }
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "team_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "teams_search.SearchTeam": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/sqlc.UserRole"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_update.Data": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "users_all_get.Response": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/users_all_get.UserData"
+                    }
+                }
+            }
+        },
+        "users_all_get.UserData": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                }
+            }
+        },
+        "users_get.UserData": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "joined_at": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "solves": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sqlc.GetUserSolvesRow"
+                    }
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "total_category_challenges": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sqlc.GetTotalCategoryChallengesRow"
+                    }
+                }
+            }
+        },
+        "users_info.Response": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "email_verification": {
+                    "type": "boolean"
+                },
+                "end_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "start_time": {
+                    "type": "string"
+                },
+                "team_id": {
+                    "type": "integer"
+                },
+                "user_mode": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "users_login.Data": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "users_password.Data": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "users_password.Response": {
+            "type": "object",
+            "properties": {
+                "new_password": {
+                    "type": "string"
+                }
+            }
+        },
+        "users_register.Data": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "users_role.Data": {
+            "type": "object",
+            "required": [
+                "new_role",
+                "user_id"
+            ],
+            "properties": {
+                "new_role": {
+                    "$ref": "#/definitions/sqlc.UserRole"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "users_search.SearchUser": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "$ref": "#/definitions/sqlc.UserRole"
+                }
+            }
+        },
+        "users_update.Data": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 }
             }

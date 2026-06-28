@@ -8,10 +8,23 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Data struct {
+	SubID *int32 `json:"sub_id" validate:"required,id"`
+}
+
+// @Summary [Admin+] Delete a submission
+// @Description Requires **Admin** privileges.
+// @Description Deletes a submission specified by the submission ID.
+// @Tags submissions
+// @Accept json
+// @Produce json
+// @Param data body Data true "all fields are required"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `SubID must be at least 0`"
+// @Failure 500 {object} models.Error "Possible errors: `Error deleting submission`"
+// @Router /api/submissions [delete]
 func Route(c *fiber.Ctx) error {
-	var data struct {
-		SubID *int32 `json:"sub_id" validate:"required,id"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}
