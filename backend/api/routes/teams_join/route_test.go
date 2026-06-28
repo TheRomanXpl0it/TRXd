@@ -67,12 +67,12 @@ var testData = []struct {
 	},
 	{
 		testBody:         JSON{"name": "test1", "password": "testpass"},
-		expectedStatus:   http.StatusConflict,
+		expectedStatus:   http.StatusUnauthorized,
 		expectedResponse: errorf(consts.InvalidTeamCredentials),
 	},
 	{
 		testBody:         JSON{"name": "test", "password": "testpassa"},
-		expectedStatus:   http.StatusConflict,
+		expectedStatus:   http.StatusUnauthorized,
 		expectedResponse: errorf(consts.InvalidTeamCredentials),
 	},
 	{

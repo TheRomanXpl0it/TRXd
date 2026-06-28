@@ -31,7 +31,7 @@ func joinTeam(c *fiber.Ctx, tid int32) error {
 
 	err = teams_join.AddTeamMember(c.Context(), tid, uid)
 	if err != nil {
-		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorRegisteringTeam, err)
+		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorJoiningTeam, err)
 	}
 
 	return c.SendStatus(fiber.StatusOK)
@@ -52,6 +52,19 @@ func getTeamToken(c *fiber.Ctx, tid int32) error {
 	})
 }
 
+// @Summary [Player+] Creates a jwt team token / Joins a team with a JWT
+// @Description Requires **Player** privileges or higher.
+// @Description Makes a user join a team given the JWT in the `token` parameter, or it generates the token for the user's team.
+// @Tags teams
+// @Accept json
+// @Produce json
+// @Param token query string false "the JWT to join a team"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `invalid token`"
+// @Failure 404 {object} models.Error "Possible errors: `Team not found`"
+// @Failure 409 {object} models.Error "Possible errors: `Already in a team`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching team` | `Error joining team`"
+// @Router /api/teams/join [get]
 func Route(c *fiber.Ctx) error {
 	token := c.Query("token", "")
 	if token == "" {

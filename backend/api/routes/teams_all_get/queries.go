@@ -14,7 +14,7 @@ type TeamData struct {
 	Role    string          `json:"role,omitempty"`
 	Score   int32           `json:"score"`
 	Country string          `json:"country"`
-	Badges  json.RawMessage `json:"badges"`
+	Badges  json.RawMessage `json:"badges" swaggertype:"object"`
 }
 
 func GetTeams(ctx context.Context, offset int32, limit int32) (int64, []TeamData, error) {

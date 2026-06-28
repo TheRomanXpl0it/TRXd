@@ -13,7 +13,7 @@ type TeamData struct {
 	Name    string          `json:"name"`
 	Score   int32           `json:"score"`
 	Country string          `json:"country"`
-	Badges  json.RawMessage `json:"badges"`
+	Badges  json.RawMessage `json:"badges" swaggertype:"object"`
 }
 
 func GetTotalScoreboardTeams(ctx context.Context) (int64, error) {

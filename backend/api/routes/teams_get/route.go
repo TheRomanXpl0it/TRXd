@@ -9,6 +9,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// @Summary [No Auth] Gets all team details by ID
+// @Description Requires no privileges.
+// @Description Retrieves all team details by ID.
+// @Tags teams
+// @Produce json
+// @Param id path int true "Team ID"
+// @Success 200 {object} TeamData "List of teams"
+// @Failure 400 {object} models.Error "Possible errors: `Invalid team ID, must be non negative` | `id must be at least 0`"
+// @Failure 404 {object} models.Error "Possible errors: `Team not found`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching team`"
+// @Router /api/teams/:id [get]
 func Route(c *fiber.Ctx) error {
 	tid := c.Locals("tid")
 	role := c.Locals("role")

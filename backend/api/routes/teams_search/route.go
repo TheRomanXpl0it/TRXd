@@ -16,7 +16,7 @@ func FetchName(c *fiber.Ctx, name string) ([]SearchTeam, error) {
 
 	teams, err := SearchTeamsByName(c.Context(), name)
 	if err != nil {
-		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingTeam, err)
+		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingTeams, err)
 	}
 
 	return teams, nil
@@ -29,12 +29,24 @@ func FetchEmail(c *fiber.Ctx, email string) ([]SearchTeam, error) {
 
 	teams, err := SearchTeamsByEmail(c.Context(), email)
 	if err != nil {
-		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingTeam, err)
+		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingTeams, err)
 	}
 
 	return teams, nil
 }
 
+// @Summary [Author+] Gets a list of searched teams
+// @Description Requires **Author** privileges or higher.
+// @Description Retrieves a list of all teams with matching **name** or **email**.
+// @Description The search is done through a case-insensitive substring match and trigrams matching.
+// @Tags teams
+// @Produce json
+// @Param name query string false "The name of the team to search for"
+// @Param email query string false "The email of the team to search for"
+// @Success 200 {object} []SearchTeam "the result of the search, a list of teams"
+// @Failure 400 {object} models.Error "Possible errors: `Missing required fields` | `Name must not exceed 64` | `Invalid name` | `Invalid email format`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching teams`"
+// @Router /api/teams/search [get]
 func Route(c *fiber.Ctx) error {
 	teamName := c.Query("name")
 	teamEmail := c.Query("email")
