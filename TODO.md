@@ -1,15 +1,11 @@
 # TODO
  - resolve TODOs left into the code
- - ctf ended not able to see the challs
  - add a red drop if challenge is first blodded
- - maybe change the color a bit for the solved challenges
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
  - utility:
-   - better names for binary flags
-   - DOCUMENTATION
- - Change email verification flow
+   - DOCUMENTATION: fix badges swagger object
 
 ## Frontend
  - [/] Extra:
