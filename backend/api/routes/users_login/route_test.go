@@ -41,6 +41,11 @@ var testData = []struct {
 		expectedResponse: errorf(consts.MissingRequiredFields),
 	},
 	{
+		testBody:         JSON{"email": "test@test.test", "password": "a"},
+		expectedStatus:   http.StatusBadRequest,
+		expectedResponse: errorf(test_utils.Format(consts.MinError, "Password", consts.MinPasswordLen)),
+	},
+	{
 		testBody:         JSON{"email": "test@test.test", "password": strings.Repeat("a", consts.MaxPasswordLen+1)},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Password", consts.MaxPasswordLen)),
@@ -49,6 +54,11 @@ var testData = []struct {
 		testBody:         JSON{"email": strings.Repeat("a", consts.MaxEmailLen+1), "password": "testpass"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Email", consts.MaxEmailLen)),
+	},
+	{
+		testBody:         JSON{"email": "a", "password": "testpass"},
+		expectedStatus:   http.StatusBadRequest,
+		expectedResponse: errorf(consts.InvalidEmail),
 	},
 	{
 		testBody:         JSON{"email": "test@test.test", "password": "testpass"},

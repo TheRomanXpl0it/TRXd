@@ -9,6 +9,29 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Response struct {
+	EmailVerification bool   `json:"email_verification"`
+	StartTime         string `json:"start_time,omitempty"`
+	EndTime           string `json:"end_time,omitempty"`
+
+	ID       int32  `json:"id,omitempty"`
+	Name     string `json:"name,omitempty"`
+	Role     string `json:"role,omitempty"`
+	UserMode bool   `json:"user_mode,omitempty"`
+	Country  string `json:"country,omitempty"`
+	TeamID   *int32 `json:"team_id,omitempty"`
+}
+
+// @Summary [No Auth] Gets various infos about the current user and the CTF
+// @Description Requires no privileges.
+// @Description Retrieves various infos about the current user and the CTF.
+// @Description It includes email verification status, start and end times if not logged in
+// @Description Otherwise it also includes user ID, name, role, user mode, country, and team ID.
+// @Tags users
+// @Produce json
+// @Success 200 {object} Response "the various infos about the current user and the CTF"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching configuration` | `Error fetching user`"
+// @Router /api/info [get]
 func Route(c *fiber.Ctx) error {
 	emailVerification, err := db.GetConfig(c.Context(), "email-verification")
 	if err != nil {
@@ -23,14 +46,14 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
 	}
 
-	info := fiber.Map{
-		"email_verification": emailVerification == "true",
+	info := Response{
+		EmailVerification: emailVerification == "true",
 	}
 	if startTime != "" {
-		info["start_time"] = startTime
+		info.StartTime = startTime
 	}
 	if endTime != "" {
-		info["end_time"] = endTime
+		info.EndTime = endTime
 	}
 
 	uidLocal := c.Locals("uid")
@@ -47,24 +70,24 @@ func Route(c *fiber.Ctx) error {
 	if user == nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingUser, fmt.Errorf("user not found"))
 	}
-	info["id"] = user.ID
-	info["name"] = user.Name
-	info["role"] = user.Role
+	info.ID = user.ID
+	info.Name = user.Name
+	info.Role = string(user.Role)
 
 	userMode, err := db.GetConfig(c.Context(), "user-mode")
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
 	}
-	info["user_mode"] = userMode == "true"
+	info.UserMode = userMode == "true"
 	if user.Country.Valid {
-		info["country"] = user.Country.String
+		info.Country = user.Country.String
 	}
 
 	var teamID *int32
 	if user.TeamID.Valid {
 		teamID = &user.TeamID.Int32
 	}
-	info["team_id"] = teamID
+	info.TeamID = teamID
 
 	return c.Status(fiber.StatusOK).JSON(info)
 }

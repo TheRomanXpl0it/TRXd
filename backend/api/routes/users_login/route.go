@@ -9,16 +9,31 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type Data struct {
+	Email    string `json:"email" validate:"required,user_email"`
+	Password string `json:"password" validate:"required,password"`
+}
+
+// @Summary [No Auth] Logs in the current user given the credentials.
+// @Description Requires no privileges.
+// @Description Creates a new user session if the credentials are valid and the client is not already logged in.
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param data body Data true "the email and password of the user to log in"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Email must not exceed 256` | `Invalid email format` | `Password must be at least 8` | `Password must not exceed 64`"
+// @Failure 401 {object} models.Error "Possible errors: `Invalid email or password`"
+// @Failure 403 {object} models.Error "Possible errors: `Already logged in`"
+// @Failure 500 {object} models.Error "Possible errors: `Error logging in` | `Error fetching session` | `Error regenerating session` | `Error saving session`"
+// @Router /api/login [post]
 func Route(c *fiber.Ctx) error {
 	uid := c.Locals("uid")
 	if uid != nil {
 		return utils.Error(c, fiber.StatusForbidden, consts.AlreadyLoggedIn)
 	}
 
-	var data struct {
-		Email    string `json:"email" validate:"required,user_email"`
-		Password string `json:"password" validate:"required,password"`
-	}
+	var data Data
 	if err := c.BodyParser(&data); err != nil {
 		return utils.Error(c, fiber.StatusBadRequest, consts.InvalidJSON)
 	}

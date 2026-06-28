@@ -35,6 +35,18 @@ func FetchEmail(c *fiber.Ctx, email string) ([]SearchUser, error) {
 	return users, nil
 }
 
+// @Summary [Author+] Gets a list of searched users
+// @Description Requires **Author** privileges or higher.
+// @Description Retrieves a list of all users with matching **name** or **email**.
+// @Description The search is done through a case-insensitive substring match and trigrams matching.
+// @Tags users
+// @Produce json
+// @Param name query string false "The name of the user to search for"
+// @Param email query string false "The email of the user to search for"
+// @Success 200 {object} []SearchUser "the result of the search, a list of users"
+// @Failure 400 {object} models.Error "Possible errors: `Missing required fields` | `Name must not exceed 64` | `Invalid name` | `Invalid email format`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching users`"
+// @Router /api/users/search [get]
 func Route(c *fiber.Ctx) error {
 	userName := c.Query("name")
 	userEmail := c.Query("email")

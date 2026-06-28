@@ -9,6 +9,17 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// @Summary [No Auth] Gets all user details by ID
+// @Description Requires no privileges.
+// @Description Retrieves all user details by ID.
+// @Tags users
+// @Produce json
+// @Param id path int true "User ID"
+// @Success 200 {object} UserData "List of users"
+// @Failure 400 {object} models.Error "Possible errors: `Invalid user ID, must be non negative` | `id must be at least 0`"
+// @Failure 404 {object} models.Error "Possible errors: `User not found`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching user`"
+// @Router /api/users/:id [get]
 func Route(c *fiber.Ctx) error {
 	uid := c.Locals("uid")
 	role := c.Locals("role")

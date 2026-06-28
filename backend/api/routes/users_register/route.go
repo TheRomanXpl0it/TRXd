@@ -17,6 +17,23 @@ type Data struct {
 	JWT      string `json:"token" validate:"omitempty,jwt"`
 }
 
+// @Summary [No Auth] Registers a new user.
+// @Description Requires no privileges.
+// @Description Creates a new user account if the provided information is valid.
+// @Description If the `allow-register` configuration is set to false, registration will be disabled.
+// @Description If the `user-mode` configuration is set to true, a new team will also be created for the user.
+// @Description If the `mail-enabled` configuration is set to true, a valid JWT token must be provided for registration, it will be sent via the specified Email, then the endpoint will accept the JWT with also the Name and Password.
+// @Tags users
+// @Accept json
+// @Produce json
+// @Param data body Data true "the name, email and password of the user to register; or the email and then the JWT, name and password"
+// @Success 200
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Email must not exceed 256` | `Invalid email format` | `Name must not exceed 64` | `Invalid name` | `Password must be at least 8` | `Password must not exceed 64` | `invalid JWT`"
+// @Failure 401 {object} models.Error "Possible errors: `invalid email` | `invalid token` | `token is unverifiable: error while executing keyfunc: invalid signing method` | `token is unverifiable: error while executing keyfunc: invalid signing algorithm`"
+// @Failure 403 {object} models.Error "Possible errors: `Registrations are disabled` | `Already registered`"
+// @Failure 409 {object} models.Error "Possible errors: `User already exists`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching configuration` | `Error beginning transaction` | `Invalid email expiration` | `Error signing verification token` | `Invalid domain` | `Error sending verification email` | `Error registering user` | `Error registering team` | `Team already exists` | `Error committing transaction` | `Error fetching session` | `Error regenerating session` | `Error saving session`"
+// @Router /api/register [post]
 func CanRegister(c *fiber.Ctx) (bool, error) {
 	conf, err := db.GetConfig(c.Context(), "allow-register")
 	if err != nil {
