@@ -1192,7 +1192,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "The total number of teams and the queried teams from the scoreboard.",
+                        "description": "The total number of teams and the queried teams from the scoreboard. Note: the ` + "`" + `badges` + "`" + ` field is a JSON array of objects, each containing ` + "`" + `name` + "`" + ` and ` + "`" + `description` + "`" + ` fields as strings.",
                         "schema": {
                             "$ref": "#/definitions/teams_scoreboard.Response"
                         }
@@ -1430,7 +1430,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of teams",
+                        "description": "List of teams. Note: the ` + "`" + `badges` + "`" + ` field is a JSON array of objects, each containing ` + "`" + `name` + "`" + ` and ` + "`" + `description` + "`" + ` fields as strings.",
                         "schema": {
                             "$ref": "#/definitions/teams_all_get.Response"
                         }

@@ -4,8 +4,6 @@
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
- - utility:
-   - DOCUMENTATION: fix badges swagger object
 
 ## Frontend
  - [/] Extra:

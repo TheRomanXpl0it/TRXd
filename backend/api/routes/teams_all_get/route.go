@@ -20,7 +20,7 @@ type Response struct {
 // @Produce json
 // @Param offset query int false "Number of items to skip before starting to collect the result set. Default is 0."
 // @Param limit query int false "Number of items to return. Default is 0, which means no limit."
-// @Success 200 {object} Response "List of teams"
+// @Success 200 {object} Response "List of teams. Note: the `badges` field is a JSON array of objects, each containing `name` and `description` fields as strings."
 // @Failure 400 {object} models.Error "Possible errors: `Invalid parameter`"
 // @Failure 500 {object} models.Error "Possible errors: `Error fetching teams`"
 // @Router /api/teams [get]
