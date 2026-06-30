@@ -14,12 +14,12 @@ type Response struct {
 	StartTime         string `json:"start_time,omitempty"`
 	EndTime           string `json:"end_time,omitempty"`
 
-	ID       int32  `json:"id,omitempty"`
-	Name     string `json:"name,omitempty"`
-	Role     string `json:"role,omitempty"`
-	UserMode bool   `json:"user_mode,omitempty"`
-	Country  string `json:"country,omitempty"`
-	TeamID   *int32 `json:"team_id,omitempty"`
+	ID       int32   `json:"id,omitempty"`
+	Name     string  `json:"name,omitempty"`
+	Role     string  `json:"role,omitempty"`
+	UserMode *bool   `json:"user_mode,omitempty"`
+	Country  string  `json:"country,omitempty"`
+	TeamID   **int32 `json:"team_id,omitempty"`
 }
 
 // @Summary [No Auth] Gets various infos about the current user and the CTF
@@ -78,16 +78,16 @@ func Route(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
 	}
-	info.UserMode = userMode == "true"
+	info.UserMode = new(userMode == "true")
 	if user.Country.Valid {
 		info.Country = user.Country.String
 	}
 
-	var teamID *int32
 	if user.TeamID.Valid {
-		teamID = &user.TeamID.Int32
+		info.TeamID = new(&user.TeamID.Int32)
+	} else {
+		info.TeamID = new((*int32)(nil))
 	}
-	info.TeamID = teamID
 
 	return c.Status(fiber.StatusOK).JSON(info)
 }

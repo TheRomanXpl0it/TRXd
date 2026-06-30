@@ -343,13 +343,11 @@ definitions:
     type: object
   sqlc.ConnType:
     enum:
-    - NONE
     - TCP
     - HTTP
     - HTTPS
     type: string
     x-enum-varnames:
-    - ConnTypeNONE
     - ConnTypeTCP
     - ConnTypeHTTP
     - ConnTypeHTTPS
@@ -1144,9 +1142,9 @@ paths:
             not exceed 32` | `Type must be one of: Normal Container Compose` | `MaxPoints
             must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port
             must be at least 0` | `Port must not exceed 65535` | `ConnType must be
-            one of: NONE TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid
-            environment variables` | `MaxMemory must be at least 0` | `Invalid Max
-            CPU, must be a positive 32-bit integer`'
+            one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment
+            variables` | `MaxMemory must be at least 0` | `Invalid Max CPU, must be
+            a positive 32-bit integer`'
           schema:
             $ref: '#/definitions/models.Error'
         "404":
