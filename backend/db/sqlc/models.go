@@ -14,7 +14,6 @@ import (
 type ConnType string
 
 const (
-	ConnTypeNONE  ConnType = "NONE"
 	ConnTypeTCP   ConnType = "TCP"
 	ConnTypeHTTP  ConnType = "HTTP"
 	ConnTypeHTTPS ConnType = "HTTPS"

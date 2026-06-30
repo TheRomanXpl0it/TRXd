@@ -61,7 +61,7 @@ func makeLabels(info *infos.InstanceInfo, p *CreateInstanceParams) {
 		protocol = "tcp"
 		rule = "HostSNI(`%s`)"
 		entrypoint = "tcp"
-	} else { // so http is (NONE, HTTP, HTTPS)
+	} else { // so http is (HTTP, HTTPS)
 		protocol = "http"
 		rule = "Host(`%s`)"
 		entrypoint = "web"

@@ -134,7 +134,7 @@ func TestRoute(t *testing.T) {
 			"author3",
 		},
 		"category":    "cat-2",
-		"conn_type":   "NONE",
+		"conn_type":   "TCP",
 		"description": "TEST chall-5 DESC",
 		"flags": []JSON{
 			{

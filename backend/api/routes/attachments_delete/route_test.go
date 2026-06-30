@@ -162,7 +162,7 @@ func TestRoute(t *testing.T) {
 			"attachments": attachments,
 			"authors":     []string{},
 			"category":    "cat",
-			"conn_type":   "NONE",
+			"conn_type":   "TCP",
 			"description": "test-desc",
 			"first_blood": false,
 			"hidden":      true,

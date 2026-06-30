@@ -23,7 +23,6 @@ CREATE TYPE submission_status AS ENUM (
 );
 
 CREATE TYPE conn_type AS ENUM (
-  'NONE',
   'TCP',
   'HTTP',
   'HTTPS'
@@ -99,7 +98,7 @@ CREATE TABLE IF NOT EXISTS challenges (
 
   host TEXT NOT NULL DEFAULT '',
   port INTEGER NOT NULL CHECK (port >= 0 AND port <= 65535) DEFAULT 0,
-  conn_type conn_type NOT NULL DEFAULT 'NONE',
+  conn_type conn_type NOT NULL DEFAULT 'TCP',
 
   FOREIGN KEY(category) REFERENCES categories(name),
   PRIMARY KEY(id)
