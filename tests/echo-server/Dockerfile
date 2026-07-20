@@ -1,9 +1,9 @@
-FROM golang:1.24
+FROM golang:1.26-alpine
 
 WORKDIR /home/chall/
-COPY ./ .
-EXPOSE 1337
-
+COPY ./go.mod ./main.go ./
 RUN go build
+
+EXPOSE 1337
 
 CMD [ "./echo-server" ]

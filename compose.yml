@@ -26,7 +26,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=${PROJECT_NAME:-trxd}_default"
-      
+
       # --- MAIN APP ROUTER (unchanged fallback) ---
       - "traefik.http.routers.app.rule=PathPrefix(`/`)"
       - "traefik.http.routers.app.entrypoints=web"
@@ -80,7 +80,7 @@ services:
     image: adminer:5
     restart: always
     ports:
-      - 8000:8080
+      - "${ADMINER_PORT:-8000}:8080"
     depends_on:
       - postgres
     networks:
@@ -90,30 +90,56 @@ services:
   redis:
     image: redis:8-alpine
     restart: always
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     ports:
       - "${REDIS_PORT:-6379}:6379"
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
     volumes:
       - ./.data/redis_data:/data
     networks:
       - internal
       - default #! Debugging
 
+  registry: # check https://registry.$DOMAIN/v2/_catalog
+    image: registry:3
+    restart: always
+    ports:
+      - "${REGISTRY_PORT:-5000}:5000" #! Debugging
+    volumes:
+      - ./registry/config.yml:/etc/distribution/config.yml:ro
+      - ./registry/gc.sh:/gc.sh:ro
+      - ./.data/registry_data:/var/lib/registry
+    networks:
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.registry.loadbalancer.server.port=5000"
+
+      - "traefik.http.routers.registry.rule=Host(`registry.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.registry.entrypoints=websecure"
+      - "traefik.http.routers.registry.tls=true"
+      - "traefik.http.routers.registry.priority=10"
+      - "traefik.http.routers.registry.middlewares=registry-auth"
+
+      - "traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME}:${REGISTRY_PASSWORD}"
+
+
   traefik:
     image: traefik:v3.6
     restart: always
     command:
       - "--api.insecure=true" #! Debugging
+      - "--providers.providersThrottleDuration=0s" #! Debugging
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.providersThrottleDuration=0s"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.tcp.address=:443"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.tcp.address=:5443"
       - "--entrypoints.tcp.http.tls=true"
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080"
+      - "5443:5443"
+      - "8080:8080" #! Debugging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
