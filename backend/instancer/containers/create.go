@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"strconv"
 	"strings"
 	"trxd/instancer/infos"
@@ -11,6 +12,7 @@ import (
 	"trxd/utils/log"
 
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
 	"github.com/docker/go-connections/nat"
 )
@@ -36,6 +38,11 @@ func CreateContainer(ctx context.Context, info *infos.InstanceInfo, image string
 
 	if log.GetLevel() == log.DebugLevel {
 		debugContainer(containerConf, hostConf, networkingConfig)
+	}
+
+	err = ensureImage(ctx, containerInfo.Image)
+	if err != nil {
+		return "", err
 	}
 
 	var containerID string
@@ -68,6 +75,33 @@ func CreateContainer(ctx context.Context, info *infos.InstanceInfo, image string
 	}
 
 	return containerID, nil
+}
+
+func ensureImage(ctx context.Context, img string) error {
+	_, err := Cli.ImageInspect(ctx, img)
+	if err == nil {
+		return nil
+	}
+
+	log.Debug("Pulling image:", "image", img)
+	if !strings.Contains(err.Error(), "No such image") {
+		return err
+	}
+
+	// TODO: RegistryAuth string // RegistryAuth is the base64 encoded credentials for the registry
+	reader, err := Cli.ImagePull(ctx, img, image.PullOptions{})
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	// Discard the output of the pull operation to avoid blocking or corruption
+	_, err = io.Copy(io.Discard, reader)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func setupContainerConf(info *infos.ContainerInfo) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {

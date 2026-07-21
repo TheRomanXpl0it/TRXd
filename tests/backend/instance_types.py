@@ -9,6 +9,8 @@ url = 'http://localhost:1337/api'
 
 proxy = os.getenv('PROXY', 'traefik')
 
+TCP_TLS_PORT = 5443
+
 
 def login(mail, password):
 	s = requests.Session()
@@ -225,12 +227,12 @@ print(i3)
 
 host = i1['host']
 LOCAL_HOSTS[host] = LOCALHOST
-received = ssl_dial(host, 443, request)
+received = ssl_dial(host, TCP_TLS_PORT, request)
 assert received == correct_resp, f"Expected:\n{correct_resp}\nReceived:\n{received}"
 
 host = i3['host']
 LOCAL_HOSTS[host] = LOCALHOST
-received = ssl_dial(host, 443, request)
+received = ssl_dial(host, TCP_TLS_PORT, request)
 assert received == correct_resp, f"Expected:\n{correct_resp}\nReceived:\n{received}"
 
 kill_instance(s1, chall_id_3)
@@ -250,12 +252,12 @@ print(i3)
 
 host = i1['host']
 LOCAL_HOSTS[host] = LOCALHOST
-received = ssl_dial(host, 443, request)
+received = ssl_dial(host, TCP_TLS_PORT, request)
 assert received == correct_resp, f"Expected:\n{correct_resp}\nReceived:\n{received}"
 
 host = i3['host']
 LOCAL_HOSTS[host] = LOCALHOST
-received = ssl_dial(host, 443, request)
+received = ssl_dial(host, TCP_TLS_PORT, request)
 assert received == correct_resp, f"Expected:\n{correct_resp}\nReceived:\n{received}"
 
 kill_instance(s1, chall_id_4)

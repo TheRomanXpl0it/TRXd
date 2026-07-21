@@ -1,20 +1,22 @@
 import sys
 import requests
 
-if len(sys.argv) != 2:
-	print("Usage: python clean.py <image>")
+if len(sys.argv) != 4:
+	print("Usage: python clean.py <registry> <image> <tag>")
 	sys.exit(1)
 
-image = sys.argv[1]
+registry = sys.argv[1]
+image = sys.argv[2]
+tag = sys.argv[3]
 
-url = 'https://registry.localhost'
+url = f"https://{registry}"
 
 username = 'user'
 password = 'password'
 
 r = requests.get(f"{url}/v2/_catalog", auth=(username, password), verify=False)
 assert r.status_code == 200, f"Failed to get catalog: {r.status_code} - {r.text}"
-r = requests.get(f"{url}/v2/{image}/manifests/latest",
+r = requests.get(f"{url}/v2/{image}/manifests/{tag}",
 	headers={
         "Accept": ",".join([
             "application/vnd.oci.image.index.v1+json",
