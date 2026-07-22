@@ -99,7 +99,7 @@ services:
       - internal
       - default #! Debugging
 
-  registry: # check https://registry.$DOMAIN/v2/_catalog
+  registry: # check https://registry.localhost/v2/_catalog
     image: registry:3
     restart: always
     ports:
@@ -114,7 +114,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.services.registry.loadbalancer.server.port=5000"
 
-      - "traefik.http.routers.registry.rule=Host(`registry.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.registry.rule=HostRegexp(`^registry\\..+$`)"
       - "traefik.http.routers.registry.entrypoints=websecure"
       - "traefik.http.routers.registry.tls=true"
       - "traefik.http.routers.registry.priority=10"

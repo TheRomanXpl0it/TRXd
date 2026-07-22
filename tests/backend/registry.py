@@ -147,7 +147,6 @@ s3 = login('c@c.c', 'testpass')
 
 
 # first loop it needs to pull the image, second loop it should use the cached image
-# for _ in range(0):
 for _ in range(2):
 	r = spawn_instance(s1, chall_id_3)
 	assert r.status_code == 200, r.text
