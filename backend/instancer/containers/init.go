@@ -1,6 +1,8 @@
 package containers
 
-import "github.com/docker/docker/client"
+import (
+	"github.com/docker/docker/client"
+)
 
 var Cli *client.Client
 

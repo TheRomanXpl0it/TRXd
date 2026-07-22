@@ -10,7 +10,7 @@ username=os.getenv('REGISTRY_USERNAME', 'user')
 password=os.getenv('REGISTRY_PASSWORD', 'password')
 
 
-registry = "localhost:5000"
+registry = "registry.localhost"
 source_image = "echo-server"
 tag = "latest"
 
@@ -73,8 +73,17 @@ def update_challenge(session, chall_id, image=None, compose=None, hash_domain=No
 	)
 	assert r.status_code == 200, r.text
 
-admin = login('admin@email.com', 'testpass')
+def change_conf(s, key, value):
+	r = s.patch(f'{url}/configs',
+		json={'key': key, 'value': value},
+		headers={"X-CSRF-Token": s.cookies.get('csrf_')})
+	assert r.status_code == 200, r.text
 
+
+admin = login('admin@email.com', 'testpass')
+change_conf(admin, 'registry-server', registry)
+change_conf(admin, 'registry-username', username)
+change_conf(admin, 'registry-password', password + 'a') # wrong password
 
 r = admin.get(f'{url}/challenges')
 assert r.status_code == 200
@@ -143,6 +152,13 @@ def assert_request(r: requests.Response, hash_domain):
 s1 = login('a@a.a', 'testpass')
 s2 = login('b@b.b', 'testpass')
 s3 = login('c@c.c', 'testpass')
+
+
+r = spawn_instance(s1, chall_id_3)
+assert r.status_code == 500, r.text
+print(f"Invalid registry auth, spawn failed as expected: {r.text}")
+
+change_conf(admin, 'registry-password', password) # fix with correct password
 
 
 # first loop it needs to pull the image, second loop it should use the cached image

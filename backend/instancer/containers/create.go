@@ -2,11 +2,13 @@ package containers
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"io"
 	"strconv"
 	"strings"
+	"trxd/db"
 	"trxd/instancer/infos"
 
 	"trxd/utils/log"
@@ -14,6 +16,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/go-connections/nat"
 )
 
@@ -83,17 +86,29 @@ func ensureImage(ctx context.Context, img string) error {
 		return nil
 	}
 
-	log.Debug("Pulling image:", "image", img)
 	if !strings.Contains(err.Error(), "No such image") {
 		return err
 	}
 
-	// TODO: RegistryAuth string // RegistryAuth is the base64 encoded credentials for the registry
-	reader, err := Cli.ImagePull(ctx, img, image.PullOptions{})
+	log.Debug("Pulling image:", "image", img)
+
+	registryAuth, err := genRegistryAuth(ctx)
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
+
+	reader, err := Cli.ImagePull(ctx, img, image.PullOptions{
+		RegistryAuth: registryAuth,
+	})
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err := reader.Close()
+		if err != nil {
+			log.Error("Failed to close image pull reader:", "err", err)
+		}
+	}()
 
 	// Discard the output of the pull operation to avoid blocking or corruption
 	_, err = io.Copy(io.Discard, reader)
@@ -102,6 +117,47 @@ func ensureImage(ctx context.Context, img string) error {
 	}
 
 	return nil
+}
+
+func genRegistryAuth(ctx context.Context) (string, error) {
+	server, err := db.GetConfig(ctx, "registry-server")
+	if err != nil {
+		return "", err
+	}
+
+	username, err := db.GetConfig(ctx, "registry-username")
+	if err != nil {
+		return "", err
+	}
+
+	password, err := db.GetConfig(ctx, "registry-password")
+	if err != nil {
+		return "", err
+	}
+
+	auth, err := wrapRegistryAuth(server, username, password)
+	if err != nil {
+		return "", err
+	}
+
+	return auth, nil
+}
+
+func wrapRegistryAuth(server string, username string, password string) (string, error) {
+	authConfig := registry.AuthConfig{
+		Username:      username,
+		Password:      password,
+		ServerAddress: server,
+	}
+
+	authJSON, err := json.Marshal(authConfig)
+	if err != nil {
+		return "", err
+	}
+
+	registryAuth := base64.URLEncoding.EncodeToString(authJSON)
+
+	return registryAuth, nil
 }
 
 func setupContainerConf(info *infos.ContainerInfo) (*container.Config, *container.HostConfig, *network.NetworkingConfig, error) {

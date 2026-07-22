@@ -2,6 +2,7 @@ package configs_update
 
 import (
 	"trxd/db"
+	"trxd/instancer/composes"
 	"trxd/utils"
 	"trxd/utils/consts"
 	"trxd/validator"
@@ -20,6 +21,7 @@ type Data struct {
 // @Description Requires **Admin** privileges.
 // @Description Updates an existing config's value.
 // @Description Note: if `user-mode` is updated, the server will automatically shut down and restart to apply the change.
+// @Description Note: if `registry-server` or `registry-username` or `registry-password` are updated, a docker config write will occur, and the auth will be updated.
 // @Tags configs
 // @Accept json
 // @Produce json
@@ -57,7 +59,8 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorUpdatingConfig, err)
 	}
 
-	if data.Key == "user-mode" {
+	switch data.Key {
+	case "user-mode":
 		log.Warn("Shutting down server to apply user-mode change")
 		go func(app *fiber.App) {
 			err := app.Shutdown()
@@ -65,6 +68,11 @@ func Route(c *fiber.Ctx) error {
 				log.Error("Error shutting down server", "err", err)
 			}
 		}(c.App())
+	case "registry-server", "registry-username", "registry-password":
+		err = composes.SetRegistryAuth(c.Context())
+		if err != nil {
+			return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorUpdatingConfig, err)
+		}
 	}
 
 	return c.SendStatus(fiber.StatusOK)

@@ -67,6 +67,8 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 		}
 
 		if s.Name == "chall" {
+			// TODO: resources
+
 			for k, v := range info.Labels {
 				s.CustomLabels[k] = v
 			}
@@ -95,9 +97,9 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 
 func debugCompose(project *types.Project) {
 	tmp, err := json.MarshalIndent(project, "", "  ")
-	if err == nil {
-		log.Debug("Created compose:", "project", string(tmp))
+	if err != nil {
+		log.Error("Created compose:", "err", err)
 	} else {
-		log.Debug("Created compose:", "err", err)
+		log.Debug("Created compose:", "project", string(tmp))
 	}
 }
