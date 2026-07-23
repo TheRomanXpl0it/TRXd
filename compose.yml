@@ -120,7 +120,7 @@ services:
       - "traefik.http.routers.registry.priority=10"
       - "traefik.http.routers.registry.middlewares=registry-auth"
 
-      - "traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME}:${REGISTRY_PASSWORD}"
+      - "traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME}:${REGISTRY_HTPASSWORD}"
 
       - "traefik.http.routers.registry-http.rule=HostRegexp(`^registry\\..+$`)"
       - "traefik.http.routers.registry-http.entrypoints=web"

@@ -90,7 +90,7 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Type:        "string",
 		Category:    "instances",
 		Description: "the username for the registry server",
-		Secret:      true,
+		Secret:      false,
 	},
 	"registry-password": {
 		Name:        "Registry Password",
