@@ -20,7 +20,7 @@ client = docker.from_env()
 client.login(
 	username=username,
 	password=password,
-	registry=f'https://{registry}',
+	registry=registry,
 )
 
 target_image = f"{registry}/{source_image}"

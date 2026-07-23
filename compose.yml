@@ -122,6 +122,13 @@ services:
 
       - "traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME}:${REGISTRY_PASSWORD}"
 
+      - "traefik.http.routers.registry-http.rule=HostRegexp(`^registry\\..+$`)"
+      - "traefik.http.routers.registry-http.entrypoints=web"
+      - "traefik.http.routers.registry-http.priority=10"
+      - "traefik.http.routers.registry-http.middlewares=redirect-to-https"
+
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
 
   traefik:
     image: traefik:v3.6
