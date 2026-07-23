@@ -11,7 +11,6 @@
 
 ## Ideas / Features
  - reclaimer python tests
- - auth (docker login) for private docker registries
  - split /challenges/:id into player and author endpoints
  - instancer container restart policy editable
  - instancer container ingress only bool
