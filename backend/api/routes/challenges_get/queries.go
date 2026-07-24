@@ -21,18 +21,18 @@ type DockerConfig struct {
 type Chall struct {
 	SolvesList []sqlc.GetChallengeSolvesRow `json:"solves_list"`
 
-	Name        *string          `json:"name,omitempty"`
-	Category    *string          `json:"category,omitempty"`
-	Description *string          `json:"description,omitempty"`
-	Authors     *[]string        `json:"authors,omitempty"`
-	Tags        *[]string        `json:"tags,omitempty"`
-	Type        *sqlc.DeployType `json:"type,omitempty"`
-	Hidden      *bool            `json:"hidden,omitempty"`
-	MaxPoints   *int32           `json:"max_points,omitempty"`
-	ScoreType   *sqlc.ScoreType  `json:"score_type,omitempty"`
-	Host        *string          `json:"host,omitempty"`
-	Port        *int32           `json:"port,omitempty"`
-	ConnType    *sqlc.ConnType   `json:"conn_type,omitempty"`
+	Name         *string            `json:"name,omitempty"`
+	Category     *string            `json:"category,omitempty"`
+	Description  *string            `json:"description,omitempty"`
+	Authors      *[]string          `json:"authors,omitempty"`
+	Tags         *[]string          `json:"tags,omitempty"`
+	InstanceType *sqlc.InstanceType `json:"instance_type,omitempty"`
+	Hidden       *bool              `json:"hidden,omitempty"`
+	MaxPoints    *int32             `json:"max_points,omitempty"`
+	ScoreType    *sqlc.ScoreType    `json:"score_type,omitempty"`
+	Host         *string            `json:"host,omitempty"`
+	Port         *int32             `json:"port,omitempty"`
+	ConnType     *sqlc.ConnType     `json:"conn_type,omitempty"`
 
 	Attachments  *[]string                      `json:"attachments,omitempty"`
 	Flags        *[]sqlc.GetFlagsByChallengeRow `json:"flags,omitempty"`
@@ -108,7 +108,7 @@ func GetChallenge(ctx context.Context, id int32, uid int32, tid int32, author bo
 	chall.Description = &challenge.Description
 	chall.Authors = &challenge.Authors
 	chall.Tags = &challenge.Tags
-	chall.Type = &challenge.Type
+	chall.InstanceType = &challenge.InstanceType
 	chall.Hidden = &challenge.Hidden
 	chall.MaxPoints = &challenge.MaxPoints
 	chall.ScoreType = &challenge.ScoreType

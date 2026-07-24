@@ -449,7 +449,7 @@ def build_output_data(
     output["category"] = category
     output["description"] = description
     output["authors"] = authors
-    output["type"] = "Container"
+    output["instance_type"] = "Container"
     output["max_points"] = 500
     output["score_type"] = "Dynamic"
     output["host"] = host

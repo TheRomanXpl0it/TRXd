@@ -238,7 +238,7 @@ def build_remote_compose(deployment_path: Path) -> tuple[Path, str, list[str]]:
     if not isinstance(deployment_config, dict):
         raise RemoteComposeError("deployment field must contain a mapping")
 
-    if str(deployment.get("type", "")).lower() != "compose":
+    if str(deployment.get("instance_type", "")).lower() != "compose":
         raise RemoteComposeError("challenge type is not Compose")
 
     compose_path = resolve_compose_path(challenge_dir, deployment_config.get("compose"))

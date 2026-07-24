@@ -12,7 +12,7 @@ description: |
   Will you rise to the challenge and lead us to victory, or shall Rome fall to the void?"
 authors:
   - kristoj
-type: Container
+instance_type: Container
 max_points: 500
 score_type: Dynamic
 host: sudoku.chall.theromanxpl0.it

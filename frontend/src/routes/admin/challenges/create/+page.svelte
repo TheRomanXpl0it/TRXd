@@ -36,7 +36,7 @@
 	let name = $state('');
 	let category = $state('');
 	let description = $state('');
-	let type = $state('NStaticone');
+	let instance_type = $state('Static');
 	let points = $state(500);
 	let dynamicScore = $state(true);
 	let hidden = $state(true);
@@ -84,7 +84,7 @@
 		attachments = attachments.filter((_, i) => i !== index);
 	}
 
-	const challengeTypes = [
+	const challengeInstanceTypes = [
 		{ value: 'Static', label: 'Static' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }
@@ -114,7 +114,7 @@
 				name.trim(),
 				category,
 				description.trim(),
-				type,
+				instance_type,
 				points,
 				dynamicScore ? 'Dynamic' : 'Static'
 			);
@@ -140,12 +140,12 @@
 				name: name.trim(),
 				category: category,
 				description: description.trim(),
-				type: type,
+				instance_type: instance_type,
 				hidden: hidden,
 				score_type: dynamicScore ? 'Dynamic' : 'Static',
 				max_points: points,
-				image: type === 'Container' ? imageName : undefined,
-				compose: type === 'Compose' ? composeFile : undefined,
+				image: instance_type === 'Container' ? imageName : undefined,
+				compose: instance_type === 'Compose' ? composeFile : undefined,
 				host: host.trim() ? host.trim() : undefined,
 				port: port ? port : undefined,
 				conn_type: connType,
@@ -299,8 +299,8 @@
 						<div class="grid gap-6 sm:grid-cols-2">
 							<div class="space-y-4">
 								<div class="space-y-2">
-									<Label for="type">Type</Label>
-									<CategorySelect items={challengeTypes} bind:value={type} />
+									<Label for="instance_type">Instance Type</Label>
+									<CategorySelect items={challengeInstanceTypes} bind:value={instance_type} />
 								</div>
 								<div class="space-y-2">
 									<Label for="points">Initial Points</Label>
@@ -383,9 +383,9 @@
 						>
 					</Card.Header>
 					<Card.Content class="space-y-6">
-						{#if type !== 'Static'}
+						{#if instance_type !== 'Static'}
 							<div class="animate-in fade-in slide-in-from-top-2 space-y-4">
-								{#if type === 'Container'}
+								{#if instance_type === 'Container'}
 									<div class="space-y-2">
 										<Label for="image">Docker Image Name</Label>
 										<Input
@@ -478,7 +478,7 @@
 						{/if}
 
 						<div
-							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${type !== 'Static' ? 'border-t pt-6' : ''}`}
+							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${instance_type !== 'Static' ? 'border-t pt-6' : ''}`}
 						>
 							<div class="space-y-2">
 								<Label for="host">Connecting Host (optional)</Label>

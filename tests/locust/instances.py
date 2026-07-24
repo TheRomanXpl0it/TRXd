@@ -161,7 +161,7 @@ class AdminAPI:
             "name": name,
             "category": category,
             "description": description or f"{name} description",
-            "type": ctype,
+            "instance_type": ctype,
             "max_points": max_points,
             "score_type": score_type,
         }

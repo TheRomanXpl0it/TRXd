@@ -183,7 +183,7 @@ func TestRoute(t *testing.T) {
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
-	session.Patch("/challenges", JSON{"chall_id": challID3, "type": "Compose"}, http.StatusOK)
+	session.Patch("/challenges", JSON{"chall_id": challID3, "instance_type": "Compose"}, http.StatusOK)
 	session.CheckResponse(nil)
 
 	session = test_utils.NewApiTestSession(t, app)
@@ -193,10 +193,10 @@ func TestRoute(t *testing.T) {
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
-	session.Patch("/challenges", JSON{"chall_id": challID3, "type": "Container"}, http.StatusOK)
+	session.Patch("/challenges", JSON{"chall_id": challID3, "instance_type": "Container"}, http.StatusOK)
 	session.CheckResponse(nil)
 
-	session.Patch("/challenges", JSON{"chall_id": challID2, "type": "Container", "image": "aaaa"}, http.StatusOK)
+	session.Patch("/challenges", JSON{"chall_id": challID2, "instance_type": "Container", "image": "aaaa"}, http.StatusOK)
 	session.CheckResponse(nil)
 
 	session = test_utils.NewApiTestSession(t, app)

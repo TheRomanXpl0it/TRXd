@@ -72,12 +72,12 @@ describe('Admin Challenge Create Page', () => {
 
 		await user.type(screen.getByLabelText(/challenge name/i), 'Container Test');
 
-		const [categorySelect, typeSelect] = screen.getAllByRole('combobox');
+		const [categorySelect, instanceTypeSelect] = screen.getAllByRole('combobox');
 
 		await user.click(categorySelect);
 		await user.click(await screen.findByText('Web'));
 
-		await user.click(typeSelect);
+		await user.click(instanceTypeSelect);
 		await user.click(await screen.findByText('Container'));
 
 		await user.click(screen.getByRole('button', { name: /deployment/i }));
@@ -107,7 +107,7 @@ describe('Admin Challenge Create Page', () => {
 			expect(updateChallenge).toHaveBeenCalledWith(
 				expect.objectContaining({
 					chall_id: 42,
-					type: 'Container',
+					instance_type: 'Container',
 					image: 'registry.example.com/chall:latest',
 					host: 'container.trxd.cc',
 					port: 31337,

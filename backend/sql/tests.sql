@@ -52,11 +52,11 @@ BEGIN
   */
   INSERT INTO categories (name) VALUES ('cat-1');
   INSERT INTO categories (name) VALUES ('cat-2');
-  INSERT INTO challenges (name, category, description, authors, tags, type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-1', 'cat-1', 'TEST chall-1 DESC', ARRAY['author1', 'author2'], ARRAY['tag-1', 'test-tag'], 'Static', 500, 'Dynamic', 'ctf.theromanxpl0.it', 1234, 'TCP', false);
-  INSERT INTO challenges (name, category, description, authors, tags, type, max_points, score_type, hidden) VALUES ('chall-2', 'cat-2', 'TEST chall-2 DESC', ARRAY['author1', 'author2', 'author3'], ARRAY['tag-2'], 'Static', 500, 'Dynamic', false);
-  INSERT INTO challenges (name, category, description, authors, tags, type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-3', 'cat-1', 'TEST chall-3 DESC', ARRAY['author1'], ARRAY['tag-3'], 'Container', 500, 'Dynamic', 'chall-3.test.com', 1337, 'HTTP', false);
-  INSERT INTO challenges (name, category, description, authors, tags, type, max_points, score_type, conn_type, hidden) VALUES ('chall-4', 'cat-1', 'TEST chall-4 DESC', ARRAY['author2'], ARRAY['tag-4'], 'Compose', 500, 'Dynamic', 'HTTP', false);
-  INSERT INTO challenges (name, category, description, authors, tags, type, max_points, score_type) VALUES ('chall-5', 'cat-2', 'TEST chall-5 DESC', ARRAY['author3'], ARRAY['tag-5'], 'Static', 500, 'Static');
+  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-1', 'cat-1', 'TEST chall-1 DESC', ARRAY['author1', 'author2'], ARRAY['tag-1', 'test-tag'], 'Static', 500, 'Dynamic', 'ctf.theromanxpl0.it', 1234, 'TCP', false);
+  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, hidden) VALUES ('chall-2', 'cat-2', 'TEST chall-2 DESC', ARRAY['author1', 'author2', 'author3'], ARRAY['tag-2'], 'Static', 500, 'Dynamic', false);
+  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-3', 'cat-1', 'TEST chall-3 DESC', ARRAY['author1'], ARRAY['tag-3'], 'Container', 500, 'Dynamic', 'chall-3.test.com', 1337, 'HTTP', false);
+  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, conn_type, hidden) VALUES ('chall-4', 'cat-1', 'TEST chall-4 DESC', ARRAY['author2'], ARRAY['tag-4'], 'Compose', 500, 'Dynamic', 'HTTP', false);
+  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type) VALUES ('chall-5', 'cat-2', 'TEST chall-5 DESC', ARRAY['author3'], ARRAY['tag-5'], 'Static', 500, 'Static');
   UPDATE docker_configs SET image='echo-server:latest', renewable=TRUE, hash_domain=TRUE WHERE chall_id=(SELECT id FROM challenges WHERE name='chall-3');
   UPDATE docker_configs SET compose='
 services:
@@ -304,7 +304,7 @@ BEGIN
   PERFORM assert(COUNT(s)=5, 'correct_submissions_drop_after_delete') FROM submissions s WHERE s.status='Correct';
 
   -- inserts back 'chall-3' as hidden (nothing should change)
-  INSERT INTO challenges (name, category, description, type, max_points, score_type)
+  INSERT INTO challenges (name, category, description, instance_type, max_points, score_type)
     VALUES ('chall-3', 'cat-1', 'TEST', 'Container', 1000, 'Dynamic');
   PERFORM assert(COUNT(b)=3, 'reinstated_hidden_chall_no_changes') FROM badges b;
 
@@ -356,14 +356,14 @@ BEGIN
   PERFORM assert(count(d)=1, 'chall3_config_exists') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-3');
   PERFORM assert(count(d)=1, 'chall4_config_exists') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-4');
 
-  -- checks that docker configs are created on type update and not duplicated
-  INSERT INTO challenges (name, category, description, type, max_points, score_type) VALUES ('chall-test', 'cat-1', 'TEST', 'Static', 500, 'Dynamic');
+  -- checks that docker configs are created on instance type update and not duplicated
+  INSERT INTO challenges (name, category, description, instance_type, max_points, score_type) VALUES ('chall-test', 'cat-1', 'TEST', 'Static', 500, 'Dynamic');
   PERFORM assert(count(d)=0, 'chall_test_no_config_initial') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
-  UPDATE challenges SET type='Container' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
-  PERFORM assert(count(d)=1, 'chall_test_config_created_on_type_container') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
-  UPDATE challenges SET type='Static' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
+  UPDATE challenges SET instance_type='Container' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
+  PERFORM assert(count(d)=1, 'chall_test_config_created_on_instance_type_container') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
+  UPDATE challenges SET instance_type='Static' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
   PERFORM assert(count(d)=1, 'chall_test_config_not_duplicated_normal') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
-  UPDATE challenges SET type='Compose' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
+  UPDATE challenges SET instance_type='Compose' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
   PERFORM assert(count(d)=1, 'chall_test_config_not_duplicated_compose') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
 
   -- checks for the first bloods does not change on already blooded challs

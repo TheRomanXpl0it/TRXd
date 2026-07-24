@@ -80,9 +80,9 @@ var testData = []struct {
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Tags[0]", consts.MaxTagNameLen)),
 	},
 	{
-		testBody:         JSON{"chall_id": "", "type": "aaa"},
+		testBody:         JSON{"chall_id": "", "instance_type": "aaa"},
 		expectedStatus:   http.StatusBadRequest,
-		expectedResponse: errorf(test_utils.Format(consts.OneOfError, "Type", consts.DeployTypesStr)),
+		expectedResponse: errorf(test_utils.Format(consts.OneOfError, "InstanceType", consts.InstanceTypesStr)),
 	},
 	{
 		testBody:         JSON{"chall_id": "", "max_points": -1},
@@ -181,19 +181,19 @@ var testData = []struct {
 	},
 	{
 		testBody: JSON{
-			"chall_id":    "",
-			"name":        "Test",
-			"category":    "cat-2",
-			"conn_type":   "TCP",
-			"description": "new test desc",
-			"authors":     []string{"author1", "author2"},
-			"tags":        []string{"tag1", "tag2", "tag3"},
-			"type":        "Container",
-			"hidden":      false,
-			"max_points":  1000,
-			"score_type":  "Dynamic",
-			"host":        "http://ctf.theromanxpl0.it",
-			"port":        1234,
+			"chall_id":      "",
+			"name":          "Test",
+			"category":      "cat-2",
+			"conn_type":     "TCP",
+			"description":   "new test desc",
+			"authors":       []string{"author1", "author2"},
+			"tags":          []string{"tag1", "tag2", "tag3"},
+			"instance_type": "Container",
+			"hidden":        false,
+			"max_points":    1000,
+			"score_type":    "Dynamic",
+			"host":          "http://ctf.theromanxpl0.it",
+			"port":          1234,
 
 			"image":       "ubuntu:latest",
 			"compose":     "",
@@ -219,7 +219,7 @@ func TestRoute(t *testing.T) {
 	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
 	session.Post("/categories", JSON{"name": "cat"}, -1)
 
-	chall := test_utils.TryCreateChallenge(t, "chall", "cat", "test-desc", sqlc.DeployTypeStatic, 1, sqlc.ScoreTypeStatic)
+	chall := test_utils.TryCreateChallenge(t, "chall", "cat", "test-desc", sqlc.InstanceTypeStatic, 1, sqlc.ScoreTypeStatic)
 	if chall != nil {
 		challID = chall.ID
 	}
@@ -253,7 +253,7 @@ func TestRoute(t *testing.T) {
 				"hidden":               test.testBody["hidden"],
 				"host":                 test.testBody["host"],
 				"id":                   challID,
-				"instance":             test.testBody["type"] != "Static",
+				"instance":             test.testBody["instance_type"] != "Static",
 				"max_points":           test.testBody["max_points"],
 				"name":                 test.testBody["name"],
 				"points":               test.testBody["max_points"],
@@ -293,16 +293,16 @@ func TestRoute(t *testing.T) {
 					"max_memory":  test.testBody["max_memory"],
 					"renewable":   test.testBody["renewable"],
 				},
-				"flags":       []string{},
-				"hidden":      test.testBody["hidden"],
-				"host":        test.testBody["host"],
-				"max_points":  test.testBody["max_points"],
-				"name":        test.testBody["name"],
-				"port":        test.testBody["port"],
-				"score_type":  test.testBody["score_type"],
-				"solves_list": []JSON{},
-				"tags":        test.testBody["tags"],
-				"type":        test.testBody["type"],
+				"flags":         []string{},
+				"hidden":        test.testBody["hidden"],
+				"host":          test.testBody["host"],
+				"instance_type": test.testBody["instance_type"],
+				"max_points":    test.testBody["max_points"],
+				"name":          test.testBody["name"],
+				"port":          test.testBody["port"],
+				"score_type":    test.testBody["score_type"],
+				"solves_list":   []JSON{},
+				"tags":          test.testBody["tags"],
 			}
 			test_utils.Compare(t, expected, body)
 		}
@@ -347,7 +347,7 @@ func TestRoute(t *testing.T) {
 		"hidden":               testBody["hidden"],
 		"host":                 testBody["host"],
 		"id":                   challID,
-		"instance":             testBody["type"] != "Static",
+		"instance":             testBody["instance_type"] != "Static",
 		"max_points":           testBody["max_points"],
 		"name":                 testBody["name"],
 		"points":               testBody["max_points"],
@@ -387,16 +387,16 @@ func TestRoute(t *testing.T) {
 			"max_memory":  testBody["max_memory"],
 			"renewable":   testBody["renewable"],
 		},
-		"flags":       []string{},
-		"hidden":      testBody["hidden"],
-		"host":        testBody["host"],
-		"max_points":  testBody["max_points"],
-		"name":        testBody["name"],
-		"port":        testBody["port"],
-		"score_type":  "Dynamic",
-		"solves_list": []JSON{},
-		"tags":        testBody["tags"],
-		"type":        "Container",
+		"flags":         []string{},
+		"hidden":        testBody["hidden"],
+		"host":          testBody["host"],
+		"instance_type": "Container",
+		"max_points":    testBody["max_points"],
+		"name":          testBody["name"],
+		"port":          testBody["port"],
+		"score_type":    "Dynamic",
+		"solves_list":   []JSON{},
+		"tags":          testBody["tags"],
 	}
 	test_utils.Compare(t, expected, body)
 }

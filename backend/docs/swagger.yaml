@@ -104,20 +104,20 @@ definitions:
         type: string
       description:
         type: string
+      instance_type:
+        $ref: '#/definitions/sqlc.InstanceType'
       max_points:
         type: integer
       name:
         type: string
       score_type:
         $ref: '#/definitions/sqlc.ScoreType'
-      type:
-        $ref: '#/definitions/sqlc.DeployType'
     required:
     - category
+    - instance_type
     - max_points
     - name
     - score_type
-    - type
     type: object
   challenges_delete.Data:
     properties:
@@ -152,6 +152,8 @@ definitions:
         type: boolean
       host:
         type: string
+      instance_type:
+        $ref: '#/definitions/sqlc.InstanceType'
       max_points:
         type: integer
       name:
@@ -168,8 +170,6 @@ definitions:
         items:
           type: string
         type: array
-      type:
-        $ref: '#/definitions/sqlc.DeployType'
     type: object
   challenges_get.DockerConfig:
     properties:
@@ -225,6 +225,8 @@ definitions:
         type: string
       image:
         type: string
+      instance_type:
+        $ref: '#/definitions/sqlc.InstanceType'
       lifetime:
         type: integer
       max_cpu:
@@ -245,8 +247,6 @@ definitions:
         items:
           type: string
         type: array
-      type:
-        $ref: '#/definitions/sqlc.DeployType'
     required:
     - chall_id
     type: object
@@ -351,16 +351,6 @@ definitions:
     - ConnTypeTCP
     - ConnTypeHTTP
     - ConnTypeHTTPS
-  sqlc.DeployType:
-    enum:
-    - Static
-    - Container
-    - Compose
-    type: string
-    x-enum-varnames:
-    - DeployTypeStatic
-    - DeployTypeContainer
-    - DeployTypeCompose
   sqlc.GetAdminStatsRow:
     properties:
       total_challenges:
@@ -455,6 +445,16 @@ definitions:
       timestamp:
         type: string
     type: object
+  sqlc.InstanceType:
+    enum:
+    - Static
+    - Container
+    - Compose
+    type: string
+    x-enum-varnames:
+    - InstanceTypeStatic
+    - InstanceTypeContainer
+    - InstanceTypeCompose
   sqlc.ScoreType:
     enum:
     - Static
@@ -1139,12 +1139,12 @@ paths:
             fields` | `No data provided to update` | `ChallID must be at least 0`
             | `Name must not exceed 128` | `Category must not exceed 32` | `Description
             must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must
-            not exceed 32` | `Type must be one of: Static Container Compose` | `MaxPoints
-            must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port
-            must be at least 0` | `Port must not exceed 65535` | `ConnType must be
-            one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment
-            variables` | `MaxMemory must be at least 0` | `Invalid Max CPU, must be
-            a positive 32-bit integer`'
+            not exceed 32` | `InstanceType must be one of: Static Container Compose`
+            | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic`
+            | `Port must be at least 0` | `Port must not exceed 65535` | `ConnType
+            must be one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid
+            environment variables` | `MaxMemory must be at least 0` | `Invalid Max
+            CPU, must be a positive 32-bit integer`'
           schema:
             $ref: '#/definitions/models.Error'
         "404":
@@ -1184,9 +1184,9 @@ paths:
         "400":
           description: 'Possible errors: `Invalid JSON format` | `Missing required
             fields` | `Name must not exceed 32` | `Category must not exceed 32` |
-            `Description must not exceed 10240` | `Type must be one of: Static Container
-            Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of:
-            Static Dynamic`'
+            `Description must not exceed 10240` | `InstanceType must be one of: Static
+            Container Compose` | `MaxPoints must be at least 0` | `ScoreType must
+            be one of: Static Dynamic`'
           schema:
             $ref: '#/definitions/models.Error'
         "404":

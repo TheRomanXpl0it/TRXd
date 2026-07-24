@@ -102,12 +102,13 @@ func TestRoute(t *testing.T) {
 				"regex": true,
 			},
 		},
-		"hidden":     false,
-		"host":       "ctf.theromanxpl0.it",
-		"max_points": 500,
-		"name":       "chall-1",
-		"port":       1234,
-		"score_type": "Dynamic",
+		"hidden":        false,
+		"host":          "ctf.theromanxpl0.it",
+		"instance_type": "Static",
+		"max_points":    500,
+		"name":          "chall-1",
+		"port":          1234,
+		"score_type":    "Dynamic",
 		"solves_list": []JSON{
 			{
 				"name": "A",
@@ -117,7 +118,6 @@ func TestRoute(t *testing.T) {
 			"tag-1",
 			"test-tag",
 		},
-		"type": "Static",
 	}
 
 	test_utils.RegisterUser(t, "test2", "test3@test.test", "testpass", sqlc.UserRoleAuthor)
@@ -142,17 +142,17 @@ func TestRoute(t *testing.T) {
 				"regex": false,
 			},
 		},
-		"hidden":      true,
-		"host":        "",
-		"max_points":  500,
-		"name":        "chall-5",
-		"port":        0,
-		"score_type":  "Static",
-		"solves_list": []JSON{},
+		"hidden":        true,
+		"host":          "",
+		"instance_type": "Static",
+		"max_points":    500,
+		"name":          "chall-5",
+		"port":          0,
+		"score_type":    "Static",
+		"solves_list":   []JSON{},
 		"tags": []string{
 			"tag-5",
 		},
-		"type": "Static",
 	}
 
 	session.Get("/challenges", nil, http.StatusOK)
@@ -194,12 +194,13 @@ func TestRoute(t *testing.T) {
 				"regex": false,
 			},
 		},
-		"hidden":     false,
-		"host":       "chall-3.test.com",
-		"max_points": 500,
-		"name":       "chall-3",
-		"port":       1337,
-		"score_type": "Dynamic",
+		"hidden":        false,
+		"host":          "chall-3.test.com",
+		"instance_type": "Container",
+		"max_points":    500,
+		"name":          "chall-3",
+		"port":          1337,
+		"score_type":    "Dynamic",
 		"solves_list": []JSON{
 			{
 				"name": "A",
@@ -208,7 +209,6 @@ func TestRoute(t *testing.T) {
 		"tags": []string{
 			"tag-3",
 		},
-		"type": "Container",
 	}
 
 	session.Get(fmt.Sprintf("/challenges/%d", id3), nil, http.StatusOK)
@@ -244,12 +244,13 @@ func TestRoute(t *testing.T) {
 				"regex": false,
 			},
 		},
-		"hidden":     false,
-		"host":       "chall-3.test.com",
-		"max_points": 500,
-		"name":       "chall-3",
-		"port":       1337,
-		"score_type": "Dynamic",
+		"hidden":        false,
+		"host":          "chall-3.test.com",
+		"instance_type": "Container",
+		"max_points":    500,
+		"name":          "chall-3",
+		"port":          1337,
+		"score_type":    "Dynamic",
 		"solves_list": []JSON{
 			{
 				"name": "A",
@@ -258,7 +259,6 @@ func TestRoute(t *testing.T) {
 		"tags": []string{
 			"tag-3",
 		},
-		"type": "Container",
 	}
 
 	session.Get(fmt.Sprintf("/challenges/%d", id3), nil, http.StatusOK)

@@ -120,7 +120,7 @@ create_challenge() {
 		--arg name "${cname}" \
 		--arg category "${CATEGORY}" \
 		--arg description "Bulk seeded nginx challenge ${idx}" \
-		'{name:$name,category:$category,description:$description,type:"Container",max_points:100,score_type:"Static"}')"
+		'{name:$name,category:$category,description:$description,instance_type:"Container",max_points:100,score_type:"Static"}')"
 
 	expect_status 200 GET "${admin_jar}" "/challenges"
 	cid="$(printf '%s' "${HTTP_BODY}" | jq -r --arg name "${cname}" '.[] | select(.name==$name) | .id')"

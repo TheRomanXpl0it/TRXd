@@ -7,7 +7,7 @@ SET
   description = COALESCE(sqlc.narg('description'), description),
   authors = COALESCE(sqlc.narg('authors'), authors),
   tags = COALESCE(sqlc.narg('tags'), tags),
-  type = COALESCE(sqlc.narg('type'), type),
+  instance_type = COALESCE(sqlc.narg('instance_type'), instance_type),
   hidden = COALESCE(sqlc.narg('hidden'), hidden),
   max_points = COALESCE(sqlc.narg('max_points'), max_points),
   score_type = COALESCE(sqlc.narg('score_type'), score_type),

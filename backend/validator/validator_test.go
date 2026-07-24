@@ -103,11 +103,11 @@ func TestValidators(t *testing.T) {
 	varTest(t, "challenge_tags", []string{strings.Repeat("a", consts.MaxTagNameLen)})
 	varTest(t, "challenge_tags", []string{strings.Repeat("a", consts.MaxTagNameLen+1)}, test_utils.Format(consts.MaxError, "[0]", consts.MaxTagNameLen))
 
-	varTest(t, "challenge_type", "", test_utils.Format(consts.OneOfError, "challenge_type", strings.Join(consts.DeployTypesStr, " ")))
-	varTest(t, "challenge_type", sqlc.DeployTypeStatic)
-	varTest(t, "challenge_type", sqlc.DeployTypeContainer)
-	varTest(t, "challenge_type", sqlc.DeployTypeCompose)
-	varTest(t, "challenge_type", "aaa", test_utils.Format(consts.OneOfError, "challenge_type", strings.Join(consts.DeployTypesStr, " ")))
+	varTest(t, "challenge_instance_type", "", test_utils.Format(consts.OneOfError, "challenge_instance_type", strings.Join(consts.InstanceTypesStr, " ")))
+	varTest(t, "challenge_instance_type", sqlc.InstanceTypeStatic)
+	varTest(t, "challenge_instance_type", sqlc.InstanceTypeContainer)
+	varTest(t, "challenge_instance_type", sqlc.InstanceTypeCompose)
+	varTest(t, "challenge_instance_type", "aaa", test_utils.Format(consts.OneOfError, "challenge_instance_type", strings.Join(consts.InstanceTypesStr, " ")))
 
 	varTest(t, "challenge_max_points", -1, test_utils.Format(consts.MinError, "challenge_max_points", 0))
 	varTest(t, "challenge_max_points", 0)

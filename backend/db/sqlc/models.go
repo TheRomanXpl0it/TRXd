@@ -54,47 +54,47 @@ func (ns NullConnType) Value() (driver.Value, error) {
 	return string(ns.ConnType), nil
 }
 
-type DeployType string
+type InstanceType string
 
 const (
-	DeployTypeStatic    DeployType = "Static"
-	DeployTypeContainer DeployType = "Container"
-	DeployTypeCompose   DeployType = "Compose"
+	InstanceTypeStatic    InstanceType = "Static"
+	InstanceTypeContainer InstanceType = "Container"
+	InstanceTypeCompose   InstanceType = "Compose"
 )
 
-func (e *DeployType) Scan(src interface{}) error {
+func (e *InstanceType) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case []byte:
-		*e = DeployType(s)
+		*e = InstanceType(s)
 	case string:
-		*e = DeployType(s)
+		*e = InstanceType(s)
 	default:
-		return fmt.Errorf("unsupported scan type for DeployType: %T", src)
+		return fmt.Errorf("unsupported scan type for InstanceType: %T", src)
 	}
 	return nil
 }
 
-type NullDeployType struct {
-	DeployType DeployType `json:"deploy_type"`
-	Valid      bool       `json:"valid"` // Valid is true if DeployType is not NULL
+type NullInstanceType struct {
+	InstanceType InstanceType `json:"instance_type"`
+	Valid        bool         `json:"valid"` // Valid is true if InstanceType is not NULL
 }
 
 // Scan implements the Scanner interface.
-func (ns *NullDeployType) Scan(value interface{}) error {
+func (ns *NullInstanceType) Scan(value interface{}) error {
 	if value == nil {
-		ns.DeployType, ns.Valid = "", false
+		ns.InstanceType, ns.Valid = "", false
 		return nil
 	}
 	ns.Valid = true
-	return ns.DeployType.Scan(value)
+	return ns.InstanceType.Scan(value)
 }
 
 // Value implements the driver Valuer interface.
-func (ns NullDeployType) Value() (driver.Value, error) {
+func (ns NullInstanceType) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
 	}
-	return string(ns.DeployType), nil
+	return string(ns.InstanceType), nil
 }
 
 type ScoreType string
@@ -244,21 +244,21 @@ type Category struct {
 }
 
 type Challenge struct {
-	ID          int32      `json:"id"`
-	Name        string     `json:"name"`
-	Category    string     `json:"category"`
-	Description string     `json:"description"`
-	Authors     []string   `json:"authors"`
-	Tags        []string   `json:"tags"`
-	Type        DeployType `json:"type"`
-	Hidden      bool       `json:"hidden"`
-	MaxPoints   int32      `json:"max_points"`
-	ScoreType   ScoreType  `json:"score_type"`
-	Points      int32      `json:"points"`
-	Solves      int32      `json:"solves"`
-	Host        string     `json:"host"`
-	Port        int32      `json:"port"`
-	ConnType    ConnType   `json:"conn_type"`
+	ID           int32        `json:"id"`
+	Name         string       `json:"name"`
+	Category     string       `json:"category"`
+	Description  string       `json:"description"`
+	Authors      []string     `json:"authors"`
+	Tags         []string     `json:"tags"`
+	InstanceType InstanceType `json:"instance_type"`
+	Hidden       bool         `json:"hidden"`
+	MaxPoints    int32        `json:"max_points"`
+	ScoreType    ScoreType    `json:"score_type"`
+	Points       int32        `json:"points"`
+	Solves       int32        `json:"solves"`
+	Host         string       `json:"host"`
+	Port         int32        `json:"port"`
+	ConnType     ConnType     `json:"conn_type"`
 }
 
 type Config struct {

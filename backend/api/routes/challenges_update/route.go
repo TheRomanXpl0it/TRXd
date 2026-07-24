@@ -12,19 +12,19 @@ import (
 )
 
 type Data struct {
-	ChallID     *int32           `json:"chall_id" validate:"required,id"`
-	Name        string           `json:"name" validate:"challenge_name"`
-	Category    string           `json:"category" validate:"category_name"`
-	Description *string          `json:"description" validate:"omitempty,challenge_description"`
-	Authors     *[]string        `json:"authors" validate:"omitempty,challenge_authors"`
-	Tags        *[]string        `json:"tags" validate:"omitempty,challenge_tags"`
-	Type        *sqlc.DeployType `json:"type" validate:"omitempty,challenge_type"`
-	Hidden      *bool            `json:"hidden"`
-	MaxPoints   *int32           `json:"max_points" validate:"omitempty,challenge_max_points"`
-	ScoreType   *sqlc.ScoreType  `json:"score_type" validate:"omitempty,challenge_score_type"`
-	Host        *string          `json:"host"`
-	Port        *int32           `json:"port" validate:"omitempty,challenge_port"`
-	ConnType    *sqlc.ConnType   `json:"conn_type" validate:"omitempty,challenge_conn_type"`
+	ChallID      *int32             `json:"chall_id" validate:"required,id"`
+	Name         string             `json:"name" validate:"challenge_name"`
+	Category     string             `json:"category" validate:"category_name"`
+	Description  *string            `json:"description" validate:"omitempty,challenge_description"`
+	Authors      *[]string          `json:"authors" validate:"omitempty,challenge_authors"`
+	Tags         *[]string          `json:"tags" validate:"omitempty,challenge_tags"`
+	InstanceType *sqlc.InstanceType `json:"instance_type" validate:"omitempty,challenge_instance_type"`
+	Hidden       *bool              `json:"hidden"`
+	MaxPoints    *int32             `json:"max_points" validate:"omitempty,challenge_max_points"`
+	ScoreType    *sqlc.ScoreType    `json:"score_type" validate:"omitempty,challenge_score_type"`
+	Host         *string            `json:"host"`
+	Port         *int32             `json:"port" validate:"omitempty,challenge_port"`
+	ConnType     *sqlc.ConnType     `json:"conn_type" validate:"omitempty,challenge_conn_type"`
 
 	Image      *string `json:"image"`
 	Compose    *string `json:"compose"`
@@ -44,7 +44,7 @@ type Data struct {
 // @Produce json
 // @Param data body Data true "`chall_id` is required, the rest of the fields are optional, only provide the fields you want to update"
 // @Success 200
-// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `No data provided to update` | `ChallID must be at least 0` | `Name must not exceed 128` | `Category must not exceed 32` | `Description must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must not exceed 32` | `Type must be one of: Static Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port must be at least 0` | `Port must not exceed 65535` | `ConnType must be one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment variables` | `MaxMemory must be at least 0` | `Invalid Max CPU, must be a positive 32-bit integer`"
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `No data provided to update` | `ChallID must be at least 0` | `Name must not exceed 128` | `Category must not exceed 32` | `Description must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must not exceed 32` | `InstanceType must be one of: Static Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port must be at least 0` | `Port must not exceed 65535` | `ConnType must be one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment variables` | `MaxMemory must be at least 0` | `Invalid Max CPU, must be a positive 32-bit integer`"
 // @Failure 404 {object} models.Error "Possible errors: `Challenge not found` | `Category not found`"
 // @Failure 409 {object} models.Error "Possible errors: `Challenge name already exists`"
 // @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error updating challenge`"

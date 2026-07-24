@@ -41,7 +41,7 @@ func init() {
 	validate.RegisterAlias("challenge_description", fmt.Sprintf("max=%d", consts.MaxChallDescLen))
 	validate.RegisterAlias("challenge_authors", fmt.Sprintf("dive,max=%d", consts.MaxAuthorNameLen))
 	validate.RegisterAlias("challenge_tags", fmt.Sprintf("dive,max=%d", consts.MaxTagNameLen))
-	validate.RegisterAlias("challenge_type", "oneof="+strings.Join(consts.DeployTypesStr, " "))
+	validate.RegisterAlias("challenge_instance_type", "oneof="+strings.Join(consts.InstanceTypesStr, " "))
 	validate.RegisterAlias("challenge_max_points", fmt.Sprintf("min=0,max=%d", math.MaxInt32))
 	validate.RegisterAlias("challenge_score_type", "oneof="+strings.Join(consts.ScoreTypesStr, " "))
 	validate.RegisterAlias("challenge_port", fmt.Sprintf("min=%d,max=%d", consts.MinPort, consts.MaxPort))

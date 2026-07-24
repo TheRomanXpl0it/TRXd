@@ -35,22 +35,22 @@
 		challengeName = $bindable(''),
 		challengeDescription = $bindable(''),
 		category = $bindable(''),
-		challengeType = $bindable('Static'),
+		challengeInstanceType = $bindable('Static'),
 		points = $bindable(500),
 		dynamicScore = $bindable(true),
 		categories = $bindable([]),
-		challengeTypes = [],
+		challengeInstanceTypes = [],
 		oncreated
 	} = $props<{
 		open: boolean;
 		challengeName?: string;
 		challengeDescription?: string;
 		category?: string;
-		challengeType?: string;
+		challengeInstanceType?: string;
 		points?: number;
 		dynamicScore?: boolean;
 		categories: Array<{ value: string; label: string }>;
-		challengeTypes: Array<{ value: string; label: string }>;
+		challengeInstanceTypes: Array<{ value: string; label: string }>;
 		oncreated?: () => void;
 	}>();
 
@@ -91,7 +91,7 @@
 		const trimmedName = challengeName.trim();
 		if (!trimmedName) return toast.error('Please enter a challenge name.');
 		if (!category) return toast.error('Please select a category.');
-		if (!challengeType) return toast.error('Please select a challenge type.');
+		if (!challengeInstanceType) return toast.error('Please select a challenge instance type.');
 
 		// Validate flags
 		const activeFlags = flags.filter((f) => f.flag.trim());
@@ -109,7 +109,7 @@
 				trimmedName,
 				category,
 				challengeDescription.trim(),
-				challengeType,
+				challengeInstanceType,
 				points,
 				scoretype
 			);
@@ -133,9 +133,9 @@
 					hidden: true // Hidden by default on creation
 				};
 
-				if (challengeType === 'Container' || challengeType === 'Compose') {
-					updateData.image = challengeType === 'Container' ? image || 'nginx:latest' : undefined;
-					updateData.compose = challengeType === 'Compose' ? compose : undefined;
+				if (challengeInstanceType === 'Container' || challengeInstanceType === 'Compose') {
+					updateData.image = challengeInstanceType === 'Container' ? image || 'nginx:latest' : undefined;
+					updateData.compose = challengeInstanceType === 'Compose' ? compose : undefined;
 					updateData.lifetime = Number(lifetime) || 1800;
 
 					// Env vars
@@ -181,7 +181,7 @@
 		challengeName = '';
 		challengeDescription = '';
 		category = '';
-		challengeType = 'Static';
+		challengeInstanceType = 'Static';
 		points = 500;
 		dynamicScore = true;
 		tags = [];
@@ -282,12 +282,12 @@
 									<div>
 										<Label
 											class="text-muted-foreground mb-2 block text-sm font-bold uppercase tracking-wider"
-											>Type</Label
+											>Instance Type</Label
 										>
 										<MultiSelect
-											items={challengeTypes}
-											bind:value={challengeType}
-											placeholder="Select type..."
+											items={challengeInstanceTypes}
+											bind:value={challengeInstanceType}
+											placeholder="Select instance type..."
 										/>
 									</div>
 								</div>
@@ -333,14 +333,14 @@
 					{:else if activeTab === 'deployment'}
 						<div class="space-y-6">
 							<!-- Container/Compose Specifics -->
-							{#if challengeType === 'Container' || challengeType === 'Compose'}
+							{#if challengeInstanceType === 'Container' || challengeInstanceType === 'Compose'}
 								<div class="bg-muted/30 space-y-4 rounded-xl border p-5">
 									<h4
 										class="text-primary/70 flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em]"
 									>
 										<Plus class="h-3 w-3" /> Docker Configuration
 									</h4>
-									{#if challengeType === 'Container'}
+									{#if challengeInstanceType === 'Container'}
 										<div>
 											<Label for="image" class="mb-2 block text-sm font-bold">Image Name</Label>
 											<Input

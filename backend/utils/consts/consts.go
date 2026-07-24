@@ -11,8 +11,8 @@ const NetworkInternal = "trxd-shared-internal"
 
 var Roles = []sqlc.UserRole{sqlc.UserRolePlayer, sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}
 var RolesStr = []string{string(sqlc.UserRolePlayer), string(sqlc.UserRoleAuthor), string(sqlc.UserRoleAdmin)}
-var DeployTypes = []sqlc.DeployType{sqlc.DeployTypeStatic, sqlc.DeployTypeContainer, sqlc.DeployTypeCompose}
-var DeployTypesStr = []string{string(sqlc.DeployTypeStatic), string(sqlc.DeployTypeContainer), string(sqlc.DeployTypeCompose)}
+var InstanceTypes = []sqlc.InstanceType{sqlc.InstanceTypeStatic, sqlc.InstanceTypeContainer, sqlc.InstanceTypeCompose}
+var InstanceTypesStr = []string{string(sqlc.InstanceTypeStatic), string(sqlc.InstanceTypeContainer), string(sqlc.InstanceTypeCompose)}
 var ScoreTypes = []sqlc.ScoreType{sqlc.ScoreTypeStatic, sqlc.ScoreTypeDynamic}
 var ScoreTypesStr = []string{string(sqlc.ScoreTypeStatic), string(sqlc.ScoreTypeDynamic)}
 var ConnTypes = []sqlc.ConnType{sqlc.ConnTypeTCP, sqlc.ConnTypeHTTP, sqlc.ConnTypeHTTPS}

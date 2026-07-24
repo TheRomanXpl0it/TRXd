@@ -48,7 +48,7 @@
 	let now = $state(Date.now());
 	const queryClient = useQueryClient();
 
-	const challengeTypes = [
+	const challengeInstanceTypes = [
 		{ value: 'Static', label: 'Static' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }

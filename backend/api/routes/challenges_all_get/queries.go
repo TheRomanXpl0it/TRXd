@@ -51,7 +51,7 @@ func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Ch
 			Category:    challenge.Category,
 			Description: challenge.Description,
 			Authors:     challenge.Authors,
-			Instance:    challenge.Type != sqlc.DeployTypeStatic,
+			Instance:    challenge.InstanceType != sqlc.InstanceTypeStatic,
 			Hidden:      challenge.Hidden,
 			Points:      int(challenge.Points),
 			Solves:      int(challenge.Solves),

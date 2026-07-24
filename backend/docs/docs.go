@@ -354,7 +354,7 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `Name must not exceed 32` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Type must be one of: Static Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + `",
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `Name must not exceed 32` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `InstanceType must be one of: Static Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -448,7 +448,7 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `No data provided to update` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + ` | ` + "`" + `Name must not exceed 128` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Authors[i] must not exceed 64` + "`" + ` | ` + "`" + `Tags[i] must not exceed 32` + "`" + ` | ` + "`" + `Type must be one of: Static Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + ` | ` + "`" + `Port must be at least 0` + "`" + ` | ` + "`" + `Port must not exceed 65535` + "`" + ` | ` + "`" + `ConnType must be one of: TCP HTTP HTTPS` + "`" + ` | ` + "`" + `Lifetime must be at least 0` + "`" + ` | ` + "`" + `Invalid environment variables` + "`" + ` | ` + "`" + `MaxMemory must be at least 0` + "`" + ` | ` + "`" + `Invalid Max CPU, must be a positive 32-bit integer` + "`" + `",
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `No data provided to update` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + ` | ` + "`" + `Name must not exceed 128` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Authors[i] must not exceed 64` + "`" + ` | ` + "`" + `Tags[i] must not exceed 32` + "`" + ` | ` + "`" + `InstanceType must be one of: Static Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + ` | ` + "`" + `Port must be at least 0` + "`" + ` | ` + "`" + `Port must not exceed 65535` + "`" + ` | ` + "`" + `ConnType must be one of: TCP HTTP HTTPS` + "`" + ` | ` + "`" + `Lifetime must be at least 0` + "`" + ` | ` + "`" + `Invalid environment variables` + "`" + ` | ` + "`" + `MaxMemory must be at least 0` + "`" + ` | ` + "`" + `Invalid Max CPU, must be a positive 32-bit integer` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -2229,10 +2229,10 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "category",
+                "instance_type",
                 "max_points",
                 "name",
-                "score_type",
-                "type"
+                "score_type"
             ],
             "properties": {
                 "category": {
@@ -2240,6 +2240,9 @@ const docTemplate = `{
                 },
                 "description": {
                     "type": "string"
+                },
+                "instance_type": {
+                    "$ref": "#/definitions/sqlc.InstanceType"
                 },
                 "max_points": {
                     "type": "integer"
@@ -2249,9 +2252,6 @@ const docTemplate = `{
                 },
                 "score_type": {
                     "$ref": "#/definitions/sqlc.ScoreType"
-                },
-                "type": {
-                    "$ref": "#/definitions/sqlc.DeployType"
                 }
             }
         },
@@ -2305,6 +2305,9 @@ const docTemplate = `{
                 "host": {
                     "type": "string"
                 },
+                "instance_type": {
+                    "$ref": "#/definitions/sqlc.InstanceType"
+                },
                 "max_points": {
                     "type": "integer"
                 },
@@ -2328,9 +2331,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "type": {
-                    "$ref": "#/definitions/sqlc.DeployType"
                 }
             }
         },
@@ -2419,6 +2419,9 @@ const docTemplate = `{
                 "image": {
                     "type": "string"
                 },
+                "instance_type": {
+                    "$ref": "#/definitions/sqlc.InstanceType"
+                },
                 "lifetime": {
                     "type": "integer"
                 },
@@ -2448,9 +2451,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                },
-                "type": {
-                    "$ref": "#/definitions/sqlc.DeployType"
                 }
             }
         },
@@ -2606,19 +2606,6 @@ const docTemplate = `{
                 "ConnTypeHTTPS"
             ]
         },
-        "sqlc.DeployType": {
-            "type": "string",
-            "enum": [
-                "Static",
-                "Container",
-                "Compose"
-            ],
-            "x-enum-varnames": [
-                "DeployTypeStatic",
-                "DeployTypeContainer",
-                "DeployTypeCompose"
-            ]
-        },
         "sqlc.GetAdminStatsRow": {
             "type": "object",
             "properties": {
@@ -2763,6 +2750,19 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "sqlc.InstanceType": {
+            "type": "string",
+            "enum": [
+                "Static",
+                "Container",
+                "Compose"
+            ],
+            "x-enum-varnames": [
+                "InstanceTypeStatic",
+                "InstanceTypeContainer",
+                "InstanceTypeCompose"
+            ]
         },
         "sqlc.ScoreType": {
             "type": "string",

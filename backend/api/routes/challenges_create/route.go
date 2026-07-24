@@ -11,12 +11,12 @@ import (
 )
 
 type Data struct {
-	Name        string          `json:"name" validate:"required,challenge_name"`
-	Category    string          `json:"category" validate:"required,category_name"`
-	Description string          `json:"description" validate:"challenge_description"`
-	Type        sqlc.DeployType `json:"type" validate:"required,challenge_type"`
-	MaxPoints   int32           `json:"max_points" validate:"required,challenge_max_points"`
-	ScoreType   sqlc.ScoreType  `json:"score_type" validate:"required,challenge_score_type"`
+	Name         string            `json:"name" validate:"required,challenge_name"`
+	Category     string            `json:"category" validate:"required,category_name"`
+	Description  string            `json:"description" validate:"challenge_description"`
+	InstanceType sqlc.InstanceType `json:"instance_type" validate:"required,challenge_instance_type"`
+	MaxPoints    int32             `json:"max_points" validate:"required,challenge_max_points"`
+	ScoreType    sqlc.ScoreType    `json:"score_type" validate:"required,challenge_score_type"`
 }
 
 // @Summary [Author+] Creates a new challenge
@@ -27,7 +27,7 @@ type Data struct {
 // @Produce json
 // @Param data body Data true "all fields are required except **description**"
 // @Success 200
-// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `Category must not exceed 32` | `Description must not exceed 10240` | `Type must be one of: Static Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic`"
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `Category must not exceed 32` | `Description must not exceed 10240` | `InstanceType must be one of: Static Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic`"
 // @Failure 404 {object} models.Error "Possible errors: `Category not found`"
 // @Failure 409 {object} models.Error "Possible errors: `Challenge already exists`"
 // @Failure 500 {object} models.Error "Possible errors: `Error creating challenge`"
@@ -43,7 +43,7 @@ func Route(c *fiber.Ctx) error {
 		return err
 	}
 
-	challenge, err := CreateChallenge(c.Context(), data.Name, data.Category, data.Description, data.Type, data.MaxPoints, data.ScoreType)
+	challenge, err := CreateChallenge(c.Context(), data.Name, data.Category, data.Description, data.InstanceType, data.MaxPoints, data.ScoreType)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == consts.PGForeignKeyViolation {

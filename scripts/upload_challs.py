@@ -49,7 +49,7 @@ for category, challs in challenges.items():
 				"description": chall_info['description'],
 				"max_points": chall_info['max_points'],
 				"score_type": chall_info['score_type'],
-				"type": chall_info['type'],
+				"instance_type": chall_info['instance_type'],
 			},
 			headers={"X-CSRF-Token": s.cookies.get('csrf_')}
 		)

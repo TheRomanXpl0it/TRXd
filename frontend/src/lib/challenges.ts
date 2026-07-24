@@ -48,14 +48,14 @@ export async function createChallenge(
 	name: string,
 	category: string,
 	description: string,
-	type: string,
+	instance_type: string,
 	max_points: number,
 	score_type: string
 ): Promise<any> {
 	return api<any>('/challenges', {
 		headers: { 'content-type': 'application/json' },
 		method: 'POST',
-		body: JSON.stringify({ name, category, description, type, max_points, score_type })
+		body: JSON.stringify({ name, category, description, instance_type, max_points, score_type })
 	});
 }
 

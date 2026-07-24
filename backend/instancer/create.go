@@ -20,7 +20,7 @@ type CreateInstanceParams struct {
 	ChallID      int32
 	ConnType     sqlc.ConnType
 	InternalPort *int32
-	DeployType   sqlc.DeployType
+	InstanceType sqlc.InstanceType
 	DockerConfig *sqlc.GetDockerConfigsByIDRow
 }
 
@@ -93,20 +93,20 @@ func makeLabels(info *infos.InstanceInfo, p *CreateInstanceParams) {
 }
 
 func spawnInstance(ctx context.Context, info *infos.InstanceInfo,
-	conf *sqlc.GetDockerConfigsByIDRow, deployType sqlc.DeployType) (string, error) {
+	conf *sqlc.GetDockerConfigsByIDRow, instanceType sqlc.InstanceType) (string, error) {
 
 	var dockerID string
 	var err error
 
 	if info.UseDomain {
 		info.NetID = "trxd-shared-internal"
-	} else if deployType == sqlc.DeployTypeContainer {
+	} else if instanceType == sqlc.InstanceTypeContainer {
 		info.NetID = "trxd-shared-external"
 	}
 
-	if deployType == sqlc.DeployTypeContainer && conf.Image != "" {
+	if instanceType == sqlc.InstanceTypeContainer && conf.Image != "" {
 		dockerID, err = containers.CreateContainer(ctx, info, conf.Image)
-	} else if deployType == sqlc.DeployTypeCompose && conf.Compose != "" {
+	} else if instanceType == sqlc.InstanceTypeCompose && conf.Compose != "" {
 		dockerID, err = composes.CreateCompose(ctx, info, conf.Compose)
 	} else {
 		return "", errors.New("[no image or compose]")
@@ -164,7 +164,7 @@ func CreateInstance(ctx context.Context, p *CreateInstanceParams) (*CreateInstan
 
 	makeLabels(instanceInfo, p)
 
-	dockerID, err = spawnInstance(ctx, instanceInfo, p.DockerConfig, p.DeployType)
+	dockerID, err = spawnInstance(ctx, instanceInfo, p.DockerConfig, p.InstanceType)
 	if err != nil {
 		return nil, err
 	}

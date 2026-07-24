@@ -88,17 +88,17 @@ func (q *Queries) CreateCategory(ctx context.Context, name string) error {
 }
 
 const createChallenge = `-- name: CreateChallenge :one
-INSERT INTO challenges (name, category, description, type, max_points, score_type)
+INSERT INTO challenges (name, category, description, instance_type, max_points, score_type)
   VALUES ($1, $2, $3, $4, $5, $6) RETURNING id
 `
 
 type CreateChallengeParams struct {
-	Name        string     `json:"name"`
-	Category    string     `json:"category"`
-	Description string     `json:"description"`
-	Type        DeployType `json:"type"`
-	MaxPoints   int32      `json:"max_points"`
-	ScoreType   ScoreType  `json:"score_type"`
+	Name         string       `json:"name"`
+	Category     string       `json:"category"`
+	Description  string       `json:"description"`
+	InstanceType InstanceType `json:"instance_type"`
+	MaxPoints    int32        `json:"max_points"`
+	ScoreType    ScoreType    `json:"score_type"`
 }
 
 // Insert a new challenge
@@ -107,7 +107,7 @@ func (q *Queries) CreateChallenge(ctx context.Context, arg CreateChallengeParams
 		arg.Name,
 		arg.Category,
 		arg.Description,
-		arg.Type,
+		arg.InstanceType,
 		arg.MaxPoints,
 		arg.ScoreType,
 	)
@@ -285,7 +285,7 @@ func (q *Queries) GetAdminStats(ctx context.Context) (GetAdminStatsRow, error) {
 const getAllChallengesInfo = `-- name: GetAllChallengesInfo :many
 WITH tid AS (SELECT team_id FROM users WHERE users.id = $1)
 SELECT
-    c.id, c.name, c.category, c.description, c.authors, c.tags, c.type, c.hidden, c.max_points, c.score_type, c.points, c.solves, c.host, c.port, c.conn_type,
+    c.id, c.name, c.category, c.description, c.authors, c.tags, c.instance_type, c.hidden, c.max_points, c.score_type, c.points, c.solves, c.host, c.port, c.conn_type,
     (s.first_blood IS NOT NULL)::BOOLEAN AS solved,
     COALESCE(s.first_blood, FALSE) AS first_blood,
     (ARRAY_AGG('/' || a.hash || '/' || a.name ORDER BY a.name)
@@ -323,7 +323,7 @@ type GetAllChallengesInfoRow struct {
 	Description        string         `json:"description"`
 	Authors            []string       `json:"authors"`
 	Tags               []string       `json:"tags"`
-	Type               DeployType     `json:"type"`
+	InstanceType       InstanceType   `json:"instance_type"`
 	Hidden             bool           `json:"hidden"`
 	MaxPoints          int32          `json:"max_points"`
 	ScoreType          ScoreType      `json:"score_type"`
@@ -360,7 +360,7 @@ func (q *Queries) GetAllChallengesInfo(ctx context.Context, id int32) ([]GetAllC
 			&i.Description,
 			pq.Array(&i.Authors),
 			pq.Array(&i.Tags),
-			&i.Type,
+			&i.InstanceType,
 			&i.Hidden,
 			&i.MaxPoints,
 			&i.ScoreType,
@@ -1704,7 +1704,7 @@ SET
   description = COALESCE($3, description),
   authors = COALESCE($4, authors),
   tags = COALESCE($5, tags),
-  type = COALESCE($6, type),
+  instance_type = COALESCE($6, instance_type),
   hidden = COALESCE($7, hidden),
   max_points = COALESCE($8, max_points),
   score_type = COALESCE($9, score_type),
@@ -1715,19 +1715,19 @@ WHERE id = $13
 `
 
 type UpdateChallengeParams struct {
-	Name        sql.NullString `json:"name"`
-	Category    sql.NullString `json:"category"`
-	Description sql.NullString `json:"description"`
-	Authors     []string       `json:"authors"`
-	Tags        []string       `json:"tags"`
-	Type        NullDeployType `json:"type"`
-	Hidden      sql.NullBool   `json:"hidden"`
-	MaxPoints   sql.NullInt32  `json:"max_points"`
-	ScoreType   NullScoreType  `json:"score_type"`
-	Host        sql.NullString `json:"host"`
-	Port        sql.NullInt32  `json:"port"`
-	ConnType    NullConnType   `json:"conn_type"`
-	ChallID     int32          `json:"chall_id"`
+	Name         sql.NullString   `json:"name"`
+	Category     sql.NullString   `json:"category"`
+	Description  sql.NullString   `json:"description"`
+	Authors      []string         `json:"authors"`
+	Tags         []string         `json:"tags"`
+	InstanceType NullInstanceType `json:"instance_type"`
+	Hidden       sql.NullBool     `json:"hidden"`
+	MaxPoints    sql.NullInt32    `json:"max_points"`
+	ScoreType    NullScoreType    `json:"score_type"`
+	Host         sql.NullString   `json:"host"`
+	Port         sql.NullInt32    `json:"port"`
+	ConnType     NullConnType     `json:"conn_type"`
+	ChallID      int32            `json:"chall_id"`
 }
 
 // Updates the challenge with the given ID
@@ -1738,7 +1738,7 @@ func (q *Queries) UpdateChallenge(ctx context.Context, arg UpdateChallengeParams
 		arg.Description,
 		pq.Array(arg.Authors),
 		pq.Array(arg.Tags),
-		arg.Type,
+		arg.InstanceType,
 		arg.Hidden,
 		arg.MaxPoints,
 		arg.ScoreType,

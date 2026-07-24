@@ -10,14 +10,14 @@ import (
 )
 
 func CreateChallenge(ctx context.Context, name, category, description string,
-	challType sqlc.DeployType, maxPoints int32, scoreType sqlc.ScoreType) (*sqlc.Challenge, error) {
+	instanceType sqlc.InstanceType, maxPoints int32, scoreType sqlc.ScoreType) (*sqlc.Challenge, error) {
 	id, err := db.Sql.CreateChallenge(ctx, sqlc.CreateChallengeParams{
-		Name:        name,
-		Category:    category,
-		Description: description,
-		Type:        challType,
-		MaxPoints:   maxPoints,
-		ScoreType:   scoreType,
+		Name:         name,
+		Category:     category,
+		Description:  description,
+		InstanceType: instanceType,
+		MaxPoints:    maxPoints,
+		ScoreType:    scoreType,
 	})
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
@@ -29,12 +29,12 @@ func CreateChallenge(ctx context.Context, name, category, description string,
 	}
 
 	return &sqlc.Challenge{
-		ID:          id,
-		Name:        name,
-		Category:    category,
-		Description: description,
-		Type:        challType,
-		MaxPoints:   maxPoints,
-		ScoreType:   scoreType,
+		ID:           id,
+		Name:         name,
+		Category:     category,
+		Description:  description,
+		InstanceType: instanceType,
+		MaxPoints:    maxPoints,
+		ScoreType:    scoreType,
 	}, nil
 }

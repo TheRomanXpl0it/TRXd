@@ -7,8 +7,9 @@
 
 ## Frontend
  - check/fix challenge connection type (now NONE is removed, default is TCP)
- - check/fix challenge type (instead of Normal is now Static) + add Static by default
- - add Change Role (modal / dropdown or whatever) if the session user is Admin (refer to PATCH /api/users/role)
+ - check/fix challenge instance type (instead of Normal is now Static)
+ - check/fix challenge instance type (before was called type, now is instance_type)
+ - add Change Role (modal / dropdown or whatever) in another user (if the user is Player or Author) if the session user is Admin (refer to PATCH /api/users/role)
  - [/] Extra:
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 
@@ -20,7 +21,6 @@
  - instancer container restart policy editable
  - instancer container ingress only bool
  - instancer container disk space limit
- - rename "type" to "instance_type"
  - no instances with tcp hash domain support
  - multi port & domain support for instances
  - rename "hash domain" (not an hash anymore, only rand bytes)

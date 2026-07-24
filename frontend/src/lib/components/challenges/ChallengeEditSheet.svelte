@@ -42,7 +42,7 @@
 	let category = $state('');
 	let description = $state('');
 	// difficulty removed
-	let type = $state('Container');
+	let instance_type = $state('Static');
 	let hidden = $state<boolean>(false);
 	let maxPoints = $state<number>(500);
 	let dynamicScoring = $state(true);
@@ -122,7 +122,7 @@
 
 	// Options
 	// Options
-	const typeOptions: Item[] = [
+	const instanceTypeOptions: Item[] = [
 		{ value: 'Static', label: 'Static' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }
@@ -166,7 +166,7 @@
 					authorsCsv = String(challenge?.authors ?? '');
 				}
 
-				type = String(challenge?.type ?? 'Static');
+				instance_type = String(challenge?.instance_type ?? 'Static');
 				hidden = Boolean(challenge?.hidden ?? false);
 				maxPoints = Number.isFinite(+challenge?.max_points)
 					? Number(challenge.max_points)
@@ -266,7 +266,7 @@
 				.split(',')
 				.map((a) => a.trim())
 				.filter(Boolean),
-			type,
+			instance_type,
 			hidden,
 			score_type: dynamicScoring ? 'Dynamic' : 'Static',
 			host: str(host),
@@ -274,8 +274,8 @@
 			conn_type: connType,
 
 			// container/compose specifics
-			image: type === 'Container' ? str(imageName) : undefined,
-			compose: type === 'Compose' ? str(composeFile) : undefined,
+			image: instance_type === 'Container' ? str(imageName) : undefined,
+			compose: instance_type === 'Compose' ? str(composeFile) : undefined,
 			hash_domain: hashDomain,
 			renewable: renewable,
 
@@ -619,7 +619,7 @@
 								</div>
 							</div>
 
-							<!-- Type -->
+							<!-- Instance Type -->
 							<div class="bg-muted/20 rounded-xl border-0 p-5">
 								<h4
 									class="text-muted-foreground mb-4 text-sm font-semibold uppercase tracking-wider"
@@ -627,13 +627,13 @@
 									Classification
 								</h4>
 								<div>
-									<Label for="ch-type" class="mb-2 block text-sm font-medium">Type</Label>
+									<Label for="ch-instance-type" class="mb-2 block text-sm font-medium">Instance Type</Label>
 									<CategorySelect
-										id="ch-type"
-										items={typeOptions}
-										bind:value={type}
-										placeholder="Select type..."
-										searchPlaceholder="Search type"
+										id="ch-instance-type"
+										items={instanceTypeOptions}
+										bind:value={instance_type}
+										placeholder="Select instance type..."
+										searchPlaceholder="Search instance type"
 									/>
 								</div>
 							</div>
@@ -762,7 +762,7 @@
 					<!-- Deployment Tab -->
 					{#if activeTab === 'deployment'}
 						<div class="mt-6 space-y-6 pb-4">
-							{#if type === 'Static'}
+							{#if instance_type === 'Static'}
 								<!-- Static Challenge Deployment -->
 								<div class="bg-muted/20 rounded-xl border-0 p-5">
 									<h4
@@ -805,7 +805,7 @@
 										</div>
 									</div>
 								</div>
-							{:else if type === 'Compose'}
+							{:else if instance_type === 'Compose'}
 								<!-- Compose Challenge Deployment -->
 								<div class="space-y-4">
 									<div>
@@ -1015,7 +1015,7 @@
 							{/if}
 
 							<!-- Performance settings for Container and Compose -->
-							{#if type === 'Container' || type === 'Compose'}
+							{#if instance_type === 'Container' || instance_type === 'Compose'}
 								<div class="border-t pt-6">
 									<h4 class="mb-4 text-sm font-semibold">Performance Limits</h4>
 									<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

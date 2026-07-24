@@ -157,8 +157,8 @@
 	});
 
 	const isDynamicType = $derived(
-		activeChallenge?.type === 'Container' ||
-			activeChallenge?.type === 'Compose' ||
+		activeChallenge?.instance_type === 'Container' ||
+			activeChallenge?.instance_type === 'Compose' ||
 			!!activeChallenge?.image ||
 			!!activeChallenge?.compose
 	);

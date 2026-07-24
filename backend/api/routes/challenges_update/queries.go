@@ -29,11 +29,11 @@ func nullInt32(src *int32) sql.NullInt32 {
 	return sql.NullInt32{Int32: *src, Valid: true}
 }
 
-func nullDeployType(src *sqlc.DeployType) sqlc.NullDeployType {
+func nullInstanceType(src *sqlc.InstanceType) sqlc.NullInstanceType {
 	if src == nil {
-		return sqlc.NullDeployType{Valid: false}
+		return sqlc.NullInstanceType{Valid: false}
 	}
-	return sqlc.NullDeployType{DeployType: *src, Valid: true}
+	return sqlc.NullInstanceType{InstanceType: *src, Valid: true}
 }
 
 func nullScoreType(src *sqlc.ScoreType) sqlc.NullScoreType {
@@ -52,7 +52,7 @@ func nullConnType(src *sqlc.ConnType) sqlc.NullConnType {
 
 func IsChallEmpty(data *Data) bool {
 	if data.Name == "" && data.Category == "" && data.Description == nil && data.Authors == nil &&
-		data.Tags == nil && data.Type == nil && data.Hidden == nil && data.MaxPoints == nil &&
+		data.Tags == nil && data.InstanceType == nil && data.Hidden == nil && data.MaxPoints == nil &&
 		data.ScoreType == nil && data.Host == nil && data.Port == nil && data.ConnType == nil {
 		return true
 	}
@@ -73,17 +73,17 @@ func UpdateChallenge(ctx context.Context, data *Data) error {
 	}
 
 	challParams := sqlc.UpdateChallengeParams{
-		ChallID:     *data.ChallID,
-		Name:        sql.NullString{String: data.Name, Valid: data.Name != ""},
-		Category:    sql.NullString{String: data.Category, Valid: data.Category != ""},
-		Description: nullString(data.Description),
-		Type:        nullDeployType(data.Type),
-		Hidden:      nullBool(data.Hidden),
-		MaxPoints:   nullInt32(data.MaxPoints),
-		ScoreType:   nullScoreType(data.ScoreType),
-		Host:        nullString(data.Host),
-		Port:        nullInt32(data.Port),
-		ConnType:    nullConnType(data.ConnType),
+		ChallID:      *data.ChallID,
+		Name:         sql.NullString{String: data.Name, Valid: data.Name != ""},
+		Category:     sql.NullString{String: data.Category, Valid: data.Category != ""},
+		Description:  nullString(data.Description),
+		InstanceType: nullInstanceType(data.InstanceType),
+		Hidden:       nullBool(data.Hidden),
+		MaxPoints:    nullInt32(data.MaxPoints),
+		ScoreType:    nullScoreType(data.ScoreType),
+		Host:         nullString(data.Host),
+		Port:         nullInt32(data.Port),
+		ConnType:     nullConnType(data.ConnType),
 	}
 
 	if data.Authors != nil {

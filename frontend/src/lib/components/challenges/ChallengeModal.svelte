@@ -110,8 +110,8 @@
 	}
 
 	const isDynamicType = $derived(
-		challenge?.type === 'Container' ||
-			challenge?.type === 'Compose' ||
+		challenge?.instance_type === 'Container' ||
+			challenge?.instance_type === 'Compose' ||
 			!!challenge?.image ||
 			!!challenge?.compose ||
 			!!challenge?.ghost

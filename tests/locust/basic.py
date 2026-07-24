@@ -95,7 +95,7 @@ class AdminAPI:
                 "name": name,
                 "category": category,
                 "description": f"{name} description",
-                "type": ctype,
+                "instance_type": ctype,
                 "max_points": 500,
                 "score_type": "Dynamic",
             },

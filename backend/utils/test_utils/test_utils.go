@@ -158,8 +158,8 @@ func RegisterTeam(t *testing.T, name, password string, userID int32) *sqlc.Team 
 }
 
 func CreateChallenge(t *testing.T, name string, category string, description string,
-	challType sqlc.DeployType, maxPoints int32, scoreType sqlc.ScoreType) *sqlc.Challenge {
-	chall, err := challenges_create.CreateChallenge(t.Context(), name, category, description, challType, maxPoints, scoreType)
+	instanceType sqlc.InstanceType, maxPoints int32, scoreType sqlc.ScoreType) *sqlc.Challenge {
+	chall, err := challenges_create.CreateChallenge(t.Context(), name, category, description, instanceType, maxPoints, scoreType)
 	if err != nil {
 		Fatalf(t, "Failed to create challenge %s: %v", name, err)
 	}
@@ -171,8 +171,8 @@ func CreateChallenge(t *testing.T, name string, category string, description str
 }
 
 func TryCreateChallenge(t *testing.T, name string, category string, description string,
-	challType sqlc.DeployType, maxPoints int32, scoreType sqlc.ScoreType) *sqlc.Challenge {
-	chall, err := challenges_create.CreateChallenge(t.Context(), name, category, description, challType, maxPoints, scoreType)
+	instanceType sqlc.InstanceType, maxPoints int32, scoreType sqlc.ScoreType) *sqlc.Challenge {
+	chall, err := challenges_create.CreateChallenge(t.Context(), name, category, description, instanceType, maxPoints, scoreType)
 	if err != nil {
 		Fatalf(t, "Failed to create challenge %s: %v", name, err)
 	}
