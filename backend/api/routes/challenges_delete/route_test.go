@@ -71,7 +71,7 @@ func TestRoute(t *testing.T) {
 		session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
 		session.Post("/categories", JSON{"name": "cat"}, -1)
 
-		chall := test_utils.TryCreateChallenge(t, "chall", "cat", "test-desc", sqlc.DeployTypeNone, 1, sqlc.ScoreTypeStatic)
+		chall := test_utils.TryCreateChallenge(t, "chall", "cat", "test-desc", sqlc.DeployTypeStatic, 1, sqlc.ScoreTypeStatic)
 		if chall != nil {
 			challID = chall.ID
 		}

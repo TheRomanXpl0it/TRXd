@@ -62,17 +62,17 @@ var testData = []struct {
 		expectedResponse: errorf(consts.MissingRequiredFields),
 	},
 	{
-		testBody:         JSON{"name": strings.Repeat("a", consts.MaxChallNameLen+1), "category": "cat", "description": "test-desc", "type": "None", "max_points": 1, "score_type": "Static"},
+		testBody:         JSON{"name": strings.Repeat("a", consts.MaxChallNameLen+1), "category": "cat", "description": "test-desc", "type": "Static", "max_points": 1, "score_type": "Static"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Name", consts.MaxChallNameLen)),
 	},
 	{
-		testBody:         JSON{"name": "test", "category": strings.Repeat("a", consts.MaxCategoryLen+1), "description": "test-desc", "type": "None", "max_points": 1, "score_type": "Static"},
+		testBody:         JSON{"name": "test", "category": strings.Repeat("a", consts.MaxCategoryLen+1), "description": "test-desc", "type": "Static", "max_points": 1, "score_type": "Static"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Category", consts.MaxCategoryLen)),
 	},
 	{
-		testBody:         JSON{"name": "test", "category": "cat", "description": strings.Repeat("a", consts.MaxChallDescLen+1), "type": "None", "max_points": 1, "score_type": "Static"},
+		testBody:         JSON{"name": "test", "category": "cat", "description": strings.Repeat("a", consts.MaxChallDescLen+1), "type": "Static", "max_points": 1, "score_type": "Static"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Description", consts.MaxChallDescLen)),
 	},
@@ -82,36 +82,36 @@ var testData = []struct {
 		expectedResponse: errorf(test_utils.Format(consts.OneOfError, "Type", strings.Join(consts.DeployTypesStr, " "))),
 	},
 	{
-		testBody:         JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "None", "max_points": -1, "score_type": "Static"},
+		testBody:         JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "Static", "max_points": -1, "score_type": "Static"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.MinError, "MaxPoints", 0)),
 	},
 	{
-		testBody:         JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "None", "max_points": math.MaxInt32 + 1, "score_type": "Static"},
+		testBody:         JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "Static", "max_points": math.MaxInt32 + 1, "score_type": "Static"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(consts.InvalidJSON),
 	},
 	{
-		testBody:         JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "None", "max_points": 1, "score_type": "aaaa"},
+		testBody:         JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "Static", "max_points": 1, "score_type": "aaaa"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.OneOfError, "ScoreType", strings.Join(consts.ScoreTypesStr, " "))),
 	},
 	{
-		testBody:         JSON{"name": "test3", "category": "cat2", "description": "test-desc", "type": "None", "max_points": 1, "score_type": "Static"},
+		testBody:         JSON{"name": "test3", "category": "cat2", "description": "test-desc", "type": "Static", "max_points": 1, "score_type": "Static"},
 		expectedStatus:   http.StatusNotFound,
 		expectedResponse: errorf(consts.CategoryNotFound),
 	},
 	{
-		testBody:       JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "None", "max_points": 1, "score_type": "Static"},
+		testBody:       JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "Static", "max_points": 1, "score_type": "Static"},
 		expectedStatus: http.StatusOK,
 	},
 	{
-		testBody:         JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "None", "max_points": 1, "score_type": "Static"},
+		testBody:         JSON{"name": "test", "category": "cat", "description": "test-desc", "type": "Static", "max_points": 1, "score_type": "Static"},
 		expectedStatus:   http.StatusConflict,
 		expectedResponse: errorf(consts.ChallengeAlreadyExists),
 	},
 	{
-		testBody:       JSON{"name": "test2", "category": "cat", "description": "", "type": "None", "max_points": 1, "score_type": "Static"},
+		testBody:       JSON{"name": "test2", "category": "cat", "description": "", "type": "Static", "max_points": 1, "score_type": "Static"},
 		expectedStatus: http.StatusOK,
 	},
 }

@@ -65,7 +65,7 @@ export interface Challenge {
 	name: string;
 	description: string;
 	category: string;
-	type: 'Container' | 'Compose' | 'None';
+	type: 'Static' | 'Container' | 'Compose';
 	score_type: 'Static' | 'Dynamic';
 	points: number;
 	max_points?: number;
@@ -83,7 +83,7 @@ export interface Challenge {
 	// Host and connection info
 	host?: string;
 	port?: number;
-	conn_type?: 'NONE' | 'TCP' | 'HTTP' | 'HTTPS';
+	conn_type?: 'TCP' | 'HTTP' | 'HTTPS';
 	connection_info?: string;
 
 	// Instance info

@@ -1,4 +1,4 @@
-type ConnectionType = 'NONE' | 'TCP' | 'HTTP' | 'HTTPS' | string | null | undefined;
+type ConnectionType = 'TCP' | 'HTTP' | 'HTTPS' | string | null | undefined;
 
 type FormatConnectionStringParams = {
 	host?: string | null;

@@ -35,7 +35,7 @@
 		challengeName = $bindable(''),
 		challengeDescription = $bindable(''),
 		category = $bindable(''),
-		challengeType = $bindable('None'),
+		challengeType = $bindable('Static'),
 		points = $bindable(500),
 		dynamicScore = $bindable(true),
 		categories = $bindable([]),
@@ -62,7 +62,7 @@
 	let compose = $state('');
 	let host = $state('');
 	let port = $state<number | null>(null);
-	let connType = $state('NONE');
+	let connType = $state('TCP');
 	let envVars = $state<{ name: string; value: string }[]>([]);
 	let hashDomain = $state(false);
 	let renewable = $state(true);
@@ -181,7 +181,7 @@
 		challengeName = '';
 		challengeDescription = '';
 		category = '';
-		challengeType = 'None';
+		challengeType = 'Static';
 		points = 500;
 		dynamicScore = true;
 		tags = [];
@@ -190,7 +190,7 @@
 		compose = '';
 		host = '';
 		port = null;
-		connType = 'NONE';
+		connType = 'TCP';
 		envVars = [];
 		hashDomain = false;
 		renewable = true;
@@ -449,7 +449,6 @@
 										bind:value={connType}
 										class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
 									>
-										<option value="NONE">None</option>
 										<option value="TCP">TCP</option>
 										<option value="HTTP">HTTP</option>
 										<option value="HTTPS">HTTPS</option>

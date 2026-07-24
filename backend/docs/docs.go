@@ -354,7 +354,7 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `Name must not exceed 32` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Type must be one of: None Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + `",
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `Name must not exceed 32` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Type must be one of: Static Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -448,7 +448,7 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `No data provided to update` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + ` | ` + "`" + `Name must not exceed 128` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Authors[i] must not exceed 64` + "`" + ` | ` + "`" + `Tags[i] must not exceed 32` + "`" + ` | ` + "`" + `Type must be one of: None Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + ` | ` + "`" + `Port must be at least 0` + "`" + ` | ` + "`" + `Port must not exceed 65535` + "`" + ` | ` + "`" + `ConnType must be one of: TCP HTTP HTTPS` + "`" + ` | ` + "`" + `Lifetime must be at least 0` + "`" + ` | ` + "`" + `Invalid environment variables` + "`" + ` | ` + "`" + `MaxMemory must be at least 0` + "`" + ` | ` + "`" + `Invalid Max CPU, must be a positive 32-bit integer` + "`" + `",
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `No data provided to update` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + ` | ` + "`" + `Name must not exceed 128` + "`" + ` | ` + "`" + `Category must not exceed 32` + "`" + ` | ` + "`" + `Description must not exceed 10240` + "`" + ` | ` + "`" + `Authors[i] must not exceed 64` + "`" + ` | ` + "`" + `Tags[i] must not exceed 32` + "`" + ` | ` + "`" + `Type must be one of: Static Container Compose` + "`" + ` | ` + "`" + `MaxPoints must be at least 0` + "`" + ` | ` + "`" + `ScoreType must be one of: Static Dynamic` + "`" + ` | ` + "`" + `Port must be at least 0` + "`" + ` | ` + "`" + `Port must not exceed 65535` + "`" + ` | ` + "`" + `ConnType must be one of: TCP HTTP HTTPS` + "`" + ` | ` + "`" + `Lifetime must be at least 0` + "`" + ` | ` + "`" + `Invalid environment variables` + "`" + ` | ` + "`" + `MaxMemory must be at least 0` + "`" + ` | ` + "`" + `Invalid Max CPU, must be a positive 32-bit integer` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -2609,12 +2609,12 @@ const docTemplate = `{
         "sqlc.DeployType": {
             "type": "string",
             "enum": [
-                "None",
+                "Static",
                 "Container",
                 "Compose"
             ],
             "x-enum-varnames": [
-                "DeployTypeNone",
+                "DeployTypeStatic",
                 "DeployTypeContainer",
                 "DeployTypeCompose"
             ]

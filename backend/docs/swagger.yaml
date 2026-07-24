@@ -353,12 +353,12 @@ definitions:
     - ConnTypeHTTPS
   sqlc.DeployType:
     enum:
-    - None
+    - Static
     - Container
     - Compose
     type: string
     x-enum-varnames:
-    - DeployTypeNone
+    - DeployTypeStatic
     - DeployTypeContainer
     - DeployTypeCompose
   sqlc.GetAdminStatsRow:
@@ -1139,7 +1139,7 @@ paths:
             fields` | `No data provided to update` | `ChallID must be at least 0`
             | `Name must not exceed 128` | `Category must not exceed 32` | `Description
             must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must
-            not exceed 32` | `Type must be one of: None Container Compose` | `MaxPoints
+            not exceed 32` | `Type must be one of: Static Container Compose` | `MaxPoints
             must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port
             must be at least 0` | `Port must not exceed 65535` | `ConnType must be
             one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment
@@ -1184,7 +1184,7 @@ paths:
         "400":
           description: 'Possible errors: `Invalid JSON format` | `Missing required
             fields` | `Name must not exceed 32` | `Category must not exceed 32` |
-            `Description must not exceed 10240` | `Type must be one of: None Container
+            `Description must not exceed 10240` | `Type must be one of: Static Container
             Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of:
             Static Dynamic`'
           schema:

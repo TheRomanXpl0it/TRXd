@@ -104,7 +104,7 @@ func Route(c *fiber.Ctx) error {
 		[]sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}) {
 		return utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
 	}
-	if chall.Info.Type == sqlc.DeployTypeNone {
+	if chall.Info.Type == sqlc.DeployTypeStatic {
 		return utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
 	}
 

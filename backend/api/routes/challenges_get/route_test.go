@@ -117,7 +117,7 @@ func TestRoute(t *testing.T) {
 			"tag-1",
 			"test-tag",
 		},
-		"type": "None",
+		"type": "Static",
 	}
 
 	test_utils.RegisterUser(t, "test2", "test3@test.test", "testpass", sqlc.UserRoleAuthor)
@@ -152,7 +152,7 @@ func TestRoute(t *testing.T) {
 		"tags": []string{
 			"tag-5",
 		},
-		"type": "None",
+		"type": "Static",
 	}
 
 	session.Get("/challenges", nil, http.StatusOK)

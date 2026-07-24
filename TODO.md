@@ -6,10 +6,15 @@
    - tests for distributed functioning (already live testing & hand tested)
 
 ## Frontend
+ - check/fix challenge connection type (now NONE is removed, default is TCP)
+ - check/fix challenge type (instead of Normal is now Static) + add Static by default
+ - add Change Role (modal / dropdown or whatever) if the session user is Admin (refer to PATCH /api/users/role)
  - [/] Extra:
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 
 ## Ideas / Features
+ - better log error/critical error (add line number and file name and function name or whatever)
+ - add author only tags (private tags) for challenges
  - reclaimer python tests
  - split /challenges/:id into player and author endpoints
  - instancer container restart policy editable

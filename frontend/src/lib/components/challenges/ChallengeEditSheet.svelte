@@ -48,7 +48,7 @@
 	let dynamicScoring = $state(true);
 	let host = $state('');
 	let portStr = $state('');
-	let connType = $state('NONE');
+	let connType = $state('TCP');
 	let authorsCsv = $state('');
 	let hashDomain = $state(false);
 	let renewable = $state(true);
@@ -123,7 +123,7 @@
 	// Options
 	// Options
 	const typeOptions: Item[] = [
-		{ value: 'None', label: 'None' },
+		{ value: 'Static', label: 'Static' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }
 	];
@@ -166,7 +166,7 @@
 					authorsCsv = String(challenge?.authors ?? '');
 				}
 
-				type = String(challenge?.type ?? 'Container');
+				type = String(challenge?.type ?? 'Static');
 				hidden = Boolean(challenge?.hidden ?? false);
 				maxPoints = Number.isFinite(+challenge?.max_points)
 					? Number(challenge.max_points)
@@ -179,7 +179,7 @@
 
 				host = String(challenge?.host ?? '');
 				portStr = challenge?.port != null ? String(challenge.port) : '';
-				connType = String(challenge?.conn_type ?? 'NONE');
+				connType = String(challenge?.conn_type ?? 'TCP');
 
 				existingAttachments = Array.isArray(challenge?.attachments)
 					? challenge.attachments.map((a: any) => String(a)).filter(Boolean)
@@ -762,8 +762,8 @@
 					<!-- Deployment Tab -->
 					{#if activeTab === 'deployment'}
 						<div class="mt-6 space-y-6 pb-4">
-							{#if type === 'None'}
-								<!-- None Challenge Deployment -->
+							{#if type === 'Static'}
+								<!-- Static Challenge Deployment -->
 								<div class="bg-muted/20 rounded-xl border-0 p-5">
 									<h4
 										class="text-muted-foreground mb-4 text-sm font-semibold uppercase tracking-wider"
@@ -798,7 +798,6 @@
 												bind:value={connType}
 												class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 											>
-												<option value="NONE">None</option>
 												<option value="TCP">TCP</option>
 												<option value="HTTP">HTTP</option>
 												<option value="HTTPS">HTTPS</option>
@@ -893,7 +892,6 @@
 											bind:value={connType}
 											class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 										>
-											<option value="NONE">None</option>
 											<option value="TCP">TCP</option>
 											<option value="HTTP">HTTP</option>
 											<option value="HTTPS">HTTPS</option>
@@ -961,7 +959,6 @@
 											bind:value={connType}
 											class="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 										>
-											<option value="NONE">None</option>
 											<option value="TCP">TCP</option>
 											<option value="HTTP">HTTP</option>
 											<option value="HTTPS">HTTPS</option>

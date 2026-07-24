@@ -36,17 +36,16 @@
 	let name = $state('');
 	let category = $state('');
 	let description = $state('');
-	let type = $state('None');
+	let type = $state('NStaticone');
 	let points = $state(500);
 	let dynamicScore = $state(true);
 	let hidden = $state(true);
 
 	let host = $state('');
 	let port = $state<number | undefined>(undefined);
-	let connType = $state('NONE');
+	let connType = $state('TCP');
 
 	const connTypes = [
-		{ value: 'NONE', label: 'None' },
 		{ value: 'TCP', label: 'TCP' },
 		{ value: 'HTTP', label: 'HTTP' },
 		{ value: 'HTTPS', label: 'HTTPS' }
@@ -86,7 +85,7 @@
 	}
 
 	const challengeTypes = [
-		{ value: 'None', label: 'None' },
+		{ value: 'Static', label: 'Static' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }
 	];
@@ -384,7 +383,7 @@
 						>
 					</Card.Header>
 					<Card.Content class="space-y-6">
-						{#if type !== 'None'}
+						{#if type !== 'Static'}
 							<div class="animate-in fade-in slide-in-from-top-2 space-y-4">
 								{#if type === 'Container'}
 									<div class="space-y-2">
@@ -479,7 +478,7 @@
 						{/if}
 
 						<div
-							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${type !== 'None' ? 'border-t pt-6' : ''}`}
+							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${type !== 'Static' ? 'border-t pt-6' : ''}`}
 						>
 							<div class="space-y-2">
 								<Label for="host">Connecting Host (optional)</Label>
