@@ -345,7 +345,7 @@
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `Category must not exceed 32` | `Description must not exceed 10240` | `Type must be one of: Normal Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic`",
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `Category must not exceed 32` | `Description must not exceed 10240` | `Type must be one of: None Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -439,7 +439,7 @@
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `No data provided to update` | `ChallID must be at least 0` | `Name must not exceed 128` | `Category must not exceed 32` | `Description must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must not exceed 32` | `Type must be one of: Normal Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port must be at least 0` | `Port must not exceed 65535` | `ConnType must be one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment variables` | `MaxMemory must be at least 0` | `Invalid Max CPU, must be a positive 32-bit integer`",
+                        "description": "Possible errors: `Invalid JSON format` | `Missing required fields` | `No data provided to update` | `ChallID must be at least 0` | `Name must not exceed 128` | `Category must not exceed 32` | `Description must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must not exceed 32` | `Type must be one of: None Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port must be at least 0` | `Port must not exceed 65535` | `ConnType must be one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment variables` | `MaxMemory must be at least 0` | `Invalid Max CPU, must be a positive 32-bit integer`",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -584,7 +584,7 @@
                 }
             },
             "patch": {
-                "description": "Requires **Admin** privileges.\nUpdates an existing config's value.\nNote: if `user-mode` is updated, the server will automatically shut down and restart to apply the change.",
+                "description": "Requires **Admin** privileges.\nUpdates an existing config's value.\nNote: if `user-mode` is updated, the server will automatically shut down and restart to apply the change.\nNote: if `registry-server` or `registry-username` or `registry-password` are updated, a docker config write will occur, and the auth will be updated.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2600,12 +2600,12 @@
         "sqlc.DeployType": {
             "type": "string",
             "enum": [
-                "Normal",
+                "None",
                 "Container",
                 "Compose"
             ],
             "x-enum-varnames": [
-                "DeployTypeNormal",
+                "DeployTypeNone",
                 "DeployTypeContainer",
                 "DeployTypeCompose"
             ]

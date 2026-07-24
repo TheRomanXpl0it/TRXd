@@ -49,7 +49,7 @@
 	const queryClient = useQueryClient();
 
 	const challengeTypes = [
-		{ value: 'Normal', label: 'Normal' },
+		{ value: 'None', label: 'None' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }
 	];

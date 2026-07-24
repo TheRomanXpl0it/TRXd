@@ -36,7 +36,7 @@
 	let name = $state('');
 	let category = $state('');
 	let description = $state('');
-	let type = $state('Normal');
+	let type = $state('None');
 	let points = $state(500);
 	let dynamicScore = $state(false);
 	let hidden = $state(true);
@@ -80,7 +80,7 @@
 				name = data.challenge.name || '';
 				category = data.challenge.category || '';
 				description = data.challenge.description || '';
-				type = data.challenge.type || 'Normal';
+				type = data.challenge.type || 'None';
 				points = data.challenge.max_points || data.challenge.points || 500;
 				dynamicScore = data.challenge.score_type === 'Dynamic';
 				hidden = !!data.challenge.hidden;
@@ -159,7 +159,7 @@
 	}
 
 	const challengeTypes = [
-		{ value: 'Normal', label: 'Normal' },
+		{ value: 'None', label: 'None' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }
 	];
@@ -467,7 +467,7 @@
 						>
 					</Card.Header>
 					<Card.Content class="space-y-6">
-						{#if type !== 'Normal'}
+						{#if type !== 'None'}
 							<div class="animate-in fade-in slide-in-from-top-2 space-y-4">
 								{#if type === 'Container'}
 									<div class="space-y-2">
@@ -562,7 +562,7 @@
 						{/if}
 
 						<div
-							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${type !== 'Normal' ? 'border-t pt-6' : ''}`}
+							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${type !== 'None' ? 'border-t pt-6' : ''}`}
 						>
 							<div class="space-y-2">
 								<Label for="host">Connecting Host (optional)</Label>

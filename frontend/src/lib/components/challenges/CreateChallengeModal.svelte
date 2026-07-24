@@ -35,7 +35,7 @@
 		challengeName = $bindable(''),
 		challengeDescription = $bindable(''),
 		category = $bindable(''),
-		challengeType = $bindable('Normal'),
+		challengeType = $bindable('None'),
 		points = $bindable(500),
 		dynamicScore = $bindable(true),
 		categories = $bindable([]),
@@ -181,7 +181,7 @@
 		challengeName = '';
 		challengeDescription = '';
 		category = '';
-		challengeType = 'Normal';
+		challengeType = 'None';
 		points = 500;
 		dynamicScore = true;
 		tags = [];

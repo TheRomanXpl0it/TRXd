@@ -27,7 +27,7 @@ type Data struct {
 // @Produce json
 // @Param data body Data true "all fields are required except **description**"
 // @Success 200
-// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `Category must not exceed 32` | `Description must not exceed 10240` | `Type must be one of: Normal Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic`"
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `Name must not exceed 32` | `Category must not exceed 32` | `Description must not exceed 10240` | `Type must be one of: None Container Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of: Static Dynamic`"
 // @Failure 404 {object} models.Error "Possible errors: `Category not found`"
 // @Failure 409 {object} models.Error "Possible errors: `Challenge already exists`"
 // @Failure 500 {object} models.Error "Possible errors: `Error creating challenge`"

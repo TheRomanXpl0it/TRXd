@@ -219,7 +219,7 @@ func TestRoute(t *testing.T) {
 	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
 	session.Post("/categories", JSON{"name": "cat"}, -1)
 
-	chall := test_utils.TryCreateChallenge(t, "chall", "cat", "test-desc", sqlc.DeployTypeNormal, 1, sqlc.ScoreTypeStatic)
+	chall := test_utils.TryCreateChallenge(t, "chall", "cat", "test-desc", sqlc.DeployTypeNone, 1, sqlc.ScoreTypeStatic)
 	if chall != nil {
 		challID = chall.ID
 	}
@@ -253,7 +253,7 @@ func TestRoute(t *testing.T) {
 				"hidden":               test.testBody["hidden"],
 				"host":                 test.testBody["host"],
 				"id":                   challID,
-				"instance":             test.testBody["type"] != "Normal",
+				"instance":             test.testBody["type"] != "None",
 				"max_points":           test.testBody["max_points"],
 				"name":                 test.testBody["name"],
 				"points":               test.testBody["max_points"],
@@ -347,7 +347,7 @@ func TestRoute(t *testing.T) {
 		"hidden":               testBody["hidden"],
 		"host":                 testBody["host"],
 		"id":                   challID,
-		"instance":             testBody["type"] != "Normal",
+		"instance":             testBody["type"] != "None",
 		"max_points":           testBody["max_points"],
 		"name":                 testBody["name"],
 		"points":               testBody["max_points"],

@@ -104,7 +104,7 @@ func TestValidators(t *testing.T) {
 	varTest(t, "challenge_tags", []string{strings.Repeat("a", consts.MaxTagNameLen+1)}, test_utils.Format(consts.MaxError, "[0]", consts.MaxTagNameLen))
 
 	varTest(t, "challenge_type", "", test_utils.Format(consts.OneOfError, "challenge_type", strings.Join(consts.DeployTypesStr, " ")))
-	varTest(t, "challenge_type", sqlc.DeployTypeNormal)
+	varTest(t, "challenge_type", sqlc.DeployTypeNone)
 	varTest(t, "challenge_type", sqlc.DeployTypeContainer)
 	varTest(t, "challenge_type", sqlc.DeployTypeCompose)
 	varTest(t, "challenge_type", "aaa", test_utils.Format(consts.OneOfError, "challenge_type", strings.Join(consts.DeployTypesStr, " ")))

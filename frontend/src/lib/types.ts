@@ -65,7 +65,7 @@ export interface Challenge {
 	name: string;
 	description: string;
 	category: string;
-	type: 'Container' | 'Compose' | 'Normal';
+	type: 'Container' | 'Compose' | 'None';
 	score_type: 'Static' | 'Dynamic';
 	points: number;
 	max_points?: number;

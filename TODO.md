@@ -15,7 +15,7 @@
  - instancer container restart policy editable
  - instancer container ingress only bool
  - instancer container disk space limit
- - rename "type" to "instance_type" (Normal -> None)
+ - rename "type" to "instance_type"
  - no instances with tcp hash domain support
  - multi port & domain support for instances
  - rename "hash domain" (not an hash anymore, only rand bytes)

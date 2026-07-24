@@ -23,7 +23,7 @@ func canRenewInstance(c *fiber.Ctx, chall *db.Chall, role sqlc.UserRole, tid int
 		return false, utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
 	}
 
-	if chall.Info.Type == sqlc.DeployTypeNormal {
+	if chall.Info.Type == sqlc.DeployTypeNone {
 		return false, utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
 	}
 

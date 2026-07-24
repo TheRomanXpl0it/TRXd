@@ -118,7 +118,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER tr_integrity_chall_docker_configs_add
 AFTER INSERT ON challenges
 FOR EACH ROW
-WHEN (NEW.type != 'Normal')
+WHEN (NEW.type != 'None')
 EXECUTE FUNCTION fn_integrity_chall_docker_configs_add();
 
 
@@ -137,5 +137,5 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER tr_integrity_chall_docker_configs_add_on_update
 AFTER UPDATE ON challenges
 FOR EACH ROW
-WHEN ((OLD.type = 'Normal') AND (NEW.type != 'Normal'))
+WHEN ((OLD.type = 'None') AND (NEW.type != 'None'))
 EXECUTE FUNCTION fn_integrity_chall_docker_configs_add_on_update();

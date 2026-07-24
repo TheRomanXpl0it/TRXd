@@ -353,12 +353,12 @@ definitions:
     - ConnTypeHTTPS
   sqlc.DeployType:
     enum:
-    - Normal
+    - None
     - Container
     - Compose
     type: string
     x-enum-varnames:
-    - DeployTypeNormal
+    - DeployTypeNone
     - DeployTypeContainer
     - DeployTypeCompose
   sqlc.GetAdminStatsRow:
@@ -1139,7 +1139,7 @@ paths:
             fields` | `No data provided to update` | `ChallID must be at least 0`
             | `Name must not exceed 128` | `Category must not exceed 32` | `Description
             must not exceed 10240` | `Authors[i] must not exceed 64` | `Tags[i] must
-            not exceed 32` | `Type must be one of: Normal Container Compose` | `MaxPoints
+            not exceed 32` | `Type must be one of: None Container Compose` | `MaxPoints
             must be at least 0` | `ScoreType must be one of: Static Dynamic` | `Port
             must be at least 0` | `Port must not exceed 65535` | `ConnType must be
             one of: TCP HTTP HTTPS` | `Lifetime must be at least 0` | `Invalid environment
@@ -1184,7 +1184,7 @@ paths:
         "400":
           description: 'Possible errors: `Invalid JSON format` | `Missing required
             fields` | `Name must not exceed 32` | `Category must not exceed 32` |
-            `Description must not exceed 10240` | `Type must be one of: Normal Container
+            `Description must not exceed 10240` | `Type must be one of: None Container
             Compose` | `MaxPoints must be at least 0` | `ScoreType must be one of:
             Static Dynamic`'
           schema:
@@ -1298,6 +1298,7 @@ paths:
         Requires **Admin** privileges.
         Updates an existing config's value.
         Note: if `user-mode` is updated, the server will automatically shut down and restart to apply the change.
+        Note: if `registry-server` or `registry-username` or `registry-password` are updated, a docker config write will occur, and the auth will be updated.
       parameters:
       - description: all fields are required
         in: body

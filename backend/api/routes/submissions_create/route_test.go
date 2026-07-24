@@ -142,7 +142,7 @@ func TestRoute(t *testing.T) {
 	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "test3@test.test", "password": "testpass"}, http.StatusOK)
 	session.Post("/categories", JSON{"name": "cat"}, http.StatusOK)
-	chall := test_utils.CreateChallenge(t, "chall", "cat", "test-desc", sqlc.DeployTypeNormal, 1, sqlc.ScoreTypeDynamic)
+	chall := test_utils.CreateChallenge(t, "chall", "cat", "test-desc", sqlc.DeployTypeNone, 1, sqlc.ScoreTypeDynamic)
 	test_utils.UnveilChallenge(t, chall.ID)
 	session.Post("/flags", JSON{"chall_id": chall.ID, "flag": "flag{test}", "regex": false}, http.StatusOK)
 
@@ -177,7 +177,7 @@ func TestRoute(t *testing.T) {
 		session.CheckResponse(test.expectedResponse)
 	}
 
-	chall_no_flag := test_utils.CreateChallenge(t, "chall-no-flag", "cat", "test-desc", sqlc.DeployTypeNormal, 1, sqlc.ScoreTypeDynamic)
+	chall_no_flag := test_utils.CreateChallenge(t, "chall-no-flag", "cat", "test-desc", sqlc.DeployTypeNone, 1, sqlc.ScoreTypeDynamic)
 	test_utils.UnveilChallenge(t, chall_no_flag.ID)
 
 	session = test_utils.NewApiTestSession(t, app)

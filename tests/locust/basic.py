@@ -136,7 +136,7 @@ def setup_basic_challenge(environment, **kwargs):
     if not admin.ensure_category(CATEGORY_NAME):
         raise RuntimeError("Locust basic setup failed: category setup failed")
 
-    chall_id = admin.ensure_challenge(BASIC_CHALL_NAME, CATEGORY_NAME, "Normal", hidden=False)
+    chall_id = admin.ensure_challenge(BASIC_CHALL_NAME, CATEGORY_NAME, "None", hidden=False)
     if chall_id is None:
         raise RuntimeError("Locust basic setup failed: challenge setup failed")
     if not admin.ensure_flag(chall_id, BASIC_CHALL_FLAG):

@@ -5,7 +5,7 @@ CREATE TYPE user_role AS ENUM (
 );
 
 CREATE TYPE deploy_type AS ENUM (
-  'Normal',
+  'None',
   'Container',
   'Compose'
 );
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS challenges (
   description VARCHAR(10240) NOT NULL,
   authors VARCHAR(64)[] NOT NULL DEFAULT '{}',
   tags VARCHAR(32)[] NOT NULL DEFAULT '{}',
-  type deploy_type NOT NULL,
+  type deploy_type NOT NULL DEFAULT 'None',
   hidden BOOLEAN NOT NULL DEFAULT TRUE,
 
   max_points INTEGER NOT NULL,

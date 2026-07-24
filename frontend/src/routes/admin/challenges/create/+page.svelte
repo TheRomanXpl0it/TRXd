@@ -36,7 +36,7 @@
 	let name = $state('');
 	let category = $state('');
 	let description = $state('');
-	let type = $state('Normal');
+	let type = $state('None');
 	let points = $state(500);
 	let dynamicScore = $state(true);
 	let hidden = $state(true);
@@ -86,7 +86,7 @@
 	}
 
 	const challengeTypes = [
-		{ value: 'Normal', label: 'Normal' },
+		{ value: 'None', label: 'None' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }
 	];
@@ -384,7 +384,7 @@
 						>
 					</Card.Header>
 					<Card.Content class="space-y-6">
-						{#if type !== 'Normal'}
+						{#if type !== 'None'}
 							<div class="animate-in fade-in slide-in-from-top-2 space-y-4">
 								{#if type === 'Container'}
 									<div class="space-y-2">
@@ -479,7 +479,7 @@
 						{/if}
 
 						<div
-							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${type !== 'Normal' ? 'border-t pt-6' : ''}`}
+							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${type !== 'None' ? 'border-t pt-6' : ''}`}
 						>
 							<div class="space-y-2">
 								<Label for="host">Connecting Host (optional)</Label>

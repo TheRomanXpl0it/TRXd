@@ -57,7 +57,7 @@ func (ns NullConnType) Value() (driver.Value, error) {
 type DeployType string
 
 const (
-	DeployTypeNormal    DeployType = "Normal"
+	DeployTypeNone      DeployType = "None"
 	DeployTypeContainer DeployType = "Container"
 	DeployTypeCompose   DeployType = "Compose"
 )

@@ -123,7 +123,7 @@
 	// Options
 	// Options
 	const typeOptions: Item[] = [
-		{ value: 'Normal', label: 'Normal' },
+		{ value: 'None', label: 'None' },
 		{ value: 'Container', label: 'Container' },
 		{ value: 'Compose', label: 'Compose' }
 	];
@@ -762,8 +762,8 @@
 					<!-- Deployment Tab -->
 					{#if activeTab === 'deployment'}
 						<div class="mt-6 space-y-6 pb-4">
-							{#if type === 'Normal'}
-								<!-- Normal Challenge Deployment -->
+							{#if type === 'None'}
+								<!-- None Challenge Deployment -->
 								<div class="bg-muted/20 rounded-xl border-0 p-5">
 									<h4
 										class="text-muted-foreground mb-4 text-sm font-semibold uppercase tracking-wider"
