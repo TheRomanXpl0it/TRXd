@@ -1,4 +1,4 @@
-package users_all_get
+package users_get_all
 
 import (
 	"math"

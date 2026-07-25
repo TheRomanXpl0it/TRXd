@@ -43,61 +43,6 @@ definitions:
     - name
     - new_name
     type: object
-  challenges_all_get.Chall:
-    properties:
-      attachments:
-        items:
-          type: string
-        type: array
-      authors:
-        items:
-          type: string
-        type: array
-      category:
-        type: string
-      conn_type:
-        $ref: '#/definitions/sqlc.ConnType'
-      description:
-        type: string
-      first_blood:
-        type: boolean
-      hash_domain:
-        type: boolean
-      hidden:
-        type: boolean
-      host:
-        type: string
-      id:
-        type: integer
-      instance:
-        type: boolean
-      instance_host:
-        type: string
-      instance_port:
-        type: integer
-      max_points:
-        type: integer
-      name:
-        type: string
-      points:
-        type: integer
-      port:
-        type: integer
-      renewable:
-        type: boolean
-      score_type:
-        $ref: '#/definitions/sqlc.ScoreType'
-      solved:
-        type: boolean
-      solves:
-        type: integer
-      tags:
-        items:
-          type: string
-        type: array
-      timeout:
-        type: integer
-    type: object
   challenges_create.Data:
     properties:
       category:
@@ -184,6 +129,61 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  challenges_get_all.Chall:
+    properties:
+      attachments:
+        items:
+          type: string
+        type: array
+      authors:
+        items:
+          type: string
+        type: array
+      category:
+        type: string
+      conn_type:
+        $ref: '#/definitions/sqlc.ConnType'
+      description:
+        type: string
+      first_blood:
+        type: boolean
+      hash_domain:
+        type: boolean
+      hidden:
+        type: boolean
+      host:
+        type: string
+      id:
+        type: integer
+      instance:
+        type: boolean
+      instance_host:
+        type: string
+      instance_port:
+        type: integer
+      max_points:
+        type: integer
+      name:
+        type: string
+      points:
+        type: integer
+      port:
+        type: integer
+      renewable:
+        type: boolean
+      score_type:
+        $ref: '#/definitions/sqlc.ScoreType'
+      solved:
+        type: boolean
+      solves:
+        type: integer
+      tags:
+        items:
+          type: string
+        type: array
+      timeout:
+        type: integer
     type: object
   challenges_hidden.Data:
     properties:
@@ -538,30 +538,6 @@ definitions:
       user_name:
         type: string
     type: object
-  teams_all_get.Response:
-    properties:
-      teams:
-        items:
-          $ref: '#/definitions/teams_all_get.TeamData'
-        type: array
-      total:
-        type: integer
-    type: object
-  teams_all_get.TeamData:
-    properties:
-      badges:
-        type: object
-      country:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      role:
-        type: string
-      score:
-        type: integer
-    type: object
   teams_get.Solve:
     properties:
       category:
@@ -610,6 +586,30 @@ definitions:
           $ref: '#/definitions/sqlc.GetTotalCategoryChallengesRow'
         type: array
       user_id:
+        type: integer
+    type: object
+  teams_get_all.Response:
+    properties:
+      teams:
+        items:
+          $ref: '#/definitions/teams_get_all.TeamData'
+        type: array
+      total:
+        type: integer
+    type: object
+  teams_get_all.TeamData:
+    properties:
+      badges:
+        type: object
+      country:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        type: string
+      score:
         type: integer
     type: object
   teams_join.Data:
@@ -710,28 +710,6 @@ definitions:
       name:
         type: string
     type: object
-  users_all_get.Response:
-    properties:
-      total:
-        type: integer
-      users:
-        items:
-          $ref: '#/definitions/users_all_get.UserData'
-        type: array
-    type: object
-  users_all_get.UserData:
-    properties:
-      country:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      role:
-        type: string
-      score:
-        type: integer
-    type: object
   users_get.UserData:
     properties:
       country:
@@ -758,6 +736,28 @@ definitions:
         items:
           $ref: '#/definitions/sqlc.GetTotalCategoryChallengesRow'
         type: array
+    type: object
+  users_get_all.Response:
+    properties:
+      total:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/users_get_all.UserData'
+        type: array
+    type: object
+  users_get_all.UserData:
+    properties:
+      country:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      role:
+        type: string
+      score:
+        type: integer
     type: object
   users_info.Response:
     properties:
@@ -1101,7 +1101,7 @@ paths:
           description: List of challenges with all dysplayable details (except solves)
           schema:
             items:
-              $ref: '#/definitions/challenges_all_get.Chall'
+              $ref: '#/definitions/challenges_get_all.Chall'
             type: array
         "500":
           description: 'Possible errors: `Error fetching challenges`'
@@ -1930,7 +1930,7 @@ paths:
           description: 'List of teams. Note: the `badges` field is a JSON array of
             objects, each containing `name` and `description` fields as strings.'
           schema:
-            $ref: '#/definitions/teams_all_get.Response'
+            $ref: '#/definitions/teams_get_all.Response'
         "400":
           description: 'Possible errors: `Invalid parameter`'
           schema:
@@ -2227,7 +2227,7 @@ paths:
         "200":
           description: List of users
           schema:
-            $ref: '#/definitions/users_all_get.Response'
+            $ref: '#/definitions/users_get_all.Response'
         "400":
           description: 'Possible errors: `Invalid parameter`'
           schema:

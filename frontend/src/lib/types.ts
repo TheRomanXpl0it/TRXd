@@ -40,7 +40,6 @@ export interface Team {
 	email?: string;
 	country?: string;
 	tags?: string[];
-	captain_id?: number; // TODO
 	members?: User[];
 	solves?: Solve[]; // Stricter type
 	badges?: Badge[];

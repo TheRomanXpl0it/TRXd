@@ -305,7 +305,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/challenges_all_get.Chall"
+                                "$ref": "#/definitions/challenges_get_all.Chall"
                             }
                         }
                     },
@@ -1423,7 +1423,7 @@
                     "200": {
                         "description": "List of teams. Note: the `badges` field is a JSON array of objects, each containing `name` and `description` fields as strings.",
                         "schema": {
-                            "$ref": "#/definitions/teams_all_get.Response"
+                            "$ref": "#/definitions/teams_get_all.Response"
                         }
                     },
                     "400": {
@@ -1817,7 +1817,7 @@
                     "200": {
                         "description": "List of users",
                         "schema": {
-                            "$ref": "#/definitions/users_all_get.Response"
+                            "$ref": "#/definitions/users_get_all.Response"
                         }
                     },
                     "400": {
@@ -2133,89 +2133,6 @@
                 }
             }
         },
-        "challenges_all_get.Chall": {
-            "type": "object",
-            "properties": {
-                "attachments": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "authors": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "category": {
-                    "type": "string"
-                },
-                "conn_type": {
-                    "$ref": "#/definitions/sqlc.ConnType"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "first_blood": {
-                    "type": "boolean"
-                },
-                "hash_domain": {
-                    "type": "boolean"
-                },
-                "hidden": {
-                    "type": "boolean"
-                },
-                "host": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "instance": {
-                    "type": "boolean"
-                },
-                "instance_host": {
-                    "type": "string"
-                },
-                "instance_port": {
-                    "type": "integer"
-                },
-                "max_points": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "points": {
-                    "type": "integer"
-                },
-                "port": {
-                    "type": "integer"
-                },
-                "renewable": {
-                    "type": "boolean"
-                },
-                "score_type": {
-                    "$ref": "#/definitions/sqlc.ScoreType"
-                },
-                "solved": {
-                    "type": "boolean"
-                },
-                "solves": {
-                    "type": "integer"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "timeout": {
-                    "type": "integer"
-                }
-            }
-        },
         "challenges_create.Data": {
             "type": "object",
             "required": [
@@ -2343,6 +2260,89 @@
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "challenges_get_all.Chall": {
+            "type": "object",
+            "properties": {
+                "attachments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "authors": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "category": {
+                    "type": "string"
+                },
+                "conn_type": {
+                    "$ref": "#/definitions/sqlc.ConnType"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "first_blood": {
+                    "type": "boolean"
+                },
+                "hash_domain": {
+                    "type": "boolean"
+                },
+                "hidden": {
+                    "type": "boolean"
+                },
+                "host": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "instance": {
+                    "type": "boolean"
+                },
+                "instance_host": {
+                    "type": "string"
+                },
+                "instance_port": {
+                    "type": "integer"
+                },
+                "max_points": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "points": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "integer"
+                },
+                "renewable": {
+                    "type": "boolean"
+                },
+                "score_type": {
+                    "$ref": "#/definitions/sqlc.ScoreType"
+                },
+                "solved": {
+                    "type": "boolean"
+                },
+                "solves": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "timeout": {
+                    "type": "integer"
                 }
             }
         },
@@ -2875,43 +2875,6 @@
                 }
             }
         },
-        "teams_all_get.Response": {
-            "type": "object",
-            "properties": {
-                "teams": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/teams_all_get.TeamData"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
-        "teams_all_get.TeamData": {
-            "type": "object",
-            "properties": {
-                "badges": {
-                    "type": "object"
-                },
-                "country": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                },
-                "score": {
-                    "type": "integer"
-                }
-            }
-        },
         "teams_get.Solve": {
             "type": "object",
             "properties": {
@@ -2984,6 +2947,43 @@
                     }
                 },
                 "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_get_all.Response": {
+            "type": "object",
+            "properties": {
+                "teams": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/teams_get_all.TeamData"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "teams_get_all.TeamData": {
+            "type": "object",
+            "properties": {
+                "badges": {
+                    "type": "object"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "score": {
                     "type": "integer"
                 }
             }
@@ -3139,40 +3139,6 @@
                 }
             }
         },
-        "users_all_get.Response": {
-            "type": "object",
-            "properties": {
-                "total": {
-                    "type": "integer"
-                },
-                "users": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/users_all_get.UserData"
-                    }
-                }
-            }
-        },
-        "users_all_get.UserData": {
-            "type": "object",
-            "properties": {
-                "country": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                },
-                "score": {
-                    "type": "integer"
-                }
-            }
-        },
         "users_get.UserData": {
             "type": "object",
             "properties": {
@@ -3211,6 +3177,40 @@
                     "items": {
                         "$ref": "#/definitions/sqlc.GetTotalCategoryChallengesRow"
                     }
+                }
+            }
+        },
+        "users_get_all.Response": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "integer"
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/users_get_all.UserData"
+                    }
+                }
+            }
+        },
+        "users_get_all.UserData": {
+            "type": "object",
+            "properties": {
+                "country": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "integer"
                 }
             }
         },

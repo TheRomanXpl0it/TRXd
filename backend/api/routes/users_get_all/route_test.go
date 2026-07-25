@@ -1,4 +1,4 @@
-package users_all_get_test
+package users_get_all_test
 
 import (
 	"fmt"

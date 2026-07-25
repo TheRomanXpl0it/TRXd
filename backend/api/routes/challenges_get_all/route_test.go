@@ -1,4 +1,4 @@
-package challenges_all_get_test
+package challenges_get_all_test
 
 import (
 	"database/sql"

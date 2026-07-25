@@ -1,4 +1,4 @@
-package teams_all_get_test
+package teams_get_all_test
 
 import (
 	"fmt"

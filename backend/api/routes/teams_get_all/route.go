@@ -1,4 +1,4 @@
-package teams_all_get
+package teams_get_all
 
 import (
 	"math"

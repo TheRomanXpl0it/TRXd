@@ -1,4 +1,4 @@
-package challenges_all_get
+package challenges_get_all
 
 import (
 	"trxd/db/sqlc"

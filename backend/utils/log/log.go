@@ -51,6 +51,7 @@ var SetLogLevel = LOG.SetLogLevel
 var SetTimeFormat = LOG.SetTimeFormat
 var SetStyles = LOG.SetStyles
 var DefaultStyles = LOG.DefaultStyles
+var Helper = LOG.Helper
 
 var defaultStyles *log.Styles
 

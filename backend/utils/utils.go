@@ -22,7 +22,8 @@ func In[T comparable](slice T, items []T) bool {
 
 func Error(c *fiber.Ctx, status int, message string, err ...error) error {
 	if len(err) != 0 {
-		log.Error("API Error:", "desc", message, "err", err[0])
+		log.Helper()
+		log.Error("API Error:", "method", c.Method(), "route", c.OriginalURL(), "desc", message, "err", err[0])
 	}
 	if c == nil {
 		return errors.New(message)
