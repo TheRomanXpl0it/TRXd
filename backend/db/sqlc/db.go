@@ -90,9 +90,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.getChallAttachmentsStmt, err = db.PrepareContext(ctx, getChallAttachments); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChallAttachments: %w", err)
 	}
-	if q.getChallDockerConfigStmt, err = db.PrepareContext(ctx, getChallDockerConfig); err != nil {
-		return nil, fmt.Errorf("error preparing query GetChallDockerConfig: %w", err)
-	}
 	if q.getChallengeByIDStmt, err = db.PrepareContext(ctx, getChallengeByID); err != nil {
 		return nil, fmt.Errorf("error preparing query GetChallengeByID: %w", err)
 	}
@@ -104,9 +101,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.getConfigsStmt, err = db.PrepareContext(ctx, getConfigs); err != nil {
 		return nil, fmt.Errorf("error preparing query GetConfigs: %w", err)
-	}
-	if q.getDockerConfigsByIDStmt, err = db.PrepareContext(ctx, getDockerConfigsByID); err != nil {
-		return nil, fmt.Errorf("error preparing query GetDockerConfigsByID: %w", err)
 	}
 	if q.getFlagsByChallengeStmt, err = db.PrepareContext(ctx, getFlagsByChallenge); err != nil {
 		return nil, fmt.Errorf("error preparing query GetFlagsByChallenge: %w", err)
@@ -221,9 +215,6 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	}
 	if q.updateConfigStmt, err = db.PrepareContext(ctx, updateConfig); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateConfig: %w", err)
-	}
-	if q.updateDockerConfigsStmt, err = db.PrepareContext(ctx, updateDockerConfigs); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateDockerConfigs: %w", err)
 	}
 	if q.updateFlagStmt, err = db.PrepareContext(ctx, updateFlag); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateFlag: %w", err)
@@ -358,11 +349,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing getChallAttachmentsStmt: %w", cerr)
 		}
 	}
-	if q.getChallDockerConfigStmt != nil {
-		if cerr := q.getChallDockerConfigStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getChallDockerConfigStmt: %w", cerr)
-		}
-	}
 	if q.getChallengeByIDStmt != nil {
 		if cerr := q.getChallengeByIDStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getChallengeByIDStmt: %w", cerr)
@@ -381,11 +367,6 @@ func (q *Queries) Close() error {
 	if q.getConfigsStmt != nil {
 		if cerr := q.getConfigsStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing getConfigsStmt: %w", cerr)
-		}
-	}
-	if q.getDockerConfigsByIDStmt != nil {
-		if cerr := q.getDockerConfigsByIDStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getDockerConfigsByIDStmt: %w", cerr)
 		}
 	}
 	if q.getFlagsByChallengeStmt != nil {
@@ -578,11 +559,6 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateConfigStmt: %w", cerr)
 		}
 	}
-	if q.updateDockerConfigsStmt != nil {
-		if cerr := q.updateDockerConfigsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateDockerConfigsStmt: %w", cerr)
-		}
-	}
 	if q.updateFlagStmt != nil {
 		if cerr := q.updateFlagStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateFlagStmt: %w", cerr)
@@ -674,12 +650,10 @@ type Queries struct {
 	getCategoriesStmt              *sql.Stmt
 	getCategoryStmt                *sql.Stmt
 	getChallAttachmentsStmt        *sql.Stmt
-	getChallDockerConfigStmt       *sql.Stmt
 	getChallengeByIDStmt           *sql.Stmt
 	getChallengeSolvesStmt         *sql.Stmt
 	getConfigStmt                  *sql.Stmt
 	getConfigsStmt                 *sql.Stmt
-	getDockerConfigsByIDStmt       *sql.Stmt
 	getFlagsByChallengeStmt        *sql.Stmt
 	getHiddenAndAttachmentsStmt    *sql.Stmt
 	getInstanceStmt                *sql.Stmt
@@ -718,7 +692,6 @@ type Queries struct {
 	updateChallengeStmt            *sql.Stmt
 	updateChallengesCategoryStmt   *sql.Stmt
 	updateConfigStmt               *sql.Stmt
-	updateDockerConfigsStmt        *sql.Stmt
 	updateFlagStmt                 *sql.Stmt
 	updateInstanceDockerIDStmt     *sql.Stmt
 	updateInstanceExpireStmt       *sql.Stmt
@@ -753,12 +726,10 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		getCategoriesStmt:              q.getCategoriesStmt,
 		getCategoryStmt:                q.getCategoryStmt,
 		getChallAttachmentsStmt:        q.getChallAttachmentsStmt,
-		getChallDockerConfigStmt:       q.getChallDockerConfigStmt,
 		getChallengeByIDStmt:           q.getChallengeByIDStmt,
 		getChallengeSolvesStmt:         q.getChallengeSolvesStmt,
 		getConfigStmt:                  q.getConfigStmt,
 		getConfigsStmt:                 q.getConfigsStmt,
-		getDockerConfigsByIDStmt:       q.getDockerConfigsByIDStmt,
 		getFlagsByChallengeStmt:        q.getFlagsByChallengeStmt,
 		getHiddenAndAttachmentsStmt:    q.getHiddenAndAttachmentsStmt,
 		getInstanceStmt:                q.getInstanceStmt,
@@ -797,7 +768,6 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		updateChallengeStmt:            q.updateChallengeStmt,
 		updateChallengesCategoryStmt:   q.updateChallengesCategoryStmt,
 		updateConfigStmt:               q.updateConfigStmt,
-		updateDockerConfigsStmt:        q.updateDockerConfigsStmt,
 		updateFlagStmt:                 q.updateFlagStmt,
 		updateInstanceDockerIDStmt:     q.updateInstanceDockerIDStmt,
 		updateInstanceExpireStmt:       q.updateInstanceExpireStmt,

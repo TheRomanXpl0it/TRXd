@@ -1,5 +1,5 @@
 -- name: UpdateChallenge :exec
--- Updates the challenge with the given ID
+-- Updates the challenge from the given ID
 UPDATE challenges
 SET
   name = COALESCE(sqlc.narg('name'), name),
@@ -9,23 +9,20 @@ SET
   tags = COALESCE(sqlc.narg('tags'), tags),
   instance_type = COALESCE(sqlc.narg('instance_type'), instance_type),
   hidden = COALESCE(sqlc.narg('hidden'), hidden),
+  
   max_points = COALESCE(sqlc.narg('max_points'), max_points),
   score_type = COALESCE(sqlc.narg('score_type'), score_type),
+  
   host = COALESCE(sqlc.narg('host'), host),
   port = COALESCE(sqlc.narg('port'), port),
-  conn_type = COALESCE(sqlc.narg('conn_type'), conn_type)
-WHERE id = sqlc.arg('chall_id');
-
--- name: UpdateDockerConfigs :exec
--- Updates the Docker configurations for the challenge with the given ID
-UPDATE docker_configs
-SET
+  conn_type = COALESCE(sqlc.narg('conn_type'), conn_type),
+  hash_domain = COALESCE(sqlc.narg('hash_domain'), hash_domain),
+  
   image = COALESCE(sqlc.narg('image'), image),
   compose = COALESCE(sqlc.narg('compose'), compose),
-  hash_domain = COALESCE(sqlc.narg('hash_domain'), hash_domain),
   lifetime = COALESCE(sqlc.narg('lifetime'), lifetime),
   renewable = COALESCE(sqlc.narg('renewable'), renewable),
   envs = COALESCE(sqlc.narg('envs'), envs),
   max_memory = COALESCE(sqlc.narg('max_memory'), max_memory),
   max_cpu = COALESCE(sqlc.narg('max_cpu'), max_cpu)
-WHERE chall_id = sqlc.arg('chall_id');
+WHERE id = sqlc.arg('chall_id');

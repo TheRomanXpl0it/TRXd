@@ -2169,6 +2169,9 @@ const docTemplate = `{
                 "first_blood": {
                     "type": "boolean"
                 },
+                "hash_domain": {
+                    "type": "boolean"
+                },
                 "hidden": {
                     "type": "boolean"
                 },
@@ -2181,17 +2184,11 @@ const docTemplate = `{
                 "instance": {
                     "type": "boolean"
                 },
-                "instance_hash_domain": {
-                    "type": "boolean"
-                },
                 "instance_host": {
                     "type": "string"
                 },
                 "instance_port": {
                     "type": "integer"
-                },
-                "instance_renewable": {
-                    "type": "boolean"
                 },
                 "max_points": {
                     "type": "integer"
@@ -2204,6 +2201,9 @@ const docTemplate = `{
                 },
                 "port": {
                     "type": "integer"
+                },
+                "renewable": {
+                    "type": "boolean"
                 },
                 "score_type": {
                     "$ref": "#/definitions/sqlc.ScoreType"
@@ -2284,14 +2284,17 @@ const docTemplate = `{
                 "category": {
                     "type": "string"
                 },
+                "compose": {
+                    "type": "string"
+                },
                 "conn_type": {
                     "$ref": "#/definitions/sqlc.ConnType"
                 },
                 "description": {
                     "type": "string"
                 },
-                "docker_config": {
-                    "$ref": "#/definitions/challenges_get.DockerConfig"
+                "envs": {
+                    "type": "string"
                 },
                 "flags": {
                     "type": "array",
@@ -2299,14 +2302,29 @@ const docTemplate = `{
                         "$ref": "#/definitions/sqlc.GetFlagsByChallengeRow"
                     }
                 },
+                "hash_domain": {
+                    "type": "boolean"
+                },
                 "hidden": {
                     "type": "boolean"
                 },
                 "host": {
                     "type": "string"
                 },
+                "image": {
+                    "type": "string"
+                },
                 "instance_type": {
                     "$ref": "#/definitions/sqlc.InstanceType"
+                },
+                "lifetime": {
+                    "type": "integer"
+                },
+                "max_cpu": {
+                    "type": "string"
+                },
+                "max_memory": {
+                    "type": "integer"
                 },
                 "max_points": {
                     "type": "integer"
@@ -2316,6 +2334,9 @@ const docTemplate = `{
                 },
                 "port": {
                     "type": "integer"
+                },
+                "renewable": {
+                    "type": "boolean"
                 },
                 "score_type": {
                     "$ref": "#/definitions/sqlc.ScoreType"
@@ -2331,35 +2352,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "challenges_get.DockerConfig": {
-            "type": "object",
-            "properties": {
-                "compose": {
-                    "type": "string"
-                },
-                "envs": {
-                    "type": "string"
-                },
-                "hash_domain": {
-                    "type": "boolean"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "lifetime": {
-                    "type": "integer"
-                },
-                "max_cpu": {
-                    "type": "string"
-                },
-                "max_memory": {
-                    "type": "integer"
-                },
-                "renewable": {
-                    "type": "boolean"
                 }
             }
         },

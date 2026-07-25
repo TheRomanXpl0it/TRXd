@@ -12,13 +12,67 @@ import (
 )
 
 const getChallengeByID = `-- name: GetChallengeByID :one
-SELECT id, name, category, description, authors, tags, instance_type, hidden, max_points, score_type, points, solves, host, port, conn_type FROM challenges WHERE id = $1
+SELECT
+  id,
+  name,
+  category,
+  description,
+  authors,
+  tags,
+  instance_type,
+  hidden,
+
+  max_points,
+  score_type,
+  points,
+  solves,
+
+  host,
+  port,
+  conn_type,
+  hash_domain,
+
+  image,
+  compose,
+  COALESCE(NULLIF(lifetime, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-lifetime'))::INTEGER AS lifetime,
+  renewable,
+  envs,
+  COALESCE(NULLIF(max_memory, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-max-memory'))::INTEGER AS max_memory,
+  COALESCE(NULLIF(max_cpu, ''), (SELECT value FROM configs WHERE key='instance-max-cpu'))::TEXT AS max_cpu
+FROM challenges
+WHERE id = $1
 `
 
+type GetChallengeByIDRow struct {
+	ID           int32        `json:"id"`
+	Name         string       `json:"name"`
+	Category     string       `json:"category"`
+	Description  string       `json:"description"`
+	Authors      []string     `json:"authors"`
+	Tags         []string     `json:"tags"`
+	InstanceType InstanceType `json:"instance_type"`
+	Hidden       bool         `json:"hidden"`
+	MaxPoints    int32        `json:"max_points"`
+	ScoreType    ScoreType    `json:"score_type"`
+	Points       int32        `json:"points"`
+	Solves       int32        `json:"solves"`
+	Host         string       `json:"host"`
+	Port         int32        `json:"port"`
+	ConnType     ConnType     `json:"conn_type"`
+	HashDomain   bool         `json:"hash_domain"`
+	Image        string       `json:"image"`
+	Compose      string       `json:"compose"`
+	Lifetime     int32        `json:"lifetime"`
+	Renewable    bool         `json:"renewable"`
+	Envs         string       `json:"envs"`
+	MaxMemory    int32        `json:"max_memory"`
+	MaxCpu       string       `json:"max_cpu"`
+}
+
 // Retrieve a challenge by its ID
-func (q *Queries) GetChallengeByID(ctx context.Context, id int32) (Challenge, error) {
+func (q *Queries) GetChallengeByID(ctx context.Context, id int32) (GetChallengeByIDRow, error) {
 	row := q.queryRow(ctx, q.getChallengeByIDStmt, getChallengeByID, id)
-	var i Challenge
+	var i GetChallengeByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -35,46 +89,12 @@ func (q *Queries) GetChallengeByID(ctx context.Context, id int32) (Challenge, er
 		&i.Host,
 		&i.Port,
 		&i.ConnType,
-	)
-	return i, err
-}
-
-const getDockerConfigsByID = `-- name: GetDockerConfigsByID :one
-SELECT
-  image,
-  compose,
-  hash_domain,
-  renewable,
-  envs,
-  COALESCE(NULLIF(lifetime, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-lifetime')) AS lifetime,
-  COALESCE(NULLIF(max_memory, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-max-memory')) AS max_memory,
-  COALESCE(NULLIF(max_cpu, ''), (SELECT value FROM configs WHERE key='instance-max-cpu')) AS max_cpu
-FROM docker_configs
-WHERE chall_id = $1
-`
-
-type GetDockerConfigsByIDRow struct {
-	Image      string      `json:"image"`
-	Compose    string      `json:"compose"`
-	HashDomain bool        `json:"hash_domain"`
-	Renewable  bool        `json:"renewable"`
-	Envs       string      `json:"envs"`
-	Lifetime   interface{} `json:"lifetime"`
-	MaxMemory  interface{} `json:"max_memory"`
-	MaxCpu     interface{} `json:"max_cpu"`
-}
-
-// Retrieve Docker configurations by challenge ID
-func (q *Queries) GetDockerConfigsByID(ctx context.Context, challID int32) (GetDockerConfigsByIDRow, error) {
-	row := q.queryRow(ctx, q.getDockerConfigsByIDStmt, getDockerConfigsByID, challID)
-	var i GetDockerConfigsByIDRow
-	err := row.Scan(
+		&i.HashDomain,
 		&i.Image,
 		&i.Compose,
-		&i.HashDomain,
+		&i.Lifetime,
 		&i.Renewable,
 		&i.Envs,
-		&i.Lifetime,
 		&i.MaxMemory,
 		&i.MaxCpu,
 	)

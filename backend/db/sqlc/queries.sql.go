@@ -285,7 +285,7 @@ func (q *Queries) GetAdminStats(ctx context.Context) (GetAdminStatsRow, error) {
 const getAllChallengesInfo = `-- name: GetAllChallengesInfo :many
 WITH tid AS (SELECT team_id FROM users WHERE users.id = $1)
 SELECT
-    c.id, c.name, c.category, c.description, c.authors, c.tags, c.instance_type, c.hidden, c.max_points, c.score_type, c.points, c.solves, c.host, c.port, c.conn_type,
+    c.id, c.name, c.category, c.description, c.authors, c.tags, c.instance_type, c.hidden, c.max_points, c.score_type, c.points, c.solves, c.host, c.port, c.conn_type, c.hash_domain, c.image, c.compose, c.lifetime, c.renewable, c.envs, c.max_memory, c.max_cpu,
     (s.first_blood IS NOT NULL)::BOOLEAN AS solved,
     COALESCE(s.first_blood, FALSE) AS first_blood,
     (ARRAY_AGG('/' || a.hash || '/' || a.name ORDER BY a.name)
@@ -293,9 +293,7 @@ SELECT
     i.expires_at,
     i.host AS instance_host,
     i.port AS instance_port,
-    i.docker_id,
-    d.hash_domain AS instance_hash_domain,
-    d.renewable AS instance_renewable
+    i.docker_id
   FROM challenges c
   LEFT JOIN attachments a
     ON a.chall_id = c.id
@@ -307,40 +305,44 @@ SELECT
           AND users.role = 'Player'
           AND submissions.status = 'Correct') s
     ON s.chall_id = c.id
-  LEFT JOIN docker_configs d
-    ON d.chall_id = c.id
   LEFT JOIN instances i
     ON i.chall_id = c.id
       AND i.team_id = (SELECT team_id FROM tid)
-  GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id, d.hash_domain, d.renewable
+  GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id
   ORDER BY c.hidden ASC, c.points ASC, c.solves DESC, c.id ASC
 `
 
 type GetAllChallengesInfoRow struct {
-	ID                 int32          `json:"id"`
-	Name               string         `json:"name"`
-	Category           string         `json:"category"`
-	Description        string         `json:"description"`
-	Authors            []string       `json:"authors"`
-	Tags               []string       `json:"tags"`
-	InstanceType       InstanceType   `json:"instance_type"`
-	Hidden             bool           `json:"hidden"`
-	MaxPoints          int32          `json:"max_points"`
-	ScoreType          ScoreType      `json:"score_type"`
-	Points             int32          `json:"points"`
-	Solves             int32          `json:"solves"`
-	Host               string         `json:"host"`
-	Port               int32          `json:"port"`
-	ConnType           ConnType       `json:"conn_type"`
-	Solved             bool           `json:"solved"`
-	FirstBlood         bool           `json:"first_blood"`
-	Attachments        []string       `json:"attachments"`
-	ExpiresAt          sql.NullTime   `json:"expires_at"`
-	InstanceHost       sql.NullString `json:"instance_host"`
-	InstancePort       sql.NullInt32  `json:"instance_port"`
-	DockerID           sql.NullString `json:"docker_id"`
-	InstanceHashDomain sql.NullBool   `json:"instance_hash_domain"`
-	InstanceRenewable  sql.NullBool   `json:"instance_renewable"`
+	ID           int32          `json:"id"`
+	Name         string         `json:"name"`
+	Category     string         `json:"category"`
+	Description  string         `json:"description"`
+	Authors      []string       `json:"authors"`
+	Tags         []string       `json:"tags"`
+	InstanceType InstanceType   `json:"instance_type"`
+	Hidden       bool           `json:"hidden"`
+	MaxPoints    int32          `json:"max_points"`
+	ScoreType    ScoreType      `json:"score_type"`
+	Points       int32          `json:"points"`
+	Solves       int32          `json:"solves"`
+	Host         string         `json:"host"`
+	Port         int32          `json:"port"`
+	ConnType     ConnType       `json:"conn_type"`
+	HashDomain   bool           `json:"hash_domain"`
+	Image        string         `json:"image"`
+	Compose      string         `json:"compose"`
+	Lifetime     int32          `json:"lifetime"`
+	Renewable    bool           `json:"renewable"`
+	Envs         string         `json:"envs"`
+	MaxMemory    int32          `json:"max_memory"`
+	MaxCpu       string         `json:"max_cpu"`
+	Solved       bool           `json:"solved"`
+	FirstBlood   bool           `json:"first_blood"`
+	Attachments  []string       `json:"attachments"`
+	ExpiresAt    sql.NullTime   `json:"expires_at"`
+	InstanceHost sql.NullString `json:"instance_host"`
+	InstancePort sql.NullInt32  `json:"instance_port"`
+	DockerID     sql.NullString `json:"docker_id"`
 }
 
 // Retrieve all challenges along with first blood status and instance info for a user
@@ -369,6 +371,14 @@ func (q *Queries) GetAllChallengesInfo(ctx context.Context, id int32) ([]GetAllC
 			&i.Host,
 			&i.Port,
 			&i.ConnType,
+			&i.HashDomain,
+			&i.Image,
+			&i.Compose,
+			&i.Lifetime,
+			&i.Renewable,
+			&i.Envs,
+			&i.MaxMemory,
+			&i.MaxCpu,
 			&i.Solved,
 			&i.FirstBlood,
 			pq.Array(&i.Attachments),
@@ -376,8 +386,6 @@ func (q *Queries) GetAllChallengesInfo(ctx context.Context, id int32) ([]GetAllC
 			&i.InstanceHost,
 			&i.InstancePort,
 			&i.DockerID,
-			&i.InstanceHashDomain,
-			&i.InstanceRenewable,
 		); err != nil {
 			return nil, err
 		}
@@ -513,28 +521,6 @@ func (q *Queries) GetChallAttachments(ctx context.Context, challID int32) ([]str
 		return nil, err
 	}
 	return items, nil
-}
-
-const getChallDockerConfig = `-- name: GetChallDockerConfig :one
-SELECT chall_id, image, compose, hash_domain, lifetime, renewable, envs, max_memory, max_cpu FROM docker_configs WHERE chall_id = $1
-`
-
-// Retrieve Docker configuration for a challenge
-func (q *Queries) GetChallDockerConfig(ctx context.Context, challID int32) (DockerConfig, error) {
-	row := q.queryRow(ctx, q.getChallDockerConfigStmt, getChallDockerConfig, challID)
-	var i DockerConfig
-	err := row.Scan(
-		&i.ChallID,
-		&i.Image,
-		&i.Compose,
-		&i.HashDomain,
-		&i.Lifetime,
-		&i.Renewable,
-		&i.Envs,
-		&i.MaxMemory,
-		&i.MaxCpu,
-	)
-	return i, err
 }
 
 const getChallengeSolves = `-- name: GetChallengeSolves :many
@@ -1706,12 +1692,23 @@ SET
   tags = COALESCE($5, tags),
   instance_type = COALESCE($6, instance_type),
   hidden = COALESCE($7, hidden),
+  
   max_points = COALESCE($8, max_points),
   score_type = COALESCE($9, score_type),
+  
   host = COALESCE($10, host),
   port = COALESCE($11, port),
-  conn_type = COALESCE($12, conn_type)
-WHERE id = $13
+  conn_type = COALESCE($12, conn_type),
+  hash_domain = COALESCE($13, hash_domain),
+  
+  image = COALESCE($14, image),
+  compose = COALESCE($15, compose),
+  lifetime = COALESCE($16, lifetime),
+  renewable = COALESCE($17, renewable),
+  envs = COALESCE($18, envs),
+  max_memory = COALESCE($19, max_memory),
+  max_cpu = COALESCE($20, max_cpu)
+WHERE id = $21
 `
 
 type UpdateChallengeParams struct {
@@ -1727,10 +1724,18 @@ type UpdateChallengeParams struct {
 	Host         sql.NullString   `json:"host"`
 	Port         sql.NullInt32    `json:"port"`
 	ConnType     NullConnType     `json:"conn_type"`
+	HashDomain   sql.NullBool     `json:"hash_domain"`
+	Image        sql.NullString   `json:"image"`
+	Compose      sql.NullString   `json:"compose"`
+	Lifetime     sql.NullInt32    `json:"lifetime"`
+	Renewable    sql.NullBool     `json:"renewable"`
+	Envs         sql.NullString   `json:"envs"`
+	MaxMemory    sql.NullInt32    `json:"max_memory"`
+	MaxCpu       sql.NullString   `json:"max_cpu"`
 	ChallID      int32            `json:"chall_id"`
 }
 
-// Updates the challenge with the given ID
+// Updates the challenge from the given ID
 func (q *Queries) UpdateChallenge(ctx context.Context, arg UpdateChallengeParams) error {
 	_, err := q.exec(ctx, q.updateChallengeStmt, updateChallenge,
 		arg.Name,
@@ -1745,6 +1750,14 @@ func (q *Queries) UpdateChallenge(ctx context.Context, arg UpdateChallengeParams
 		arg.Host,
 		arg.Port,
 		arg.ConnType,
+		arg.HashDomain,
+		arg.Image,
+		arg.Compose,
+		arg.Lifetime,
+		arg.Renewable,
+		arg.Envs,
+		arg.MaxMemory,
+		arg.MaxCpu,
 		arg.ChallID,
 	)
 	return err
@@ -1762,48 +1775,6 @@ type UpdateChallengesCategoryParams struct {
 // update category name in challenges table
 func (q *Queries) UpdateChallengesCategory(ctx context.Context, arg UpdateChallengesCategoryParams) error {
 	_, err := q.exec(ctx, q.updateChallengesCategoryStmt, updateChallengesCategory, arg.NewCategory, arg.OldCategory)
-	return err
-}
-
-const updateDockerConfigs = `-- name: UpdateDockerConfigs :exec
-UPDATE docker_configs
-SET
-  image = COALESCE($1, image),
-  compose = COALESCE($2, compose),
-  hash_domain = COALESCE($3, hash_domain),
-  lifetime = COALESCE($4, lifetime),
-  renewable = COALESCE($5, renewable),
-  envs = COALESCE($6, envs),
-  max_memory = COALESCE($7, max_memory),
-  max_cpu = COALESCE($8, max_cpu)
-WHERE chall_id = $9
-`
-
-type UpdateDockerConfigsParams struct {
-	Image      sql.NullString `json:"image"`
-	Compose    sql.NullString `json:"compose"`
-	HashDomain sql.NullBool   `json:"hash_domain"`
-	Lifetime   sql.NullInt32  `json:"lifetime"`
-	Renewable  sql.NullBool   `json:"renewable"`
-	Envs       sql.NullString `json:"envs"`
-	MaxMemory  sql.NullInt32  `json:"max_memory"`
-	MaxCpu     sql.NullString `json:"max_cpu"`
-	ChallID    int32          `json:"chall_id"`
-}
-
-// Updates the Docker configurations for the challenge with the given ID
-func (q *Queries) UpdateDockerConfigs(ctx context.Context, arg UpdateDockerConfigsParams) error {
-	_, err := q.exec(ctx, q.updateDockerConfigsStmt, updateDockerConfigs,
-		arg.Image,
-		arg.Compose,
-		arg.HashDomain,
-		arg.Lifetime,
-		arg.Renewable,
-		arg.Envs,
-		arg.MaxMemory,
-		arg.MaxCpu,
-		arg.ChallID,
-	)
 	return err
 }
 

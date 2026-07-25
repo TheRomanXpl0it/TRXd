@@ -50,18 +50,26 @@ func nullConnType(src *sqlc.ConnType) sqlc.NullConnType {
 	return sqlc.NullConnType{ConnType: *src, Valid: true}
 }
 
-func IsChallEmpty(data *Data) bool {
-	if data.Name == "" && data.Category == "" && data.Description == nil && data.Authors == nil &&
-		data.Tags == nil && data.InstanceType == nil && data.Hidden == nil && data.MaxPoints == nil &&
-		data.ScoreType == nil && data.Host == nil && data.Port == nil && data.ConnType == nil {
+func nullStringSlice(src *[]string) []string {
+	if src == nil {
+		return nil
+	}
+	return *src
+}
+
+func IsChallInstanceInfoEmpty(data *Data) bool {
+	if data.Image == nil && data.Compose == nil && data.Lifetime == nil && data.Renewable == nil &&
+		data.Envs == nil && data.MaxMemory == nil && data.MaxCpu == nil {
 		return true
 	}
 	return false
 }
 
-func IsDockerConfigsEmpty(data *Data) bool {
-	if data.Image == nil && data.Compose == nil && data.HashDomain == nil && data.Lifetime == nil &&
-		data.Renewable == nil && data.Envs == nil && data.MaxMemory == nil && data.MaxCpu == nil {
+func IsChallEmpty(data *Data) bool {
+	if data.Name == "" && data.Category == "" && data.Description == nil && data.Authors == nil &&
+		data.Tags == nil && data.InstanceType == nil && data.Hidden == nil && data.MaxPoints == nil &&
+		data.ScoreType == nil && data.Host == nil && data.Port == nil && data.ConnType == nil &&
+		data.HashDomain == nil && IsChallInstanceInfoEmpty(data) {
 		return true
 	}
 	return false
@@ -72,64 +80,43 @@ func UpdateChallenge(ctx context.Context, data *Data) error {
 		return fmt.Errorf("missing challenge ID")
 	}
 
+	if IsChallEmpty(data) {
+		return nil
+	}
+
 	challParams := sqlc.UpdateChallengeParams{
 		ChallID:      *data.ChallID,
 		Name:         sql.NullString{String: data.Name, Valid: data.Name != ""},
 		Category:     sql.NullString{String: data.Category, Valid: data.Category != ""},
 		Description:  nullString(data.Description),
+		Authors:      nullStringSlice(data.Authors),
+		Tags:         nullStringSlice(data.Tags),
 		InstanceType: nullInstanceType(data.InstanceType),
 		Hidden:       nullBool(data.Hidden),
-		MaxPoints:    nullInt32(data.MaxPoints),
-		ScoreType:    nullScoreType(data.ScoreType),
-		Host:         nullString(data.Host),
-		Port:         nullInt32(data.Port),
-		ConnType:     nullConnType(data.ConnType),
-	}
 
-	if data.Authors != nil {
-		challParams.Authors = *data.Authors
-	}
-	if data.Tags != nil {
-		challParams.Tags = *data.Tags
-	}
+		MaxPoints: nullInt32(data.MaxPoints),
+		ScoreType: nullScoreType(data.ScoreType),
 
-	dockerParams := sqlc.UpdateDockerConfigsParams{
-		ChallID:    *data.ChallID,
-		Image:      nullString(data.Image),
-		Compose:    nullString(data.Compose),
+		Host:       nullString(data.Host),
+		Port:       nullInt32(data.Port),
+		ConnType:   nullConnType(data.ConnType),
 		HashDomain: nullBool(data.HashDomain),
-		Lifetime:   nullInt32(data.Lifetime),
-		Renewable:  nullBool(data.Renewable),
-		Envs:       nullString(data.Envs),
-		MaxMemory:  nullInt32(data.MaxMemory),
-		MaxCpu:     nullString(data.MaxCpu),
+
+		Image:     nullString(data.Image),
+		Compose:   nullString(data.Compose),
+		Lifetime:  nullInt32(data.Lifetime),
+		Renewable: nullBool(data.Renewable),
+		Envs:      nullString(data.Envs),
+		MaxMemory: nullInt32(data.MaxMemory),
+		MaxCpu:    nullString(data.MaxCpu),
 	}
 
-	tx, err := db.BeginTx(ctx)
+	err := db.Sql.UpdateChallenge(ctx, challParams)
 	if err != nil {
-		return fmt.Errorf("failed to begin transaction: %w", err)
-	}
-	defer db.Rollback(tx)
-	queries := db.Sql.WithTx(tx)
-
-	if !IsChallEmpty(data) {
-		err = queries.UpdateChallenge(ctx, challParams)
-		if err != nil {
-			return err
-		}
+		return err
 	}
 
-	if !IsDockerConfigsEmpty(data) {
-		err = queries.UpdateDockerConfigs(ctx, dockerParams)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return fmt.Errorf("failed to commit transaction: %w", err)
-	}
+	// TODO: no more transaction, so no more errors
 
 	return nil
 }

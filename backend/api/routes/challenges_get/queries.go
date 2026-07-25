@@ -7,17 +7,6 @@ import (
 	"trxd/db/sqlc"
 )
 
-type DockerConfig struct {
-	Image      string  `json:"image"`
-	Compose    string  `json:"compose"`
-	HashDomain *bool   `json:"hash_domain"`
-	Lifetime   *int    `json:"lifetime"`
-	Renewable  *bool   `json:"renewable"`
-	Envs       *string `json:"envs"`
-	MaxMemory  *int    `json:"max_memory"`
-	MaxCpu     *string `json:"max_cpu"`
-}
-
 type Chall struct {
 	SolvesList []sqlc.GetChallengeSolvesRow `json:"solves_list"`
 
@@ -33,10 +22,18 @@ type Chall struct {
 	Host         *string            `json:"host,omitempty"`
 	Port         *int32             `json:"port,omitempty"`
 	ConnType     *sqlc.ConnType     `json:"conn_type,omitempty"`
+	HashDomain   *bool              `json:"hash_domain,omitempty"`
 
-	Attachments  *[]string                      `json:"attachments,omitempty"`
-	Flags        *[]sqlc.GetFlagsByChallengeRow `json:"flags,omitempty"`
-	DockerConfig *DockerConfig                  `json:"docker_config,omitempty"`
+	Attachments *[]string                      `json:"attachments,omitempty"`
+	Flags       *[]sqlc.GetFlagsByChallengeRow `json:"flags,omitempty"`
+
+	Image     *string `json:"image,omitempty"`
+	Compose   *string `json:"compose,omitempty"`
+	Lifetime  *int    `json:"lifetime,omitempty"`
+	Renewable *bool   `json:"renewable,omitempty"`
+	Envs      *string `json:"envs,omitempty"`
+	MaxMemory *int    `json:"max_memory,omitempty"`
+	MaxCpu    *string `json:"max_cpu,omitempty"`
 }
 
 func GetChallengeSolves(ctx context.Context, challengeID int32) ([]sqlc.GetChallengeSolvesRow, error) {
@@ -115,6 +112,14 @@ func GetChallenge(ctx context.Context, id int32, uid int32, tid int32, author bo
 	chall.Host = &challenge.Host
 	chall.Port = &challenge.Port
 	chall.ConnType = &challenge.ConnType
+	chall.HashDomain = &challenge.HashDomain
+	chall.Image = &challenge.Image
+	chall.Compose = &challenge.Compose
+	chall.Lifetime = new(int(challenge.Lifetime))
+	chall.Renewable = &challenge.Renewable
+	chall.Envs = &challenge.Envs
+	chall.MaxMemory = new(int(challenge.MaxMemory))
+	chall.MaxCpu = &challenge.MaxCpu
 
 	chall.Attachments, err = GetChallAttachments(ctx, id)
 	if err != nil {
@@ -129,25 +134,6 @@ func GetChallenge(ctx context.Context, id int32, uid int32, tid int32, author bo
 	chall.Flags = &[]sqlc.GetFlagsByChallengeRow{}
 	if flags != nil {
 		chall.Flags = &flags
-	}
-
-	dockerConfig, err := db.Sql.GetChallDockerConfig(ctx, challenge.ID)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return &chall, nil
-		}
-		return nil, err
-	}
-
-	chall.DockerConfig = &DockerConfig{
-		Image:      dockerConfig.Image,
-		Compose:    dockerConfig.Compose,
-		HashDomain: &dockerConfig.HashDomain,
-		Lifetime:   new(int(dockerConfig.Lifetime)),
-		Envs:       &dockerConfig.Envs,
-		MaxMemory:  new(int(dockerConfig.MaxMemory)),
-		MaxCpu:     &dockerConfig.MaxCpu,
-		Renewable:  &dockerConfig.Renewable,
 	}
 
 	return &chall, nil

@@ -103,39 +103,3 @@ CREATE TRIGGER tr_integrity_chall_default_points
 BEFORE INSERT ON challenges
 FOR EACH ROW
 EXECUTE FUNCTION fn_integrity_chall_default_points();
-
-
--- tr_integrity_chall_docker_configs_add
-
-CREATE OR REPLACE FUNCTION fn_integrity_chall_docker_configs_add()
-RETURNS TRIGGER AS $$
-BEGIN
-  INSERT INTO docker_configs (chall_id) VALUES (NEW.id);
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER tr_integrity_chall_docker_configs_add
-AFTER INSERT ON challenges
-FOR EACH ROW
-WHEN (NEW.instance_type != 'Static')
-EXECUTE FUNCTION fn_integrity_chall_docker_configs_add();
-
-
--- tr_integrity_chall_docker_configs_add_on_update
-
-CREATE OR REPLACE FUNCTION fn_integrity_chall_docker_configs_add_on_update()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NOT EXISTS(SELECT * FROM docker_configs WHERE chall_id = NEW.id) THEN
-    INSERT INTO docker_configs (chall_id) VALUES (NEW.id);
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER tr_integrity_chall_docker_configs_add_on_update
-AFTER UPDATE ON challenges
-FOR EACH ROW
-WHEN ((OLD.instance_type = 'Static') AND (NEW.instance_type != 'Static'))
-EXECUTE FUNCTION fn_integrity_chall_docker_configs_add_on_update();

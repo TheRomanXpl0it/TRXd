@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"trxd/db"
-	"trxd/db/sqlc"
 
 	"trxd/utils/log"
 )
@@ -42,7 +41,7 @@ func BroadcastWebhook(url string, body any) error {
 	return nil
 }
 
-func BroadcastFirstBlood(ctx context.Context, challenge *sqlc.Challenge, uid int32) {
+func BroadcastFirstBlood(ctx context.Context, challenge *db.Chall, uid int32) {
 	conf, err := db.GetConfig(ctx, "discord-webhook")
 	if err != nil {
 		log.Error("Failed to fetch webhook url:", "err", err)

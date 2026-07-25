@@ -17,7 +17,6 @@ BEGIN
   DELETE FROM instances;
   DELETE FROM flags;
   DELETE FROM attachments;
-  DELETE FROM docker_configs;
   DELETE FROM challenges;
   DELETE FROM categories;
   DELETE FROM badges;
@@ -57,8 +56,8 @@ BEGIN
   INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-3', 'cat-1', 'TEST chall-3 DESC', ARRAY['author1'], ARRAY['tag-3'], 'Container', 500, 'Dynamic', 'chall-3.test.com', 1337, 'HTTP', false);
   INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, conn_type, hidden) VALUES ('chall-4', 'cat-1', 'TEST chall-4 DESC', ARRAY['author2'], ARRAY['tag-4'], 'Compose', 500, 'Dynamic', 'HTTP', false);
   INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type) VALUES ('chall-5', 'cat-2', 'TEST chall-5 DESC', ARRAY['author3'], ARRAY['tag-5'], 'Static', 500, 'Static');
-  UPDATE docker_configs SET image='echo-server:latest', renewable=TRUE, hash_domain=TRUE WHERE chall_id=(SELECT id FROM challenges WHERE name='chall-3');
-  UPDATE docker_configs SET compose='
+  UPDATE challenges SET image='echo-server:latest', renewable=TRUE, hash_domain=TRUE WHERE name='chall-3';
+  UPDATE challenges SET compose='
 services:
   chall:
     image: echo-server:latest
@@ -69,7 +68,7 @@ services:
       - ECHO_MESSAGE=Hello from app
       - INSTANCE_PORT=${INSTANCE_PORT}
       - INSTANCE_DOMAIN=${INSTANCE_DOMAIN}
-    ', hash_domain=TRUE WHERE chall_id=(SELECT id FROM challenges WHERE name='chall-4');
+    ', hash_domain=TRUE WHERE name='chall-4';
   INSERT INTO flags (flag, chall_id) VALUES ('flag{test-1}', (SELECT id FROM challenges WHERE name='chall-1'));
   INSERT INTO flags (flag, chall_id, regex) VALUES ('flag\{test-[a-z]{2}\}', (SELECT id FROM challenges WHERE name='chall-1'), true);
   INSERT INTO flags (flag, chall_id) VALUES ('flag{test-2}', (SELECT id FROM challenges WHERE name='chall-2'));
@@ -352,20 +351,6 @@ BEGIN
   PERFORM assert(COUNT(s)=3, 'delete_user_removes_submissions') FROM submissions s WHERE s.status='Correct';
   PERFORM assert(score=0, 'teamB_score_zero_after_user_delete') FROM teams WHERE name='B';
 
-  -- checks that 'chall-3' and 'chall-4' have their configs created
-  PERFORM assert(count(d)=1, 'chall3_config_exists') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-3');
-  PERFORM assert(count(d)=1, 'chall4_config_exists') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-4');
-
-  -- checks that docker configs are created on instance type update and not duplicated
-  INSERT INTO challenges (name, category, description, instance_type, max_points, score_type) VALUES ('chall-test', 'cat-1', 'TEST', 'Static', 500, 'Dynamic');
-  PERFORM assert(count(d)=0, 'chall_test_no_config_initial') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
-  UPDATE challenges SET instance_type='Container' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
-  PERFORM assert(count(d)=1, 'chall_test_config_created_on_instance_type_container') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
-  UPDATE challenges SET instance_type='Static' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
-  PERFORM assert(count(d)=1, 'chall_test_config_not_duplicated_normal') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
-  UPDATE challenges SET instance_type='Compose' WHERE id=(SELECT id FROM challenges WHERE name='chall-test');
-  PERFORM assert(count(d)=1, 'chall_test_config_not_duplicated_compose') FROM docker_configs d WHERE d.chall_id=(SELECT id FROM challenges WHERE name='chall-test');
-
   -- checks for the first bloods does not change on already blooded challs
   PERFORM assert(count(s)=3, 'first_blood_count_initial') FROM submissions s WHERE s.first_blood=TRUE;
   INSERT INTO users (name, email, password_hash, password_salt, role, team_id) VALUES ('c', 'c@c.c',
@@ -421,7 +406,6 @@ SELECT * FROM submissions;
 SELECT * FROM instances;
 SELECT * FROM flags;
 SELECT * FROM attachments;
-SELECT * FROM docker_configs;
 SELECT * FROM challenges;
 SELECT * FROM categories;
 SELECT * FROM badges;

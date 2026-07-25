@@ -19,7 +19,3 @@ SELECT
     (a.hash || '/' || a.name)::TEXT AS attachments
   FROM attachments a
   WHERE chall_id = $1;
-
--- name: GetChallDockerConfig :one
--- Retrieve Docker configuration for a challenge
-SELECT * FROM docker_configs WHERE chall_id = $1;

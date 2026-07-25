@@ -18,16 +18,16 @@ type Data struct {
 }
 
 func canRenewInstance(c *fiber.Ctx, chall *db.Chall, role sqlc.UserRole, tid int32, challID int32) (bool, error) {
-	if chall.Info.Hidden &&
+	if chall.Hidden &&
 		!utils.In(role, []sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}) {
 		return false, utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
 	}
 
-	if chall.Info.InstanceType == sqlc.InstanceTypeStatic {
+	if chall.InstanceType == sqlc.InstanceTypeStatic {
 		return false, utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
 	}
 
-	if !chall.DockerConfig.Renewable {
+	if !chall.Renewable {
 		return false, utils.Error(c, fiber.StatusBadRequest, consts.ChallengeInstanceNotRenewable)
 	}
 
@@ -73,7 +73,7 @@ func Route(c *fiber.Ctx) error {
 		return err
 	}
 
-	chall, err := db.GetChallenge(c.Context(), *data.ChallID)
+	chall, err := db.GetChallengeByID(c.Context(), *data.ChallID)
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingChallenge, err)
 	}
@@ -86,10 +86,10 @@ func Route(c *fiber.Ctx) error {
 		return err
 	}
 
-	if chall.DockerConfig.Lifetime == 0 {
+	if chall.Lifetime == 0 {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.MissingLifetime, errors.New(consts.MissingLifetime))
 	}
-	lifetime := time.Second * time.Duration(chall.DockerConfig.Lifetime.(int64))
+	lifetime := time.Second * time.Duration(chall.Lifetime)
 	expires_at := time.Now().Add(lifetime)
 
 	err = instancer.UpdateInstanceExpire(c.Context(), tid, *data.ChallID, expires_at)

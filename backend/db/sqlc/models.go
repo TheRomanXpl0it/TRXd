@@ -259,6 +259,14 @@ type Challenge struct {
 	Host         string       `json:"host"`
 	Port         int32        `json:"port"`
 	ConnType     ConnType     `json:"conn_type"`
+	HashDomain   bool         `json:"hash_domain"`
+	Image        string       `json:"image"`
+	Compose      string       `json:"compose"`
+	Lifetime     int32        `json:"lifetime"`
+	Renewable    bool         `json:"renewable"`
+	Envs         string       `json:"envs"`
+	MaxMemory    int32        `json:"max_memory"`
+	MaxCpu       string       `json:"max_cpu"`
 }
 
 type Config struct {
@@ -269,18 +277,6 @@ type Config struct {
 	Category    string `json:"category"`
 	Description string `json:"description"`
 	Secret      bool   `json:"secret"`
-}
-
-type DockerConfig struct {
-	ChallID    int32  `json:"chall_id"`
-	Image      string `json:"image"`
-	Compose    string `json:"compose"`
-	HashDomain bool   `json:"hash_domain"`
-	Lifetime   int32  `json:"lifetime"`
-	Renewable  bool   `json:"renewable"`
-	Envs       string `json:"envs"`
-	MaxMemory  int32  `json:"max_memory"`
-	MaxCpu     string `json:"max_cpu"`
 }
 
 type Flag struct {

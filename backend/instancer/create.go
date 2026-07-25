@@ -21,7 +21,14 @@ type CreateInstanceParams struct {
 	ConnType     sqlc.ConnType
 	InternalPort *int32
 	InstanceType sqlc.InstanceType
-	DockerConfig *sqlc.GetDockerConfigsByIDRow
+	HashDomain   bool
+
+	Image     string
+	Compose   string
+	Lifetime  int32
+	Envs      string
+	MaxMemory int32
+	MaxCpu    string
 }
 
 type CreateInstanceResult struct {
@@ -46,7 +53,7 @@ func recoverBrokenInstance(ctx context.Context, tid int32, challID int32, docker
 }
 
 func makeLabels(info *infos.InstanceInfo, p *CreateInstanceParams) {
-	if !p.DockerConfig.HashDomain {
+	if !p.HashDomain {
 		return
 	}
 
@@ -92,8 +99,7 @@ func makeLabels(info *infos.InstanceInfo, p *CreateInstanceParams) {
 	}
 }
 
-func spawnInstance(ctx context.Context, info *infos.InstanceInfo,
-	conf *sqlc.GetDockerConfigsByIDRow, instanceType sqlc.InstanceType) (string, error) {
+func spawnInstance(ctx context.Context, info *infos.InstanceInfo, instanceType sqlc.InstanceType, image string, compose string) (string, error) {
 
 	var dockerID string
 	var err error
@@ -104,10 +110,10 @@ func spawnInstance(ctx context.Context, info *infos.InstanceInfo,
 		info.NetID = "trxd-shared-external"
 	}
 
-	if instanceType == sqlc.InstanceTypeContainer && conf.Image != "" {
-		dockerID, err = containers.CreateContainer(ctx, info, conf.Image)
-	} else if instanceType == sqlc.InstanceTypeCompose && conf.Compose != "" {
-		dockerID, err = composes.CreateCompose(ctx, info, conf.Compose)
+	if instanceType == sqlc.InstanceTypeContainer && image != "" {
+		dockerID, err = containers.CreateContainer(ctx, info, image)
+	} else if instanceType == sqlc.InstanceTypeCompose && compose != "" {
+		dockerID, err = composes.CreateCompose(ctx, info, compose)
 	} else {
 		return "", errors.New("[no image or compose]")
 	}
@@ -136,10 +142,10 @@ func CreateInstance(ctx context.Context, p *CreateInstanceParams) (*CreateInstan
 
 	log.Info("Creating instance:", "chall", p.ChallID, "team", p.Tid)
 
-	lifetime := time.Second * time.Duration(p.DockerConfig.Lifetime.(int64))
+	lifetime := time.Second * time.Duration(p.Lifetime)
 	expires_at := time.Now().Add(lifetime)
 
-	creationInfo, err := dbCreateInstance(ctx, p.Tid, p.ChallID, expires_at, p.DockerConfig.HashDomain)
+	creationInfo, err := dbCreateInstance(ctx, p.Tid, p.ChallID, expires_at, p.HashDomain)
 	if err != nil {
 		return nil, err
 	}
@@ -151,11 +157,11 @@ func CreateInstance(ctx context.Context, p *CreateInstanceParams) (*CreateInstan
 	instanceInfo := &infos.InstanceInfo{
 		Name:         fmt.Sprintf("chall_%d_%d", p.ChallID, p.Tid),
 		Domain:       creationInfo.Host,
-		UseDomain:    p.DockerConfig.HashDomain,
+		UseDomain:    p.HashDomain,
 		InternalPort: p.InternalPort,
-		Envs:         p.DockerConfig.Envs,
-		MaxMemory:    int32(p.DockerConfig.MaxMemory.(int64)),
-		MaxCpu:       p.DockerConfig.MaxCpu.(string),
+		Envs:         p.Envs,
+		MaxMemory:    p.MaxMemory,
+		MaxCpu:       p.MaxCpu,
 	}
 
 	if creationInfo.Port.Valid {
@@ -164,7 +170,7 @@ func CreateInstance(ctx context.Context, p *CreateInstanceParams) (*CreateInstan
 
 	makeLabels(instanceInfo, p)
 
-	dockerID, err = spawnInstance(ctx, instanceInfo, p.DockerConfig, p.InstanceType)
+	dockerID, err = spawnInstance(ctx, instanceInfo, p.InstanceType, p.Image, p.Compose)
 	if err != nil {
 		return nil, err
 	}

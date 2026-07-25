@@ -8,29 +8,30 @@ import (
 )
 
 type Chall struct {
-	ID                 int32          `json:"id"`
-	Name               string         `json:"name"`
-	Category           string         `json:"category"`
-	Description        string         `json:"description"`
-	Authors            []string       `json:"authors"`
-	Instance           bool           `json:"instance"`
-	Hidden             bool           `json:"hidden"`
-	Points             int            `json:"points"`
-	Solves             int            `json:"solves"`
-	Solved             bool           `json:"solved"`
-	FirstBlood         bool           `json:"first_blood"`
-	Attachments        []string       `json:"attachments"`
-	Tags               []string       `json:"tags"`
-	Host               string         `json:"host"`
-	Port               int            `json:"port"`
-	ConnType           sqlc.ConnType  `json:"conn_type"`
-	MaxPoints          int            `json:"max_points"`
-	ScoreType          sqlc.ScoreType `json:"score_type"`
-	Timeout            int            `json:"timeout"`
-	InstanceHost       string         `json:"instance_host,omitempty"`
-	InstancePort       int            `json:"instance_port,omitempty"`
-	InstanceHashDomain *bool          `json:"instance_hash_domain,omitempty"`
-	InstanceRenewable  *bool          `json:"instance_renewable,omitempty"`
+	ID          int32          `json:"id"`
+	Name        string         `json:"name"`
+	Category    string         `json:"category"`
+	Description string         `json:"description"`
+	Authors     []string       `json:"authors"`
+	Instance    bool           `json:"instance"`
+	Hidden      bool           `json:"hidden"`
+	Points      int            `json:"points"`
+	Solves      int            `json:"solves"`
+	Solved      bool           `json:"solved"`
+	FirstBlood  bool           `json:"first_blood"`
+	Attachments []string       `json:"attachments"`
+	Tags        []string       `json:"tags"`
+	Host        string         `json:"host"`
+	Port        int            `json:"port"`
+	ConnType    sqlc.ConnType  `json:"conn_type"`
+	MaxPoints   int            `json:"max_points"`
+	ScoreType   sqlc.ScoreType `json:"score_type"`
+	HashDomain  bool           `json:"hash_domain"`
+	Renewable   bool           `json:"renewable"`
+
+	Timeout      int    `json:"timeout"`
+	InstanceHost string `json:"instance_host,omitempty"`
+	InstancePort int    `json:"instance_port,omitempty"`
 }
 
 func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Chall, error) {
@@ -64,6 +65,8 @@ func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Ch
 			ConnType:    challenge.ConnType,
 			MaxPoints:   int(challenge.MaxPoints),
 			ScoreType:   challenge.ScoreType,
+			HashDomain:  challenge.HashDomain,
+			Renewable:   challenge.Renewable,
 			Timeout:     0,
 		}
 
@@ -87,13 +90,6 @@ func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Ch
 			if challenge.InstancePort.Valid {
 				chall.InstancePort = int(challenge.InstancePort.Int32)
 			}
-		}
-
-		if challenge.InstanceHashDomain.Valid {
-			chall.InstanceHashDomain = &challenge.InstanceHashDomain.Bool
-		}
-		if challenge.InstanceRenewable.Valid {
-			chall.InstanceRenewable = &challenge.InstanceRenewable.Bool
 		}
 
 		challsData = append(challsData, chall)

@@ -42,7 +42,7 @@ func Route(c *fiber.Ctx) error {
 		return err
 	}
 
-	chall, err := db.GetChallenge(c.Context(), *data.ChallID)
+	chall, err := db.GetChallengeByID(c.Context(), *data.ChallID)
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingChallenge, err)
 	}
@@ -51,11 +51,11 @@ func Route(c *fiber.Ctx) error {
 	}
 
 	role := c.Locals("role").(sqlc.UserRole)
-	if chall.Info.Hidden && !utils.In(role,
+	if chall.Hidden && !utils.In(role,
 		[]sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}) {
 		return utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
 	}
-	if chall.Info.InstanceType == sqlc.InstanceTypeStatic {
+	if chall.InstanceType == sqlc.InstanceTypeStatic {
 		return utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
 	}
 

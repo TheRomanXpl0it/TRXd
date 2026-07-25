@@ -25,19 +25,26 @@ type InstanceInfo struct {
 }
 
 func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, error) {
-	if chall.DockerConfig.Lifetime == 0 {
+	if chall.Lifetime == 0 {
 		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.MissingLifetime, errors.New(consts.MissingLifetime))
 	}
 	params := &instancer.CreateInstanceParams{
 		Tid:          tid,
-		ChallID:      chall.Info.ID,
-		ConnType:     chall.Info.ConnType,
-		InstanceType: chall.Info.InstanceType,
-		DockerConfig: chall.DockerConfig,
+		ChallID:      chall.ID,
+		ConnType:     chall.ConnType,
+		InstanceType: chall.InstanceType,
+
+		Image:      chall.Image,
+		Compose:    chall.Compose,
+		HashDomain: chall.HashDomain,
+		Lifetime:   chall.Lifetime,
+		Envs:       chall.Envs,
+		MaxMemory:  chall.MaxMemory,
+		MaxCpu:     chall.MaxCpu,
 	}
 
-	if chall.Info.Port != 0 {
-		params.InternalPort = &chall.Info.Port
+	if chall.Port != 0 {
+		params.InternalPort = &chall.Port
 	}
 
 	res, err := instancer.CreateInstance(c.Context(), params)
@@ -56,7 +63,7 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, er
 		Host:       res.Host,
 		Port:       res.Port,
 		Timeout:    max(int(time.Until(res.Expiration).Seconds()), 0),
-		HashDomain: chall.DockerConfig.HashDomain,
+		HashDomain: chall.HashDomain,
 	}, nil
 }
 
@@ -92,7 +99,7 @@ func Route(c *fiber.Ctx) error {
 		return err
 	}
 
-	chall, err := db.GetChallenge(c.Context(), *data.ChallID)
+	chall, err := db.GetChallengeByID(c.Context(), *data.ChallID)
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingChallenge, err)
 	}
@@ -100,11 +107,11 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
 	}
 
-	if chall.Info.Hidden && !utils.In(role,
+	if chall.Hidden && !utils.In(role,
 		[]sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}) {
 		return utils.Error(c, fiber.StatusNotFound, consts.ChallengeNotFound)
 	}
-	if chall.Info.InstanceType == sqlc.InstanceTypeStatic {
+	if chall.InstanceType == sqlc.InstanceTypeStatic {
 		return utils.Error(c, fiber.StatusBadRequest, consts.ChallengeNotInstanciable)
 	}
 

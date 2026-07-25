@@ -1,20 +1,34 @@
 -- name: GetChallengeByID :one
 -- Retrieve a challenge by its ID
-SELECT * FROM challenges WHERE id = $1;
-
--- name: GetDockerConfigsByID :one
--- Retrieve Docker configurations by challenge ID
 SELECT
+  id,
+  name,
+  category,
+  description,
+  authors,
+  tags,
+  instance_type,
+  hidden,
+
+  max_points,
+  score_type,
+  points,
+  solves,
+
+  host,
+  port,
+  conn_type,
+  hash_domain,
+
   image,
   compose,
-  hash_domain,
+  COALESCE(NULLIF(lifetime, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-lifetime'))::INTEGER AS lifetime,
   renewable,
   envs,
-  COALESCE(NULLIF(lifetime, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-lifetime')) AS lifetime,
-  COALESCE(NULLIF(max_memory, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-max-memory')) AS max_memory,
-  COALESCE(NULLIF(max_cpu, ''), (SELECT value FROM configs WHERE key='instance-max-cpu')) AS max_cpu
-FROM docker_configs
-WHERE chall_id = $1;
+  COALESCE(NULLIF(max_memory, 0), (SELECT value::INTEGER FROM configs WHERE key='instance-max-memory'))::INTEGER AS max_memory,
+  COALESCE(NULLIF(max_cpu, ''), (SELECT value FROM configs WHERE key='instance-max-cpu'))::TEXT AS max_cpu
+FROM challenges
+WHERE id = $1;
 
 -- name: GetHiddenAndAttachments :one
 -- Checks if a challenge is hidden

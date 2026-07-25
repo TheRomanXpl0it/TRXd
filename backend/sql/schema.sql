@@ -99,23 +99,18 @@ CREATE TABLE IF NOT EXISTS challenges (
   host TEXT NOT NULL DEFAULT '',
   port INTEGER NOT NULL CHECK (port >= 0 AND port <= 65535) DEFAULT 0,
   conn_type conn_type NOT NULL DEFAULT 'TCP',
+  hash_domain BOOLEAN NOT NULL DEFAULT FALSE, -- Use a hash to generate the domain (e.g., 00112233AABB.example.com)
 
-  FOREIGN KEY(category) REFERENCES categories(name),
-  PRIMARY KEY(id)
-);
-
-CREATE TABLE IF NOT EXISTS docker_configs (
-  chall_id INTEGER NOT NULL,
   image TEXT NOT NULL DEFAULT '', -- Docker image
   compose TEXT NOT NULL DEFAULT '', -- Docker Compose file
-  hash_domain BOOLEAN NOT NULL DEFAULT FALSE, -- Use a hash to generate the domain (e.g., 00112233AABB.example.com)
   lifetime INTEGER NOT NULL DEFAULT 0, -- Lifetime in seconds
   renewable BOOLEAN NOT NULL DEFAULT FALSE, -- Whether the instance can be renewed (reset the lifetime)
   envs TEXT NOT NULL DEFAULT '', -- Environment variables in JSON format
   max_memory INTEGER NOT NULL DEFAULT 0, -- Memory in MB (e.g., '512' for 512 MB)
   max_cpu VARCHAR(16) NOT NULL DEFAULT '', -- CPUs as float (e.g., '1.5' for 1.5 CPUs)
-  FOREIGN KEY(chall_id) REFERENCES challenges(id) ON DELETE CASCADE,
-  PRIMARY KEY(chall_id)
+
+  FOREIGN KEY(category) REFERENCES categories(name),
+  PRIMARY KEY(id)
 );
 
 CREATE TABLE IF NOT EXISTS attachments (

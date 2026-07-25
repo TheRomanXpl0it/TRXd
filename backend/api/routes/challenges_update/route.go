@@ -20,20 +20,22 @@ type Data struct {
 	Tags         *[]string          `json:"tags" validate:"omitempty,challenge_tags"`
 	InstanceType *sqlc.InstanceType `json:"instance_type" validate:"omitempty,challenge_instance_type"`
 	Hidden       *bool              `json:"hidden"`
-	MaxPoints    *int32             `json:"max_points" validate:"omitempty,challenge_max_points"`
-	ScoreType    *sqlc.ScoreType    `json:"score_type" validate:"omitempty,challenge_score_type"`
-	Host         *string            `json:"host"`
-	Port         *int32             `json:"port" validate:"omitempty,challenge_port"`
-	ConnType     *sqlc.ConnType     `json:"conn_type" validate:"omitempty,challenge_conn_type"`
 
-	Image      *string `json:"image"`
-	Compose    *string `json:"compose"`
-	HashDomain *bool   `json:"hash_domain"`
-	Lifetime   *int32  `json:"lifetime" validate:"omitempty,challenge_lifetime"`
-	Renewable  *bool   `json:"renewable"`
-	Envs       *string `json:"envs" validate:"omitempty,challenge_envs"`
-	MaxMemory  *int32  `json:"max_memory" validate:"omitempty,challenge_max_memory"`
-	MaxCpu     *string `json:"max_cpu" validate:"omitempty,challenge_max_cpu"`
+	MaxPoints *int32          `json:"max_points" validate:"omitempty,challenge_max_points"`
+	ScoreType *sqlc.ScoreType `json:"score_type" validate:"omitempty,challenge_score_type"`
+
+	Host       *string        `json:"host"`
+	Port       *int32         `json:"port" validate:"omitempty,challenge_port"`
+	ConnType   *sqlc.ConnType `json:"conn_type" validate:"omitempty,challenge_conn_type"`
+	HashDomain *bool          `json:"hash_domain"`
+
+	Image     *string `json:"image"`
+	Compose   *string `json:"compose"`
+	Lifetime  *int32  `json:"lifetime" validate:"omitempty,challenge_lifetime"`
+	Renewable *bool   `json:"renewable"`
+	Envs      *string `json:"envs" validate:"omitempty,challenge_envs"`
+	MaxMemory *int32  `json:"max_memory" validate:"omitempty,challenge_max_memory"`
+	MaxCpu    *string `json:"max_cpu" validate:"omitempty,challenge_max_cpu"`
 }
 
 // @Summary [Author+] Updates details of an existing challenge
@@ -59,7 +61,7 @@ func Route(c *fiber.Ctx) error {
 	if err != nil || !valid {
 		return err
 	}
-	if IsChallEmpty(&data) && IsDockerConfigsEmpty(&data) {
+	if IsChallEmpty(&data) {
 		return utils.Error(c, fiber.StatusBadRequest, consts.NoDataToUpdate)
 	}
 

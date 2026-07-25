@@ -61,6 +61,8 @@ definitions:
         type: string
       first_blood:
         type: boolean
+      hash_domain:
+        type: boolean
       hidden:
         type: boolean
       host:
@@ -69,14 +71,10 @@ definitions:
         type: integer
       instance:
         type: boolean
-      instance_hash_domain:
-        type: boolean
       instance_host:
         type: string
       instance_port:
         type: integer
-      instance_renewable:
-        type: boolean
       max_points:
         type: integer
       name:
@@ -85,6 +83,8 @@ definitions:
         type: integer
       port:
         type: integer
+      renewable:
+        type: boolean
       score_type:
         $ref: '#/definitions/sqlc.ScoreType'
       solved:
@@ -138,28 +138,42 @@ definitions:
         type: array
       category:
         type: string
+      compose:
+        type: string
       conn_type:
         $ref: '#/definitions/sqlc.ConnType'
       description:
         type: string
-      docker_config:
-        $ref: '#/definitions/challenges_get.DockerConfig'
+      envs:
+        type: string
       flags:
         items:
           $ref: '#/definitions/sqlc.GetFlagsByChallengeRow'
         type: array
+      hash_domain:
+        type: boolean
       hidden:
         type: boolean
       host:
         type: string
+      image:
+        type: string
       instance_type:
         $ref: '#/definitions/sqlc.InstanceType'
+      lifetime:
+        type: integer
+      max_cpu:
+        type: string
+      max_memory:
+        type: integer
       max_points:
         type: integer
       name:
         type: string
       port:
         type: integer
+      renewable:
+        type: boolean
       score_type:
         $ref: '#/definitions/sqlc.ScoreType'
       solves_list:
@@ -170,25 +184,6 @@ definitions:
         items:
           type: string
         type: array
-    type: object
-  challenges_get.DockerConfig:
-    properties:
-      compose:
-        type: string
-      envs:
-        type: string
-      hash_domain:
-        type: boolean
-      image:
-        type: string
-      lifetime:
-        type: integer
-      max_cpu:
-        type: string
-      max_memory:
-        type: integer
-      renewable:
-        type: boolean
     type: object
   challenges_hidden.Data:
     properties:
