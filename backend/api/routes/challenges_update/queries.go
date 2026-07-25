@@ -3,7 +3,7 @@ package challenges_update
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
 	"trxd/db"
 	"trxd/db/sqlc"
 )
@@ -77,7 +77,7 @@ func IsChallEmpty(data *Data) bool {
 
 func UpdateChallenge(ctx context.Context, data *Data) error {
 	if data.ChallID == nil {
-		return fmt.Errorf("missing challenge ID")
+		return errors.New("Missing challenge ID")
 	}
 
 	if IsChallEmpty(data) {
@@ -115,8 +115,6 @@ func UpdateChallenge(ctx context.Context, data *Data) error {
 	if err != nil {
 		return err
 	}
-
-	// TODO: no more transaction, so no more errors
 
 	return nil
 }

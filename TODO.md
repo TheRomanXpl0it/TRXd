@@ -1,6 +1,6 @@
 # TODO
+ - clean instancer
  - resolve TODOs left into the code
- - add a red drop if challenge is first blodded
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
@@ -10,11 +10,11 @@
  - check/fix challenge instance type (instead of Normal is now Static)
  - check/fix challenge instance type (before was called type, now is instance_type)
  - add Change Role (modal / dropdown or whatever) in another user (if the user is Player or Author) if the session user is Admin (refer to PATCH /api/users/role)
+ - add a red drop if challenge is first blodded (on the card) in the /challenges page
  - [/] Extra:
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 
 ## Ideas / Features
- - better log error/critical error (add line number and file name and function name or whatever)
  - add author only tags (private tags) for challenges
  - reclaimer python tests
  - split /challenges/:id into player and author endpoints

@@ -68,7 +68,7 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorSubmittingFlag, err)
 	}
 
-	if first_blood { // TODO: check role != player (it's already checkd in SubmitFlag tho)
+	if first_blood && role == sqlc.UserRolePlayer {
 		go discord.BroadcastFirstBlood(c.Context(), challenge, uid)
 	}
 

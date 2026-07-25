@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"runtime/debug"
 	"strings"
 	"time"
 	"trxd/api/middlewares"
@@ -11,10 +12,10 @@ import (
 	"trxd/api/routes/categories_delete"
 	"trxd/api/routes/categories_get"
 	"trxd/api/routes/categories_update"
-	"trxd/api/routes/challenges_all_get"
 	"trxd/api/routes/challenges_create"
 	"trxd/api/routes/challenges_delete"
 	"trxd/api/routes/challenges_get"
+	"trxd/api/routes/challenges_get_all"
 	"trxd/api/routes/challenges_hidden"
 	"trxd/api/routes/challenges_update"
 	"trxd/api/routes/configs_get"
@@ -30,8 +31,8 @@ import (
 	"trxd/api/routes/submissions_create"
 	"trxd/api/routes/submissions_delete"
 	"trxd/api/routes/submissions_get"
-	"trxd/api/routes/teams_all_get"
 	"trxd/api/routes/teams_get"
+	"trxd/api/routes/teams_get_all"
 	"trxd/api/routes/teams_join"
 	"trxd/api/routes/teams_join_get"
 	"trxd/api/routes/teams_password"
@@ -40,8 +41,8 @@ import (
 	"trxd/api/routes/teams_scoreboard_graph"
 	"trxd/api/routes/teams_search"
 	"trxd/api/routes/teams_update"
-	"trxd/api/routes/users_all_get"
 	"trxd/api/routes/users_get"
+	"trxd/api/routes/users_get_all"
 	"trxd/api/routes/users_info"
 	"trxd/api/routes/users_login"
 	"trxd/api/routes/users_logout"
@@ -124,7 +125,7 @@ func SetupFeatures(app *fiber.App) {
 				if r == nil {
 					return
 				}
-				log.Critical("Panic recovered:", "crit", r)
+				log.Critical("Panic recovered:", "crit", r, "stack", string(debug.Stack()))
 				_ = utils.Error(c, fiber.StatusInternalServerError, consts.InternalServerError)
 			}()
 			return c.Next()
@@ -186,7 +187,7 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 	api.Patch("/users/role", admin, users_role.Route)
 	api.Patch("/users/password", player, users_password.Route)
 	if !userMode {
-		api.Get("/users", noAuth, users_all_get.Route)
+		api.Get("/users", noAuth, users_get_all.Route)
 		api.Get("/users/search", author, users_search.Route)
 		api.Get("/users/:id", noAuth, users_get.Route)
 	}
@@ -198,7 +199,7 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 		api.Patch("/teams", player, team, teams_update.Route)
 		api.Patch("/teams/password", player, team, teams_password.Route)
 	}
-	api.Get("/teams", noAuth, teams_all_get.Route)
+	api.Get("/teams", noAuth, teams_get_all.Route)
 	api.Get("/teams/search", author, teams_search.Route)
 	api.Get("/teams/:id", noAuth, teams_get.Route)
 
@@ -211,7 +212,7 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 	api.Patch("/challenges", author, challenges_update.Route)
 	api.Patch("/challenges/hidden", author, challenges_hidden.Route)
 	api.Delete("/challenges", author, challenges_delete.Route)
-	api.Get("/challenges", player, team, start, challenges_all_get.Route)
+	api.Get("/challenges", player, team, start, challenges_get_all.Route)
 	api.Get("/challenges/:id", player, team, start, challenges_get.Route)
 
 	api.Post("/instances", player, team, start, instances_create.Route)

@@ -3,6 +3,7 @@ package composes
 import (
 	"context"
 	"encoding/json"
+	"strconv"
 	"strings"
 	"trxd/instancer/infos"
 
@@ -67,7 +68,19 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 		}
 
 		if s.Name == "chall" {
-			// TODO: resources
+			maxCpu, err := strconv.ParseFloat(info.MaxCpu, 64)
+			if err != nil {
+				return nil, err
+			}
+
+			if s.Deploy == nil {
+				s.Deploy = &types.DeployConfig{}
+			}
+
+			s.Deploy.Resources.Limits = &types.Resource{
+				NanoCPUs:    types.NanoCPUs(maxCpu), // Note: despite the name, this is actually in units of CPUs, not nanocpus
+				MemoryBytes: types.UnitBytes(int64(info.MaxMemory) * 1024 * 1024),
+			}
 
 			for k, v := range info.Labels {
 				s.CustomLabels[k] = v
