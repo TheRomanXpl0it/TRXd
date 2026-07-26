@@ -17,6 +17,12 @@ files=(
 )
 
 cd ../../backend/
+./trxd -test-data-WARNING-DO-NOT-USE-IN-PRODUCTION
+./trxd &
+PID=$!
+sleep 5
+kill $PID
+wait $PID || true
 docker network create trxd-shared-external-test
 (timeout 10 ./trxd || true) 2>&1 | grep -q "multiple networks with the same name"
 docker network rm -f trxd-shared-external-test

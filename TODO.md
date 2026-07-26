@@ -1,5 +1,5 @@
 # TODO
- - resolve TODOs left into the code
+ - add join time to profiles (single user mode & verify for team mode)
  - split /challenges/:id into player and author endpoints
  - instancer container restart policy editable
  - instancer container disk space limit
