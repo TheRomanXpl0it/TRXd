@@ -128,7 +128,6 @@ const (
 	InvalidFilePath         = "Invalid file path"
 	InvalidFormData         = "Invalid form data"
 	InvalidHttpUrl          = "Invalid http(s) url"
-	InvalidImage            = "Invalid image"
 	InvalidJSON             = "Invalid JSON format"
 	InvalidJWT              = "invalid JWT"
 	InvalidJWTSecret        = "invalid JWT secret"
@@ -167,6 +166,9 @@ const (
 
 	MissingLifetime           = "global lifetime is missing"
 	MissingRequiredFields     = "Missing required fields"
+	MissingComposeFile        = "Missing compose file"
+	MissingContainerImage     = "Missing container image"
+	MissingInternalPort       = "Missing internal port"
 	NoDataToUpdate            = "No data provided to update"
 	NotLoggedIn               = "Not logged in"
 	NotStartedYet             = "Not started yet"

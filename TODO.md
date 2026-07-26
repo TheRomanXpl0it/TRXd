@@ -1,29 +1,33 @@
 # TODO
- - clean instancer
+ - static instance type with tcp hash domain support
+
  - resolve TODOs left into the code
+ - move mail object & content to configs
+ - split /challenges/:id into player and author endpoints
+ - instancer container restart policy editable
+ - instancer container disk space limit
+ - ingress only challenges (verify if useful)
+ - rename "hash domain" (not an hash anymore, only rand bytes)
+ - multi port & domain support for instances
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
+   - reclaimer python tests
 
 ## Frontend
  - check/fix challenge connection type (now NONE is removed, default is TCP)
  - check/fix challenge instance type (instead of Normal is now Static)
  - check/fix challenge instance type (before was called type, now is instance_type)
+ - leave hash domain box even without instaces (static insance type)
+ - force https with hash domain for instances
  - add Change Role (modal / dropdown or whatever) in another user (if the user is Player or Author) if the session user is Admin (refer to PATCH /api/users/role)
  - add a red drop if challenge is first blodded (on the card) in the /challenges page
  - [/] Extra:
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 
 ## Ideas / Features
+ - add a deploy ansible playbook for the platform
  - add author only tags (private tags) for challenges
- - reclaimer python tests
- - split /challenges/:id into player and author endpoints
- - instancer container restart policy editable
- - instancer container ingress only bool
- - instancer container disk space limit
- - no instances with tcp hash domain support
- - multi port & domain support for instances
- - rename "hash domain" (not an hash anymore, only rand bytes)
  - submissions page filers (first bloods, only wrong, group filter [correct, repeated])
  - extract data for ctftime
  - ban user/team support
@@ -43,7 +47,6 @@
  - kick user from team
  - endpoint to store image files (like badges and pfp)
  - flag format validator
- - ingress only challenges (verify if useful)
  - chall time schedule release
  - login via /verify with a valid token
  - chall sequence (unlock a challenge by solving another chall)

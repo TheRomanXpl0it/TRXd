@@ -54,7 +54,7 @@ func GetInterval(ctx context.Context) (time.Duration, error) {
 	return sleep, nil
 }
 
-func ReclaimLoop() {
+func StartReclaimLoop() {
 	err := InitInstancer()
 	if err != nil {
 		log.Fatal("Failed to initialize instancer:", "err", err)

@@ -77,7 +77,7 @@ func IsChallEmpty(data *Data) bool {
 
 func UpdateChallenge(ctx context.Context, data *Data) error {
 	if data.ChallID == nil {
-		return errors.New("Missing challenge ID")
+		return errors.New("missing challenge ID")
 	}
 
 	if IsChallEmpty(data) {

@@ -6,6 +6,7 @@ import (
 	"trxd/db"
 	"trxd/db/sqlc"
 	"trxd/instancer"
+	"trxd/instancer/instancer_errors"
 	"trxd/utils"
 	"trxd/utils/consts"
 	"trxd/validator"
@@ -49,11 +50,11 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, er
 
 	res, err := instancer.CreateInstance(c.Context(), params)
 	if err != nil {
-		switch err.Error() {
-		case "[race condition]":
+		switch err.(type) {
+		case *instancer_errors.InvalidInstanceError:
+			return nil, utils.Error(c, fiber.StatusInternalServerError, err.Error())
+		case *instancer_errors.RaceConditionError:
 			return nil, utils.Error(c, fiber.StatusConflict, consts.AlreadyAnActiveInstance)
-		case "[no image or compose]":
-			return nil, utils.Error(c, fiber.StatusBadRequest, consts.InvalidImage) // TODO: change this status code
 		default:
 			return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorCreatingInstance, err)
 		}
@@ -76,11 +77,11 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, er
 // @Produce json
 // @Param data body Data true "all fields are required"
 // @Success 200
-// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Challenge is not instanciable` | `Invalid image`"
+// @Failure 400 {object} models.Error "Possible errors: `Invalid JSON format` | `Missing required fields` | `ChallID must be at least 0` | `Challenge is not instanciable`"
 // @Failure 403 {object} models.Error "Possible errors: `Team not Found`"
 // @Failure 404 {object} models.Error "Possible errors: `Challenge not found`"
 // @Failure 409 {object} models.Error "Possible errors: `Already an active instance`"
-// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error fetching instance` | `Error creating instance`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error fetching instance` | `Error creating instance` | `invalid instance: {error message}`"
 // @Router /api/instances [post]
 func Route(c *fiber.Ctx) error {
 	role := c.Locals("role").(sqlc.UserRole)

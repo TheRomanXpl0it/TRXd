@@ -7,6 +7,7 @@ import (
 	"testing"
 	"trxd/api"
 	"trxd/db/sqlc"
+	"trxd/instancer/instancer_errors"
 	"trxd/utils/consts"
 	"trxd/utils/test_utils"
 )
@@ -188,21 +189,31 @@ func TestRoute(t *testing.T) {
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "test@test.test", "password": "testpass"}, http.StatusOK)
-	session.Post("/instances", JSON{"chall_id": challID3}, http.StatusBadRequest)
-	session.CheckResponse(errorf(consts.InvalidImage))
+	session.Post("/instances", JSON{"chall_id": challID3}, http.StatusInternalServerError)
+	session.CheckResponse(errorf(instancer_errors.NewInvalidInstanceError(consts.MissingComposeFile).Error()))
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
 	session.Patch("/challenges", JSON{"chall_id": challID3, "instance_type": "Container"}, http.StatusOK)
 	session.CheckResponse(nil)
 
-	session.Patch("/challenges", JSON{"chall_id": challID2, "instance_type": "Container", "image": "aaaa"}, http.StatusOK)
+	session.Patch("/challenges", JSON{"chall_id": challID2, "instance_type": "Container"}, http.StatusOK)
 	session.CheckResponse(nil)
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "test@test.test", "password": "testpass"}, http.StatusOK)
 	session.Post("/instances", JSON{"chall_id": challID2}, http.StatusInternalServerError)
-	session.CheckResponse(errorf(consts.ErrorCreatingInstance))
+	session.CheckResponse(errorf(instancer_errors.NewInvalidInstanceError(consts.MissingContainerImage).Error()))
+
+	session = test_utils.NewApiTestSession(t, app)
+	session.Post("/login", JSON{"email": "author@test.test", "password": "authorpass"}, http.StatusOK)
+	session.Patch("/challenges", JSON{"chall_id": challID2, "image": "aaaa"}, http.StatusOK)
+	session.CheckResponse(nil)
+
+	session = test_utils.NewApiTestSession(t, app)
+	session.Post("/login", JSON{"email": "test@test.test", "password": "testpass"}, http.StatusOK)
+	session.Post("/instances", JSON{"chall_id": challID2}, http.StatusInternalServerError)
+	session.CheckResponse(errorf(instancer_errors.NewInvalidInstanceError(consts.MissingInternalPort).Error()))
 
 	session.Post("/instances", JSON{"chall_id": challID4}, http.StatusOK)
 	body = session.Body()

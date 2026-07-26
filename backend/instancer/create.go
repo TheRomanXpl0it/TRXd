@@ -3,13 +3,13 @@ package instancer
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 	"trxd/db/sqlc"
 	"trxd/instancer/composes"
 	"trxd/instancer/containers"
 	"trxd/instancer/infos"
+	"trxd/instancer/instancer_errors"
 
 	"trxd/utils/consts"
 	"trxd/utils/log"
@@ -52,51 +52,54 @@ func recoverBrokenInstance(ctx context.Context, tid int32, challID int32, docker
 	log.Error("Failed to expire instance after creation failure", "team", tid, "challenge", challID, "err", err)
 }
 
-func makeLabels(info *infos.InstanceInfo, p *CreateInstanceParams) {
-	if !p.HashDomain {
-		return
+const (
+	loadbalancerPort   = "traefik.%s.services.%s.loadbalancer.server.port"
+	routersRule        = "traefik.%s.routers.%s.rule"
+	routersPriotity    = "traefik.%s.routers.%s.priority"
+	routersEntrypoints = "traefik.%s.routers.%s.entrypoints"
+	routersTls         = "traefik.%s.routers.%s.tls"
+)
+
+func makeTraefikLabels(name string, domain string, connType sqlc.ConnType, hashDomain bool, internalPort *int32) map[string]string {
+	if !hashDomain {
+		return nil
 	}
 
-	routersRule := "traefik.%s.routers.%s.rule"
-	routersEntrypoints := "traefik.%s.routers.%s.entrypoints"
-	routersTls := "traefik.%s.routers.%s.tls"
-	routersPriotity := "traefik.%s.routers.%s.priority"
-	loadbalancerPort := "traefik.%s.services.%s.loadbalancer.server.port"
-
 	var protocol, rule, entrypoint string
-	if p.ConnType == sqlc.ConnTypeTCP {
-		protocol = "tcp"
-		rule = "HostSNI(`%s`)"
-		entrypoint = "tcp"
-	} else { // so http is (HTTP, HTTPS)
+	switch connType {
+	case sqlc.ConnTypeHTTP:
 		protocol = "http"
 		rule = "Host(`%s`)"
 		entrypoint = "web"
+	case sqlc.ConnTypeHTTPS:
+		protocol = "http"
+		rule = "Host(`%s`)"
+		entrypoint = "websecure"
+	default:
+		protocol = "tcp"
+		rule = "HostSNI(`%s`)"
+		entrypoint = "tcp"
 	}
 
 	traefikPort := "1337"
-	if p.InternalPort != nil {
-		traefikPort = fmt.Sprint(*p.InternalPort)
+	if internalPort != nil {
+		traefikPort = fmt.Sprint(*internalPort)
 	}
 
-	traefikRoutersRule := fmt.Sprintf(routersRule, protocol, info.Name)
-	traefikRoutersEntrypoints := fmt.Sprintf(routersEntrypoints, protocol, info.Name)
-	traefikRoutersPriority := fmt.Sprintf(routersPriotity, protocol, info.Name)
-	traefikLoadbalancerPort := fmt.Sprintf(loadbalancerPort, protocol, info.Name)
-	traefikRoutersTls := fmt.Sprintf(routersTls, protocol, info.Name)
-
-	info.Labels = map[string]string{
-		"traefik.enable":          "true",
-		"traefik.docker.network":  consts.NetworkInternal,
-		traefikRoutersRule:        fmt.Sprintf(rule, info.Domain),
-		traefikRoutersEntrypoints: entrypoint,
-		traefikRoutersPriority:    "10",
-		traefikLoadbalancerPort:   traefikPort,
+	labels := map[string]string{
+		"traefik.enable":                                "true",
+		"traefik.docker.network":                        consts.NetworkInternal,
+		fmt.Sprintf(loadbalancerPort, protocol, name):   traefikPort,
+		fmt.Sprintf(routersRule, protocol, name):        fmt.Sprintf(rule, domain),
+		fmt.Sprintf(routersPriotity, protocol, name):    "10",
+		fmt.Sprintf(routersEntrypoints, protocol, name): entrypoint,
 	}
 
-	if protocol == "tcp" {
-		info.Labels[traefikRoutersTls] = "true"
+	if entrypoint == "tcp" || entrypoint == "websecure" {
+		labels[fmt.Sprintf(routersTls, protocol, name)] = "true"
 	}
+
+	return labels
 }
 
 func spawnInstance(ctx context.Context, info *infos.InstanceInfo, instanceType sqlc.InstanceType, image string, compose string) (string, error) {
@@ -110,12 +113,13 @@ func spawnInstance(ctx context.Context, info *infos.InstanceInfo, instanceType s
 		info.NetID = "trxd-shared-external"
 	}
 
-	if instanceType == sqlc.InstanceTypeContainer && image != "" {
+	switch instanceType {
+	case sqlc.InstanceTypeContainer:
 		dockerID, err = containers.CreateContainer(ctx, info, image)
-	} else if instanceType == sqlc.InstanceTypeCompose && compose != "" {
+	case sqlc.InstanceTypeCompose:
 		dockerID, err = composes.CreateCompose(ctx, info, compose)
-	} else {
-		return "", errors.New("[no image or compose]")
+	default:
+		err = instancer_errors.NewInvalidInstanceError("invalid instance type")
 	}
 	if err != nil {
 		return dockerID, err
@@ -124,7 +128,7 @@ func spawnInstance(ctx context.Context, info *infos.InstanceInfo, instanceType s
 	return dockerID, nil
 }
 
-func CreateInstance(ctx context.Context, p *CreateInstanceParams) (*CreateInstanceResult, error) {
+func CreateInstance(ctx context.Context, params *CreateInstanceParams) (*CreateInstanceResult, error) {
 	var dockerID string
 	cleanup := true
 
@@ -137,45 +141,45 @@ func CreateInstance(ctx context.Context, p *CreateInstanceParams) (*CreateInstan
 			log.Critical("Recovered instancer create panic", "crit", r)
 		}
 
-		recoverBrokenInstance(ctx, p.Tid, p.ChallID, dockerID)
+		recoverBrokenInstance(ctx, params.Tid, params.ChallID, dockerID)
 	}()
 
-	log.Info("Creating instance:", "chall", p.ChallID, "team", p.Tid)
+	log.Info("Creating instance:", "chall", params.ChallID, "team", params.Tid)
 
-	lifetime := time.Second * time.Duration(p.Lifetime)
+	lifetime := time.Second * time.Duration(params.Lifetime)
 	expires_at := time.Now().Add(lifetime)
 
-	creationInfo, err := dbCreateInstance(ctx, p.Tid, p.ChallID, expires_at, p.HashDomain)
+	creationInfo, err := dbCreateInstance(ctx, params.Tid, params.ChallID, expires_at, params.HashDomain)
 	if err != nil {
 		return nil, err
 	}
 	if creationInfo == nil {
 		cleanup = false
-		return nil, errors.New("[race condition]")
+		return nil, instancer_errors.NewRaceConditionError()
 	}
 
 	instanceInfo := &infos.InstanceInfo{
-		Name:         fmt.Sprintf("chall_%d_%d", p.ChallID, p.Tid),
+		Name:         fmt.Sprintf("chall_%d_%d", params.ChallID, params.Tid),
 		Domain:       creationInfo.Host,
-		UseDomain:    p.HashDomain,
-		InternalPort: p.InternalPort,
-		Envs:         p.Envs,
-		MaxMemory:    p.MaxMemory,
-		MaxCpu:       p.MaxCpu,
+		UseDomain:    params.HashDomain,
+		InternalPort: params.InternalPort,
+		Envs:         params.Envs,
+		MaxMemory:    params.MaxMemory,
+		MaxCpu:       params.MaxCpu,
 	}
 
 	if creationInfo.Port.Valid {
 		instanceInfo.ExternalPort = &creationInfo.Port.Int32
 	}
 
-	makeLabels(instanceInfo, p)
+	instanceInfo.Labels = makeTraefikLabels(instanceInfo.Name, instanceInfo.Domain, params.ConnType, params.HashDomain, params.InternalPort)
 
-	dockerID, err = spawnInstance(ctx, instanceInfo, p.InstanceType, p.Image, p.Compose)
+	dockerID, err = spawnInstance(ctx, instanceInfo, params.InstanceType, params.Image, params.Compose)
 	if err != nil {
 		return nil, err
 	}
 
-	err = dbUpdateInstanceDockerID(ctx, p.Tid, p.ChallID, dockerID)
+	err = dbUpdateInstanceDockerID(ctx, params.Tid, params.ChallID, dockerID)
 	if err != nil {
 		return nil, err
 	}

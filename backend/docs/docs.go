@@ -877,7 +877,7 @@ const docTemplate = `{
                         "description": "OK"
                     },
                     "400": {
-                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + ` | ` + "`" + `Challenge is not instanciable` + "`" + ` | ` + "`" + `Invalid image` + "`" + `",
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + ` | ` + "`" + `Challenge is not instanciable` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
@@ -901,7 +901,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Possible errors: ` + "`" + `Error fetching challenge` + "`" + ` | ` + "`" + `Error fetching instance` + "`" + ` | ` + "`" + `Error creating instance` + "`" + `",
+                        "description": "Possible errors: ` + "`" + `Error fetching challenge` + "`" + ` | ` + "`" + `Error fetching instance` + "`" + ` | ` + "`" + `Error creating instance` + "`" + ` | ` + "`" + `invalid instance: {error message}` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }

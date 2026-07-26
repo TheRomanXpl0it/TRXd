@@ -6,7 +6,9 @@ import (
 	"strconv"
 	"strings"
 	"trxd/instancer/infos"
+	"trxd/instancer/instancer_errors"
 
+	"trxd/utils/consts"
 	"trxd/utils/log"
 
 	"github.com/compose-spec/compose-go/v2/loader"
@@ -15,6 +17,10 @@ import (
 )
 
 func CreateCompose(ctx context.Context, info *infos.InstanceInfo, composeBody string) (string, error) {
+	if composeBody == "" {
+		return "", instancer_errors.NewInvalidInstanceError(consts.MissingComposeFile)
+	}
+
 	if ComposeCli == nil {
 		return "", nil
 	}

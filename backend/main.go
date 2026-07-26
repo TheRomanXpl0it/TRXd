@@ -232,7 +232,7 @@ func main() {
 	ctx := context.Background()
 	parseFlags(ctx)
 
-	go instancer.ReclaimLoop()
+	go instancer.StartReclaimLoop()
 
 	for {
 		log.Info("Starting server")

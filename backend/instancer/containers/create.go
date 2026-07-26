@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"io"
 	"strconv"
 	"strings"
 	"trxd/db"
 	"trxd/instancer/infos"
+	"trxd/instancer/instancer_errors"
 
+	"trxd/utils/consts"
 	"trxd/utils/log"
 
 	"github.com/docker/docker/api/types/container"
@@ -21,8 +22,9 @@ import (
 )
 
 func CreateContainer(ctx context.Context, info *infos.InstanceInfo, image string) (string, error) {
-	if info.ExternalPort != nil && info.InternalPort == nil {
-		return "", errors.New("[missing internal port]")
+	err := validateInstance(info, image)
+	if err != nil {
+		return "", err
 	}
 
 	if Cli == nil {
@@ -78,6 +80,18 @@ func CreateContainer(ctx context.Context, info *infos.InstanceInfo, image string
 	}
 
 	return containerID, nil
+}
+
+func validateInstance(info *infos.InstanceInfo, image string) error {
+	if image == "" {
+		return instancer_errors.NewInvalidInstanceError(consts.MissingContainerImage)
+	}
+
+	if info.ExternalPort != nil && info.InternalPort == nil {
+		return instancer_errors.NewInvalidInstanceError(consts.MissingInternalPort)
+	}
+
+	return nil
 }
 
 func ensureImage(ctx context.Context, img string) error {
