@@ -122,14 +122,15 @@ func ExecSQLFile(path string) (bool, error) {
 }
 
 func InitConfigs() error {
-	var err error
-
 	if secret, ok := consts.DefaultConfigs["jwt-secret"]; ok && secret.Value == "" {
-		secret.Value, err = crypto_utils.GeneratePassword()
+		value, err := crypto_utils.GeneratePassword()
 		if err != nil {
 			return fmt.Errorf("failed to generate random secret: %v", err)
 		}
-		consts.DefaultConfigs["jwt-secret"] = secret
+		err = consts.UpdateDefaultConfigValue("jwt-secret", value)
+		if err != nil {
+			return fmt.Errorf("failed to update default config value for jwt-secret: %v", err)
+		}
 	}
 
 	for key, conf := range consts.DefaultConfigs {

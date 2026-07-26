@@ -1,6 +1,5 @@
 # TODO
  - resolve TODOs left into the code
- - move mail object & content to configs
  - split /challenges/:id into player and author endpoints
  - instancer container restart policy editable
  - instancer container disk space limit
@@ -17,8 +16,11 @@
  - check/fix challenge instance type (instead of Normal is now Static)
  - check/fix challenge instance type (before was called type, now is instance_type)
  - leave hash domain box even without instaces (static insance type)
- - force https with hash domain for instances
+ - do no sort configs by key, but by the order which are recived from the backend
+ - make "text" config type a textarea instead of input (for exaple for the "email-body-template" config)
+ - add the "eye" button to the secret configs to show/hide the value (toggle, not press and hold)
  - add Change Role (modal / dropdown or whatever) in another user (if the user is Player or Author) if the session user is Admin (refer to PATCH /api/users/role)
+ - force https with hash domain for instances
  - add a red drop if challenge is first blodded (on the card) in the /challenges page
  - [/] Extra:
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)

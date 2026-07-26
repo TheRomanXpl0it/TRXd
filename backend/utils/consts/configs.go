@@ -1,6 +1,7 @@
 package consts
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -11,6 +12,7 @@ import (
 var AntiPanic = true
 
 type Config struct {
+	Key         string
 	Name        string
 	Value       any
 	Type        string
@@ -19,8 +21,9 @@ type Config struct {
 	Secret      bool
 }
 
-var DefaultConfigs map[string]Config = map[string]Config{
-	"allow-register": {
+var DefaultConfigsList = []Config{
+	{
+		Key:         "allow-register",
 		Name:        "Allow Register",
 		Value:       false,
 		Type:        "bool",
@@ -28,7 +31,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "whether to allow user registration",
 		Secret:      false,
 	},
-	"chall-min-points": {
+	{
+		Key:         "chall-min-points",
 		Name:        "Challenge Min Points",
 		Value:       50,
 		Type:        "int",
@@ -36,7 +40,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the minimum points a challenge can award",
 		Secret:      false,
 	},
-	"chall-points-decay": {
+	{
+		Key:         "chall-points-decay",
 		Name:        "Challenge Points Decay",
 		Value:       15,
 		Type:        "int",
@@ -44,7 +49,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the rate at which challenge points decay",
 		Secret:      false,
 	},
-	"instance-lifetime": {
+	{
+		Key:         "instance-lifetime",
 		Name:        "Instance Lifetime",
 		Value:       30 * 60, // 30 minutes
 		Type:        "duration",
@@ -52,7 +58,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the instances lifetime duration in seconds",
 		Secret:      false,
 	},
-	"reclaim-instance-interval": {
+	{
+		Key:         "reclaim-instance-interval",
 		Name:        "Reclaim Instance Interval",
 		Value:       5 * 60, // 5 minutes
 		Type:        "duration",
@@ -60,7 +67,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the interval for reclaiming instances in seconds",
 		Secret:      false,
 	},
-	"instance-max-memory": {
+	{
+		Key:         "instance-max-memory",
 		Name:        "Instance Max Memory",
 		Value:       512,
 		Type:        "int",
@@ -68,7 +76,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the maximum memory allocation for each instance in MB",
 		Secret:      false,
 	},
-	"instance-max-cpu": {
+	{
+		Key:         "instance-max-cpu",
 		Name:        "Instance Max CPU",
 		Value:       1.0,
 		Type:        "float",
@@ -76,7 +85,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the maximum CPU allocation for each instance",
 		Secret:      false,
 	},
-	"registry-server": {
+	{
+		Key:         "registry-server",
 		Name:        "Registry Server",
 		Value:       "",
 		Type:        "remote",
@@ -84,7 +94,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the registry server used for pulling images",
 		Secret:      false,
 	},
-	"registry-username": {
+	{
+		Key:         "registry-username",
 		Name:        "Registry Username",
 		Value:       "",
 		Type:        "string",
@@ -92,7 +103,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the username for the registry server",
 		Secret:      false,
 	},
-	"registry-password": {
+	{
+		Key:         "registry-password",
 		Name:        "Registry Password",
 		Value:       "",
 		Type:        "string",
@@ -100,7 +112,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the password for the registry server",
 		Secret:      true,
 	},
-	"min-port": {
+	{
+		Key:         "min-port",
 		Name:        "Min Port",
 		Value:       10000,
 		Type:        "port",
@@ -108,7 +121,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the minimum port number for instance allocation",
 		Secret:      false,
 	},
-	"max-port": {
+	{
+		Key:         "max-port",
 		Name:        "Max Port",
 		Value:       20000,
 		Type:        "port",
@@ -116,7 +130,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the maximum port number for instance allocation",
 		Secret:      false,
 	},
-	"hash-len": {
+	{
+		Key:         "hash-len",
 		Name:        "Hash Domain Length",
 		Value:       12,
 		Type:        "int",
@@ -124,7 +139,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the length of the random hash used into the instance domain (e.g. abcdef123456.domain.com)",
 		Secret:      false,
 	},
-	"domain": {
+	{
+		Key:         "domain",
 		Name:        "Domain",
 		Value:       "",
 		Type:        "remote",
@@ -132,7 +148,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the domain used for the instances (e.g. domain.com)",
 		Secret:      false,
 	},
-	"discord-webhook": {
+	{
+		Key:         "discord-webhook",
 		Name:        "Discord Webhook",
 		Value:       "",
 		Type:        "remote",
@@ -140,7 +157,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the Discord webhook url for first blood notifications",
 		Secret:      false,
 	},
-	"user-mode": {
+	{
+		Key:         "user-mode",
 		Name:        "Single User Mode",
 		Value:       false,
 		Type:        "bool",
@@ -148,7 +166,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "if enabled there will be no teams, but only users, like a single player mode",
 		Secret:      false,
 	},
-	"scoreboard-top": {
+	{
+		Key:         "scoreboard-top",
 		Name:        "Scoreboard Top Teams",
 		Value:       10,
 		Type:        "int",
@@ -156,7 +175,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the number of the top teams to show on the scoreboard graph",
 		Secret:      false,
 	},
-	"start-time": {
+	{
+		Key:         "start-time",
 		Name:        "Start Time",
 		Value:       "",
 		Type:        "date",
@@ -164,7 +184,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the start time for the competition following the RFC3339 format",
 		Secret:      false,
 	},
-	"end-time": {
+	{
+		Key:         "end-time",
 		Name:        "End Time",
 		Value:       "",
 		Type:        "date",
@@ -172,7 +193,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the end time for the competition following the RFC3339 format",
 		Secret:      false,
 	},
-	"email-verification": {
+	{
+		Key:         "email-verification",
 		Name:        "Email Verification",
 		Value:       false,
 		Type:        "bool",
@@ -180,7 +202,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "enables all the email related features",
 		Secret:      false,
 	},
-	"jwt-secret": {
+	{
+		Key:         "jwt-secret",
 		Name:        "Email JWT Secret",
 		Value:       "",
 		Type:        "string",
@@ -188,7 +211,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the secret key used for signing JWT tokens for email verification",
 		Secret:      true,
 	},
-	"email-server": {
+	{
+		Key:         "email-server",
 		Name:        "Email Server",
 		Value:       "",
 		Type:        "remote",
@@ -196,7 +220,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the SMTP server address for sending verification emails (e.g. smtp.example.com)",
 		Secret:      false,
 	},
-	"email-port": {
+	{
+		Key:         "email-port",
 		Name:        "Email Server Port",
 		Value:       587,
 		Type:        "port",
@@ -204,7 +229,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the port number for the SMTP server (e.g. 587)",
 		Secret:      false,
 	},
-	"email-addr": {
+	{
+		Key:         "email-addr",
 		Name:        "Email Address",
 		Value:       "",
 		Type:        "email",
@@ -212,7 +238,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the email address for sending verification emails (e.g. no-reply@example.com)",
 		Secret:      false,
 	},
-	"email-passwd": {
+	{
+		Key:         "email-passwd",
 		Name:        "Email Password",
 		Value:       "",
 		Type:        "string",
@@ -220,7 +247,8 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the password for the email account used for sending verification emails",
 		Secret:      true,
 	},
-	"email-expiration": {
+	{
+		Key:         "email-expiration",
 		Name:        "Email Token Expiration",
 		Value:       30 * 60, // 30 minutes
 		Type:        "duration",
@@ -228,6 +256,53 @@ var DefaultConfigs map[string]Config = map[string]Config{
 		Description: "the expiration time for the email verification tokens in seconds",
 		Secret:      false,
 	},
+	{
+		Key:         "email-subject",
+		Name:        "Email Subject",
+		Value:       "TRXD - Verify Your Email Address",
+		Type:        "string",
+		Category:    "email",
+		Description: "the subject line for the email verification emails",
+		Secret:      false,
+	},
+	{
+		Key:         "email-body-template",
+		Name:        "Email Body Template",
+		Value:       "Hello,\n\nPlease confirm your email address by clicking the link below:\nhttp://{{DOMAIN}}/verify?token={{TOKEN}}\n\nIf you did not request this, you can ignore this email.\n\nThank you!",
+		Type:        "text",
+		Category:    "email",
+		Description: "the template for the email verification emails, Note: {{DOMAIN}} and {{TOKEN}} will be replaced with the actual domain and token values",
+		Secret:      false,
+	},
+}
+
+var DefaultConfigs map[string]Config = map[string]Config{}
+var ConfigsSortOrder = map[string]int{}
+
+func init() {
+	for _, conf := range DefaultConfigsList {
+		DefaultConfigs[conf.Key] = conf
+		ConfigsSortOrder[conf.Key] = len(ConfigsSortOrder)
+	}
+}
+
+func UpdateDefaultConfigValue(key string, newValue any) error {
+	conf, ok := DefaultConfigs[key]
+	if !ok {
+		return fmt.Errorf("config with key %s not found", key)
+	}
+
+	idx, ok := ConfigsSortOrder[key]
+	if !ok {
+		return fmt.Errorf("config with key %s not found in sort order", key)
+	}
+
+	conf.Value = newValue
+
+	DefaultConfigs[key] = conf
+	DefaultConfigsList[idx] = conf
+
+	return nil
 }
 
 func LoadEnvConfigs() {
@@ -237,6 +312,8 @@ func LoadEnvConfigs() {
 	}
 
 	for name, conf := range DefaultConfigs {
+		value := conf.Value
+
 		envName := strings.ReplaceAll(name, "-", "_")
 		envName = strings.ToUpper(envName)
 
@@ -245,10 +322,10 @@ func LoadEnvConfigs() {
 			continue
 		}
 
-		switch conf.Value.(type) {
+		switch value.(type) {
 		case bool:
 			if newValue == "1" || strings.ToLower(newValue) == "true" {
-				conf.Value = true
+				value = true
 			}
 		case int:
 			intValue, err := strconv.Atoi(newValue)
@@ -256,21 +333,24 @@ func LoadEnvConfigs() {
 				log.Warn("Invalid int value for env", "env", envName, "value", newValue)
 				continue
 			}
-			conf.Value = intValue
+			value = intValue
 		case float64:
 			floatValue, err := strconv.ParseFloat(newValue, 64)
 			if err != nil {
 				log.Warn("Invalid float value for env", "env", envName, "value", newValue)
 				continue
 			}
-			conf.Value = floatValue
+			value = floatValue
 		case string:
-			conf.Value = newValue
+			value = newValue
 		default:
 			log.Fatal("Unsupported config type for env", "env", envName, "type", conf.Type)
 			continue
 		}
 
-		DefaultConfigs[name] = conf
+		err := UpdateDefaultConfigValue(name, value)
+		if err != nil {
+			log.Fatal("Failed to update default config value", "key", name, "value", value, "err", err)
+		}
 	}
 }

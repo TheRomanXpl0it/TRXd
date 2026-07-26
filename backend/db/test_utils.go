@@ -107,10 +107,11 @@ func DeleteAll(ctx context.Context) error {
 }
 
 func InsertMockData(ctx context.Context) error {
-	c := consts.DefaultConfigs["domain"]
-	c.Value = "test.com"
-	consts.DefaultConfigs["domain"] = c
-	err := UpdateConfig(ctx, "domain", "test.com")
+	err := consts.UpdateDefaultConfigValue("domain", "test.com")
+	if err != nil {
+		return err
+	}
+	err = UpdateConfig(ctx, "domain", "test.com")
 	if err != nil {
 		return err
 	}

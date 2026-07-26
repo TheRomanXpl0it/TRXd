@@ -2,8 +2,8 @@ package users_register
 
 import (
 	"database/sql"
-	"fmt"
 	"strconv"
+	"strings"
 	"time"
 	"trxd/db"
 	"trxd/utils"
@@ -14,10 +14,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 )
-
-// TODO: move these into consts
-const SUBJECT = "TRX CTF 2026 - Verify Your Email Address"
-const BODY_TEMPLATE = "Hello,\n\nPlease confirm your email address by clicking the link below:\nhttps://%s/verify?token=%s\n\nIf you did not request this, you can ignore this email.\n\nThank you!"
 
 func verifyMailEnabled(c *fiber.Ctx) (bool, error) {
 	verification, err := db.GetConfig(c.Context(), "email-verification")
@@ -57,6 +53,28 @@ func generateJWTForEmail(c *fiber.Ctx, registerEmail string) (string, error) {
 	return signed, nil
 }
 
+func sendVerificationEmail(c *fiber.Ctx, client *email.Client, registerEmail string, domain string, token string) error {
+	subject, err := db.GetConfig(c.Context(), "email-subject")
+	if err != nil {
+		return err
+	}
+
+	bodyTemplate, err := db.GetConfig(c.Context(), "email-body-template")
+	if err != nil {
+		return err
+	}
+
+	bodyTemplate = strings.ReplaceAll(bodyTemplate, "{{DOMAIN}}", domain)
+	body := strings.ReplaceAll(bodyTemplate, "{{TOKEN}}", token)
+
+	err = client.SendEmail(c.Context(), registerEmail, subject, body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func registerViaMail(c *fiber.Ctx, registerEmail string) error {
 	valid, err := validator.Var(c, registerEmail, "required,user_email")
 	if err != nil || !valid {
@@ -91,8 +109,7 @@ func registerViaMail(c *fiber.Ctx, registerEmail string) error {
 		return err
 	}
 
-	body := fmt.Sprintf(BODY_TEMPLATE, domain, signed)
-	err = client.SendEmail(c.Context(), registerEmail, SUBJECT, body)
+	err = sendVerificationEmail(c, client, registerEmail, domain, signed)
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorSendingVerificationEmail, err)
 	}

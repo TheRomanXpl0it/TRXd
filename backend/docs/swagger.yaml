@@ -1269,7 +1269,7 @@ paths:
     get:
       description: |-
         Requires **Admin** privileges.
-        Retrieves a list of all configs.
+        Retrieves a list of all configs sorted as defined in the configs file into the backend.
       produces:
       - application/json
       responses:

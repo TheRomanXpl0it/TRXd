@@ -9,7 +9,7 @@ import (
 
 // @Summary [Admin] Gets all configs
 // @Description Requires **Admin** privileges.
-// @Description Retrieves a list of all configs.
+// @Description Retrieves a list of all configs sorted as defined in the configs file into the backend.
 // @Tags configs
 // @Produce json
 // @Success 200 {object} []sqlc.Config "List of configs with all displayable details"

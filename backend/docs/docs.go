@@ -566,7 +566,7 @@ const docTemplate = `{
         },
         "/api/configs": {
             "get": {
-                "description": "Requires **Admin** privileges.\nRetrieves a list of all configs.",
+                "description": "Requires **Admin** privileges.\nRetrieves a list of all configs sorted as defined in the configs file into the backend.",
                 "produces": [
                     "application/json"
                 ],

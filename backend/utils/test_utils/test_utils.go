@@ -79,17 +79,19 @@ func Main(m *testing.M) {
 		fatalf("Failed to insert mock data: %v\n", err)
 	}
 
-	c := consts.DefaultConfigs["allow-register"]
-	c.Value = true
-	consts.DefaultConfigs["allow-register"] = c
+	err = consts.UpdateDefaultConfigValue("allow-register", true)
+	if err != nil {
+		fatalf("Failed to update default config value: %v\n", err)
+	}
 	err = db.UpdateConfig(ctx, "allow-register", "true")
 	if err != nil {
 		fatalf("Failed to update config: %v\n", err)
 	}
 
-	c = consts.DefaultConfigs["jwt-secret"]
-	c.Value = "414243"
-	consts.DefaultConfigs["jwt-secret"] = c
+	err = consts.UpdateDefaultConfigValue("jwt-secret", "414243")
+	if err != nil {
+		fatalf("Failed to update default config value: %v\n", err)
+	}
 	err = db.UpdateConfig(ctx, "jwt-secret", "414243")
 	if err != nil {
 		fatalf("Failed to update config: %v\n", err)

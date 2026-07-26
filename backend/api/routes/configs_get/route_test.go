@@ -3,7 +3,6 @@ package configs_get_test
 import (
 	"fmt"
 	"net/http"
-	"sort"
 	"testing"
 	"trxd/api"
 	"trxd/db/sqlc"
@@ -21,22 +20,18 @@ func TestRoute(t *testing.T) {
 	app := api.SetupApp(t.Context())
 	defer api.Shutdown(app)
 
-	expected := make([]JSON, 0, len(consts.DefaultConfigs))
-	for key, conf := range consts.DefaultConfigs {
+	expected := make([]JSON, 0, len(consts.DefaultConfigsList))
+	for _, conf := range consts.DefaultConfigsList {
 		expected = append(expected, JSON{
 			"category":    conf.Category,
 			"description": conf.Description,
-			"key":         key,
+			"key":         conf.Key,
 			"name":        conf.Name,
 			"secret":      conf.Secret,
 			"type":        conf.Type,
 			"value":       fmt.Sprintf("%v", conf.Value),
 		})
 	}
-
-	sort.Slice(expected, func(i int, j int) bool {
-		return expected[i]["key"].(string) < expected[j]["key"].(string)
-	})
 
 	test_utils.RegisterUser(t, "test", "test@test.test", "testpass", sqlc.UserRoleAdmin)
 	session := test_utils.NewApiTestSession(t, app)
