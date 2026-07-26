@@ -20,7 +20,7 @@ func CreateNetwork(ctx context.Context, name string, disableICC bool) (string, e
 
 	var netID string
 	if len(summary) > 1 {
-		return "", errors.New("multiple networks with the same name") // TODO: test
+		return "", errors.New("multiple networks with the same name")
 	} else if len(summary) == 1 {
 		netID = summary[0].ID
 	} else {

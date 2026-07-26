@@ -16,6 +16,12 @@ files=(
 	discord_webhook.py
 )
 
+cd ../../backend/
+docker network create trxd-shared-external-test
+(timeout 10 ./trxd || true) 2>&1 | grep -q "multiple networks with the same name"
+docker network rm -f trxd-shared-external-test
+cd -
+
 for file in "${files[@]}"; do
 	echo "Running Test: $file"
 
