@@ -1,6 +1,4 @@
 # TODO
- - static instance type with tcp hash domain support
-
  - resolve TODOs left into the code
  - move mail object & content to configs
  - split /challenges/:id into player and author endpoints

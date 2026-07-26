@@ -82,6 +82,7 @@ def assert_request(r: requests.Response, hash_domain):
 		assert line in resp, f'"{line}" not in resp\n{req}\n-----DIFF-----\n{resp}'
 
 
+
 r = spawn_instance(s1, chall_id_3)
 assert r.status_code == 200, r.text
 i1 = r.json()
@@ -118,6 +119,67 @@ assert_request(r, False)
 
 kill_instance(s1, chall_id_4)
 kill_instance(s3, chall_id_4)
+
+
+
+update_challenge(admin, chall_id_3, conn_type="TCP")
+update_challenge(admin, chall_id_4, conn_type="TCP")
+
+
+def dial(port, content):
+	with socket.create_connection(('localhost', port)) as sock:
+		sock.sendall(content)
+		return sock.recv(4096)
+
+
+request = b"GET /\r\n\r\n"
+correct_resp = b'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nGET /\r\n\r\n'
+
+
+r = spawn_instance(s1, chall_id_3)
+assert r.status_code == 200, r.text
+i1 = r.json()
+print(i1)
+r = spawn_instance(s2, chall_id_3)
+assert r.status_code == 409, r.text
+r = spawn_instance(s3, chall_id_3)
+assert r.status_code == 200, r.text
+i3 = r.json()
+print(i3)
+
+received = dial(i1['port'], request)
+assert received == correct_resp, f"Expected:\n{correct_resp}\nReceived:\n{received}"
+
+received = dial(i3['port'], request)
+assert received == correct_resp, f"Expected:\n{correct_resp}\nReceived:\n{received}"
+
+kill_instance(s1, chall_id_3)
+kill_instance(s3, chall_id_3)
+
+
+r = spawn_instance(s1, chall_id_4)
+assert r.status_code == 200, r.text
+i1 = r.json()
+print(i1)
+r = spawn_instance(s2, chall_id_4)
+assert r.status_code == 409, r.text
+r = spawn_instance(s3, chall_id_4)
+assert r.status_code == 200, r.text
+i3 = r.json()
+print(i3)
+
+received = dial(i1['port'], request)
+assert received == correct_resp, f"Expected:\n{correct_resp}\nReceived:\n{received}"
+
+received = dial(i3['port'], request)
+assert received == correct_resp, f"Expected:\n{correct_resp}\nReceived:\n{received}"
+
+kill_instance(s1, chall_id_4)
+kill_instance(s3, chall_id_4)
+
+
+update_challenge(admin, chall_id_3, conn_type="HTTP")
+update_challenge(admin, chall_id_4, conn_type="HTTP")
 
 
 
@@ -211,9 +273,6 @@ update_challenge(admin, chall_id_3, conn_type="TCP")
 update_challenge(admin, chall_id_4, conn_type="TCP")
 
 
-request = b"GET /\r\n\r\n"
-correct_resp = b'HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nGET /\r\n\r\n'
-
 r = spawn_instance(s1, chall_id_3)
 assert r.status_code == 200, r.text
 i1 = r.json()
@@ -264,8 +323,109 @@ kill_instance(s1, chall_id_4)
 kill_instance(s3, chall_id_4)
 
 
-update_challenge(admin, chall_id_3, conn_type="HTTP")
-update_challenge(admin, chall_id_4, conn_type="HTTP")
+
+import warnings
+warnings.filterwarnings("ignore")
+
+
+update_challenge(admin, chall_id_3, conn_type="HTTPS")
+update_challenge(admin, chall_id_4, conn_type="HTTPS")
+
+
+r = spawn_instance(s1, chall_id_3)
+assert r.status_code == 200, r.text
+i1 = r.json()
+print(i1)
+r = spawn_instance(s2, chall_id_3)
+assert r.status_code == 409, r.text
+r = spawn_instance(s3, chall_id_3)
+assert r.status_code == 200, r.text
+i3 = r.json()
+print(i3)
+
+host = i1['host']
+LOCAL_HOSTS[host] = LOCALHOST
+r = requests.get(f'https://{host}', verify=False)
+assert_request(r, True)
+
+host = i3['host']
+LOCAL_HOSTS[host] = LOCALHOST
+r = requests.get(f'https://{host}', verify=False)
+assert_request(r, True)
+
+kill_instance(s1, chall_id_3)
+kill_instance(s3, chall_id_3)
+
+
+r = spawn_instance(s1, chall_id_4)
+assert r.status_code == 200, r.text
+i1 = r.json()
+print(i1)
+r = spawn_instance(s2, chall_id_4)
+assert r.status_code == 409, r.text
+r = spawn_instance(s3, chall_id_4)
+assert r.status_code == 200, r.text
+i3 = r.json()
+print(i3)
+
+host = i1['host']
+LOCAL_HOSTS[host] = LOCALHOST
+r = requests.get(f'https://{host}', verify=False)
+assert_request(r, True)
+
+host = i3['host']
+LOCAL_HOSTS[host] = LOCALHOST
+r = requests.get(f'https://{host}', verify=False)
+assert_request(r, True)
+
+kill_instance(s1, chall_id_4)
+kill_instance(s3, chall_id_4)
+
+
+
+#! Note: this is not really intended to be used in production, but it is useful for testing purposes
+
+update_challenge(admin, chall_id_3, hash_domain=False)
+update_challenge(admin, chall_id_4, hash_domain=False)
+
+
+r = spawn_instance(s1, chall_id_3)
+assert r.status_code == 200, r.text
+i1 = r.json()
+print(i1)
+r = spawn_instance(s2, chall_id_3)
+assert r.status_code == 409, r.text
+r = spawn_instance(s3, chall_id_3)
+assert r.status_code == 200, r.text
+i3 = r.json()
+print(i3)
+
+r = requests.get(f'http://localhost:{i1["port"]}')
+assert_request(r, False)
+r = requests.get(f'http://localhost:{i3["port"]}')
+assert_request(r, False)
+
+kill_instance(s1, chall_id_3)
+kill_instance(s3, chall_id_3)
+
+
+r = spawn_instance(s1, chall_id_4)
+assert r.status_code == 200, r.text
+i1 = r.json()
+print(i1)
+r = spawn_instance(s3, chall_id_4)
+assert r.status_code == 200, r.text
+i3 = r.json()
+print(i3)
+
+r = requests.get(f'http://localhost:{i1["port"]}')
+assert_request(r, False)
+r = requests.get(f'http://localhost:{i3["port"]}')
+assert_request(r, False)
+
+kill_instance(s1, chall_id_4)
+kill_instance(s3, chall_id_4)
+
+
 
 socket.getaddrinfo = original_getaddrinfo
-
