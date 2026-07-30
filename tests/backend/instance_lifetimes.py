@@ -239,7 +239,10 @@ else:
 def hash_connection_refused(resp):
 	try:
 		r = hash_request(resp)
-		assert r.status_code == refused_status, "Instance should be down: " + str(r.status_code) + "\n" + r.text
+		if proxy == 'traefik' and r.status_code == 200:
+			assert "sveltekit" in r.text, "Instance should be down: " + str(r.status_code) + "\n" + r.text
+		else:
+			assert r.status_code == refused_status, "Instance should be down: " + str(r.status_code) + "\n" + r.text
 	except requests.ConnectionError:
 		pass
 

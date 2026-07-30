@@ -1,0 +1,72 @@
+http:
+  routers:
+    #! #################### App #################### !#
+    app-instances:
+      service: app@docker
+      rule: "Path(`/api/instances`)"
+      entryPoints:
+        - web
+      priority: 10
+      middlewares:
+        - app-instances-ratelimit
+
+    app-submissions:
+      service: app@docker
+      rule: "Path(`/api/submissions`) && Method(`POST`)"
+      entryPoints:
+        - web
+      priority: 10
+      middlewares:
+        - app-submissions-ratelimit
+
+    #! #################### Traefik API #################### !#
+    traefik-api-http:
+      service: api@internal
+      rule: "HostRegexp(`^traefik\\..+$`)"
+      entryPoints:
+        - web
+      priority: 10
+      middlewares:
+        - traefik-api-https-redirect
+
+    traefik-api:
+      service: api@internal
+      rule: "HostRegexp(`^traefik\\..+$`)"
+      tls: {}
+      entryPoints:
+        - websecure
+      priority: 10
+      middlewares:
+        - traefik-api-auth
+
+
+
+  middlewares:
+    #! #################### Traefik API Auth & Redirect #################### !#
+    traefik-api-https-redirect:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    traefik-api-auth:
+      basicAuth:
+        users:
+          - '{{ env "TRAEFIK_USERNAME" }}:{{ env "TRAEFIK_HTPASSWORD" }}'
+
+    #! #################### App Rate limits #################### !#
+    app-instances-ratelimit:
+      rateLimit:
+        average: 1
+        burst: 10
+        period: 60s
+        sourceCriterion:
+          requestHeaderName: "CF-Connecting-IP"
+
+    app-submissions-ratelimit:
+      rateLimit:
+        average: 2
+        burst: 10
+        period: 10s
+        sourceCriterion:
+          requestHeaderName: "CF-Connecting-IP"
+

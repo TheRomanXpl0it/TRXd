@@ -59,7 +59,7 @@ change_conf(admin, 'email-verification', "true")
 change_conf(admin, 'email-server', server)
 change_conf(admin, 'email-port', str(port))
 change_conf(admin, 'email-addr', addr)
-change_conf(admin, 'email-passwd', passwd)
+change_conf(admin, 'email-password', passwd)
 
 # change_conf(admin, 'email-expiration', "1") # 1 second for testing
 

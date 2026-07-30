@@ -13,10 +13,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
       REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PASSWORD: ${REDIS_PASSWORD:?}
-    depends_on:
-      - postgres
-      - redis
-      - traefik
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./.data/attachments:/app/attachments
@@ -26,39 +22,10 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=${PROJECT_NAME:-trxd}_default"
-
-      # --- MAIN APP ROUTER (unchanged fallback) ---
       - "traefik.http.routers.app.rule=PathPrefix(`/`)"
       - "traefik.http.routers.app.entrypoints=web"
       - "traefik.http.routers.app.priority=1"
       - "traefik.http.services.app.loadbalancer.server.port=1337"
-
-      # --- INSTANCES ROUTER (rate limited) ---
-      - "traefik.http.routers.app-instances.rule=Path(`/api/instances`)"
-      - "traefik.http.routers.app-instances.entrypoints=web"
-      - "traefik.http.routers.app-instances.priority=10"
-      - "traefik.http.routers.app-instances.service=app"
-      - "traefik.http.routers.app-instances.middlewares=app-instances-ratelimit"
-
-      # --- SUBMISSION ROUTER (rate limited) ---
-      - "traefik.http.routers.app-submissions.rule=Path(`/api/submissions`) && Method(`POST`)"
-      - "traefik.http.routers.app-submissions.entrypoints=web"
-      - "traefik.http.routers.app-submissions.priority=10"
-      - "traefik.http.routers.app-submissions.service=app"
-      - "traefik.http.routers.app-submissions.middlewares=app-submissions-ratelimit"
-
-      # --- INSTANCES RATE LIMIT MIDDLEWARE ---
-      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.average=1"
-      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.burst=10"
-      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.period=60s"
-      - "traefik.http.middlewares.app-instances-ratelimit.ratelimit.sourcecriterion.requestheadername=CF-Connecting-IP"
-
-      # --- SUBMISSION RATE LIMIT MIDDLEWARE ---
-      - "traefik.http.middlewares.app-submissions-ratelimit.ratelimit.average=2"
-      - "traefik.http.middlewares.app-submissions-ratelimit.ratelimit.burst=10"
-      - "traefik.http.middlewares.app-submissions-ratelimit.ratelimit.period=10s"
-      - "traefik.http.middlewares.app-submissions-ratelimit.ratelimit.sourcecriterion.requestheadername=CF-Connecting-IP"
-
 
   postgres:
     image: postgres:18-alpine
@@ -81,11 +48,16 @@ services:
     restart: always
     ports:
       - "${ADMINER_PORT:-8000}:8080"
-    depends_on:
-      - postgres
     networks:
       - internal
       - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
+      - "traefik.http.routers.adminer.rule=HostRegexp(`^adminer\\..+$`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls=true"
+      - "traefik.http.routers.adminer.priority=10"
 
   redis:
     image: redis:8-alpine
@@ -133,22 +105,17 @@ services:
   traefik:
     image: traefik:v3.6
     restart: always
-    command:
-      - "--api.insecure=true" #! Debugging
-      - "--providers.providersThrottleDuration=0s"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--entrypoints.tcp.address=:5443"
-      - "--entrypoints.tcp.http.tls=true"
+    environment:
+      - TRAEFIK_USERNAME=${TRAEFIK_USERNAME:?}
+      - TRAEFIK_HTPASSWORD=${TRAEFIK_HTPASSWORD:?}
     ports:
       - "80:80"
       - "443:443"
       - "5443:5443"
-      - "8080:8080" #! Debugging
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
     networks:
       default:
       trxd-shared-internal:

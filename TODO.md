@@ -20,6 +20,7 @@
  - make "text" config type a textarea instead of input (for exaple for the "email-body-template" config)
  - add the "eye" button to the secret configs to show/hide the value (toggle, not press and hold)
  - add Change Role (modal / dropdown or whatever) in another user (if the user is Player or Author) if the session user is Admin (refer to PATCH /api/users/role)
+ - fix error where empty field submission does not update the value if the field was not empty before
  - force https with hash domain for instances
  - add a red drop if challenge is first blodded (on the card) in the /challenges page
  - [/] Extra:

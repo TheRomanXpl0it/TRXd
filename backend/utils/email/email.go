@@ -37,9 +37,9 @@ func InitEmailClientFromConfigs(ctx context.Context) (*Client, error) {
 		return nil, fmt.Errorf("failed to get email-addr config: %w", err)
 	}
 
-	passwd, err := db.GetConfig(ctx, "email-passwd")
+	passwd, err := db.GetConfig(ctx, "email-password")
 	if err != nil {
-		return nil, fmt.Errorf("failed to get email-passwd config: %w", err)
+		return nil, fmt.Errorf("failed to get email-password config: %w", err)
 	}
 
 	if server == "" || port == 0 || addr == "" {

@@ -239,7 +239,7 @@ var DefaultConfigsList = []Config{
 		Secret:      false,
 	},
 	{
-		Key:         "email-passwd",
+		Key:         "email-password",
 		Name:        "Email Password",
 		Value:       "",
 		Type:        "string",
