@@ -27,6 +27,9 @@ py-test:
 	@go build .
 	@cd ../tests/backend/ && (./run.sh || (kill $$(pidof trxd) && exit 1))
 
+roast:
+	@droast --min-severity warning ../Dockerfile
+
 lint:
 	@go vet ./...
 	@ineffassign ./...
@@ -37,7 +40,7 @@ lint:
 cyclo:
 	@gocyclo -ignore "sqlc|_test|test_" -top 15 .
 
-pipe: sqlc-diff docs lint test py-test
+pipe: sqlc-diff docs roast lint test py-test
 
 
-.PHONY: default sqlc sql sqlc-diff sql-diff docs run test py-test lint cyclo pipe
+.PHONY: default sqlc sql sqlc-diff sql-diff docs run test py-test lint cyclo roast pipe

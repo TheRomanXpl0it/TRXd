@@ -2,7 +2,7 @@ FROM node:24-alpine AS frontend
 
 WORKDIR /app
 COPY ./frontend/package*.json ./
-RUN npm install
+RUN npm ci
 COPY ./frontend ./
 ARG GIT_HASH=unknown
 ENV VITE_GIT_HASH=${GIT_HASH}
@@ -20,9 +20,9 @@ COPY ./backend/ .
 RUN go build .
 
 
-FROM alpine:latest
+FROM alpine:3.24
 
-# RUN apk --no-cache add ca-certificates
+RUN addgroup -S app && adduser -S -G app app
 
 WORKDIR /app
 
@@ -31,6 +31,10 @@ COPY --from=frontend /app/build ./frontend
 COPY --from=backend /app/trxd ./trxd
 COPY --from=backend /app/static ./static
 COPY --from=backend /app/sql ./sql
+
+RUN chown -R app:app /app
+
+USER app
 
 EXPOSE 1337
 
