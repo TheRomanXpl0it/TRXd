@@ -28,7 +28,7 @@ py-test:
 	@cd ../tests/backend/ && (./run.sh || (kill $$(pidof trxd) && exit 1))
 
 roast:
-	@droast --min-severity warning ../Dockerfile
+	@droast ../Dockerfile
 
 lint:
 	@go vet ./...

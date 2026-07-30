@@ -12,28 +12,32 @@ description: |
   Will you rise to the challenge and lead us to victory, or shall Rome fall to the void?"
 authors:
   - kristoj
-instance_type: Container
-max_points: 500
-score_type: Dynamic
-host: sudoku.chall.theromanxpl0.it
-port: 1337
-conn_type: TCP
 tags:
   - Easy
   - c++
   - sudoku
-deployment:
-  image: trxctf-sudoku
-  compose: ./remote/compose.yml
-  hash_domain: true
-  lifetime: 900
-  renewable: false 
-  envs: '{"key": "value"}'
-  max_memory: 512
-  max_cpu: 1.0
+
+score_type: Dynamic # Static, Dynamic
+max_points: 500
+
+host: sudoku.chall.theromanxpl0.it
+port: 1337 # port to connect to, if instance_type != Static or hash_domain == true: then this is the internal service port
+conn_type: TCP # TCP, HTTP, HTTPS
+hash_domain: true # whether to add a random prefix to the domain (e.g. 00112233.domain.com)
+
+instance_type: Container # Static, Conatiner, Compose
+image: registry.localhost/trxctf-sudoku # if instance_type is Container, this is the image to use
+compose: ./remote/compose.yml # if instance_type is Compose, this is the compose file to use
+lifetime: 900 # seconds
+renewable: false # whether the instance can be renewed before it expires
+envs: '{"key": "value"}' # environment variables to set in the container or compose context
+max_memory: 512 # MB
+max_cpus: 1.0
+
 flags:
   - flag: TRX{H0w_0ft3n_d0_y0u_th1nk_4b0ut_th3_R0m4n_3mp1r3?!?:D}
     regex: false
+
 attachments:
   - ./attachments/chall
   - ./attachments/Dockerfile

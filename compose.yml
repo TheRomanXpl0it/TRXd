@@ -8,11 +8,11 @@ services:
     environment:
       CLICOLOR_FORCE: ${CLICOLOR_FORCE:-0}
       POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
       REDIS_HOST: ${REDIS_HOST:-redis}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?}
     depends_on:
       - postgres
       - redis
@@ -99,7 +99,7 @@ services:
       - internal
       - default #! Debugging
 
-  registry: # check https://registry.localhost/v2/_catalog
+  registry: # https://registry.localhost/v2/_catalog
     image: registry:3
     restart: always
     ports:
@@ -135,7 +135,7 @@ services:
     restart: always
     command:
       - "--api.insecure=true" #! Debugging
-      - "--providers.providersThrottleDuration=0s" #! Debugging
+      - "--providers.providersThrottleDuration=0s"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
@@ -148,7 +148,7 @@ services:
       - "5443:5443"
       - "8080:8080" #! Debugging
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       default:
       trxd-shared-internal:

@@ -2,6 +2,22 @@ import requests
 import yaml
 import os
 
+KEYS = [
+	'authors',
+	'tags',
+	'host',
+	'port',
+	'conn_type',
+	'hash_domain',
+	'image',
+	'compose',
+	'lifetime',
+	'renewable',
+	'envs',
+	'max_memory',
+	'max_cpus',
+]
+
 url = "https://localhost/api"
 email = ""
 password = ""
@@ -68,14 +84,13 @@ for category, challs in challenges.items():
 
 		# Update Challenge
 		data = {'chall_id': chall_id}
-		for key in ['authors', 'tags', 'host', 'port', 'conn_type']:
+		for key in KEYS:
 			if key in chall_info:
-				data[key] = chall_info[key]
-		deployment = chall_info.get("deployment", None)
-		if deployment is not None:
-			for key in ['image', 'compose', 'hash_domain', 'lifetime', 'renewable', 'envs', 'max_memory', 'max_cpu']:
-				if key in deployment:
-					data[key] = deployment[key]
+				if key == 'compose':
+					with open(os.path.join(f'{category.lower()}/{chall}/', chall_info[key]), 'r') as f:
+						data[key] = f.read()
+				else:
+					data[key] = chall_info[key]
 		print(data)
 
 		r = s.patch(url + f"/challenges", 

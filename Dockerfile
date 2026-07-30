@@ -22,8 +22,6 @@ RUN go build .
 
 FROM alpine:3.24
 
-RUN addgroup -S app && adduser -S -G app app
-
 WORKDIR /app
 
 COPY --from=frontend /app/build ./frontend
@@ -31,10 +29,6 @@ COPY --from=frontend /app/build ./frontend
 COPY --from=backend /app/trxd ./trxd
 COPY --from=backend /app/static ./static
 COPY --from=backend /app/sql ./sql
-
-RUN chown -R app:app /app
-
-USER app
 
 EXPOSE 1337
 
