@@ -71,7 +71,7 @@ services:
       - internal
       - default #! Debugging
 
-  registry: # https://registry.localhost/v2/_catalog
+  registry:
     image: registry:3
     restart: always
     ports:
@@ -100,6 +100,35 @@ services:
       - "traefik.http.routers.registry-http.middlewares=redirect-to-https"
 
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+
+  registry-ui:
+    image: joxit/docker-registry-ui:2.6
+    restart: always
+    environment:
+      SINGLE_REGISTRY: "true"
+      REGISTRY_TITLE: "Docker Registry"
+      DELETE_IMAGES: "true"
+      NGINX_PROXY_PASS_URL: "http://registry:5000"
+      SHOW_CONTENT_DIGEST: "true"
+      SHOW_CATALOG_NB_TAGS: "true"
+    networks:
+      - default
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
+
+      - "traefik.http.routers.registry-ui.rule=HostRegexp(`^registry-ui\\..+$`)"
+      - "traefik.http.routers.registry-ui.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui.priority=10"
+      - "traefik.http.routers.registry-ui.tls=true"
+
+      - "traefik.http.routers.registry-ui.middlewares=registry-auth"
+
+      - "traefik.http.routers.registry-ui-http.rule=HostRegexp(`^registry-ui\\..+$`)"
+      - "traefik.http.routers.registry-ui-http.entrypoints=web"
+      - "traefik.http.routers.registry-ui-http.priority=10"
+      - "traefik.http.routers.registry-ui-http.middlewares=redirect-to-https"
 
 
   traefik:
