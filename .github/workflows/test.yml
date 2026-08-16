@@ -23,13 +23,9 @@ env:
   REDIS_PORT: 9736
   REDIS_PASSWORD: testpass
 
-  TRAEFIK_USERNAME: testuser
-  TRAEFIK_PASSWORD: password
-  TRAEFIK_HTPASSWORD: '$apr1$SXlYINSe$m0/9UxcCHTpCNuPaCpREq0' # password
-
-  REGISTRY_USERNAME: testuser
-  REGISTRY_PASSWORD: password
-  REGISTRY_HTPASSWORD: '$apr1$SXlYINSe$m0/9UxcCHTpCNuPaCpREq0' # password
+  BASIC_AUTH_USERNAME: testuser
+  BASIC_AUTH_PASSWORD: password
+  BASIC_AUTH_HTPASSWORD: '$apr1$SXlYINSe$m0/9UxcCHTpCNuPaCpREq0' # password
 
 
 defaults:

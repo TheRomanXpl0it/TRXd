@@ -6,8 +6,8 @@ warnings.filterwarnings("ignore")
 
 
 project_name = os.getenv('PROJECT_NAME', 'trxd')
-username = os.getenv('REGISTRY_USERNAME', 'user')
-password = os.getenv('REGISTRY_PASSWORD', 'password')
+username = os.getenv('BASIC_AUTH_USERNAME', 'user')
+password = os.getenv('BASIC_AUTH_PASSWORD', 'password')
 
 
 registry = "registry.localhost"

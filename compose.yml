@@ -19,13 +19,6 @@ services:
     networks:
       - default
       - internal
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=${PROJECT_NAME:-trxd}_default"
-      - "traefik.http.routers.app.rule=PathPrefix(`/`)"
-      - "traefik.http.routers.app.entrypoints=web"
-      - "traefik.http.routers.app.priority=1"
-      - "traefik.http.services.app.loadbalancer.server.port=1337"
 
   postgres:
     image: postgres:18-alpine
@@ -51,13 +44,6 @@ services:
     networks:
       - internal
       - default
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.adminer.loadbalancer.server.port=8080"
-      - "traefik.http.routers.adminer.rule=HostRegexp(`^adminer\\..+$`)"
-      - "traefik.http.routers.adminer.entrypoints=websecure"
-      - "traefik.http.routers.adminer.tls=true"
-      - "traefik.http.routers.adminer.priority=10"
 
   redis:
     image: redis:8-alpine
@@ -82,25 +68,6 @@ services:
       - ./.data/registry_data:/var/lib/registry
     networks:
       - default
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.registry.loadbalancer.server.port=5000"
-
-      - "traefik.http.routers.registry.rule=HostRegexp(`^registry\\..+$`)"
-      - "traefik.http.routers.registry.entrypoints=websecure"
-      - "traefik.http.routers.registry.tls=true"
-      - "traefik.http.routers.registry.priority=10"
-      - "traefik.http.routers.registry.middlewares=registry-auth"
-
-      - "traefik.http.middlewares.registry-auth.basicauth.users=${REGISTRY_USERNAME}:${REGISTRY_HTPASSWORD}"
-
-      - "traefik.http.routers.registry-http.rule=HostRegexp(`^registry\\..+$`)"
-      - "traefik.http.routers.registry-http.entrypoints=web"
-      - "traefik.http.routers.registry-http.priority=10"
-      - "traefik.http.routers.registry-http.middlewares=redirect-to-https"
-
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-
 
   registry-ui:
     image: joxit/docker-registry-ui:2.6
@@ -114,29 +81,13 @@ services:
       SHOW_CATALOG_NB_TAGS: "true"
     networks:
       - default
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
-
-      - "traefik.http.routers.registry-ui.rule=HostRegexp(`^registry-ui\\..+$`)"
-      - "traefik.http.routers.registry-ui.entrypoints=websecure"
-      - "traefik.http.routers.registry-ui.priority=10"
-      - "traefik.http.routers.registry-ui.tls=true"
-
-      - "traefik.http.routers.registry-ui.middlewares=registry-auth"
-
-      - "traefik.http.routers.registry-ui-http.rule=HostRegexp(`^registry-ui\\..+$`)"
-      - "traefik.http.routers.registry-ui-http.entrypoints=web"
-      - "traefik.http.routers.registry-ui-http.priority=10"
-      - "traefik.http.routers.registry-ui-http.middlewares=redirect-to-https"
-
 
   traefik:
     image: traefik:v3.6
     restart: always
     environment:
-      - TRAEFIK_USERNAME=${TRAEFIK_USERNAME:?}
-      - TRAEFIK_HTPASSWORD=${TRAEFIK_HTPASSWORD:?}
+      - BASIC_AUTH_USERNAME=${BASIC_AUTH_USERNAME:?}
+      - BASIC_AUTH_HTPASSWORD=${BASIC_AUTH_HTPASSWORD:?}
     ports:
       - "80:80"
       - "443:443"

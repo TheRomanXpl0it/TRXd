@@ -231,10 +231,10 @@ def hash_request(resp):
 	r = requests.get(f'http://{host}')
 	return r
 
-if proxy == 'traefik':
-	refused_status = 404
-else:
-	refused_status = 502
+# if proxy == 'traefik':
+# 	refused_status = 404
+# else:
+refused_status = 502
 
 def hash_connection_refused(resp):
 	try:

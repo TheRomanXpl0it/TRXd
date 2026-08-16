@@ -1,8 +1,37 @@
 http:
+  services:
+    app:
+      loadBalancer:
+        servers:
+          - url: "http://app:1337"
+
+    adminer:
+      loadBalancer:
+        servers:
+          - url: "http://adminer:8080"
+    
+    registry:
+      loadBalancer:
+        servers:
+          - url: "http://registry:5000"
+    
+    registry-ui:
+      loadBalancer:
+        servers:
+          - url: "http://registry-ui:80"
+
+
   routers:
     #! #################### App #################### !#
+    app:
+      service: app
+      rule: "PathPrefix(`/`)"
+      entryPoints:
+        - web
+      priority: 1
+
     app-instances:
-      service: app@docker
+      service: app
       rule: "Path(`/api/instances`)"
       entryPoints:
         - web
@@ -11,7 +40,7 @@ http:
         - app-instances-ratelimit
 
     app-submissions:
-      service: app@docker
+      service: app
       rule: "Path(`/api/submissions`) && Method(`POST`)"
       entryPoints:
         - web
@@ -27,7 +56,7 @@ http:
         - web
       priority: 10
       middlewares:
-        - traefik-api-https-redirect
+        - https-redirect
 
     traefik-api:
       service: api@internal
@@ -37,21 +66,80 @@ http:
         - websecure
       priority: 10
       middlewares:
-        - traefik-api-auth
+        - basic-auth
 
+    #! #################### Adminer #################### !#
+    adminer-http:
+      service: adminer
+      rule: "HostRegexp(`^adminer\\..+$`)"
+      entryPoints:
+        - web
+      priority: 10
+      middlewares:
+        - https-redirect
+
+    adminer:
+      service: adminer
+      rule: "HostRegexp(`^adminer\\..+$`)"
+      tls: {}
+      entryPoints:
+        - websecure
+      priority: 10
+      middlewares:
+        - basic-auth
+    
+    #! #################### Registry #################### !#
+    registry-http:
+      service: registry
+      rule: "HostRegexp(`^registry\\..+$`)"
+      entryPoints:
+        - web
+      priority: 10
+      middlewares:
+        - https-redirect
+
+    registry:
+      service: registry
+      rule: "HostRegexp(`^registry\\..+$`)"
+      tls: {}
+      entryPoints:
+        - websecure
+      priority: 10
+      middlewares:
+        - basic-auth
+    
+    #! #################### Registry UI #################### !#
+    registry-ui-http:
+      service: registry-ui
+      rule: "HostRegexp(`^registry-ui\\..+$`)"
+      entryPoints:
+        - web
+      priority: 10
+      middlewares:
+        - https-redirect
+
+    registry-ui:
+      service: registry-ui
+      rule: "HostRegexp(`^registry-ui\\..+$`)"
+      tls: {}
+      entryPoints:
+        - websecure
+      priority: 10
+      middlewares:
+        - basic-auth
 
 
   middlewares:
-    #! #################### Traefik API Auth & Redirect #################### !#
-    traefik-api-https-redirect:
+    #! #################### Common Middlewares #################### !#
+    https-redirect:
       redirectScheme:
         scheme: https
         permanent: true
 
-    traefik-api-auth:
+    basic-auth:
       basicAuth:
         users:
-          - '{{ env "TRAEFIK_USERNAME" }}:{{ env "TRAEFIK_HTPASSWORD" }}'
+          - '{{ env "BASIC_AUTH_USERNAME" }}:{{ env "BASIC_AUTH_HTPASSWORD" }}'
 
     #! #################### App Rate limits #################### !#
     app-instances-ratelimit:
