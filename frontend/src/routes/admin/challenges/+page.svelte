@@ -55,7 +55,7 @@
 		if (!confirm('Are you sure you want to permanently delete this challenge?')) return;
 
 		try {
-			await deleteChallenge(challId.toString());
+			await deleteChallenge(challId);
 			showSuccess('Challenge deleted successfully.');
 			loadChallenges();
 		} catch (err: any) {
@@ -131,9 +131,7 @@
 			<p class="text-sm">{error}</p>
 		</div>
 	{:else if challenges.length === 0}
-		<Card.Root class="text-muted-foreground p-8 text-center">
-			No challenges found.
-		</Card.Root>
+		<Card.Root class="text-muted-foreground p-8 text-center">No challenges found.</Card.Root>
 	{:else}
 		<Card.Root class="overflow-hidden border-0 shadow-sm">
 			<Card.Content class="p-0">
@@ -253,7 +251,3 @@
 		</Card.Root>
 	{/if}
 </div>
-
-
-
-

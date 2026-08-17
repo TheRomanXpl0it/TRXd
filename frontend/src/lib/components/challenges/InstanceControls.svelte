@@ -40,18 +40,22 @@
 	}
 
 	function updateChallengeQueryCache(patch: Record<string, any>) {
-		queryClient.setQueryData(['challenges'], (old: any) => updateChallengeCache(old, challenge.id, patch));
+		queryClient.setQueryData(['challenges'], (old: any) =>
+			updateChallengeCache(old, challenge.id, patch)
+		);
 	}
 
 	function usesHashDomain(ch: any) {
-		return ch?.instance_hash_domain === true || ch?.docker_config?.hash_domain === true;
+		return ch?.instance_hash_domain === true || ch?.hash_domain === true;
 	}
 
 	async function createInstance() {
 		if (creatingInstance || !challenge?.id) return;
 		creatingInstance = true;
 		try {
-			const { host, port, timeout, hash_domain, instance_renewable } = await startInstance(Number(challenge.id));
+			const { host, port, timeout, hash_domain, instance_renewable } = await startInstance(
+				Number(challenge.id)
+			);
 			const instanceHashDomain = hash_domain ?? usesHashDomain(challenge);
 			const patch = {
 				instance_host: host,
@@ -165,7 +169,7 @@
 		{#if countdown > 0}
 			<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
 				<button
-					class="bg-green-600 hover:bg-green-700 active:scale-[0.99] flex h-11 min-w-0 w-full items-center justify-center gap-3 overflow-hidden rounded-lg px-4 text-xs font-bold text-white shadow-sm transition-all sm:flex-1"
+					class="flex h-11 w-full min-w-0 items-center justify-center gap-3 overflow-hidden rounded-lg bg-green-600 px-4 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.99] sm:flex-1"
 					onclick={() => copyToClipboard(connectionString)}
 					title="Click to copy connection address"
 					aria-label="Copy instance connection address"
@@ -177,7 +181,7 @@
 				</button>
 
 				<div class="flex shrink-0 items-center gap-2">
-					{#if showTimer && challenge?.instance_renewable !== false}
+					{#if showTimer && (challenge?.instance_renewable ?? challenge?.renewable) !== false}
 						<div
 							class="bg-muted/40 border-border/60 flex h-11 flex-1 shrink-0 items-center gap-2 rounded-lg border px-3 text-green-600 sm:flex-none dark:text-green-500"
 						>
@@ -194,7 +198,9 @@
 								{/if}
 							</button>
 							<div class="bg-border/70 h-5 w-px"></div>
-							<div class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums">
+							<div
+								class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums"
+							>
 								<Clock class="h-4 w-4" />
 								<span>{formatCountdown(countdown)}</span>
 							</div>
@@ -203,7 +209,9 @@
 						<div
 							class="bg-muted/40 border-border/60 flex h-11 flex-1 shrink-0 items-center gap-3 rounded-lg border px-4 text-green-600 sm:flex-none dark:text-green-500"
 						>
-							<div class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums">
+							<div
+								class="flex shrink-0 items-center gap-1.5 font-mono text-sm font-black tabular-nums"
+							>
 								<Clock class="h-4 w-4" />
 								<span>{formatCountdown(countdown)}</span>
 							</div>

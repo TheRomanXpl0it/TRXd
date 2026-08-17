@@ -4,17 +4,20 @@
 	import { Label } from '$lib/components/ui/label';
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Input } from '$lib/components/ui/input';
+	import { Textarea } from '$lib/components/ui/textarea';
 	import DateTimePicker from '$lib/components/ui/date-time-picker.svelte';
 	import { authState } from '$lib/stores/auth';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import * as Card from '$lib/components/ui/card';
+	import { Eye, EyeOff } from '@lucide/svelte';
 
 	type ConfigType =
 		| 'bool'
 		| 'int'
 		| 'float'
 		| 'string'
+		| 'text'
 		| 'date'
 		| 'url'
 		| 'port'
@@ -45,6 +48,7 @@
 
 	let configs = $state<Config[]>([]);
 	let form = $state<Record<string, FormValue>>({});
+	let visibleSecrets = $state<Record<string, boolean>>({});
 	let activeTab = $state('');
 	let fetchedOnce = $state(false);
 
@@ -75,6 +79,7 @@
 			type === 'int' ||
 			type === 'float' ||
 			type === 'string' ||
+			type === 'text' ||
 			type === 'date' ||
 			type === 'url' ||
 			type === 'port' ||
@@ -96,7 +101,9 @@
 	}
 
 	function getCategoryKey(category: Config['category']): string {
-		const value = String(category ?? '').trim().toLowerCase();
+		const value = String(category ?? '')
+			.trim()
+			.toLowerCase();
 		if (!value) return 'general';
 		return value.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'general';
 	}
@@ -109,11 +116,7 @@
 	function groupConfigs(list: Config[]): ConfigGroup[] {
 		const groups = new Map<string, ConfigGroup>();
 
-		for (const config of [...list].sort((a, b) => {
-			const nameCompare = getDisplayName(a).localeCompare(getDisplayName(b));
-			if (nameCompare !== 0) return nameCompare;
-			return a.key.localeCompare(b.key);
-		})) {
+		for (const config of list) {
 			const key = getCategoryKey(config.category);
 			const label = getCategoryLabel(config.category);
 			const group = groups.get(key);
@@ -130,11 +133,7 @@
 			});
 		}
 
-		return [...groups.values()].sort((a, b) => {
-			if (a.key === 'general') return -1;
-			if (b.key === 'general') return 1;
-			return a.label.localeCompare(b.label);
-		});
+		return [...groups.values()];
 	}
 
 	function toDateTimeInputValue(raw: unknown): string {
@@ -215,15 +214,14 @@
 		return false;
 	}
 
-	function getInputType(config: Config):
-		| 'text'
-		| 'number'
-		| 'url'
-		| 'password' {
+	function getInputType(
+		config: Config,
+		secretVisible = false
+	): 'text' | 'number' | 'url' | 'password' {
 		const t = normalizeType(config.type);
+		if (config.secret && !secretVisible) return 'password';
 		if (t === 'url') return 'url';
 		if (isNumericType(t)) return 'number';
-		if (config.secret) return 'password';
 		return 'text';
 	}
 
@@ -347,19 +345,21 @@
 			<p class="text-muted-foreground">Loading configuration...</p>
 		</div>
 	{:else if isReady && !isAdmin}
-		<div class="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive">
+		<div class="border-destructive/20 bg-destructive/10 text-destructive rounded-lg border p-4">
 			<p class="font-semibold">Access denied</p>
 			<p class="text-sm">Administrator access is required to edit configuration.</p>
 		</div>
 	{:else if error}
-		<div class="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive">
+		<div class="border-destructive/20 bg-destructive/10 text-destructive rounded-lg border p-4">
 			<p class="font-semibold">Error loading configuration</p>
 			<p class="text-sm">{error}</p>
 		</div>
 	{:else if groupedConfigs.length === 0}
 		<div class="rounded-lg border p-6">
 			<p class="font-semibold">No configuration entries found</p>
-			<p class="text-muted-foreground mt-1 text-sm">The server did not return any editable settings.</p>
+			<p class="text-muted-foreground mt-1 text-sm">
+				The server did not return any editable settings.
+			</p>
 		</div>
 	{:else}
 		<div class="space-y-6 pb-20">
@@ -391,13 +391,19 @@
 						{#each group.configs as c (c.key)}
 							{@const normalizedType = normalizeType(c.type)}
 							{@const invalid = isInvalidFormValue(c, form[c.key])}
-							<Card.Root class="flex flex-col gap-4 p-5">
+							<Card.Root
+								class="flex flex-col gap-4 p-5 {normalizedType === 'text'
+									? 'md:col-span-2 xl:col-span-3'
+									: ''}"
+							>
 								<div class="flex items-start justify-between gap-3">
 									<div class="min-w-0 flex-1">
 										<Label class="block truncate text-sm font-bold">{getDisplayName(c)}</Label>
 										<p class="text-muted-foreground mt-1 font-mono text-[11px]">{c.key}</p>
 										{#if c.description}
-											<p class="text-muted-foreground mt-2 text-xs leading-relaxed">{c.description}</p>
+											<p class="text-muted-foreground mt-2 text-xs leading-relaxed">
+												{c.description}
+											</p>
 										{/if}
 									</div>
 									<div class="flex shrink-0 items-center gap-2">
@@ -433,24 +439,49 @@
 									{:else if normalizedType === 'date'}
 										<DateTimePicker
 											bind:value={form[c.key]}
-											invalid={invalid}
+											{invalid}
 											class="h-9"
 											placeholder="Select date and time"
 										/>
 										{#if invalid}
 											<p class="text-destructive text-xs">{getValidationMessage(c)}</p>
 										{/if}
-									{:else}
-										<Input
-											type={getInputType(c)}
-											bind:value={form[c.key]}
-											class="h-9"
-											min={getMin(c)}
-											step={getStep(c)}
-											inputmode={getInputMode(c)}
-											placeholder={normalizedType === 'date' ? 'Select date and time' : 'Value'}
+									{:else if normalizedType === 'text'}
+										<Textarea
+											value={String(form[c.key] ?? '')}
+											oninput={(event) => (form[c.key] = event.currentTarget.value)}
+											rows={8}
+											class="min-h-40 resize-y font-mono"
+											placeholder="Value"
 											aria-invalid={invalid}
 										/>
+									{:else}
+										<div class="relative">
+											<Input
+												type={getInputType(c, visibleSecrets[c.key])}
+												bind:value={form[c.key]}
+												class={c.secret ? 'h-9 pr-10' : 'h-9'}
+												min={getMin(c)}
+												step={getStep(c)}
+												inputmode={getInputMode(c)}
+												placeholder="Value"
+												aria-invalid={invalid}
+											/>
+											{#if c.secret}
+												<button
+													type="button"
+													class="text-muted-foreground hover:text-foreground absolute right-0 top-0 inline-flex h-9 w-9 items-center justify-center"
+													aria-label={`${visibleSecrets[c.key] ? 'Hide' : 'Show'} ${getDisplayName(c)}`}
+													onclick={() => (visibleSecrets[c.key] = !visibleSecrets[c.key])}
+												>
+													{#if visibleSecrets[c.key]}
+														<EyeOff class="h-4 w-4" />
+													{:else}
+														<Eye class="h-4 w-4" />
+													{/if}
+												</button>
+											{/if}
+										</div>
 										{#if invalid}
 											<p class="text-destructive text-xs">{getValidationMessage(c)}</p>
 										{/if}

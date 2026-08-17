@@ -59,7 +59,7 @@ export async function createChallenge(
 	});
 }
 
-export async function deleteChallenge(chall_id: string): Promise<any> {
+export async function deleteChallenge(chall_id: number): Promise<any> {
 	return api<any>(`/challenges`, {
 		headers: { 'content-type': 'application/json' },
 		method: 'DELETE',

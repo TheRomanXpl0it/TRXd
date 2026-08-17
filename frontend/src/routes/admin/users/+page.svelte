@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { resetUserPassword, getUserByEmail, getUserByName } from '$lib/user';
+	import { resetUserPassword, getUserByEmail, getUserByName, updateUserRole } from '$lib/user';
 	import { Button } from '$lib/components/ui/button';
 	import { authState } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
@@ -7,6 +7,8 @@
 	import { Label } from '$lib/components/ui/label';
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
+	import * as Select from '$lib/components/ui/select';
+	import { Select as SelectPrimitive } from 'bits-ui';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { Search, KeyRound, User as UserIcon, ExternalLink, ShieldAlert } from '@lucide/svelte';
 	import { showSuccess, showError } from '$lib/utils/toast';
@@ -22,11 +24,14 @@
 	let newPassword = $state('');
 	let showResetDialog = $state(false);
 	let resetting = $state(false);
+	let changingRoleIds = $state<Set<number>>(new Set());
 
 	const userMode = $derived(authState.userMode);
 	const lookupSubject = $derived(userMode ? 'team name' : 'name');
 	const pageDescription = $derived(
-		userMode ? 'Search users through their team records and manage account security' : 'Search users and manage account security'
+		userMode
+			? 'Search users through their team records and manage account security'
+			: 'Search users and manage account security'
 	);
 	const searchDescription = $derived(
 		userMode
@@ -37,10 +42,20 @@
 		userMode ? 'Exact team name (e.g. team rocket)' : 'Exact username (e.g. alice)'
 	);
 	const identityHeader = $derived(userMode ? 'Team / Email' : 'Name / Username');
-	const emptyStateLabel = $derived(userMode ? 'team-backed user' : 'user');
+	const emptyStateLabel = $derived(userMode ? 'team' : 'user');
 	const resetTargetId = $derived(
-		selectedUser ? (userMode ? selectedUser.user_id ?? null : selectedUser.id) : null
+		selectedUser ? (userMode ? (selectedUser.user_id ?? null) : selectedUser.id) : null
 	);
+
+	function getRoleTargetId(user: any): number | null {
+		const id = Number(userMode ? user.user_id : user.id);
+		return Number.isInteger(id) && id >= 0 ? id : null;
+	}
+
+	function getEditableRole(user: any): 'Player' | 'Author' | 'Admin' {
+		if (user?.role === 'Author' || user?.role === 'Admin') return user.role;
+		return 'Player';
+	}
 
 	$effect(() => {
 		if (!authState.ready) return;
@@ -68,13 +83,13 @@
 		searched = true;
 		try {
 			const q = query.trim();
-			let user: any = null;
+			let users: any[] = [];
 			if (searchType === 'email') {
-				user = await getUserByEmail(q);
+				users = await getUserByEmail(q);
 			} else {
-				user = await getUserByName(q);
+				users = await getUserByName(q);
 			}
-			results = user ? [user] : [];
+			results = users;
 		} catch (err: any) {
 			const msg: string = err?.message?.toLowerCase() ?? '';
 			const isNotFound =
@@ -106,6 +121,29 @@
 			showError(err, 'Failed to reset password');
 		} finally {
 			resetting = false;
+		}
+	}
+
+	async function handleRoleChange(user: any, newRole: string) {
+		const userId = getRoleTargetId(user);
+		const previousRole = getEditableRole(user);
+		if (userId === null || newRole === previousRole || !['Player', 'Author'].includes(newRole)) {
+			return;
+		}
+
+		changingRoleIds = new Set(changingRoleIds).add(userId);
+		try {
+			await updateUserRole(userId, newRole);
+			results = results.map((result) =>
+				getRoleTargetId(result) === userId ? { ...result, role: newRole } : result
+			);
+			showSuccess(`Role for ${user.name} updated to ${newRole}.`);
+		} catch (err: any) {
+			showError(err, 'Failed to update user role');
+		} finally {
+			const next = new Set(changingRoleIds);
+			next.delete(userId);
+			changingRoleIds = next;
 		}
 	}
 </script>
@@ -213,6 +251,8 @@
 						</Table.Header>
 						<Table.Body>
 							{#each results as user (user.id)}
+								{@const roleTargetId = getRoleTargetId(user)}
+								{@const editableRole = getEditableRole(user)}
 								<Table.Row class="hover:bg-muted/50 group border-none transition-colors">
 									<Table.Cell class="font-mono text-xs">{user.id}</Table.Cell>
 									<Table.Cell>
@@ -230,11 +270,44 @@
 										</div>
 									</Table.Cell>
 									<Table.Cell>
-										<span
-											class="bg-secondary text-secondary-foreground rounded px-1.5 py-0.5 text-[10px] font-bold uppercase"
+										<Select.Root
+											type="single"
+											value={editableRole}
+											disabled={roleTargetId === null || changingRoleIds.has(roleTargetId)}
+											onValueChange={(newRole) => handleRoleChange(user, newRole)}
 										>
-											{user.role || 'User'}
-										</span>
+											<Select.Trigger
+												aria-label={`Role for ${user.name}`}
+												class="border-border/80 bg-card hover:bg-accent/60 focus-visible:ring-primary/30 h-9 min-w-29 rounded-lg px-3 text-xs font-semibold shadow-xs transition-all"
+											>
+												<SelectPrimitive.Value />
+											</Select.Trigger>
+											<Select.Content
+												class="border-border/80 bg-popover/98 min-w-(--bits-select-anchor-width) rounded-lg p-1.5 shadow-xl backdrop-blur-sm"
+											>
+												<Select.Item
+													value="Player"
+													class="data-[selected]:bg-primary/10 data-[selected]:text-primary data-[highlighted]:bg-primary data-[highlighted]:text-primary-foreground rounded-md px-2.5 py-2 text-xs font-semibold transition-colors"
+												>
+													<div class="flex items-center gap-2"><UserIcon class="size-3.5" />Player</div>
+												</Select.Item>
+												<Select.Item
+													value="Author"
+													class="data-[selected]:bg-primary/10 data-[selected]:text-primary data-[highlighted]:bg-primary data-[highlighted]:text-primary-foreground rounded-md px-2.5 py-2 text-xs font-semibold transition-colors"
+												>
+													<div class="flex items-center gap-2"><KeyRound class="size-3.5" />Author</div>
+												</Select.Item>
+												{#if editableRole === 'Admin'}
+													<Select.Item
+														value="Admin"
+														disabled
+														class="rounded-md px-2.5 py-2 text-xs font-semibold"
+													>
+														<div class="flex items-center gap-2"><ShieldAlert class="size-3.5" />Admin</div>
+													</Select.Item>
+												{/if}
+											</Select.Content>
+										</Select.Root>
 									</Table.Cell>
 									<Table.Cell class="text-right">
 										<div class="flex items-center justify-end gap-1">
@@ -273,9 +346,8 @@
 		>
 			<UserIcon class="text-muted-foreground mb-2 h-10 w-10 opacity-20" />
 			<p class="text-muted-foreground text-sm">
-				No {emptyStateLabel} found with {searchType === 'name' ? lookupSubject : 'email'} <span class="text-foreground font-medium"
-					>"{query}"</span
-				>
+				No {emptyStateLabel} found with {searchType === 'name' ? lookupSubject : 'email'}
+				<span class="text-foreground font-medium">"{query}"</span>
 			</p>
 		</div>
 	{/if}

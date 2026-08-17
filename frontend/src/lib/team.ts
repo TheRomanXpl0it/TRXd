@@ -11,12 +11,16 @@ function isTeamsArrayResponse(response: SearchTeamsResponse): response is { team
 	return typeof response === 'object' && response !== null && 'teams' in response;
 }
 
-function parseSearchTeamResponse(response: SearchTeamsResponse): Team | null {
-	if (isTeamsArrayResponse(response)) {
-		return response.teams?.[0] || null;
+function parseSearchTeamResponse(response: SearchTeamsResponse): Team[] {
+	if (Array.isArray(response)) {
+		return response;
 	}
 
-	return response ?? null;
+	if (isTeamsArrayResponse(response)) {
+		return response.teams ?? [];
+	}
+
+	return response ? [response] : [];
 }
 
 export async function getTeams(page = 1, limit = 20): Promise<PaginatedResponse<Team>> {
@@ -91,12 +95,12 @@ export async function joinTeamWithToken(token: string): Promise<BaseResponse> {
 	return api<BaseResponse>(`/teams/join?token=${token}`);
 }
 
-export async function getTeamByEmail(email: string): Promise<Team | null> {
+export async function getTeamByEmail(email: string): Promise<Team[]> {
 	const response = await api<SearchTeamsResponse>(`/teams/search?email=${encodeURIComponent(email)}`);
 	return parseSearchTeamResponse(response);
 }
 
-export async function getTeamByName(name: string): Promise<Team | null> {
+export async function getTeamByName(name: string): Promise<Team[]> {
 	const response = await api<SearchTeamsResponse>(`/teams/search?name=${encodeURIComponent(name)}`);
 	return parseSearchTeamResponse(response);
 }

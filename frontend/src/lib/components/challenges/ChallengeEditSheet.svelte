@@ -195,15 +195,15 @@
 							.filter(Boolean)
 					)
 				);
-				imageName = String(challenge?.docker_config?.image ?? '');
-				hashDomain = Boolean(challenge?.docker_config?.hash_domain ?? false);
-				renewable = Boolean(challenge?.docker_config?.renewable ?? true);
-				composeFile = String(challenge?.docker_config?.compose ?? '');
-				maxCPU = String(challenge?.docker_config?.max_cpu ?? '');
-				maxRam = String(challenge?.docker_config?.max_memory ?? '');
-				lifetime = String(challenge?.docker_config?.lifetime ?? '');
+				imageName = String(challenge?.image ?? '');
+				hashDomain = Boolean(challenge?.hash_domain ?? false);
+				renewable = Boolean(challenge?.renewable ?? true);
+				composeFile = String(challenge?.compose ?? '');
+				maxCPU = String(challenge?.max_cpu ?? '');
+				maxRam = String(challenge?.max_memory ?? '');
+				lifetime = String(challenge?.lifetime ?? '');
 				envVars = (() => {
-					const e = challenge?.docker_config?.envs;
+					const e = challenge?.envs;
 					if (!e) return [];
 					try {
 						const obj = JSON.parse(String(e));
@@ -357,7 +357,9 @@
 					<Cpu class="text-muted-foreground h-8 w-8" />
 				</div>
 				<div>
-					<Sheet.Title class="text-xl font-black tracking-tighter uppercase">Edit Challenge</Sheet.Title>
+					<Sheet.Title class="text-xl font-black uppercase tracking-tighter"
+						>Edit Challenge</Sheet.Title
+					>
 					<Sheet.Description class="text-muted-foreground/80 mt-1">
 						Modify settings for <b class="text-foreground">{challenge?.name ?? '-'}</b>
 					</Sheet.Description>
@@ -627,7 +629,9 @@
 									Classification
 								</h4>
 								<div>
-									<Label for="ch-instance-type" class="mb-2 block text-sm font-medium">Instance Type</Label>
+									<Label for="ch-instance-type" class="mb-2 block text-sm font-medium"
+										>Instance Type</Label
+									>
 									<CategorySelect
 										id="ch-instance-type"
 										items={instanceTypeOptions}

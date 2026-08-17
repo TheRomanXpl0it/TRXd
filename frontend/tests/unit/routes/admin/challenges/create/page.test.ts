@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/svelte';
+import { fireEvent, screen, waitFor } from '@testing-library/svelte';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '../../../../render';
@@ -72,10 +72,12 @@ describe('Admin Challenge Create Page', () => {
 
 		await user.type(screen.getByLabelText(/challenge name/i), 'Container Test');
 
-		const [categorySelect, instanceTypeSelect] = screen.getAllByRole('combobox');
+		const categorySelect = screen.getByLabelText('Category');
+		const instanceTypeSelect = screen.getByRole('combobox');
 
-		await user.click(categorySelect);
-		await user.click(await screen.findByText('Web'));
+		expect(categorySelect).toHaveClass('rounded-lg');
+		await fireEvent.keyDown(categorySelect, { key: 'ArrowDown' });
+		await fireEvent.pointerUp(await screen.findByRole('option', { name: 'Web' }));
 
 		await user.click(instanceTypeSelect);
 		await user.click(await screen.findByText('Container'));
@@ -91,7 +93,8 @@ describe('Admin Challenge Create Page', () => {
 
 		const connTypeSelect = screen.getByRole('combobox');
 		await user.click(connTypeSelect);
-		await user.click(await screen.findByText('TCP'));
+		const tcpOptions = await screen.findAllByText('TCP');
+		await user.click(tcpOptions[tcpOptions.length - 1]);
 
 		await user.click(screen.getByRole('button', { name: /^create challenge$/i }));
 

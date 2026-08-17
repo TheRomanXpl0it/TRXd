@@ -14,12 +14,16 @@ function isUsersArrayResponse(response: SearchUsersResponse): response is { user
 	return typeof response === 'object' && response !== null && 'users' in response;
 }
 
-function parseSearchUserResponse(response: SearchUsersResponse): User | null {
-	if (isUsersArrayResponse(response)) {
-		return response.users?.[0] || null;
+function parseSearchUserResponse(response: SearchUsersResponse): User[] {
+	if (Array.isArray(response)) {
+		return response;
 	}
 
-	return response ?? null;
+	if (isUsersArrayResponse(response)) {
+		return response.users ?? [];
+	}
+
+	return response ? [response] : [];
 }
 
 export async function getUsers(page = 1, limit = 20): Promise<PaginatedResponse<User>> {
@@ -99,20 +103,20 @@ export async function resetUserPassword(
 	});
 }
 
-export async function getUserByEmail(email: string): Promise<User | null> {
+export async function getUserByEmail(email: string): Promise<User[]> {
 	if (authState.userMode) {
-		const team = await getTeamByEmail(email);
-		return team ? { ...team, role: (team.role as any) || 'User' } as User : null;
+		const teams = await getTeamByEmail(email);
+		return teams.map((result) => ({ ...result, role: (result.role as any) || 'User' }) as User);
 	}
 
 	const response = await api<SearchUsersResponse>(`/users/search?email=${encodeURIComponent(email)}`);
 	return parseSearchUserResponse(response);
 }
 
-export async function getUserByName(name: string): Promise<User | null> {
+export async function getUserByName(name: string): Promise<User[]> {
 	if (authState.userMode) {
-		const team = await getTeamByName(name);
-		return team ? { ...team, role: (team.role as any) || 'User' } as User : null;
+		const teams = await getTeamByName(name);
+		return teams.map((result) => ({ ...result, role: (result.role as any) || 'User' }) as User);
 	}
 
 	const response = await api<SearchUsersResponse>(`/users/search?name=${encodeURIComponent(name)}`);

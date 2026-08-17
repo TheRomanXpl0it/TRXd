@@ -6,6 +6,8 @@
 	import { Checkbox } from '$lib/components/ui/checkbox';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card';
+	import * as Select from '$lib/components/ui/select';
+	import { Select as SelectPrimitive } from 'bits-ui';
 	import { toast } from 'svelte-sonner';
 	import {
 		createChallenge,
@@ -278,11 +280,27 @@
 							</div>
 							<div class="space-y-2">
 								<Label for="category">Category*</Label>
-								<CategorySelect
-									items={categories}
-									bind:value={category}
-									placeholder="Select Category..."
-								/>
+								<Select.Root type="single" bind:value={category} items={categories}>
+									<Select.Trigger
+										id="category"
+										aria-label="Category"
+										class="border-border/80 bg-card hover:bg-accent/60 focus-visible:ring-primary/30 h-9 w-full rounded-lg px-3 text-sm font-medium shadow-xs transition-all"
+									>
+										<SelectPrimitive.Value placeholder="Select category..." />
+									</Select.Trigger>
+									<Select.Content
+										class="border-border/80 bg-popover/98 min-w-(--bits-select-anchor-width) rounded-lg p-1.5 shadow-xl backdrop-blur-sm"
+									>
+										{#each categories as categoryOption (categoryOption.value)}
+											<Select.Item
+												value={categoryOption.value}
+												class="data-[selected]:bg-primary/10 data-[selected]:text-primary data-[highlighted]:bg-primary data-[highlighted]:text-primary-foreground rounded-md px-2.5 py-2 text-sm font-medium transition-colors"
+											>
+												{categoryOption.label}
+											</Select.Item>
+										{/each}
+									</Select.Content>
+								</Select.Root>
 							</div>
 						</div>
 

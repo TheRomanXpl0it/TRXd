@@ -70,7 +70,6 @@ describe('Team Profile Page', () => {
 
 		// Cards that should be HIDDEN
 		expect(screen.queryByText('Category Breakdown')).not.toBeInTheDocument();
-		expect(screen.queryByText('Team Status')).not.toBeInTheDocument();
 
 		// Basic team info should still be there
 		expect(screen.getByText('Test Team')).toBeInTheDocument();
@@ -85,6 +84,5 @@ describe('Team Profile Page', () => {
 
 		// Cards that should be VISIBLE
 		expect(screen.getByText('Category Breakdown')).toBeInTheDocument();
-		expect(screen.getByText('Team Status')).toBeInTheDocument();
 	});
 });

@@ -64,7 +64,7 @@ export interface Challenge {
 	name: string;
 	description: string;
 	category: string;
-	instance_type: 'Static' | 'Container' | 'Compose';
+	instance_type?: 'Static' | 'Container' | 'Compose';
 	score_type: 'Static' | 'Dynamic';
 	points: number;
 	max_points?: number;
@@ -94,6 +94,12 @@ export interface Challenge {
 	timeout?: number | null;
 	image?: string;
 	compose?: string;
+	lifetime?: number;
+	renewable?: boolean;
+	hash_domain?: boolean;
+	envs?: string;
+	max_memory?: number;
+	max_cpu?: string;
 
 	// Solve state
 	solved?: boolean;
@@ -103,16 +109,6 @@ export interface Challenge {
 	// Admin fields
 	hidden?: boolean;
 	flags?: Flag[];
-	docker_config?: {
-		image: string;
-		compose: string;
-		hash_domain: boolean;
-		lifetime: number;
-		renewable: boolean;
-		envs: string;
-		max_memory: number;
-		max_cpu: string;
-	};
 }
 
 export interface Solve {
@@ -137,8 +133,8 @@ export interface PasswordResetResponse extends BaseResponse {
 	new_password?: string;
 }
 
-export type SearchUsersResponse = User | { users: User[] };
+export type SearchUsersResponse = User | User[] | { users: User[] };
 
-export type SearchTeamsResponse = Team | { teams: Team[] };
+export type SearchTeamsResponse = Team | Team[] | { teams: Team[] };
 
-export interface ApiError extends BaseResponse { }
+export interface ApiError extends BaseResponse {}

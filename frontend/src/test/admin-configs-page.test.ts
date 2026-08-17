@@ -85,6 +85,61 @@ describe('Admin configs page', () => {
 		await screen.findByText('JWT Secret');
 		expect(container.querySelector('input[type="password"]')).toBeInTheDocument();
 		expect(screen.queryByRole('button', { name: /Select date and time/i })).not.toBeInTheDocument();
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Show JWT Secret' }));
+		expect(container.querySelector('input[type="password"]')).not.toBeInTheDocument();
+		expect(container.querySelector('input[type="text"]')).toHaveValue('secret-value');
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Hide JWT Secret' }));
+		expect(container.querySelector('input[type="password"]')).toBeInTheDocument();
+	});
+
+	it('preserves the config and category order returned by the backend', async () => {
+		getConfigsMock.mockResolvedValue([
+			{ key: 'z-first', type: 'string', value: '', category: 'zeta', name: 'Z First' },
+			{ key: 'b-second', type: 'string', value: '', category: 'zeta', name: 'B Second' },
+			{ key: 'a-third', type: 'string', value: '', category: 'alpha', name: 'A Third' }
+		]);
+
+		const { container } = render(Page);
+		await screen.findByText('Z First');
+
+		const tabLabels = [...container.querySelectorAll('button')]
+			.map((button) => button.textContent?.trim() ?? '')
+			.filter((label) => /^(Zeta|Alpha)/.test(label));
+		expect(tabLabels).toEqual(['Zeta 2', 'Alpha 1']);
+
+		const fieldLabels = [...container.querySelectorAll('label')].map((label) =>
+			label.textContent?.trim()
+		);
+		expect(fieldLabels).toEqual(['Z First', 'B Second']);
+	});
+
+	it('edits and saves multiline text configs without removing newlines', async () => {
+		getConfigsMock.mockResolvedValue([
+			{
+				key: 'email-body-template',
+				type: 'text',
+				value: 'Hello\nworld',
+				category: 'email',
+				name: 'Email Body Template'
+			}
+		]);
+
+		const { container } = render(Page);
+		await screen.findByText('Email Body Template');
+
+		const textarea = container.querySelector('textarea');
+		expect(textarea).toHaveValue('Hello\nworld');
+		await fireEvent.input(textarea!, { target: { value: 'Line 1\nLine 2\n\n{{TOKEN}}' } });
+		await fireEvent.click(screen.getByRole('button', { name: /Save Changes/i }));
+
+		expect(updateConfigsMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				key: 'email-body-template',
+				value: 'Line 1\nLine 2\n\n{{TOKEN}}'
+			})
+		);
 	});
 
 	it('saves edited date configs back as RFC3339 timestamps', async () => {

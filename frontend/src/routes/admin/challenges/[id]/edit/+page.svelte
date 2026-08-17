@@ -94,25 +94,21 @@
 						: [{ flag: '', regex: false }];
 				originalFlags = JSON.parse(JSON.stringify(flags));
 
-				imageName = data.challenge.docker_config?.image || data.challenge.image || '';
-				composeFile = data.challenge.docker_config?.compose || data.challenge.compose || '';
-				lifetime = data.challenge.docker_config?.lifetime || data.challenge.timeout || 1800;
-				maxMemory = data.challenge.docker_config?.max_memory || 0;
-				maxCpu = data.challenge.docker_config?.max_cpu || '';
-				hashDomain = data.challenge.docker_config
-					? !!data.challenge.docker_config.hash_domain
-					: !!data.challenge.instance_hash_domain;
-				renewable = data.challenge.docker_config
-					? !!data.challenge.docker_config.renewable
-					: !!data.challenge.instance_renewable;
+				imageName = data.challenge.image ?? '';
+				composeFile = data.challenge.compose ?? '';
+				lifetime = data.challenge.lifetime ?? 1800;
+				maxMemory = data.challenge.max_memory ?? 0;
+				maxCpu = data.challenge.max_cpu ?? '';
+				hashDomain = !!data.challenge.hash_domain;
+				renewable = data.challenge.renewable ?? true;
 
 				tags = data.challenge.tags || [];
 				existingAttachments = data.challenge.attachments || [];
 				authorsCsv = (data.challenge.authors || []).join(', ');
 
-				if (data.challenge.docker_config?.envs) {
+				if (data.challenge.envs) {
 					try {
-						const parsedEnvs = JSON.parse(data.challenge.docker_config.envs);
+						const parsedEnvs = JSON.parse(data.challenge.envs);
 						envVars = Object.entries(parsedEnvs).map(([name, value]) => ({
 							name,
 							value: String(value)

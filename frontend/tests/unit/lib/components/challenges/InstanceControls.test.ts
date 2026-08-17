@@ -166,7 +166,9 @@ describe('InstanceControls Component', () => {
 		});
 
 		// Click the running instance button (green background with connection string)
-		const instanceButton = screen.getByRole('button', { name: /copy instance connection address/i });
+		const instanceButton = screen.getByRole('button', {
+			name: /copy instance connection address/i
+		});
 		await user.click(instanceButton);
 
 		// Verify clipboard API was called with connection string
@@ -342,7 +344,12 @@ describe('InstanceControls Component', () => {
 
 	it('formats countdown timer correctly for hours', async () => {
 		const challengeId = Math.floor(Math.random() * 10000);
-		const challenge = { id: challengeId, instance_host: 'test.com', instance_port: 1337, timeout: 3600 };
+		const challenge = {
+			id: challengeId,
+			instance_host: 'test.com',
+			instance_port: 1337,
+			timeout: 3600
+		};
 
 		renderWithProviders(InstanceControls, {
 			props: {
@@ -357,7 +364,12 @@ describe('InstanceControls Component', () => {
 
 	it('formats countdown timer correctly for minutes', async () => {
 		const challengeId = Math.floor(Math.random() * 10000);
-		const challenge = { id: challengeId, instance_host: 'test.com', instance_port: 1337, timeout: 3600 };
+		const challenge = {
+			id: challengeId,
+			instance_host: 'test.com',
+			instance_port: 1337,
+			timeout: 3600
+		};
 
 		renderWithProviders(InstanceControls, {
 			props: {
@@ -372,7 +384,12 @@ describe('InstanceControls Component', () => {
 
 	it('formats countdown timer correctly for seconds only', async () => {
 		const challengeId = Math.floor(Math.random() * 10000);
-		const challenge = { id: challengeId, instance_host: 'test.com', instance_port: 1337, timeout: 3600 };
+		const challenge = {
+			id: challengeId,
+			instance_host: 'test.com',
+			instance_port: 1337,
+			timeout: 3600
+		};
 
 		renderWithProviders(InstanceControls, {
 			props: {
@@ -446,14 +463,14 @@ describe('InstanceControls Component', () => {
 		expect(screen.getByText('ncat --ssl abc123.ctf.example.com 443')).toBeInTheDocument();
 	});
 
-	it('uses docker config hash-domain fallback when instance_hash_domain is absent', async () => {
+	it('uses the flat challenge hash-domain field when instance_hash_domain is absent', async () => {
 		const challengeId = Math.floor(Math.random() * 10000);
 		const challenge = {
 			id: challengeId,
 			conn_type: 'TCP',
 			instance_host: 'abc123.ctf.example.com',
 			instance_port: null,
-			docker_config: { hash_domain: true },
+			hash_domain: true,
 			timeout: 3600
 		};
 
@@ -465,6 +482,23 @@ describe('InstanceControls Component', () => {
 		});
 
 		expect(screen.getByText('ncat --ssl abc123.ctf.example.com 443')).toBeInTheDocument();
+	});
+
+	it('uses the flat renewable field for an already running instance', () => {
+		renderWithProviders(InstanceControls, {
+			props: {
+				challenge: {
+					id: 42,
+					instance_host: 'ctf.example.com',
+					instance_port: 1337,
+					renewable: false
+				},
+				countdown: 3600
+			}
+		});
+
+		expect(screen.queryByTitle('Renew Instance')).not.toBeInTheDocument();
+		expect(screen.getByText('1:00:00')).toBeInTheDocument();
 	});
 
 	it('handles clipboard copy failure gracefully', async () => {
@@ -536,7 +570,9 @@ describe('InstanceControls Component', () => {
 		});
 
 		// Should show running instance with countdown
-		expect(screen.getByRole('button', { name: /copy instance connection address/i })).toBeInTheDocument();
+		expect(
+			screen.getByRole('button', { name: /copy instance connection address/i })
+		).toBeInTheDocument();
 		// Should NOT show Start Instance button
 		expect(screen.queryByRole('button', { name: /start.*instance/i })).not.toBeInTheDocument();
 	});
@@ -562,10 +598,13 @@ describe('InstanceControls Component', () => {
 
 		// Update countdown to 30 seconds
 		await rerender({ challenge, countdown: 30 });
-		
-		await waitFor(() => {
-			expect(screen.getByText('0:30')).toBeInTheDocument();
-		}, { timeout: 3000 });
+
+		await waitFor(
+			() => {
+				expect(screen.getByText('0:30')).toBeInTheDocument();
+			},
+			{ timeout: 3000 }
+		);
 		expect(screen.queryByText(/1:00:00/)).not.toBeInTheDocument();
 	});
 
@@ -586,7 +625,9 @@ describe('InstanceControls Component', () => {
 		});
 
 		// Should show running instance
-		expect(screen.getByRole('button', { name: /copy instance connection address/i })).toBeInTheDocument();
+		expect(
+			screen.getByRole('button', { name: /copy instance connection address/i })
+		).toBeInTheDocument();
 
 		// Update countdown to 0 (expired)
 		await rerender({
@@ -595,9 +636,12 @@ describe('InstanceControls Component', () => {
 		});
 
 		// Should now show start button
-		await waitFor(() => {
-			expect(screen.getByRole('button', { name: /start.*instance/i })).toBeInTheDocument();
-		}, { timeout: 3000 });
+		await waitFor(
+			() => {
+				expect(screen.getByRole('button', { name: /start.*instance/i })).toBeInTheDocument();
+			},
+			{ timeout: 3000 }
+		);
 		expect(
 			screen.queryByRole('button', { name: /copy instance connection address/i })
 		).not.toBeInTheDocument();

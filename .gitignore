@@ -39,6 +39,8 @@ attachments/
 tmp/
 
 # Other files
+.serena/
+compose.local.yml
 *.bashrc
 *.pyc
 __pycache__/

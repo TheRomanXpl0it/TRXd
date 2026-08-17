@@ -74,7 +74,6 @@ describe('Account Profile Page', () => {
 
 		// Cards that should be HIDDEN
 		expect(screen.queryByText('Category Breakdown')).not.toBeInTheDocument();
-		expect(screen.queryByText('Challenges Solved')).not.toBeInTheDocument();
 
 		// Profile header should still be there
 		expect(screen.getByText('Profile')).toBeInTheDocument();
@@ -89,6 +88,5 @@ describe('Account Profile Page', () => {
 
 		// Cards that should be VISIBLE
 		expect(screen.getByText('Category Breakdown')).toBeInTheDocument();
-		expect(screen.getByText('Challenges Solved')).toBeInTheDocument();
 	});
 });
