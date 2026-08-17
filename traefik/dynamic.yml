@@ -139,7 +139,7 @@ http:
     basic-auth:
       basicAuth:
         users:
-          - '{{ env "BASIC_AUTH_USERNAME" }}:{{ env "BASIC_AUTH_HTPASSWORD" }}'
+          - '{{ env "BASIC_AUTH_USERNAME" }}:{{ env "BASIC_AUTH_HTPASSWD" }}'
 
     #! #################### App Rate limits #################### !#
     app-instances-ratelimit:

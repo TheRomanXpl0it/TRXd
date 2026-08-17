@@ -87,7 +87,7 @@ services:
     restart: always
     environment:
       - BASIC_AUTH_USERNAME=${BASIC_AUTH_USERNAME:?}
-      - BASIC_AUTH_HTPASSWORD=${BASIC_AUTH_HTPASSWORD:?}
+      - BASIC_AUTH_HTPASSWD=${BASIC_AUTH_HTPASSWD:?}
     ports:
       - "80:80"
       - "443:443"

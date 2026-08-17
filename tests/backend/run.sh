@@ -13,6 +13,7 @@ files=(
 	instance_lifetimes.py
 	registry.py
 	registry_auth.py
+	mail_confirm.py
 	discord_webhook.py
 )
 
