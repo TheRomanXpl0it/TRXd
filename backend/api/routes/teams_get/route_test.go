@@ -211,7 +211,7 @@ func TestRoute(t *testing.T) {
 		"user_id": userID,
 	}
 	session.Get(fmt.Sprintf("/teams/%d", teamID), nil, http.StatusOK)
-	session.CheckResponse(expected)
+	session.CheckFilteredResponse(expected, "joined_at")
 
 	expected = JSON{
 		"badges": []JSON{
@@ -256,14 +256,14 @@ func TestRoute(t *testing.T) {
 		},
 	}
 	session.Get(fmt.Sprintf("/teams/%d", A.ID), nil, http.StatusOK)
-	session.CheckFilteredResponse(expected, "id", "timestamp", "user_id")
+	session.CheckFilteredResponse(expected, "id", "timestamp", "user_id", "joined_at")
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "admin@email.com", "password": "testpass"}, http.StatusOK)
 
 	expected["email"] = "a@a.a"
 	session.Get(fmt.Sprintf("/teams/%d", A.ID), nil, http.StatusOK)
-	session.CheckFilteredResponse(expected, "id", "timestamp", "user_id")
+	session.CheckFilteredResponse(expected, "id", "timestamp", "user_id", "joined_at")
 
 	expected = JSON{
 		"badges":  []any{},
@@ -287,10 +287,10 @@ func TestRoute(t *testing.T) {
 		"user_id": userID,
 	}
 	session.Get(fmt.Sprintf("/teams/%d", teamID), nil, http.StatusOK)
-	session.CheckResponse(expected)
+	session.CheckFilteredResponse(expected, "joined_at")
 
 	test_utils.UpdateConfig(t, "start-time", time.Now().Add(10*time.Hour).Format(time.RFC3339))
 	delete(expected, "total_category_challenges")
 	session.Get(fmt.Sprintf("/teams/%d", teamID), nil, http.StatusOK)
-	session.CheckResponse(expected)
+	session.CheckFilteredResponse(expected, "joined_at")
 }

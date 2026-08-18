@@ -1,5 +1,4 @@
 # TODO
- - add join time to profiles (single user mode & verify for team mode)
  - split /challenges/:id into player and author endpoints
  - instancer container restart policy editable
  - instancer container disk space limit
@@ -12,15 +11,7 @@
    - reclaimer python tests
 
 ## Frontend
- - check/fix challenge connection type (now NONE is removed, default is TCP)
- - check/fix challenge instance type (instead of Normal is now Static)
- - check/fix challenge instance type (before was called type, now is instance_type)
  - leave hash domain box even without instaces (static insance type)
- - do no sort configs by key, but by the order which are recived from the backend
- - make "text" config type a textarea instead of input (for exaple for the "email-body-template" config)
- - add the "eye" button to the secret configs to show/hide the value (toggle, not press and hold)
- - add Change Role (modal / dropdown or whatever) in another user (if the user is Player or Author) if the session user is Admin (refer to PATCH /api/users/role)
- - fix error where empty field submission does not update the value if the field was not empty before
  - force https with hash domain for instances
  - add a red drop if challenge is first blodded (on the card) in the /challenges page
  - [/] Extra:

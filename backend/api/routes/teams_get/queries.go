@@ -25,6 +25,7 @@ type TeamData struct {
 	Name                    string                               `json:"name"`
 	Email                   string                               `json:"email,omitempty"`
 	Role                    string                               `json:"role,omitempty"`
+	JoinedAt                *time.Time                           `json:"joined_at,omitempty"`
 	Score                   int32                                `json:"score"`
 	Country                 string                               `json:"country"`
 	Members                 []sqlc.GetTeamMembersRow             `json:"members,omitempty"`
@@ -132,6 +133,7 @@ func GetTeam(ctx context.Context, teamID int32, admin bool) (*TeamData, error) {
 
 		teamData.UserID = &user.ID
 		teamData.Role = string(user.Role)
+		teamData.JoinedAt = &user.CreatedAt
 		if admin {
 			teamData.Email = user.Email
 		}

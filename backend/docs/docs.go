@@ -2928,6 +2928,9 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "joined_at": {
+                    "type": "string"
+                },
                 "members": {
                     "type": "array",
                     "items": {

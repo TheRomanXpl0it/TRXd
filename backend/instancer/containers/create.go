@@ -187,8 +187,13 @@ func setupContainerConf(info *infos.ContainerInfo) (*container.Config, *containe
 	hostConf := &container.HostConfig{
 		PortBindings: nat.PortMap{},
 		RestartPolicy: container.RestartPolicy{
+			// TODO: configurable restart policy
 			Name: container.RestartPolicyAlways,
 		},
+		// TODO: configurable storage size
+		// StorageOpt: map[string]string{
+		// 	"size": "20G",
+		// },
 		Resources: container.Resources{
 			Memory:   int64(info.MaxMemory) * 1024 * 1024,
 			NanoCPUs: info.MaxCPUs,

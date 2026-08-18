@@ -1216,20 +1216,26 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByTeamID = `-- name: GetUserByTeamID :one
-SELECT id, email, role FROM users WHERE team_id = $1 LIMIT 1
+SELECT id, email, role, created_at FROM users WHERE team_id = $1 LIMIT 1
 `
 
 type GetUserByTeamIDRow struct {
-	ID    int32    `json:"id"`
-	Email string   `json:"email"`
-	Role  UserRole `json:"role"`
+	ID        int32     `json:"id"`
+	Email     string    `json:"email"`
+	Role      UserRole  `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // Retrieve a user associated with a team by team ID (Used in user mode)
 func (q *Queries) GetUserByTeamID(ctx context.Context, teamID sql.NullInt32) (GetUserByTeamIDRow, error) {
 	row := q.queryRow(ctx, q.getUserByTeamIDStmt, getUserByTeamID, teamID)
 	var i GetUserByTeamIDRow
-	err := row.Scan(&i.ID, &i.Email, &i.Role)
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Role,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
