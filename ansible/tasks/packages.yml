@@ -1,0 +1,27 @@
+- name: Install Common Packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ basic_packages }}"
+    state: present
+
+  vars:
+    basic_packages:
+      - git
+      - curl
+      - wget
+      - vim
+      - htop
+      - jq
+      - unzip
+      - zip
+      - tar
+      - gzip
+      - tree
+      - netcat-openbsd
+      - tmux
+      - ncdu
+      - zoxide
+      - btop
+      - dnsutils
+      - net-tools
+      - build-essential

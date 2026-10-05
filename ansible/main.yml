@@ -1,0 +1,26 @@
+- name: Deploy
+  hosts: all
+
+  tasks:
+    - name: Install system packages
+      ansible.builtin.import_tasks: tasks/packages.yml
+
+    - name: Install Docker
+      ansible.builtin.import_tasks: tasks/docker.yml
+
+    - name: Setup Binaries
+      ansible.builtin.import_tasks: tasks/binaries.yml
+
+    - name: Configure shell
+      ansible.builtin.import_tasks: tasks/bashrc.yml
+
+    - name: Setup Users
+      ansible.builtin.import_tasks: tasks/users.yml
+
+    - name: Setup Network
+      become: true
+      ansible.builtin.import_tasks: tasks/trxd-net.yml
+      vars:
+        subnet: "172.137.0.0/16"
+        proxy_ip: "172.137.0.2"
+        docker_network_name: "trxd-shared-internal"

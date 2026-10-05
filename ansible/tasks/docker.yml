@@ -1,0 +1,49 @@
+# https://docs.docker.com/engine/install/debian/
+
+- name: Install prerequisite packages
+  become: true
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+    update_cache: true
+
+- name: Create /etc/apt/keyrings directory
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download Docker official GPG key
+  become: true
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/debian/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: '0644'
+
+- name: Add Docker deb822 repository source
+  become: true
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/docker.sources
+    mode: '0644'
+    content: |
+      Types: deb
+      URIs: https://download.docker.com/linux/debian
+      Suites: {{ ansible_facts['distribution_release'] }}
+      Components: stable
+      Architectures: {{ 'amd64' if ansible_facts['architecture'] in ['x86_64', 'amd64'] else ('arm64' if ansible_facts['architecture'] in ['aarch64', 'arm64'] else ansible_facts['architecture']) }}
+      Signed-By: /etc/apt/keyrings/docker.asc
+
+- name: Install Docker engine and plugins
+  become: true
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+    update_cache: true

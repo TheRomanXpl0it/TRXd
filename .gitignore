@@ -46,3 +46,4 @@ compose.local.yml
 __pycache__/
 site-schema.json
 homepage
+inventory.ini

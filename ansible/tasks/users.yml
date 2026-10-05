@@ -1,0 +1,23 @@
+- name: Create users and setup groups
+  become: true
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    password: "{{ item.password | password_hash('sha512') }}"
+    groups: "{{ item.groups | default(omit) }}"
+    append: true
+    state: present
+    shell: /bin/bash
+    generate_ssh_key: true
+    ssh_key_type: ed25519
+    ssh_key_file: .ssh/id_ed25519
+  loop:
+    - { name: 'ctf', password: 'ctf', groups: 'docker'  }
+
+- name: Configure .bashrc for all users
+  ansible.builtin.include_tasks: tasks/bashrc.yml
+  vars:
+    target_user_home: "/home/{{ item.name }}"
+    target_user_name: "{{ item.name }}"
+    target_user_become: true
+  loop:
+    - { name: 'ctf' }

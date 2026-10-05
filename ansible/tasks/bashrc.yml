@@ -1,0 +1,77 @@
+- name: Bashrc Setup
+  become: "{{ target_user_become | default(false) }}"
+  ansible.builtin.blockinfile:
+    path: "{{ target_user_home | default(ansible_user_dir) }}/.bashrc"
+    create: true
+    block: "{{ bashrc_block }}"
+    owner: "{{ target_user_name | default(ansible_user) }}"
+    group: "{{ target_user_name | default(ansible_user) }}"
+    mode: '0644'
+
+  vars:
+    bashrc_block: |
+      # -------------------------------
+      # Custom shell configuration
+      # -------------------------------
+
+      export PATH="$PATH:/opt"
+
+      alias "disk"="ncdu"
+      alias "c"="clear"
+      alias "py"="python3"
+      alias ls="ls --color=auto"
+      alias "ll"="ls -al"
+      alias "l"="ls -al"
+      alias "grep"="grep --color=auto"
+
+      alias "gcl"="git clone"
+      alias "add"="git add"
+      alias "stat"="git status"
+      alias "gc"="git commit -m"
+      alias "pull"="git pull"
+      alias "push"="git push"
+
+      alias "build"="docker compose build"
+      alias "up"="docker compose up"
+      alias "upd"="docker compose up -d"
+      alias "down"="docker compose down"
+
+      alias "dock"="docker run -it --rm -v ~/.config/bashrc:/root/.bashrc -v ~/.config/bashrc:/home/.bashrc -v \"\`pwd\`:/home\" -w /home --entrypoint /bin/bash"
+      alias "dock-sh"="docker run -it --rm -v \"\`pwd\`:/home\" -w /home --entrypoint /bin/sh"
+
+      alias "lzd"="lazydocker"
+      alias "lg"="lazygit"
+      
+      md () {
+          mkdir -p "$1"
+          cd "$1"
+      }
+
+      ex () {
+          if [ -f "$1" ]; then
+              case "$1" in
+                  *.tar.bz2) tar xjf "$1" ;;
+                  *.tar.gz)  tar xzf "$1" ;;
+                  *.bz2)     bunzip2 "$1" ;;
+                  *.rar)     unrar x "$1" ;;
+                  *.gz)      gunzip "$1" ;;
+                  *.tar)     tar xf "$1" ;;
+                  *.tbz2)    tar xjf "$1" ;;
+                  *.tgz)     tar xzf "$1" ;;
+                  *.zip)     unzip "$1" ;;
+                  *.Z)       uncompress "$1" ;;
+                  *.7z)      7z x "$1" ;;
+                  *) echo "Cannot extract '$1'" ;;
+              esac
+          fi
+      }
+
+      BLUE="\[\033[1;34m\]"
+      GREEN="\[\033[1;32m\]"
+      RED="\[\033[31m\]"
+      END="\[\033[00m\]"
+
+      EXITSTATUS="\`if [ \$? = 0 ]; then echo '${GREEN}'; else echo '${RED}'; fi\`"
+      export PS1="${EXITSTATUS}\u${END}:${BLUE}\w${END}$ "
+
+      eval "$(zoxide init bash --cmd cd)"

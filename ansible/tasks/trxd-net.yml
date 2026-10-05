@@ -1,0 +1,54 @@
+- name: Block all traffic to Cloud Metadata Service
+  ansible.builtin.iptables:
+    chain: DOCKER-USER
+    destination: 169.254.169.254
+    jump: DROP
+    action: insert
+    state: present
+
+- name: Allow DNS queries (UDP port 53) to Cloud Metadata IP
+  ansible.builtin.iptables:
+    chain: DOCKER-USER
+    destination: 169.254.169.254
+    protocol: udp
+    destination_port: "53"
+    jump: ACCEPT
+    action: insert
+    state: present
+
+- name: Block inter-subnet traffic
+  ansible.builtin.iptables:
+    chain: DOCKER-USER
+    source: "{{ subnet }}"
+    destination: "{{ subnet }}"
+    jump: DROP
+    action: insert
+    state: present
+
+- name: Allow traffic from Proxy IP to subnet
+  ansible.builtin.iptables:
+    chain: DOCKER-USER
+    source: "{{ proxy_ip }}"
+    destination: "{{ subnet }}"
+    jump: ACCEPT
+    action: insert
+    state: present
+
+- name: Allow established/related connections within subnet
+  ansible.builtin.iptables:
+    chain: DOCKER-USER
+    source: "{{ subnet }}"
+    destination: "{{ subnet }}"
+    ctstate:
+      - RELATED
+      - ESTABLISHED
+    jump: ACCEPT
+    action: insert
+    state: present
+
+- name: Create Docker network
+  community.docker.docker_network:
+    name: "{{ docker_network_name }}"
+    ipam_config:
+      - subnet: "{{ subnet }}"
+    state: present

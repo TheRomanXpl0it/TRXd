@@ -1,0 +1,61 @@
+#! ######################################## LAZYDOCKER ######################################## !#
+
+- name: Get latest lazydocker release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/jesseduffield/lazydocker/releases/latest
+    return_content: true
+  register: lazydocker_release
+
+- name: Set lazydocker version
+  ansible.builtin.set_fact:
+    lazydocker_version: "{{ lazydocker_release.json.tag_name | regex_replace('^v', '') }}"
+
+- name: Download lazydocker
+  become: true
+  ansible.builtin.unarchive:
+    src: >-
+      https://github.com/jesseduffield/lazydocker/releases/download/v{{ lazydocker_version }}/lazydocker_{{ lazydocker_version }}_Linux_x86_64.tar.gz
+    dest: /opt/
+    remote_src: true
+    mode: "0755"
+    include:
+      - lazydocker
+
+#! ######################################## CTOP ######################################## !#
+
+- name: Get latest ctop release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/bcicen/ctop/releases/latest
+    return_content: true
+  register: ctop_release
+
+- name: Download ctop binary
+  become: true
+  ansible.builtin.get_url:
+    url: >-
+      https://github.com/bcicen/ctop/releases/download/{{ ctop_release.json.tag_name }}/ctop-{{ ctop_release.json.tag_name | regex_replace('^v','') }}-linux-amd64
+    dest: /opt/ctop
+    mode: "0755"
+
+#! ######################################## LAZYGIT ######################################## !#
+
+- name: Get latest lazygit release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+    return_content: true
+  register: lazygit_release
+
+- name: Set lazygit version
+  ansible.builtin.set_fact:
+    lazygit_version: "{{ lazygit_release.json.tag_name | regex_replace('^v', '') }}"
+
+- name: Download lazygit
+  become: true
+  ansible.builtin.unarchive:
+    src: >-
+      https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz
+    dest: /opt/
+    remote_src: true
+    mode: "0755"
+    include:
+      - lazygit
