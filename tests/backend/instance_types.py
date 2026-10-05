@@ -9,7 +9,7 @@ url = 'http://localhost:1337/api'
 
 proxy = os.getenv('PROXY', 'traefik')
 
-TCP_TLS_PORT = 5443
+TCP_TLS_PORT = 443
 
 
 def login(mail, password):

@@ -74,11 +74,11 @@ func makeTraefikLabels(name string, domain string, connType sqlc.ConnType, hashD
 	case sqlc.ConnTypeHTTPS:
 		protocol = "http"
 		rule = "Host(`%s`)"
-		entrypoint = "websecure"
+		entrypoint = "tls"
 	default:
 		protocol = "tcp"
 		rule = "HostSNI(`%s`)"
-		entrypoint = "tcp"
+		entrypoint = "tls"
 	}
 
 	traefikPort := "1337"
@@ -95,7 +95,7 @@ func makeTraefikLabels(name string, domain string, connType sqlc.ConnType, hashD
 		fmt.Sprintf(routersEntrypoints, protocol, name): entrypoint,
 	}
 
-	if entrypoint == "tcp" || entrypoint == "websecure" {
+	if entrypoint == "tls" {
 		labels[fmt.Sprintf(routersTls, protocol, name)] = "true"
 	}
 

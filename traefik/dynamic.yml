@@ -56,14 +56,14 @@ http:
         - web
       priority: 10
       middlewares:
-        - https-redirect
+        - basic-auth
 
     traefik-api:
       service: api@internal
       rule: "HostRegexp(`^traefik\\..+$`)"
       tls: {}
       entryPoints:
-        - websecure
+        - tls
       priority: 10
       middlewares:
         - basic-auth
@@ -76,18 +76,18 @@ http:
         - web
       priority: 10
       middlewares:
-        - https-redirect
+        - basic-auth
 
     adminer:
       service: adminer
       rule: "HostRegexp(`^adminer\\..+$`)"
       tls: {}
       entryPoints:
-        - websecure
+        - tls
       priority: 10
       middlewares:
         - basic-auth
-    
+
     #! #################### Registry #################### !#
     registry-http:
       service: registry
@@ -96,18 +96,18 @@ http:
         - web
       priority: 10
       middlewares:
-        - https-redirect
+        - basic-auth
 
     registry:
       service: registry
       rule: "HostRegexp(`^registry\\..+$`)"
       tls: {}
       entryPoints:
-        - websecure
+        - tls
       priority: 10
       middlewares:
         - basic-auth
-    
+
     #! #################### Registry UI #################### !#
     registry-ui-http:
       service: registry-ui
@@ -116,14 +116,14 @@ http:
         - web
       priority: 10
       middlewares:
-        - https-redirect
+        - basic-auth
 
     registry-ui:
       service: registry-ui
       rule: "HostRegexp(`^registry-ui\\..+$`)"
       tls: {}
       entryPoints:
-        - websecure
+        - tls
       priority: 10
       middlewares:
         - basic-auth

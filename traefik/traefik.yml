@@ -14,8 +14,6 @@ entryPoints:
   web:
     address: ":80"
 
-  websecure:
+  tls:
     address: ":443"
 
-  tcp:
-    address: ":5443"
