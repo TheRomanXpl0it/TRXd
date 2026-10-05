@@ -97,7 +97,7 @@ jobs:
     - name: Setup trxd-shared-internal
       run: |
         cd ../
-        ./scritps/network_setup.sh
+        ./scripts/network_setup.sh
 
     - name: Set up Infra
       run: |

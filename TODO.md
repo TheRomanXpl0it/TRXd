@@ -3,8 +3,8 @@
  - instancer container restart policy editable
  - instancer container disk space limit
  - ingress only challenges (verify if useful)
- - rename "hash domain" (not an hash anymore, only rand bytes)
  - multi port & domain support for instances
+ - author+ auth: verbose errors from instancer
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
@@ -18,6 +18,7 @@
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 
 ## Ideas / Features
+ - real usage docs
  - certresolver for instances (idea: use a wildcard cert and generate a cert for each instance)
  - add author only tags (private tags) for challenges
  - submissions page filers (first bloods, only wrong, group filter [correct, repeated])

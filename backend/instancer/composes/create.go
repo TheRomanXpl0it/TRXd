@@ -42,7 +42,7 @@ func CreateCompose(ctx context.Context, info *infos.InstanceInfo, composeBody st
 	err = ComposeCli.Up(ctx, project, api.UpOptions{
 		Create: api.CreateOptions{
 			Build: &api.BuildOptions{
-				Pull: true, // TODO: test
+				Pull: true, // TODO: integration tests
 			},
 		},
 	})
@@ -78,6 +78,8 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 			api.ConfigFilesLabel: strings.Join(project.ComposeFiles, ","),
 			api.OneoffLabel:      "False",
 		}
+
+		s.PullPolicy = types.PullPolicyAlways // TODO: integration tests
 
 		if s.Name == "chall" {
 			maxCpu, err := strconv.ParseFloat(info.MaxCpu, 64)

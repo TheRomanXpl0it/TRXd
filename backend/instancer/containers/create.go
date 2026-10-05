@@ -95,18 +95,18 @@ func validateInstance(info *infos.InstanceInfo, image string) error {
 }
 
 func ensureImage(ctx context.Context, img string) error {
-	_, err := Cli.ImageInspect(ctx, img)
-	if err == nil {
-		return nil
-	}
+	// _, err := Cli.ImageInspect(ctx, img)
+	// if err == nil {
+	// 	return nil
+	// }
 
-	// TODO: make a policy to pull if there are updates
+	// if !strings.Contains(err.Error(), "No such image") {
+	// 	return err
+	// }
 
-	if !strings.Contains(err.Error(), "No such image") {
-		return err
-	}
+	// log.Debug("Pulling image:", "image", img)
 
-	log.Debug("Pulling image:", "image", img)
+	// TODO: integration tests
 
 	registryAuth, err := genRegistryAuth(ctx)
 	if err != nil {
