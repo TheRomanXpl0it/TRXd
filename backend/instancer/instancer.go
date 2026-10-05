@@ -80,6 +80,12 @@ func StartReclaimLoop() {
 		log.Fatal("Failed to initialize instancer: network not found", "net", consts.NetworkInternal)
 	}
 
+	// TODO: tests
+	err = composes.SetRegistryAuth(ctx)
+	if err != nil {
+		log.Fatal("Failed to set registry auth:", "err", err)
+	}
+
 	reclaimLoop()
 }
 

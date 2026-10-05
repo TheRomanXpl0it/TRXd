@@ -73,6 +73,9 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 			api.OneoffLabel:      "False",
 		}
 
+		// TODO: tests
+		s.PullPolicy = types.PullPolicyRefresh
+
 		if s.Name == "chall" {
 			maxCpu, err := strconv.ParseFloat(info.MaxCpu, 64)
 			if err != nil {

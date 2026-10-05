@@ -103,7 +103,6 @@ func makeTraefikLabels(name string, domain string, connType sqlc.ConnType, hashD
 }
 
 func spawnInstance(ctx context.Context, info *infos.InstanceInfo, instanceType sqlc.InstanceType, image string, compose string) (string, error) {
-
 	var dockerID string
 	var err error
 

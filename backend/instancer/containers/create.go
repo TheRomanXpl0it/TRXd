@@ -100,6 +100,8 @@ func ensureImage(ctx context.Context, img string) error {
 		return nil
 	}
 
+	// TODO: make a policy to pull if there are updates
+
 	if !strings.Contains(err.Error(), "No such image") {
 		return err
 	}
