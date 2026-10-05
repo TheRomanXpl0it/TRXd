@@ -39,7 +39,13 @@ func CreateCompose(ctx context.Context, info *infos.InstanceInfo, composeBody st
 		debugCompose(project)
 	}
 
-	err = ComposeCli.Up(ctx, project, api.UpOptions{})
+	err = ComposeCli.Up(ctx, project, api.UpOptions{
+		Create: api.CreateOptions{
+			Build: &api.BuildOptions{
+				Pull: true, // TODO: test
+			},
+		},
+	})
 	if err != nil {
 		return "", err
 	}
@@ -64,7 +70,7 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 	}
 
 	for i, s := range project.Services {
-		s.CustomLabels = map[string]string{
+		s.CustomLabels = types.Labels{
 			api.ProjectLabel:     project.Name,
 			api.ServiceLabel:     s.Name,
 			api.VersionLabel:     api.ComposeVersion,
@@ -72,9 +78,6 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 			api.ConfigFilesLabel: strings.Join(project.ComposeFiles, ","),
 			api.OneoffLabel:      "False",
 		}
-
-		// TODO: tests
-		s.PullPolicy = types.PullPolicyRefresh
 
 		if s.Name == "chall" {
 			maxCpu, err := strconv.ParseFloat(info.MaxCpu, 64)

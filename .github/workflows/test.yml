@@ -13,7 +13,7 @@ env:
   CLICOLOR_FORCE: 1
   DISABLE_ANTI_PANIC: 1
   TEST_WORKERS: 100
-  
+
   POSTGRES_DB: testdb
   POSTGRES_USER: testuser
   POSTGRES_PASSWORD: testpass
@@ -25,7 +25,7 @@ env:
   BASIC_AUTH_USERNAME: testuser
   BASIC_AUTH_PASSWORD: password
   BASIC_AUTH_HTPASSWD: '$apr1$SXlYINSe$m0/9UxcCHTpCNuPaCpREq0' # password
-  
+
   DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
   TEST_EMAIL_SERVER: ${{ secrets.TEST_EMAIL_SERVER }}
@@ -97,7 +97,7 @@ jobs:
     - name: Setup trxd-shared-internal
       run: |
         cd ../
-        ./net.sh
+        ./scritps/network_setup.sh
 
     - name: Set up Infra
       run: |

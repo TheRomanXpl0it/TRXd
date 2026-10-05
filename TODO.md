@@ -18,7 +18,7 @@
    - [ ] Add custom button themes for first/second/third bloods? (Analysis done)
 
 ## Ideas / Features
- - add a deploy ansible playbook for the platform
+ - certresolver for instances (idea: use a wildcard cert and generate a cert for each instance)
  - add author only tags (private tags) for challenges
  - submissions page filers (first bloods, only wrong, group filter [correct, repeated])
  - extract data for ctftime
