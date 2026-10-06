@@ -95,23 +95,9 @@ func validateInstance(info *infos.InstanceInfo, image string) error {
 }
 
 func ensureImage(ctx context.Context, img string) error {
-	// _, err := Cli.ImageInspect(ctx, img)
-	// if err == nil {
-	// 	return nil
-	// }
-
-	// if !strings.Contains(err.Error(), "No such image") {
-	// 	return err
-	// }
-
-	// log.Debug("Pulling image:", "image", img)
-
-	// TODO: integration tests
-
-	//! pull only if pullable
-	//! Error response from daemon: pull access denied for echo-server, repository does not exist or may require 'docker login': denied: requested access to the resource is denied
-
-	if !strings.Contains(img, "/") { // the image is not from a registry
+	// TODO: more integration tests
+	// the image is not from a registry
+	if !strings.Contains(img, "/") {
 		return nil
 	}
 

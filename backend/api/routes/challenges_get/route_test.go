@@ -37,53 +37,38 @@ func TestRoute(t *testing.T) {
 	app := api.SetupApp(t.Context())
 	defer api.Shutdown(app)
 
+	test_utils.RegisterUser(t, "test2", "test3@test.test", "testpass", sqlc.UserRoleAuthor)
 	session := test_utils.NewApiTestSession(t, app)
-	session.Post("/register", JSON{"name": "test", "email": "test2@test.test", "password": "testpass"}, http.StatusOK)
-	session.Post("/teams/register", JSON{"name": "test-team", "password": "testpass"}, http.StatusOK)
+	session.Post("/login", JSON{"email": "test3@test.test", "password": "testpass"}, http.StatusOK)
+	session.Post("/teams/register", JSON{"name": "test-team-2", "password": "testpass"}, http.StatusOK)
+
 	session.Get("/challenges", nil, http.StatusOK)
 	body := session.Body()
-	var id int32
+	var id1, id3, id5 int32
 	for _, chall := range List(body) {
-		if Json(chall)["name"] == "chall-1" {
-			id = Int32(Json(chall)["id"])
-			break
+		switch Json(chall)["name"] {
+		case "chall-1":
+			id1 = Int32(Json(chall)["id"])
+		case "chall-3":
+			id3 = Int32(Json(chall)["id"])
+		case "chall-5":
+			id5 = Int32(Json(chall)["id"])
 		}
 	}
 
-	expectedPlayer := JSON{
-		"solves_list": []JSON{
-			{
-				"name": "A",
-			},
-		},
-	}
-
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "test2@test.test", "password": "testpass"}, http.StatusOK)
 	session.Get("/challenges/AAA", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.InvalidChallengeID))
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "test2@test.test", "password": "testpass"}, http.StatusOK)
 	session.Get(fmt.Sprintf("/challenges/%d", -1), nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(test_utils.Format(consts.MinError, "id", 0)))
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "test2@test.test", "password": "testpass"}, http.StatusOK)
 	session.Get(fmt.Sprintf("/challenges/%d", 99999), nil, http.StatusNotFound)
 	session.CheckResponse(errorf(consts.ChallengeNotFound))
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "test2@test.test", "password": "testpass"}, http.StatusOK)
 	session.Get(fmt.Sprintf("/challenges/%d", math.MaxInt32+1), nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(test_utils.Format(consts.MinError, "id", 0)))
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "test2@test.test", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/challenges/%d", id), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedPlayer, "id", "timestamp")
-
-	expectedAuthor := JSON{
+	expected := JSON{
 		"attachments": []string{},
 		"authors": []string{
 			"author1",
@@ -117,26 +102,16 @@ func TestRoute(t *testing.T) {
 		"port":          1234,
 		"renewable":     false,
 		"score_type":    "Dynamic",
-		"solves_list": []JSON{
-			{
-				"name": "A",
-			},
-		},
 		"tags": []string{
 			"tag-1",
 			"test-tag",
 		},
 	}
 
-	test_utils.RegisterUser(t, "test2", "test3@test.test", "testpass", sqlc.UserRoleAuthor)
+	session.Get(fmt.Sprintf("/challenges/%d", id1), nil, http.StatusOK)
+	session.CheckFilteredResponse(expected, "id", "timestamp")
 
-	session = test_utils.NewApiTestSession(t, app)
-	session.Post("/login", JSON{"email": "test3@test.test", "password": "testpass"}, http.StatusOK)
-	session.Post("/teams/register", JSON{"name": "test-team-2", "password": "testpass"}, http.StatusOK)
-	session.Get(fmt.Sprintf("/challenges/%d", id), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedAuthor, "id", "timestamp")
-
-	expectedAuthorHidden := JSON{
+	expectedHidden := JSON{
 		"attachments": []string{},
 		"authors": []string{
 			"author3",
@@ -165,26 +140,13 @@ func TestRoute(t *testing.T) {
 		"port":          0,
 		"renewable":     false,
 		"score_type":    "Static",
-		"solves_list":   []JSON{},
 		"tags": []string{
 			"tag-5",
 		},
 	}
 
-	session.Get("/challenges", nil, http.StatusOK)
-	body = session.Body()
-	var id3, id5 int32
-	for _, chall := range List(body) {
-		switch Json(chall)["name"] {
-		case "chall-3":
-			id3 = Int32(Json(chall)["id"])
-		case "chall-5":
-			id5 = Int32(Json(chall)["id"])
-		}
-	}
-
 	session.Get(fmt.Sprintf("/challenges/%d", id5), nil, http.StatusOK)
-	session.CheckFilteredResponse(expectedAuthorHidden, "id", "timestamp")
+	session.CheckFilteredResponse(expectedHidden, "id", "timestamp")
 
 	expectedDocker := JSON{
 		"attachments": []string{},
@@ -215,11 +177,6 @@ func TestRoute(t *testing.T) {
 		"port":          1337,
 		"renewable":     true,
 		"score_type":    "Dynamic",
-		"solves_list": []JSON{
-			{
-				"name": "A",
-			},
-		},
 		"tags": []string{
 			"tag-3",
 		},
@@ -263,11 +220,6 @@ func TestRoute(t *testing.T) {
 		"port":          1337,
 		"renewable":     true,
 		"score_type":    "Dynamic",
-		"solves_list": []JSON{
-			{
-				"name": "A",
-			},
-		},
 		"tags": []string{
 			"tag-3",
 		},

@@ -1,6 +1,6 @@
 # TODO
- - split /challenges/:id into player and author endpoints
  - add author only tags (private tags) for challenges
+ - better scoreboard query (maybe use views)
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)

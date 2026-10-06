@@ -57,7 +57,7 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall, role sqlc.UserRole
 			return nil, utils.Error(c, fiber.StatusConflict, consts.AlreadyAnActiveInstance)
 		default:
 			msg := consts.ErrorCreatingInstance
-			if role == sqlc.UserRoleAuthor || role == sqlc.UserRoleAdmin {
+			if utils.In(role, []sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin}) {
 				msg = msg + ": " + err.Error()
 			}
 			return nil, utils.Error(c, fiber.StatusInternalServerError, msg, err)

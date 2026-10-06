@@ -299,7 +299,6 @@ func TestRoute(t *testing.T) {
 				"port":          test.testBody["port"],
 				"renewable":     test.testBody["renewable"],
 				"score_type":    test.testBody["score_type"],
-				"solves_list":   []JSON{},
 				"tags":          test.testBody["tags"],
 			}
 			test_utils.Compare(t, expected, body)
@@ -391,7 +390,6 @@ func TestRoute(t *testing.T) {
 		"port":          testBody["port"],
 		"renewable":     testBody["renewable"],
 		"score_type":    "Dynamic",
-		"solves_list":   []JSON{},
 		"tags":          testBody["tags"],
 	}
 	test_utils.Compare(t, expected, body)

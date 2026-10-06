@@ -467,14 +467,14 @@
         },
         "/api/challenges/:id": {
             "get": {
-                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).\nRetrieves challenge details (with role **Player** only solves if the challenge is visible).",
+                "description": "Retrieves all challenge details.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "challenges"
                 ],
-                "summary": "[Player+] Gets challenge details",
+                "summary": "[Author+] Gets challenge details",
                 "parameters": [
                     {
                         "type": "integer",
@@ -486,9 +486,59 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "solves is only included if the requester has Player role, otherwise all the challenge details are included except the solves",
+                        "description": "all the challenge details are included except the solves",
                         "schema": {
                             "$ref": "#/definitions/challenges_get.Chall"
+                        }
+                    },
+                    "400": {
+                        "description": "Possible errors: `Invalid challenge ID, must be non negative` | `id must be at least 0`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: `Challenge not found`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: `Error fetching challenge`",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/challenges/:id/solves": {
+            "get": {
+                "description": "Requires **Player** privileges or higher (with role **Player** is also required to be in a team, the challenge must be visible, and the competition has to be active).",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "[Player+] Get challenge solves by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Challenge ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "solves from the specified challenge",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/sqlc.GetChallengeSolvesRow"
+                            }
                         }
                     },
                     "400": {
@@ -2248,12 +2298,6 @@
                 },
                 "score_type": {
                     "$ref": "#/definitions/sqlc.ScoreType"
-                },
-                "solves_list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/sqlc.GetChallengeSolvesRow"
-                    }
                 },
                 "tags": {
                     "type": "array",

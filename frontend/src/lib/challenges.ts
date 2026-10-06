@@ -2,8 +2,8 @@ import { api } from '$lib/api';
 import type { Challenge, Category, Solve } from '$lib/types';
 
 export async function getSolves(chall_id: string | number): Promise<Solve[]> {
-	const ch = await api<any>(`/challenges/${chall_id}`);
-	return ch.solves_list || [];
+	const ch = await api<any>(`/challenges/${chall_id}/solves`);
+	return ch || [];
 }
 
 export async function getChallenges(): Promise<Challenge[]> {

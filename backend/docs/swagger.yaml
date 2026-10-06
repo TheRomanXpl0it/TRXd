@@ -121,10 +121,6 @@ definitions:
         type: boolean
       score_type:
         $ref: '#/definitions/sqlc.ScoreType'
-      solves_list:
-        items:
-          $ref: '#/definitions/sqlc.GetChallengeSolvesRow'
-        type: array
       tags:
         items:
           type: string
@@ -1203,9 +1199,7 @@ paths:
       - challenges
   /api/challenges/:id:
     get:
-      description: |-
-        Requires **Player** privileges or higher (with role **Player** is also required to be in a team and the competition has to be active).
-        Retrieves challenge details (with role **Player** only solves if the challenge is visible).
+      description: Retrieves all challenge details.
       parameters:
       - description: Challenge ID
         in: path
@@ -1216,8 +1210,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: solves is only included if the requester has Player role, otherwise
-            all the challenge details are included except the solves
+          description: all the challenge details are included except the solves
           schema:
             $ref: '#/definitions/challenges_get.Chall'
         "400":
@@ -1233,7 +1226,43 @@ paths:
           description: 'Possible errors: `Error fetching challenge`'
           schema:
             $ref: '#/definitions/models.Error'
-      summary: '[Player+] Gets challenge details'
+      summary: '[Author+] Gets challenge details'
+      tags:
+      - challenges
+  /api/challenges/:id/solves:
+    get:
+      description: Requires **Player** privileges or higher (with role **Player**
+        is also required to be in a team, the challenge must be visible, and the competition
+        has to be active).
+      parameters:
+      - description: Challenge ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: solves from the specified challenge
+          schema:
+            items:
+              $ref: '#/definitions/sqlc.GetChallengeSolvesRow'
+            type: array
+        "400":
+          description: 'Possible errors: `Invalid challenge ID, must be non negative`
+            | `id must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error fetching challenge`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Player+] Get challenge solves by id'
       tags:
       - challenges
   /api/challenges/hidden:

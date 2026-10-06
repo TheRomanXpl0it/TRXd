@@ -80,7 +80,8 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 		}
 
 		// TODO: more integration tests
-		if strings.Contains(s.Image, "/") { // the image is from a registry
+		// the image is from a registry
+		if strings.Contains(s.Image, "/") {
 			s.PullPolicy = types.PullPolicyAlways
 		}
 
