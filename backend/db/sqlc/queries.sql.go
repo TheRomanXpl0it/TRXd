@@ -285,7 +285,7 @@ func (q *Queries) GetAdminStats(ctx context.Context) (GetAdminStatsRow, error) {
 const getAllChallengesInfo = `-- name: GetAllChallengesInfo :many
 WITH tid AS (SELECT team_id FROM users WHERE users.id = $1)
 SELECT
-    c.id, c.name, c.category, c.description, c.authors, c.tags, c.instance_type, c.hidden, c.max_points, c.score_type, c.points, c.solves, c.host, c.port, c.conn_type, c.hash_domain, c.image, c.compose, c.lifetime, c.renewable, c.envs, c.max_memory, c.max_cpu,
+    c.id, c.name, c.category, c.description, c.authors, c.tags, c.author_tags, c.instance_type, c.hidden, c.max_points, c.score_type, c.points, c.solves, c.host, c.port, c.conn_type, c.hash_domain, c.image, c.compose, c.lifetime, c.renewable, c.envs, c.max_memory, c.max_cpu,
     (s.first_blood IS NOT NULL)::BOOLEAN AS solved,
     COALESCE(s.first_blood, FALSE) AS first_blood,
     (ARRAY_AGG('/' || a.hash || '/' || a.name ORDER BY a.name)
@@ -319,6 +319,7 @@ type GetAllChallengesInfoRow struct {
 	Description  string         `json:"description"`
 	Authors      []string       `json:"authors"`
 	Tags         []string       `json:"tags"`
+	AuthorTags   []string       `json:"author_tags"`
 	InstanceType InstanceType   `json:"instance_type"`
 	Hidden       bool           `json:"hidden"`
 	MaxPoints    int32          `json:"max_points"`
@@ -362,6 +363,7 @@ func (q *Queries) GetAllChallengesInfo(ctx context.Context, id int32) ([]GetAllC
 			&i.Description,
 			pq.Array(&i.Authors),
 			pq.Array(&i.Tags),
+			pq.Array(&i.AuthorTags),
 			&i.InstanceType,
 			&i.Hidden,
 			&i.MaxPoints,
@@ -1696,25 +1698,26 @@ SET
   description = COALESCE($3, description),
   authors = COALESCE($4, authors),
   tags = COALESCE($5, tags),
-  instance_type = COALESCE($6, instance_type),
-  hidden = COALESCE($7, hidden),
+  author_tags = COALESCE($6, author_tags),
+  instance_type = COALESCE($7, instance_type),
+  hidden = COALESCE($8, hidden),
   
-  max_points = COALESCE($8, max_points),
-  score_type = COALESCE($9, score_type),
+  max_points = COALESCE($9, max_points),
+  score_type = COALESCE($10, score_type),
   
-  host = COALESCE($10, host),
-  port = COALESCE($11, port),
-  conn_type = COALESCE($12, conn_type),
-  hash_domain = COALESCE($13, hash_domain),
+  host = COALESCE($11, host),
+  port = COALESCE($12, port),
+  conn_type = COALESCE($13, conn_type),
+  hash_domain = COALESCE($14, hash_domain),
   
-  image = COALESCE($14, image),
-  compose = COALESCE($15, compose),
-  lifetime = COALESCE($16, lifetime),
-  renewable = COALESCE($17, renewable),
-  envs = COALESCE($18, envs),
-  max_memory = COALESCE($19, max_memory),
-  max_cpu = COALESCE($20, max_cpu)
-WHERE id = $21
+  image = COALESCE($15, image),
+  compose = COALESCE($16, compose),
+  lifetime = COALESCE($17, lifetime),
+  renewable = COALESCE($18, renewable),
+  envs = COALESCE($19, envs),
+  max_memory = COALESCE($20, max_memory),
+  max_cpu = COALESCE($21, max_cpu)
+WHERE id = $22
 `
 
 type UpdateChallengeParams struct {
@@ -1723,6 +1726,7 @@ type UpdateChallengeParams struct {
 	Description  sql.NullString   `json:"description"`
 	Authors      []string         `json:"authors"`
 	Tags         []string         `json:"tags"`
+	AuthorTags   []string         `json:"author_tags"`
 	InstanceType NullInstanceType `json:"instance_type"`
 	Hidden       sql.NullBool     `json:"hidden"`
 	MaxPoints    sql.NullInt32    `json:"max_points"`
@@ -1749,6 +1753,7 @@ func (q *Queries) UpdateChallenge(ctx context.Context, arg UpdateChallengeParams
 		arg.Description,
 		pq.Array(arg.Authors),
 		pq.Array(arg.Tags),
+		pq.Array(arg.AuthorTags),
 		arg.InstanceType,
 		arg.Hidden,
 		arg.MaxPoints,

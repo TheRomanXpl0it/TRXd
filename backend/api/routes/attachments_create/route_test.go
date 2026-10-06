@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 	"trxd/api"
 	"trxd/db/sqlc"
 	"trxd/utils/consts"
@@ -158,6 +159,7 @@ func TestRoute(t *testing.T) {
 				fmt.Sprintf("/%s/%s", h2, "f2.txt"),
 				fmt.Sprintf("/%s/%s", h3, "f3.txt"),
 			},
+			"author_tags": []string{},
 			"authors":     []string{},
 			"category":    "cat",
 			"conn_type":   "TCP",
@@ -188,11 +190,13 @@ func TestRoute(t *testing.T) {
 		}
 		test_utils.Compare(t, expected, challengeBody)
 
+		// do to race condition where the files may not be fully written to disk before the test checks for their existence
+		time.Sleep(1 * time.Second)
+
 		attachments := expected["attachments"].([]string)
 		for _, name := range attachments {
 			path := fmt.Sprintf("attachments/%d/%s", challID, name)
 			if _, err := os.Stat(path); os.IsNotExist(err) {
-				// NOTE: on a system like WSL could race with the slow creatio and fail
 				t.Fatalf("Expected attachment file %s to exist", path)
 			}
 		}

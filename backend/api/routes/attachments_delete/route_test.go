@@ -160,6 +160,7 @@ func TestRoute(t *testing.T) {
 		body := session.Body()
 		expected := JSON{
 			"attachments": attachments,
+			"author_tags": []string{},
 			"authors":     []string{},
 			"category":    "cat",
 			"conn_type":   "TCP",

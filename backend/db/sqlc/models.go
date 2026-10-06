@@ -250,6 +250,7 @@ type Challenge struct {
 	Description  string       `json:"description"`
 	Authors      []string     `json:"authors"`
 	Tags         []string     `json:"tags"`
+	AuthorTags   []string     `json:"author_tags"`
 	InstanceType InstanceType `json:"instance_type"`
 	Hidden       bool         `json:"hidden"`
 	MaxPoints    int32        `json:"max_points"`

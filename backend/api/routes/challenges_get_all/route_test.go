@@ -166,6 +166,9 @@ func TestRoute(t *testing.T) {
 	expectedAuthor := []JSON{
 		{
 			"attachments": []string{},
+			"author_tags": []string{
+				"author-tag-4",
+			},
 			"authors": []string{
 				"author2",
 			},
@@ -191,6 +194,9 @@ func TestRoute(t *testing.T) {
 		},
 		{
 			"attachments": []string{},
+			"author_tags": []string{
+				"author-tag-1",
+			},
 			"authors": []string{
 				"author1",
 				"author2",
@@ -218,6 +224,9 @@ func TestRoute(t *testing.T) {
 		},
 		{
 			"attachments": []string{},
+			"author_tags": []string{
+				"author-tag-2",
+			},
 			"authors": []string{
 				"author1",
 				"author2",
@@ -245,6 +254,9 @@ func TestRoute(t *testing.T) {
 		},
 		{
 			"attachments": []string{},
+			"author_tags": []string{
+				"author-tag-3",
+			},
 			"authors": []string{
 				"author1",
 			},
@@ -270,6 +282,9 @@ func TestRoute(t *testing.T) {
 		},
 		{
 			"attachments": []string{},
+			"author_tags": []string{
+				"author-tag-5",
+			},
 			"authors": []string{
 				"author3",
 			},

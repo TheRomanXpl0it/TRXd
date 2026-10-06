@@ -19,6 +19,7 @@ SELECT
   description,
   authors,
   tags,
+  author_tags,
   instance_type,
   hidden,
 
@@ -50,6 +51,7 @@ type GetChallengeByIDRow struct {
 	Description  string       `json:"description"`
 	Authors      []string     `json:"authors"`
 	Tags         []string     `json:"tags"`
+	AuthorTags   []string     `json:"author_tags"`
 	InstanceType InstanceType `json:"instance_type"`
 	Hidden       bool         `json:"hidden"`
 	MaxPoints    int32        `json:"max_points"`
@@ -80,6 +82,7 @@ func (q *Queries) GetChallengeByID(ctx context.Context, id int32) (GetChallengeB
 		&i.Description,
 		pq.Array(&i.Authors),
 		pq.Array(&i.Tags),
+		pq.Array(&i.AuthorTags),
 		&i.InstanceType,
 		&i.Hidden,
 		&i.MaxPoints,

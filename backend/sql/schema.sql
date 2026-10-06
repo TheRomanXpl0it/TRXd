@@ -88,6 +88,7 @@ CREATE TABLE IF NOT EXISTS challenges (
   description VARCHAR(10240) NOT NULL,
   authors VARCHAR(64)[] NOT NULL DEFAULT '{}',
   tags VARCHAR(32)[] NOT NULL DEFAULT '{}',
+  author_tags VARCHAR(32)[] NOT NULL DEFAULT '{}',
   instance_type instance_type NOT NULL DEFAULT 'Static',
   hidden BOOLEAN NOT NULL DEFAULT TRUE,
 

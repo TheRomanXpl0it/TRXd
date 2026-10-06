@@ -80,6 +80,11 @@ var testData = []struct {
 		expectedResponse: errorf(test_utils.Format(consts.MaxError, "Tags[0]", consts.MaxTagNameLen)),
 	},
 	{
+		testBody:         JSON{"chall_id": "", "author_tags": []string{strings.Repeat("a", consts.MaxTagNameLen+1)}},
+		expectedStatus:   http.StatusBadRequest,
+		expectedResponse: errorf(test_utils.Format(consts.MaxError, "AuthorTags[0]", consts.MaxTagNameLen)),
+	},
+	{
 		testBody:         JSON{"chall_id": "", "instance_type": "aaa"},
 		expectedStatus:   http.StatusBadRequest,
 		expectedResponse: errorf(test_utils.Format(consts.OneOfError, "InstanceType", consts.InstanceTypesStr)),
@@ -187,6 +192,7 @@ var testData = []struct {
 			"description":   "new test desc",
 			"authors":       []string{"author1", "author2"},
 			"tags":          []string{"tag1", "tag2", "tag3"},
+			"author_tags":   []string{"author_tag1", "author_tag2", "author_tag3"},
 			"instance_type": "Container",
 			"hidden":        false,
 			"max_points":    1000,
@@ -245,6 +251,7 @@ func TestRoute(t *testing.T) {
 			body := session.Body()
 			expected := JSON{
 				"attachments": []string{},
+				"author_tags": test.testBody["author_tags"],
 				"authors":     test.testBody["authors"],
 				"category":    test.testBody["category"],
 				"conn_type":   test.testBody["conn_type"],
@@ -279,6 +286,7 @@ func TestRoute(t *testing.T) {
 			body = session.Body()
 			expected = JSON{
 				"attachments":   []string{},
+				"author_tags":   test.testBody["author_tags"],
 				"authors":       test.testBody["authors"],
 				"category":      test.testBody["category"],
 				"compose":       test.testBody["compose"],
@@ -312,6 +320,7 @@ func TestRoute(t *testing.T) {
 		"description": "",
 		"authors":     []string{},
 		"tags":        []string{},
+		"author_tags": []string{},
 		"hidden":      false,
 		"max_points":  0,
 		"host":        "",
@@ -336,6 +345,7 @@ func TestRoute(t *testing.T) {
 	body := session.Body()
 	expected := JSON{
 		"attachments": []string{},
+		"author_tags": testBody["author_tags"],
 		"authors":     testBody["authors"],
 		"category":    testBody["category"],
 		"conn_type":   "TCP",
@@ -370,6 +380,7 @@ func TestRoute(t *testing.T) {
 	body = session.Body()
 	expected = JSON{
 		"attachments":   []string{},
+		"author_tags":   testBody["author_tags"],
 		"authors":       testBody["authors"],
 		"category":      testBody["category"],
 		"compose":       testBody["compose"],

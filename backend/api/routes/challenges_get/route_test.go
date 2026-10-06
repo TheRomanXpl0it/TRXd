@@ -70,6 +70,9 @@ func TestRoute(t *testing.T) {
 
 	expected := JSON{
 		"attachments": []string{},
+		"author_tags": []string{
+			"author-tag-1",
+		},
 		"authors": []string{
 			"author1",
 			"author2",
@@ -113,6 +116,9 @@ func TestRoute(t *testing.T) {
 
 	expectedHidden := JSON{
 		"attachments": []string{},
+		"author_tags": []string{
+			"author-tag-5",
+		},
 		"authors": []string{
 			"author3",
 		},
@@ -150,6 +156,9 @@ func TestRoute(t *testing.T) {
 
 	expectedDocker := JSON{
 		"attachments": []string{},
+		"author_tags": []string{
+			"author-tag-3",
+		},
 		"authors": []string{
 			"author1",
 		},
@@ -193,6 +202,9 @@ func TestRoute(t *testing.T) {
 
 	expectedInstance := JSON{
 		"attachments": []string{},
+		"author_tags": []string{
+			"author-tag-3",
+		},
 		"authors": []string{
 			"author1",
 		},

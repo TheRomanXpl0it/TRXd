@@ -57,7 +57,7 @@ func nullStringSlice(src *[]string) []string {
 	return *src
 }
 
-func IsChallInstanceInfoEmpty(data *Data) bool {
+func isChallInstanceInfoEmpty(data *Data) bool {
 	if data.Image == nil && data.Compose == nil && data.Lifetime == nil && data.Renewable == nil &&
 		data.Envs == nil && data.MaxMemory == nil && data.MaxCpu == nil {
 		return true
@@ -65,11 +65,18 @@ func IsChallInstanceInfoEmpty(data *Data) bool {
 	return false
 }
 
-func IsChallEmpty(data *Data) bool {
+func isChallBaseInfoEmpty(data *Data) bool {
 	if data.Name == "" && data.Category == "" && data.Description == nil && data.Authors == nil &&
-		data.Tags == nil && data.InstanceType == nil && data.Hidden == nil && data.MaxPoints == nil &&
-		data.ScoreType == nil && data.Host == nil && data.Port == nil && data.ConnType == nil &&
-		data.HashDomain == nil && IsChallInstanceInfoEmpty(data) {
+		data.Tags == nil && data.AuthorTags == nil && data.InstanceType == nil && data.Hidden == nil &&
+		data.MaxPoints == nil && data.ScoreType == nil && data.Host == nil && data.Port == nil &&
+		data.ConnType == nil && data.HashDomain == nil {
+		return true
+	}
+	return false
+}
+
+func IsChallEmpty(data *Data) bool {
+	if isChallBaseInfoEmpty(data) && isChallInstanceInfoEmpty(data) {
 		return true
 	}
 	return false
@@ -91,6 +98,7 @@ func UpdateChallenge(ctx context.Context, data *Data) error {
 		Description:  nullString(data.Description),
 		Authors:      nullStringSlice(data.Authors),
 		Tags:         nullStringSlice(data.Tags),
+		AuthorTags:   nullStringSlice(data.AuthorTags),
 		InstanceType: nullInstanceType(data.InstanceType),
 		Hidden:       nullBool(data.Hidden),
 

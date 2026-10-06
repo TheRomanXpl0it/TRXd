@@ -7,6 +7,7 @@ SELECT
   description,
   authors,
   tags,
+  author_tags,
   instance_type,
   hidden,
 

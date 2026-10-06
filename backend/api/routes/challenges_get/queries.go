@@ -13,6 +13,7 @@ type Chall struct {
 	Description  string            `json:"description"`
 	Authors      []string          `json:"authors"`
 	Tags         []string          `json:"tags"`
+	AuthorTags   []string          `json:"author_tags"`
 	InstanceType sqlc.InstanceType `json:"instance_type"`
 	Hidden       bool              `json:"hidden"`
 	MaxPoints    int32             `json:"max_points"`
@@ -72,28 +73,30 @@ func GetChallenge(ctx context.Context, id int32) (*Chall, error) {
 		return nil, nil
 	}
 
-	chall := Chall{}
+	chall := Chall{
+		Name:         challenge.Name,
+		Category:     challenge.Category,
+		Description:  challenge.Description,
+		Authors:      challenge.Authors,
+		Tags:         challenge.Tags,
+		AuthorTags:   challenge.AuthorTags,
+		InstanceType: challenge.InstanceType,
+		Hidden:       challenge.Hidden,
+		MaxPoints:    challenge.MaxPoints,
+		ScoreType:    challenge.ScoreType,
+		Host:         challenge.Host,
+		Port:         challenge.Port,
+		ConnType:     challenge.ConnType,
+		HashDomain:   challenge.HashDomain,
 
-	chall.Name = challenge.Name
-	chall.Category = challenge.Category
-	chall.Description = challenge.Description
-	chall.Authors = challenge.Authors
-	chall.Tags = challenge.Tags
-	chall.InstanceType = challenge.InstanceType
-	chall.Hidden = challenge.Hidden
-	chall.MaxPoints = challenge.MaxPoints
-	chall.ScoreType = challenge.ScoreType
-	chall.Host = challenge.Host
-	chall.Port = challenge.Port
-	chall.ConnType = challenge.ConnType
-	chall.HashDomain = challenge.HashDomain
-	chall.Image = challenge.Image
-	chall.Compose = challenge.Compose
-	chall.Lifetime = challenge.Lifetime
-	chall.Renewable = challenge.Renewable
-	chall.Envs = challenge.Envs
-	chall.MaxMemory = challenge.MaxMemory
-	chall.MaxCpu = challenge.MaxCpu
+		Image:     challenge.Image,
+		Compose:   challenge.Compose,
+		Lifetime:  challenge.Lifetime,
+		Renewable: challenge.Renewable,
+		Envs:      challenge.Envs,
+		MaxMemory: challenge.MaxMemory,
+		MaxCpu:    challenge.MaxCpu,
+	}
 
 	chall.Attachments, err = GetChallAttachments(ctx, id)
 	if err != nil {

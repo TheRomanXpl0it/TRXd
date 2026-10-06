@@ -7,6 +7,7 @@ SET
   description = COALESCE(sqlc.narg('description'), description),
   authors = COALESCE(sqlc.narg('authors'), authors),
   tags = COALESCE(sqlc.narg('tags'), tags),
+  author_tags = COALESCE(sqlc.narg('author_tags'), author_tags),
   instance_type = COALESCE(sqlc.narg('instance_type'), instance_type),
   hidden = COALESCE(sqlc.narg('hidden'), hidden),
   

@@ -51,11 +51,11 @@ BEGIN
   */
   INSERT INTO categories (name) VALUES ('cat-1');
   INSERT INTO categories (name) VALUES ('cat-2');
-  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-1', 'cat-1', 'TEST chall-1 DESC', ARRAY['author1', 'author2'], ARRAY['tag-1', 'test-tag'], 'Static', 500, 'Dynamic', 'ctf.theromanxpl0.it', 1234, 'TCP', false);
-  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, hidden) VALUES ('chall-2', 'cat-2', 'TEST chall-2 DESC', ARRAY['author1', 'author2', 'author3'], ARRAY['tag-2'], 'Static', 500, 'Dynamic', false);
-  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-3', 'cat-1', 'TEST chall-3 DESC', ARRAY['author1'], ARRAY['tag-3'], 'Container', 500, 'Dynamic', 'chall-3.test.com', 1337, 'HTTP', false);
-  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type, conn_type, hidden) VALUES ('chall-4', 'cat-1', 'TEST chall-4 DESC', ARRAY['author2'], ARRAY['tag-4'], 'Compose', 500, 'Dynamic', 'HTTP', false);
-  INSERT INTO challenges (name, category, description, authors, tags, instance_type, max_points, score_type) VALUES ('chall-5', 'cat-2', 'TEST chall-5 DESC', ARRAY['author3'], ARRAY['tag-5'], 'Static', 500, 'Static');
+  INSERT INTO challenges (name, category, description, authors, tags, author_tags, instance_type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-1', 'cat-1', 'TEST chall-1 DESC', ARRAY['author1', 'author2'], ARRAY['tag-1', 'test-tag'], ARRAY['author-tag-1'], 'Static', 500, 'Dynamic', 'ctf.theromanxpl0.it', 1234, 'TCP', false);
+  INSERT INTO challenges (name, category, description, authors, tags, author_tags, instance_type, max_points, score_type, hidden) VALUES ('chall-2', 'cat-2', 'TEST chall-2 DESC', ARRAY['author1', 'author2', 'author3'], ARRAY['tag-2'], ARRAY['author-tag-2'], 'Static', 500, 'Dynamic', false);
+  INSERT INTO challenges (name, category, description, authors, tags, author_tags, instance_type, max_points, score_type, host, port, conn_type, hidden) VALUES ('chall-3', 'cat-1', 'TEST chall-3 DESC', ARRAY['author1'], ARRAY['tag-3'], ARRAY['author-tag-3'], 'Container', 500, 'Dynamic', 'chall-3.test.com', 1337, 'HTTP', false);
+  INSERT INTO challenges (name, category, description, authors, tags, author_tags, instance_type, max_points, score_type, conn_type, hidden) VALUES ('chall-4', 'cat-1', 'TEST chall-4 DESC', ARRAY['author2'], ARRAY['tag-4'], ARRAY['author-tag-4'], 'Compose', 500, 'Dynamic', 'HTTP', false);
+  INSERT INTO challenges (name, category, description, authors, tags, author_tags, instance_type, max_points, score_type) VALUES ('chall-5', 'cat-2', 'TEST chall-5 DESC', ARRAY['author3'], ARRAY['tag-5'], ARRAY['author-tag-5'], 'Static', 500, 'Static');
   UPDATE challenges SET image='echo-server:latest', renewable=TRUE, hash_domain=TRUE WHERE name='chall-3';
   UPDATE challenges SET compose='
 services:

@@ -13,6 +13,8 @@ type Chall struct {
 	Category    string         `json:"category"`
 	Description string         `json:"description"`
 	Authors     []string       `json:"authors"`
+	Tags        []string       `json:"tags"`
+	AuthorTags  *[]string      `json:"author_tags,omitempty"`
 	Instance    bool           `json:"instance"`
 	Hidden      bool           `json:"hidden"`
 	Points      int            `json:"points"`
@@ -20,7 +22,6 @@ type Chall struct {
 	Solved      bool           `json:"solved"`
 	FirstBlood  bool           `json:"first_blood"`
 	Attachments []string       `json:"attachments"`
-	Tags        []string       `json:"tags"`
 	Host        string         `json:"host"`
 	Port        int            `json:"port"`
 	ConnType    sqlc.ConnType  `json:"conn_type"`
@@ -34,7 +35,7 @@ type Chall struct {
 	InstancePort int    `json:"instance_port,omitempty"`
 }
 
-func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Chall, error) {
+func GetChallenges(ctx context.Context, uid int32, author bool) ([]Chall, error) {
 	challenges, err := db.Sql.GetAllChallengesInfo(ctx, uid)
 	if err != nil {
 		return nil, err
@@ -52,6 +53,7 @@ func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Ch
 			Category:    challenge.Category,
 			Description: challenge.Description,
 			Authors:     challenge.Authors,
+			Tags:        []string{},
 			Instance:    challenge.InstanceType != sqlc.InstanceTypeStatic,
 			Hidden:      challenge.Hidden,
 			Points:      int(challenge.Points),
@@ -59,7 +61,6 @@ func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Ch
 			Solved:      challenge.Solved,
 			FirstBlood:  challenge.FirstBlood,
 			Attachments: []string{},
-			Tags:        []string{},
 			Host:        challenge.Host,
 			Port:        int(challenge.Port),
 			ConnType:    challenge.ConnType,
@@ -70,11 +71,11 @@ func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Ch
 			Timeout:     0,
 		}
 
-		if challenge.Attachments != nil {
-			chall.Attachments = challenge.Attachments
-		}
 		if challenge.Tags != nil {
 			chall.Tags = challenge.Tags
+		}
+		if challenge.Attachments != nil {
+			chall.Attachments = challenge.Attachments
 		}
 
 		if challenge.ExpiresAt.Valid {
@@ -90,6 +91,10 @@ func GetChallenges(ctx context.Context, uid int32, tid int32, author bool) ([]Ch
 			if challenge.InstancePort.Valid {
 				chall.InstancePort = int(challenge.InstancePort.Int32)
 			}
+		}
+
+		if author {
+			chall.AuthorTags = &challenge.AuthorTags
 		}
 
 		challsData = append(challsData, chall)

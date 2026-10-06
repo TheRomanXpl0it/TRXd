@@ -1,5 +1,4 @@
 # TODO
- - add author only tags (private tags) for challenges
  - better scoreboard query (maybe use views)
  - tests:
    - integration tests (for generic behaviour)

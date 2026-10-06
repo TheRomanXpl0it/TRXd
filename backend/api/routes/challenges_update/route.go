@@ -18,6 +18,7 @@ type Data struct {
 	Description  *string            `json:"description" validate:"omitempty,challenge_description"`
 	Authors      *[]string          `json:"authors" validate:"omitempty,challenge_authors"`
 	Tags         *[]string          `json:"tags" validate:"omitempty,challenge_tags"`
+	AuthorTags   *[]string          `json:"author_tags" validate:"omitempty,challenge_tags"`
 	InstanceType *sqlc.InstanceType `json:"instance_type" validate:"omitempty,challenge_instance_type"`
 	Hidden       *bool              `json:"hidden"`
 
