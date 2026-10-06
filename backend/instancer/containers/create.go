@@ -108,6 +108,13 @@ func ensureImage(ctx context.Context, img string) error {
 
 	// TODO: integration tests
 
+	//! pull only if pullable
+	//! Error response from daemon: pull access denied for echo-server, repository does not exist or may require 'docker login': denied: requested access to the resource is denied
+
+	if !strings.Contains(img, "/") { // the image is not from a registry
+		return nil
+	}
+
 	registryAuth, err := genRegistryAuth(ctx)
 	if err != nil {
 		return err

@@ -79,7 +79,10 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 			api.OneoffLabel:      "False",
 		}
 
-		s.PullPolicy = types.PullPolicyAlways // TODO: integration tests
+		// TODO: integration tests
+		if strings.Contains(s.Image, "/") { // the image is from a registry
+			s.PullPolicy = types.PullPolicyAlways
+		}
 
 		if s.Name == "chall" {
 			maxCpu, err := strconv.ParseFloat(info.MaxCpu, 64)
