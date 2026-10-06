@@ -1,10 +1,6 @@
 # TODO
  - split /challenges/:id into player and author endpoints
- - instancer container restart policy editable
- - instancer container disk space limit
- - ingress only challenges (verify if useful)
- - multi port & domain support for instances
- - author+ auth: verbose errors from instancer
+ - add author only tags (private tags) for challenges
  - tests:
    - integration tests (for generic behaviour)
    - tests for distributed functioning (already live testing & hand tested)
@@ -19,8 +15,11 @@
 
 ## Ideas / Features
  - real usage docs
+ - ingress only challenges (verify if useful)
+ - instancer container restart policy editable
+ - instancer container disk space limit
+ - multi port & domain support for instances
  - certresolver for instances (idea: use a wildcard cert and generate a cert for each instance)
- - add author only tags (private tags) for challenges
  - submissions page filers (first bloods, only wrong, group filter [correct, repeated])
  - extract data for ctftime
  - ban user/team support

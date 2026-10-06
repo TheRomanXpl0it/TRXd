@@ -42,7 +42,7 @@ func CreateCompose(ctx context.Context, info *infos.InstanceInfo, composeBody st
 	err = ComposeCli.Up(ctx, project, api.UpOptions{
 		Create: api.CreateOptions{
 			Build: &api.BuildOptions{
-				Pull: true, // TODO: integration tests
+				Pull: true,
 			},
 		},
 	})
@@ -79,7 +79,7 @@ func setupComposeProject(ctx context.Context, info *infos.ComposeInfo) (*types.P
 			api.OneoffLabel:      "False",
 		}
 
-		// TODO: integration tests
+		// TODO: more integration tests
 		if strings.Contains(s.Image, "/") { // the image is from a registry
 			s.PullPolicy = types.PullPolicyAlways
 		}

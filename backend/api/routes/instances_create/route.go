@@ -25,7 +25,7 @@ type InstanceInfo struct {
 	HashDomain bool   `json:"hash_domain"`
 }
 
-func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, error) {
+func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall, role sqlc.UserRole) (*InstanceInfo, error) {
 	if chall.Lifetime == 0 {
 		return nil, utils.Error(c, fiber.StatusInternalServerError, consts.MissingLifetime, errors.New(consts.MissingLifetime))
 	}
@@ -56,7 +56,11 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, er
 		case *instancer_errors.RaceConditionError:
 			return nil, utils.Error(c, fiber.StatusConflict, consts.AlreadyAnActiveInstance)
 		default:
-			return nil, utils.Error(c, fiber.StatusInternalServerError, consts.ErrorCreatingInstance, err)
+			msg := consts.ErrorCreatingInstance
+			if role == sqlc.UserRoleAuthor || role == sqlc.UserRoleAdmin {
+				msg = msg + ": " + err.Error()
+			}
+			return nil, utils.Error(c, fiber.StatusInternalServerError, msg, err)
 		}
 	}
 
@@ -81,7 +85,7 @@ func createInstance(c *fiber.Ctx, tid int32, chall *db.Chall) (*InstanceInfo, er
 // @Failure 403 {object} models.Error "Possible errors: `Team not Found`"
 // @Failure 404 {object} models.Error "Possible errors: `Challenge not found`"
 // @Failure 409 {object} models.Error "Possible errors: `Already an active instance`"
-// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error fetching instance` | `Error creating instance` | `invalid instance: {error message}`"
+// @Failure 500 {object} models.Error "Possible errors: `Error fetching challenge` | `Error fetching instance` | `Error creating instance` | `Error creating instance: {error message}` | `invalid instance: {error message}`"
 // @Router /api/instances [post]
 func Route(c *fiber.Ctx) error {
 	role := c.Locals("role").(sqlc.UserRole)
@@ -124,7 +128,7 @@ func Route(c *fiber.Ctx) error {
 		return utils.Error(c, fiber.StatusConflict, consts.AlreadyAnActiveInstance)
 	}
 
-	info, err := createInstance(c, tid, chall)
+	info, err := createInstance(c, tid, chall, role)
 	if err != nil || info == nil {
 		return err
 	}

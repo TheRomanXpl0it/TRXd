@@ -1609,7 +1609,8 @@ paths:
             $ref: '#/definitions/models.Error'
         "500":
           description: 'Possible errors: `Error fetching challenge` | `Error fetching
-            instance` | `Error creating instance` | `invalid instance: {error message}`'
+            instance` | `Error creating instance` | `Error creating instance: {error
+            message}` | `invalid instance: {error message}`'
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Player+] Spawns a new instance of a challenge'

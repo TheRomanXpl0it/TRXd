@@ -901,7 +901,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "Possible errors: ` + "`" + `Error fetching challenge` + "`" + ` | ` + "`" + `Error fetching instance` + "`" + ` | ` + "`" + `Error creating instance` + "`" + ` | ` + "`" + `invalid instance: {error message}` + "`" + `",
+                        "description": "Possible errors: ` + "`" + `Error fetching challenge` + "`" + ` | ` + "`" + `Error fetching instance` + "`" + ` | ` + "`" + `Error creating instance` + "`" + ` | ` + "`" + `Error creating instance: {error message}` + "`" + ` | ` + "`" + `invalid instance: {error message}` + "`" + `",
                         "schema": {
                             "$ref": "#/definitions/models.Error"
                         }
