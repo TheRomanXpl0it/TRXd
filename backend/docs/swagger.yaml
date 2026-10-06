@@ -77,6 +77,10 @@ definitions:
         items:
           type: string
         type: array
+      author_tags:
+        items:
+          type: string
+        type: array
       authors:
         items:
           type: string
@@ -129,6 +133,10 @@ definitions:
   challenges_get_all.Chall:
     properties:
       attachments:
+        items:
+          type: string
+        type: array
+      author_tags:
         items:
           type: string
         type: array
@@ -192,6 +200,10 @@ definitions:
     type: object
   challenges_update.Data:
     properties:
+      author_tags:
+        items:
+          type: string
+        type: array
       authors:
         items:
           type: string

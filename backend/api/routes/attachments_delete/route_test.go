@@ -5,6 +5,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"trxd/api"
@@ -197,7 +198,7 @@ func TestRoute(t *testing.T) {
 			t.Fatalf("Expected attachment file %s to be deleted", path)
 		}
 		for _, name := range attachments {
-			path := fmt.Sprintf("attachments/%d/%s", challID, name)
+			path := filepath.Join("./attachments", fmt.Sprint(challID), name)
 			if _, err := os.Stat(path); os.IsNotExist(err) {
 				t.Fatalf("Expected attachment file %s to exist", path)
 			}

@@ -5,9 +5,9 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 	"trxd/api"
 	"trxd/db/sqlc"
 	"trxd/utils/consts"
@@ -190,12 +190,9 @@ func TestRoute(t *testing.T) {
 		}
 		test_utils.Compare(t, expected, challengeBody)
 
-		// do to race condition where the files may not be fully written to disk before the test checks for their existence
-		time.Sleep(1 * time.Second)
-
 		attachments := expected["attachments"].([]string)
 		for _, name := range attachments {
-			path := fmt.Sprintf("attachments/%d/%s", challID, name)
+			path := filepath.Join("./attachments", fmt.Sprint(challID), name)
 			if _, err := os.Stat(path); os.IsNotExist(err) {
 				t.Fatalf("Expected attachment file %s to exist", path)
 			}

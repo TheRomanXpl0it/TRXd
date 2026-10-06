@@ -2242,6 +2242,12 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "author_tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "authors": {
                     "type": "array",
                     "items": {
@@ -2320,6 +2326,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "attachments": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "author_tags": {
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -2419,6 +2431,12 @@ const docTemplate = `{
                 "chall_id"
             ],
             "properties": {
+                "author_tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "authors": {
                     "type": "array",
                     "items": {
