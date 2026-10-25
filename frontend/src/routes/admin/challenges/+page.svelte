@@ -16,6 +16,7 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
 	import { goto } from '$app/navigation';
+	import AuthorTags from '$lib/components/challenges/AuthorTags.svelte';
 
 	let challenges = $state<any[]>([]);
 	let loading = $state(true);
@@ -188,6 +189,7 @@
 									<Table.Cell class="text-muted-foreground/60 font-medium">{chall.id}</Table.Cell>
 									<Table.Cell class="font-bold">
 										{chall.name}
+										<AuthorTags tags={chall.author_tags} />
 										{#if chall.authors && chall.authors.length > 0}
 											<div
 												class="text-muted-foreground/50 flex items-center gap-1.5 text-xs font-medium"

@@ -83,6 +83,8 @@
 	);
 	const loading = $derived(challengesQuery.isLoading || categoriesQuery.isLoading);
 	const error = $derived(challengesQuery.error?.message);
+	const searchableTags = (challenge: Challenge) =>
+		isAdmin ? [...(challenge.tags ?? []), ...(challenge.author_tags ?? [])] : (challenge.tags ?? []);
 
 	const sortedChallenges = $derived.by(() => {
 		let list = [...challenges];
@@ -93,7 +95,7 @@
 				(c) =>
 					c.name.toLowerCase().includes(s) ||
 					(c.category ?? '').toLowerCase().includes(s) ||
-					(c.tags ?? []).some((t: any) => String(t).toLowerCase().includes(s))
+					searchableTags(c).some((tag) => tag.toLowerCase().includes(s))
 			);
 		}
 
@@ -102,18 +104,14 @@
 		}
 
 		if (filterTags.length > 0) {
-			list = list.filter((c) => (c.tags ?? []).some((t: any) => filterTags.includes(String(t))));
+			list = list.filter((c) => searchableTags(c).some((tag) => filterTags.includes(tag)));
 		}
 
 		return list.sort((a, b) => (a.points ?? 0) - (b.points ?? 0));
 	});
 
 	const allTags = $derived(
-		Array.from(
-			new Set<string>(
-				(challenges ?? []).flatMap((ch: any) => (ch?.tags ?? []).map((t: any) => String(t)))
-			)
-		).sort((a, b) => a.localeCompare(b))
+		Array.from(new Set(challenges.flatMap(searchableTags))).sort((a, b) => a.localeCompare(b))
 	);
 
 	$effect(() => {

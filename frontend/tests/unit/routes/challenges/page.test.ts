@@ -1,4 +1,5 @@
-import { screen } from '@testing-library/svelte';
+import { screen, waitFor } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../render';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Page from '../../../../src/routes/challenges/+page.svelte';
@@ -43,8 +44,6 @@ vi.mock('$lib/env', () => ({
 	}
 }));
 
-
-
 // Mock the admin-only modal and controls to prevent errors from dynamic imports or missing aliases
 vi.mock('$lib/components/challenges/CreateChallengeModal.svelte', () => ({
 	default: () => null
@@ -56,6 +55,9 @@ vi.mock('$lib/components/challenges/AdminControls.svelte', () => ({
 describe('Challenges Page', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		authState.user = null;
+		authState.startTime = null;
+		authState.endTime = null;
 
 		// Default mock for queries
 		(createQuery as any).mockReturnValue({
@@ -146,4 +148,76 @@ describe('Challenges Page', () => {
 		expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 		expect(window.location.hash).toBe('#challenge-1');
 	});
+
+	it.each(['Author', 'Admin', 'Player'])(
+		'searches author tags only for privileged roles: %s',
+		async (role) => {
+			const user = userEvent.setup();
+			authState.user = { role } as any;
+			vi.mocked(createQuery)
+				.mockReturnValueOnce({
+					data: [
+						{
+							id: 1,
+							name: 'Web One',
+							category: 'Web',
+							tags: ['web'],
+							author_tags: ['review'],
+							points: 100
+						},
+						{ id: 2, name: 'Web Two', category: 'Web', tags: ['web'], points: 200 }
+					],
+					isLoading: false,
+					error: null
+				} as any)
+				.mockReturnValueOnce({ data: [], isLoading: false, error: null } as any);
+			renderWithProviders(Page);
+
+			await user.type(screen.getByRole('textbox', { name: 'Search challenges' }), 'review');
+			await waitFor(() => {
+				expect(screen.queryByText('Web Two')).not.toBeInTheDocument();
+				if (role === 'Player') {
+					expect(screen.queryByText('Web One')).not.toBeInTheDocument();
+				} else {
+					expect(screen.getByText('Web One')).toBeInTheDocument();
+				}
+			});
+		}
+	);
+
+	it.each(['Author', 'Player'])(
+		'offers private tags in the tag filter only to authors: %s',
+		async (role) => {
+			const user = userEvent.setup();
+			authState.user = { role } as any;
+			vi.mocked(createQuery)
+				.mockReturnValueOnce({
+					data: [
+						{
+							id: 1,
+							name: 'Web One',
+							category: 'Web',
+							tags: ['web'],
+							author_tags: ['review'],
+							points: 100
+						},
+						{ id: 2, name: 'Web Two', category: 'Web', tags: ['web'], points: 200 }
+					],
+					isLoading: false,
+					error: null
+				} as any)
+				.mockReturnValueOnce({ data: [], isLoading: false, error: null } as any);
+			renderWithProviders(Page);
+
+			await user.click(screen.getByRole('button', { name: 'Filter by tags' }));
+			expect(await screen.findByLabelText('Filter by web')).toBeInTheDocument();
+			if (role === 'Author') {
+				await user.click(screen.getByLabelText('Filter by review').parentElement!);
+				await waitFor(() => expect(screen.queryByText('Web Two')).not.toBeInTheDocument());
+				expect(screen.getByText('Web One')).toBeInTheDocument();
+			} else {
+				expect(screen.queryByLabelText('Filter by review')).not.toBeInTheDocument();
+			}
+		}
+	);
 });

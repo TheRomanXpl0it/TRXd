@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/svelte';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SidebarChallengeView from '../../../src/lib/components/challenges/SidebarChallengeView.svelte';
 import { uiStore } from '$lib/stores/ui.svelte';
+import { authState } from '$lib/stores/auth';
 
 vi.mock('$lib/stores/ui.svelte', () => ({
 	uiStore: {
@@ -36,6 +37,7 @@ const groupedMock: any = [
 
 describe('SidebarChallengeView', () => {
 	beforeEach(() => {
+		authState.user = { role: 'User' } as any;
 		uiStore.setChallengeView('sidebar');
 		window.history.replaceState({}, '', '/challenges');
 		window.location.hash = '';
@@ -61,14 +63,49 @@ describe('SidebarChallengeView', () => {
 		window.location.hash = '#stale-fragment';
 		render(SidebarChallengeView, { grouped: groupedMock });
 
-		expect(await screen.findByRole('heading', { level: 1, name: 'Web Chall 1' })).toBeInTheDocument();
+		expect(
+			await screen.findByRole('heading', { level: 1, name: 'Web Chall 1' })
+		).toBeInTheDocument();
 
 		await fireEvent.click(screen.getByRole('button', { name: /web chall 2/i }));
-		expect(await screen.findByRole('heading', { level: 1, name: 'Web Chall 2' })).toBeInTheDocument();
+		expect(
+			await screen.findByRole('heading', { level: 1, name: 'Web Chall 2' })
+		).toBeInTheDocument();
 		expect(window.location.hash).toBe('#stale-fragment');
 
 		await fireEvent.click(screen.getByRole('button', { name: /web chall 1/i }));
-		expect(await screen.findByRole('heading', { level: 1, name: 'Web Chall 1' })).toBeInTheDocument();
+		expect(
+			await screen.findByRole('heading', { level: 1, name: 'Web Chall 1' })
+		).toBeInTheDocument();
 		expect(window.location.hash).toBe('#stale-fragment');
 	});
+
+	it.each(['Author', 'Player'])(
+		'restricts sidebar author tag search to privileged roles: %s',
+		async (role) => {
+			authState.user = { role } as any;
+			render(SidebarChallengeView, {
+				grouped: [
+					[
+						'Web',
+						[
+							{ id: 1, name: 'Web One', tags: [], author_tags: ['review'] },
+							{ id: 2, name: 'Web Two', tags: [] }
+						]
+					]
+				] as any
+			});
+
+			await fireEvent.input(screen.getByPlaceholderText(/search/i), {
+				target: { value: 'review' }
+			});
+			expect(screen.queryByRole('button', { name: /web two/i })).not.toBeInTheDocument();
+			if (role === 'Author') {
+				expect(screen.getByRole('button', { name: /web one/i })).toBeInTheDocument();
+			} else {
+				expect(screen.queryByRole('button', { name: /web one/i })).not.toBeInTheDocument();
+				expect(screen.queryByText('review')).not.toBeInTheDocument();
+			}
+		}
+	);
 });

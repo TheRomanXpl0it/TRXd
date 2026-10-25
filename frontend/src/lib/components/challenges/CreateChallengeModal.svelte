@@ -57,6 +57,7 @@
 	// Additional states
 	let activeTab = $state<'meta' | 'deployment' | 'flags' | 'attachments'>('meta');
 	let tags = $state<string[]>([]);
+	let authorTags = $state<string[]>([]);
 	let image = $state('');
 	let lifetime = $state(1800);
 	let compose = $state('');
@@ -125,6 +126,7 @@
 				const updateData: any = {
 					chall_id,
 					tags,
+					author_tags: authorTags,
 					host,
 					port,
 					conn_type: connType,
@@ -185,6 +187,7 @@
 		points = 500;
 		dynamicScore = true;
 		tags = [];
+		authorTags = [];
 		image = '';
 		lifetime = 1800;
 		compose = '';
@@ -327,6 +330,16 @@
 								<TagMultiSelect
 									bind:value={tags}
 									placeholder="Add keywords (e.g. pwn, web, easy)..."
+								/>
+							</div>
+							<div>
+								<Label for="create-author-tags" class="mb-2 block text-sm font-semibold">
+									Author-only tags
+								</Label>
+								<TagMultiSelect
+									id="create-author-tags"
+									bind:value={authorTags}
+									placeholder="Add author-only tags..."
 								/>
 							</div>
 						</div>

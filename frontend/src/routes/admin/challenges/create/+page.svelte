@@ -71,6 +71,7 @@
 
 	// Parity fields
 	let tags = $state<string[]>([]);
+	let authorTags = $state<string[]>([]);
 	let authorsCsv = $state('');
 	let envVars = $state<{ name: string; value: string }[]>([]);
 	let attachments = $state<File[]>([]);
@@ -157,6 +158,7 @@
 				hash_domain: hashDomain,
 				renewable: renewable,
 				tags: tags,
+				author_tags: authorTags,
 				authors: authors.length > 0 ? authors : undefined,
 				envs: Object.keys(envObj).length > 0 ? JSON.stringify(envObj) : undefined
 			});
@@ -351,6 +353,14 @@
 							<TagMultiSelect
 								bind:value={tags}
 								placeholder="Add keywords (e.g. pwn, web, crypto)..."
+							/>
+						</div>
+						<div class="space-y-2">
+							<Label for="author-tags">Author-only tags</Label>
+							<TagMultiSelect
+								id="author-tags"
+								bind:value={authorTags}
+								placeholder="Add author-only tags..."
 							/>
 						</div>
 					</Card.Content>

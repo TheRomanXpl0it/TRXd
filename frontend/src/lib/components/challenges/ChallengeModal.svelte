@@ -12,6 +12,7 @@
 	import { formatConnectionString } from '$lib/utils/connection';
 	import { copyToClipboard as copy } from '$lib/utils/clipboard';
 	import type { Solve } from '$lib/types';
+	import AuthorTags from './AuthorTags.svelte';
 
 	let {
 		open = $bindable(false),
@@ -175,6 +176,8 @@
 							{/each}
 						</div>
 					{/if}
+
+					<AuthorTags tags={challenge?.author_tags} />
 
 					{#if challenge?.solves === 0}
 						<span class="inline-flex items-center gap-1 text-xs font-medium">

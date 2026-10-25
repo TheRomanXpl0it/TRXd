@@ -1,4 +1,5 @@
 <script lang="ts">
+	import AuthorTags from './AuthorTags.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Tabs from '$lib/components/ui/tabs';
@@ -73,7 +74,8 @@
 				items.filter(
 					(ch) =>
 						ch.name.toLowerCase().includes(q) ||
-						(ch.tags || []).some((t) => t.toLowerCase().includes(q))
+						(ch.tags || []).some((t) => t.toLowerCase().includes(q)) ||
+						(isPrivileged && (ch.author_tags ?? []).some((tag) => tag.toLowerCase().includes(q)))
 				)
 			])
 			.filter(([_, items]) => items.length > 0) as [string, Challenge[]][];
@@ -272,6 +274,7 @@
 												{/each}
 											</div>
 										{/if}
+										<AuthorTags tags={ch.author_tags} />
 									</button>
 								{/each}
 							</div>
@@ -348,6 +351,7 @@
 										{/each}
 									</div>
 								{/if}
+								<AuthorTags tags={activeChallenge.author_tags} />
 							</div>
 							<h1
 								class="text-foreground break-words pb-1 text-3xl font-black leading-tight tracking-tighter sm:text-5xl"

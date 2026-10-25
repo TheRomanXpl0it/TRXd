@@ -4,6 +4,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithProviders } from '../../../../render';
 import Page from '../../../../../../src/routes/admin/challenges/[id]/edit/+page.svelte';
 import { getCategories } from '$lib/categories';
+import { updateChallenge } from '$lib/challenges';
+
+vi.mock('$app/stores', async () => {
+	const { readable } = await import('svelte/store');
+	return { page: readable({ params: { id: '42' } }) };
+});
 
 vi.mock('svelte-sonner', () => ({
 	toast: { success: vi.fn(), error: vi.fn() }
@@ -70,4 +76,38 @@ describe('Admin Challenge Edit Page', () => {
 		expect(screen.getByPlaceholderText('VALUE')).toHaveValue('/flag');
 		expect(screen.getByText('TCP')).toBeInTheDocument();
 	});
+
+	it.each([false, true])(
+		'preserves or clears author tags independently of public tags (clear: %s)',
+		async (clearTags) => {
+			const user = userEvent.setup();
+			const challenge = {
+				id: 42,
+				name: 'Web Challenge',
+				category: 'Web',
+				description: '',
+				score_type: 'Static',
+				points: 500,
+				instance: false,
+				tags: ['web'],
+				author_tags: ['review'],
+				authors: []
+			};
+			renderWithProviders(Page, { data: { challenge } });
+
+			expect(await screen.findByText('review')).toBeInTheDocument();
+			if (clearTags) await user.click(screen.getByRole('button', { name: 'Remove review' }));
+			await user.click(screen.getByRole('button', { name: /update challenge/i }));
+
+			await waitFor(() =>
+				expect(updateChallenge).toHaveBeenCalledWith(
+					expect.objectContaining({
+						chall_id: 42,
+						tags: ['web'],
+						author_tags: clearTags ? [] : ['review']
+					})
+				)
+			);
+		}
+	);
 });

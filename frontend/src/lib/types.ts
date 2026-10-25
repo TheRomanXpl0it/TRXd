@@ -74,6 +74,7 @@ export interface Challenge {
 
 	// Metadata
 	tags: string[];
+	author_tags?: string[];
 	authors: string[];
 	attachments?: string[];
 	difficulty?: string;

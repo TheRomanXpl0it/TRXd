@@ -74,6 +74,7 @@
 
 	// Current selected tags, as **strings**, deduped
 	let tags = $state<string[]>([]);
+	let authorTags = $state<string[]>([]);
 
 	let existingAttachments = $state<string[]>([]); // from backend
 	let removedAttachmentNames = $state<Set<string>>(new Set()); // user-marked for deletion
@@ -147,8 +148,8 @@
 		(async () => {
 			try {
 				const fetched = await getChallenge(challenge_user?.id);
-				challenge = { ...(fetched ?? {}), ...(challenge_user ?? {}) };
-				if (cancelled || !challenge) return;
+				if (cancelled) return;
+				challenge = { ...(challenge_user ?? {}), ...(fetched ?? {}) };
 
 				flags_og = Array.isArray(challenge?.flags) ? challenge.flags : [];
 
@@ -195,6 +196,7 @@
 							.filter(Boolean)
 					)
 				);
+				authorTags = [...(challenge?.author_tags ?? [])];
 				imageName = String(challenge?.image ?? '');
 				hashDomain = Boolean(challenge?.hash_domain ?? false);
 				renewable = Boolean(challenge?.renewable ?? true);
@@ -293,6 +295,7 @@
 				return Object.keys(obj).length > 0 ? JSON.stringify(obj) : undefined;
 			})(),
 			tags,
+			author_tags: authorTags,
 			max_cpu: toNum(maxCPU) && (toNum(maxCPU) as number) > 0 ? String(toNum(maxCPU)) : '0.5'
 		};
 
@@ -616,6 +619,16 @@
 												const tag = String(newTag ?? '').trim();
 												if (tag && !tags.includes(tag)) tags = [...tags, tag];
 											}}
+										/>
+									</div>
+									<div class="col-span-1 sm:col-span-2">
+										<Label for="edit-author-tags" class="mb-2 block text-sm font-semibold">
+											Author-only tags
+										</Label>
+										<TagMultiSelect
+											id="edit-author-tags"
+											bind:value={authorTags}
+											placeholder="Add author-only tags..."
 										/>
 									</div>
 								</div>

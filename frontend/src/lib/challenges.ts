@@ -2,7 +2,7 @@ import { api } from '$lib/api';
 import type { Challenge, Category, Solve } from '$lib/types';
 
 export async function getSolves(chall_id: string | number): Promise<Solve[]> {
-	const ch = await api<any>(`/challenges/${chall_id}/solves`);
+	const ch = await api<Solve[]>(`/challenges/${chall_id}/solves`);
 	return ch || [];
 }
 
@@ -11,7 +11,8 @@ export async function getChallenges(): Promise<Challenge[]> {
 }
 
 export async function getChallenge(chall_id: string | number): Promise<Challenge> {
-	return api<Challenge>(`/challenges/${chall_id}`);
+	const challenge = await api<Omit<Challenge, 'id'>>(`/challenges/${chall_id}`);
+	return { ...challenge, id: Number(chall_id) };
 }
 
 export async function submitFlag(

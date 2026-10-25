@@ -2,6 +2,7 @@
 	import { authState } from '$lib/stores/auth';
 	import { EyeOff, Clock } from '@lucide/svelte';
 	import { fmtTimeLeft } from '$lib/utils/time';
+	import AuthorTags from './AuthorTags.svelte';
 
 	let {
 		challenge,
@@ -69,6 +70,12 @@
 	{/if}
 
 	<!-- Points / Footer -->
+	{#if isPrivileged && challenge.author_tags?.length}
+		<div class="mb-4">
+			<AuthorTags tags={challenge.author_tags} />
+		</div>
+	{/if}
+
 	<div class="mt-auto flex items-center justify-between">
 		<span class="text-[14px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-300">
 			{challenge.points} pts

@@ -8,11 +8,13 @@
 		all_tags = [] as string[],
 		placeholder = 'Select tags...',
 		value = $bindable<string[]>([]),
+		id,
 		oncreate
 	} = $props<{
 		all_tags?: string[];
 		placeholder?: string;
 		value?: string[];
+		id?: string;
 		oncreate?: (tag: string) => void;
 	}>();
 
@@ -114,10 +116,12 @@
 	{/if}
 
 	<Popover.Root bind:open>
-		<Popover.Trigger>
-			<Button type="button" variant="outline" class="w-full justify-between">
-				<span class="truncate">{summary}</span>
-			</Button>
+		<Popover.Trigger {id}>
+			{#snippet child({ props })}
+				<Button {...props} type="button" variant="outline" class="w-full justify-between">
+					<span class="truncate">{summary}</span>
+				</Button>
+			{/snippet}
 		</Popover.Trigger>
 
 		<Popover.Content class="w-80 p-3">

@@ -120,4 +120,23 @@ describe('Admin Challenge Create Page', () => {
 			expect(goto).toHaveBeenCalledWith('/challenges');
 		});
 	}, 15000);
+
+	it('saves author-only tags through the post-create update', async () => {
+		const user = userEvent.setup();
+		renderWithProviders(Page);
+		await user.type(screen.getByLabelText(/challenge name/i), 'Container Test');
+		await fireEvent.keyDown(screen.getByLabelText('Category'), { key: 'ArrowDown' });
+		await fireEvent.pointerUp(await screen.findByRole('option', { name: 'Web' }));
+
+		await user.click(screen.getByLabelText('Author-only tags'));
+		await user.type(screen.getByPlaceholderText('Search or create...'), 'review{Enter}');
+		await user.keyboard('{Escape}');
+		await user.click(screen.getByRole('button', { name: /^create challenge$/i }));
+
+		await waitFor(() =>
+			expect(updateChallenge).toHaveBeenCalledWith(
+				expect.objectContaining({ chall_id: 42, author_tags: ['review'], tags: [] })
+			)
+		);
+	});
 });
