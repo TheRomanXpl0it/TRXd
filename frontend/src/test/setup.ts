@@ -59,6 +59,33 @@ if (typeof window !== 'undefined' && !HTMLElement.prototype.hasPointerCapture) {
 	HTMLElement.prototype.releasePointerCapture = () => {};
 }
 
+// Polyfill localStorage for Node/JSDOM test environment
+const storageMap = new Map<string, string>();
+const localStorageMock = {
+	getItem: (key: string) => storageMap.get(key) ?? null,
+	setItem: (key: string, value: string) => { storageMap.set(key, String(value)); },
+	removeItem: (key: string) => { storageMap.delete(key); },
+	clear: () => { storageMap.clear(); },
+	get length() { return storageMap.size; },
+	key: (index: number) => Array.from(storageMap.keys())[index] ?? null
+};
+try {
+	Object.defineProperty(globalThis, 'localStorage', {
+		value: localStorageMock,
+		writable: true,
+		configurable: true
+	});
+	if (typeof window !== 'undefined') {
+		Object.defineProperty(window, 'localStorage', {
+			value: localStorageMock,
+			writable: true,
+			configurable: true
+		});
+	}
+} catch {
+	// ignore if cannot redefine
+}
+
 // Ensure each test starts with a clean DOM
 afterEach(async () => {
 	cleanup();

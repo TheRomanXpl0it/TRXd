@@ -108,4 +108,37 @@ describe('SidebarChallengeView', () => {
 			}
 		}
 	);
+
+	it('does not render hidden challenge toggle for unprivileged roles', async () => {
+		authState.user = { role: 'Player' } as any;
+		render(SidebarChallengeView, { grouped: groupedMock });
+
+		expect(screen.queryByTestId('sidebar-toggle-hidden-challenges')).not.toBeInTheDocument();
+	});
+
+	it('renders hidden challenge toggle for privileged roles and toggles visibility', async () => {
+		authState.user = { role: 'Admin' } as any;
+		const groupedWithHidden = [
+			[
+				'Web',
+				[
+					{ id: 1, name: 'Web Visible', points: 100, tags: [], hidden: false },
+					{ id: 2, name: 'Web Hidden', points: 200, tags: [], hidden: true }
+				]
+			]
+		];
+
+		render(SidebarChallengeView, { grouped: groupedWithHidden as any });
+
+		const toggle = await screen.findByTestId('sidebar-toggle-hidden-challenges');
+		expect(toggle).toBeInTheDocument();
+		expect(toggle).toHaveTextContent(/Hide hidden/i);
+		expect(screen.getByRole('button', { name: /web hidden/i })).toBeInTheDocument();
+
+		await fireEvent.click(toggle);
+
+		expect(toggle).toHaveTextContent(/Show hidden/i);
+		expect(screen.queryByRole('button', { name: /web hidden/i })).not.toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /web visible/i })).toBeInTheDocument();
+	});
 });

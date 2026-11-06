@@ -16,6 +16,7 @@
 		Users,
 		Monitor,
 		Clock,
+		Eye,
 		EyeOff
 	} from '@lucide/svelte';
 	import { cn } from '$lib/utils';
@@ -39,7 +40,8 @@
 		onOpenChallenge,
 		countdowns = {} as Record<string | number, number>,
 		onCountdownUpdate,
-		submissionsClosed = false
+		submissionsClosed = false,
+		showHidden = $bindable(true)
 	}: {
 		grouped: [string, Challenge[]][];
 		onSolved?: () => void;
@@ -47,6 +49,7 @@
 		countdowns?: Record<string | number, number>;
 		onCountdownUpdate?: (id: string | number, newCountdown: number) => void;
 		submissionsClosed?: boolean;
+		showHidden?: boolean;
 	} = $props();
 
 	import { uiStore } from '$lib/stores/ui.svelte';
@@ -66,9 +69,15 @@
 	let mobileShowSide = $state(true);
 
 	const filteredGrouped = $derived.by(() => {
-		if (!search.trim()) return grouped;
+		let currentGrouped = grouped;
+		if (isPrivileged && !showHidden) {
+			currentGrouped = currentGrouped
+				.map(([cat, items]) => [cat, items.filter((ch) => !ch.hidden)])
+				.filter(([_, items]) => items.length > 0) as [string, Challenge[]][];
+		}
+		if (!search.trim()) return currentGrouped;
 		const q = search.toLowerCase();
-		return grouped
+		return currentGrouped
 			.map(([cat, items]) => [
 				cat,
 				items.filter(
@@ -125,6 +134,12 @@
 	$effect(() => {
 		if (!activeChallenge && filteredGrouped.length > 0 && filteredGrouped[0][1].length > 0) {
 			activeChallenge = { ...filteredGrouped[0][1][0] };
+		} else if (activeChallenge?.hidden && isPrivileged && !showHidden) {
+			if (filteredGrouped.length > 0 && filteredGrouped[0][1].length > 0) {
+				activeChallenge = { ...filteredGrouped[0][1][0] };
+			} else {
+				activeChallenge = null;
+			}
 		}
 	});
 
@@ -177,9 +192,30 @@
 		)}
 	>
 		<div class="border-border/15 bg-background/12 space-y-4 border-b px-5 py-6">
-			<h2 class="text-muted-foreground/40 px-1 text-[10px] font-black uppercase tracking-[0.2em]">
-				Challenges
-			</h2>
+			<div class="flex items-center justify-between px-1">
+				<h2 class="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.2em]">
+					Challenges
+				</h2>
+				{#if isPrivileged}
+					<Button
+						variant={showHidden ? 'ghost' : 'secondary'}
+						size="sm"
+						class="text-muted-foreground hover:text-foreground flex h-6 cursor-pointer items-center gap-1.5 px-2 text-[10px] font-bold"
+						onclick={() => (showHidden = !showHidden)}
+						aria-label={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
+						title={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
+						data-testid="sidebar-toggle-hidden-challenges"
+					>
+						{#if showHidden}
+							<Eye class="h-3 w-3" aria-hidden="true" />
+							<span>Hide hidden</span>
+						{:else}
+							<EyeOff class="h-3 w-3 opacity-60" aria-hidden="true" />
+							<span>Show hidden</span>
+						{/if}
+					</Button>
+				{/if}
+			</div>
 			<div class="group relative">
 				<Search
 					class="text-muted-foreground/30 group-focus-within:text-primary/50 absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-colors"

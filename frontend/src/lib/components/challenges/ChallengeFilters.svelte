@@ -4,13 +4,15 @@
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
-	import { X, Filter, Shapes } from '@lucide/svelte';
+	import { X, Filter, Shapes, Eye, EyeOff } from '@lucide/svelte';
 	import VirtualList from '@sveltejs/svelte-virtual-list';
 
 	let {
 		search = $bindable(''),
 		filterCategories = $bindable([]),
 		filterTags = $bindable([]),
+		showHidden = $bindable(true),
+		canSeeHidden = false,
 		categories = [],
 		allTags = [],
 		activeFiltersCount = 0,
@@ -19,6 +21,8 @@
 		search: string;
 		filterCategories: string[];
 		filterTags: string[];
+		showHidden?: boolean;
+		canSeeHidden?: boolean;
 		categories: Array<{ value: string; label: string }>;
 		allTags: string[];
 		activeFiltersCount: number;
@@ -210,6 +214,29 @@
 			</Tooltip.Trigger>
 			<Tooltip.Content>Filter by Tag</Tooltip.Content>
 		</Tooltip.Root>
+
+		{#if canSeeHidden}
+			<Tooltip.Root>
+				<Tooltip.Trigger>
+					<Button
+						variant={showHidden ? 'outline' : 'secondary'}
+						class="flex h-9 shrink-0 cursor-pointer items-center gap-1.5 px-3 md:h-10 md:px-4"
+						onclick={() => (showHidden = !showHidden)}
+						aria-label={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
+						data-testid="toggle-hidden-challenges"
+					>
+						{#if showHidden}
+							<Eye class="h-4 w-4 shrink-0 opacity-60" aria-hidden="true" />
+							<span class="hidden sm:inline">Hide hidden</span>
+						{:else}
+							<EyeOff class="h-4 w-4 shrink-0 text-zinc-600 dark:text-zinc-300" aria-hidden="true" />
+							<span class="hidden sm:inline">Show hidden</span>
+						{/if}
+					</Button>
+				</Tooltip.Trigger>
+				<Tooltip.Content>{showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}</Tooltip.Content>
+			</Tooltip.Root>
+		{/if}
 
 		{#if activeFiltersCount > 0}
 			<Button

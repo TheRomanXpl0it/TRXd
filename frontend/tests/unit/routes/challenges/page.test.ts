@@ -220,4 +220,62 @@ describe('Challenges Page', () => {
 			}
 		}
 	);
+
+	it('does not render toggle for hidden challenges for players', async () => {
+		authState.user = { role: 'Player' } as any;
+		vi.mocked(createQuery)
+			.mockReturnValueOnce({
+				data: [{ id: 1, name: 'Normal Chall', category: 'Web', points: 100, hidden: false }],
+				isLoading: false,
+				error: null
+			} as any)
+			.mockReturnValueOnce({ data: [], isLoading: false, error: null } as any);
+
+		renderWithProviders(Page);
+
+		expect(await screen.findByText('Normal Chall')).toBeInTheDocument();
+		expect(screen.queryByTestId('toggle-hidden-challenges')).not.toBeInTheDocument();
+	});
+
+	it('renders toggle for hidden challenges for admins and filters hidden challenges on click', async () => {
+		const user = userEvent.setup();
+		authState.user = { role: 'Admin' } as any;
+		vi.mocked(createQuery)
+			.mockReturnValueOnce({
+				data: [
+					{ id: 1, name: 'Public Chall', category: 'Web', points: 100, hidden: false },
+					{ id: 2, name: 'Secret Hidden Chall', category: 'Web', points: 200, hidden: true }
+				],
+				isLoading: false,
+				error: null
+			} as any)
+			.mockReturnValueOnce({ data: [], isLoading: false, error: null } as any);
+
+		renderWithProviders(Page);
+
+		expect(await screen.findByText('Public Chall')).toBeInTheDocument();
+		expect(screen.getByText('Secret Hidden Chall')).toBeInTheDocument();
+
+		const toggleButton = screen.getByTestId('toggle-hidden-challenges');
+		expect(toggleButton).toBeInTheDocument();
+		expect(toggleButton).toHaveTextContent(/Hide hidden/i);
+
+		// Click to hide hidden challenges
+		await user.click(toggleButton);
+
+		await waitFor(() => {
+			expect(screen.queryByText('Secret Hidden Chall')).not.toBeInTheDocument();
+			expect(screen.getByText('Public Chall')).toBeInTheDocument();
+		});
+		expect(toggleButton).toHaveTextContent(/Show hidden/i);
+
+		// Click again to restore hidden challenges
+		await user.click(toggleButton);
+
+		await waitFor(() => {
+			expect(screen.getByText('Secret Hidden Chall')).toBeInTheDocument();
+			expect(screen.getByText('Public Chall')).toBeInTheDocument();
+		});
+		expect(toggleButton).toHaveTextContent(/Hide hidden/i);
+	});
 });

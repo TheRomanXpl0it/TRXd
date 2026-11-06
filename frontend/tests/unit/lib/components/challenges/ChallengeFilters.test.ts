@@ -155,4 +155,39 @@ describe('ChallengeFilters Component', () => {
 
 		expect(await screen.findByPlaceholderText(/search tags/i)).toBeInTheDocument();
 	});
+
+	it('does not render hidden challenge toggle when canSeeHidden is false', async () => {
+		renderWithProviders(ChallengeFilters, {
+			props: { ...defaultProps, canSeeHidden: false }
+		});
+
+		await screen.findByRole('textbox', { name: /search challenges/i });
+		expect(screen.queryByTestId('toggle-hidden-challenges')).not.toBeInTheDocument();
+	});
+
+	it('renders hidden challenge toggle when canSeeHidden is true and toggles state', async () => {
+		const user = userEvent.setup();
+		let showHidden = true;
+
+		renderWithProviders(ChallengeFilters, {
+			props: {
+				...defaultProps,
+				canSeeHidden: true,
+				get showHidden() {
+					return showHidden;
+				},
+				set showHidden(val: boolean) {
+					showHidden = val;
+				}
+			}
+		});
+
+		const toggleButton = await screen.findByTestId('toggle-hidden-challenges');
+		expect(toggleButton).toBeInTheDocument();
+		expect(toggleButton).toHaveTextContent(/Hide hidden/i);
+		expect(toggleButton).toHaveAttribute('aria-label', 'Hide hidden challenges');
+
+		await user.click(toggleButton);
+		expect(showHidden).toBe(false);
+	});
 });

@@ -58,6 +58,7 @@
 	let debouncedSearch = $state('');
 	let filterCategories = $state<string[]>([]);
 	let filterTags = $state<string[]>([]);
+	let showHidden = $state(true);
 	let openModal = $state(false);
 
 	// 3. Data Fetching
@@ -88,6 +89,10 @@
 
 	const sortedChallenges = $derived.by(() => {
 		let list = [...challenges];
+
+		if (isAdmin && !showHidden) {
+			list = list.filter((c) => !c.hidden);
+		}
 
 		if (debouncedSearch) {
 			const s = debouncedSearch.toLowerCase();
@@ -252,12 +257,14 @@
 	}
 </script>
 
-{#if !upcoming && challengeView !== 'sidebar'}
+{#if (!upcoming || isAdmin) && challengeView !== 'sidebar'}
 	<div class="mb-10 w-full">
 		<ChallengeFilters
 			bind:search
 			bind:filterCategories
 			bind:filterTags
+			bind:showHidden
+			canSeeHidden={isAdmin}
 			{categories}
 			{allTags}
 			{activeFiltersCount}
@@ -319,6 +326,7 @@
 			{countdowns}
 			onCountdownUpdate={updateCountdown}
 			{submissionsClosed}
+			bind:showHidden
 		/>
 	</div>
 {:else}
