@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"sort"
 	"testing"
 	"trxd/api"
 	"trxd/db"
@@ -188,6 +189,7 @@ func TestRoute(t *testing.T) {
 			"score_type":  "Dynamic",
 			"solved":      true,
 			"solves":      2,
+			"sort_order":  3,
 			"tags": []string{
 				"tag-4",
 			},
@@ -217,6 +219,7 @@ func TestRoute(t *testing.T) {
 			"score_type":  "Dynamic",
 			"solved":      true,
 			"solves":      1,
+			"sort_order":  1,
 			"tags": []string{
 				"tag-1",
 				"test-tag",
@@ -248,6 +251,7 @@ func TestRoute(t *testing.T) {
 			"score_type":  "Dynamic",
 			"solved":      false,
 			"solves":      1,
+			"sort_order":  1,
 			"tags": []string{
 				"tag-2",
 			},
@@ -276,6 +280,7 @@ func TestRoute(t *testing.T) {
 			"score_type":  "Dynamic",
 			"solved":      true,
 			"solves":      1,
+			"sort_order":  2,
 			"tags": []string{
 				"tag-3",
 			},
@@ -304,6 +309,7 @@ func TestRoute(t *testing.T) {
 			"score_type":  "Static",
 			"solved":      false,
 			"solves":      0,
+			"sort_order":  2,
 			"tags": []string{
 				"tag-5",
 			},
@@ -353,5 +359,14 @@ func TestRoute(t *testing.T) {
 	}
 
 	session.Get("/challenges", nil, http.StatusOK)
+	session.CheckFilteredResponse(expectedAuthor, "id", "timeout", "instance_host")
+
+	test_utils.UpdateConfig(t, "chall-fixed-order", "true")
+	session.Get("/challenges", nil, http.StatusOK)
+	sort.Slice(expectedAuthor, func(i, j int) bool {
+		return expectedAuthor[i]["sort_order"].(int) < expectedAuthor[j]["sort_order"].(int)
+		// Note: Not sorting by ID here, but the above array is already sorted by ID,
+		//       so this will maintain the order of elements with the same sort_order.
+	})
 	session.CheckFilteredResponse(expectedAuthor, "id", "timeout", "instance_host")
 }

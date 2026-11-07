@@ -59,3 +59,63 @@ BEGIN
   RETURN NEXT;
 END;
 $$ LANGUAGE plpgsql;
+
+
+-- update_challenge_sort_order
+
+CREATE OR REPLACE FUNCTION update_challenge_sort_order(chall_id INTEGER, new_order INTEGER)
+RETURNS VOID AS $$
+DECLARE
+  cat TEXT;
+  old_order INTEGER;
+  max_order INTEGER;
+BEGIN
+  SELECT category INTO cat
+    FROM challenges
+    WHERE id = chall_id
+    FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Challenge % not found', chall_id;
+  END IF;
+
+  PERFORM 1
+    FROM challenges
+    WHERE category = cat
+      AND id != chall_id
+    FOR UPDATE;
+
+  SELECT sort_order INTO old_order
+    FROM challenges
+    WHERE id = chall_id;
+
+  SELECT MAX(sort_order) INTO max_order
+    FROM challenges
+    WHERE category = cat;
+
+  new_order := GREATEST(1, LEAST(new_order, max_order));
+
+  IF old_order = new_order THEN
+    RETURN;
+  END IF;
+
+  IF new_order < old_order THEN
+    UPDATE challenges
+      SET sort_order = sort_order + 1
+      WHERE category = cat
+        AND sort_order >= new_order
+        AND sort_order < old_order;
+  ELSE
+    UPDATE challenges
+      SET sort_order = sort_order - 1
+      WHERE category = cat
+        AND sort_order > old_order
+        AND sort_order <= new_order;
+  END IF;
+
+  UPDATE challenges
+    SET sort_order = new_order
+    WHERE id = chall_id;
+
+END;
+$$ LANGUAGE plpgsql;

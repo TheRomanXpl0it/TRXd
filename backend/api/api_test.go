@@ -74,7 +74,7 @@ func TestCSRF(t *testing.T) {
 	session.Post("/login", nil, http.StatusForbidden)
 	session.CheckResponse(nil)
 	session.Get("/info", nil, http.StatusOK)
-	session.CheckResponse(JSON{"email_verification": false})
+	session.CheckResponse(JSON{"email_verification": false, "user_mode": false})
 	session.Post("/login", nil, http.StatusBadRequest)
 	session.CheckResponse(errorf(consts.InvalidJSON))
 }

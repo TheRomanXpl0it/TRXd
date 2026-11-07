@@ -17,6 +17,7 @@ import (
 	"trxd/api/routes/challenges_get"
 	"trxd/api/routes/challenges_get_all"
 	"trxd/api/routes/challenges_hidden"
+	"trxd/api/routes/challenges_order"
 	"trxd/api/routes/challenges_solves"
 	"trxd/api/routes/challenges_update"
 	"trxd/api/routes/configs_get"
@@ -212,6 +213,7 @@ func SetupApi(ctx context.Context, app *fiber.App) {
 	api.Post("/challenges", author, challenges_create.Route)
 	api.Patch("/challenges", author, challenges_update.Route)
 	api.Patch("/challenges/hidden", author, challenges_hidden.Route)
+	api.Patch("/challenges/order", author, challenges_order.Route)
 	api.Delete("/challenges", author, challenges_delete.Route)
 	api.Get("/challenges", player, team, start, challenges_get_all.Route)
 	api.Get("/challenges/:id", author, challenges_get.Route)

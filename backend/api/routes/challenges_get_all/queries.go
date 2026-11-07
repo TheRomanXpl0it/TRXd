@@ -17,6 +17,7 @@ type Chall struct {
 	AuthorTags  *[]string      `json:"author_tags,omitempty"`
 	Instance    bool           `json:"instance"`
 	Hidden      bool           `json:"hidden"`
+	SortOrder   *int           `json:"sort_order,omitempty"`
 	Points      int            `json:"points"`
 	Solves      int            `json:"solves"`
 	Solved      bool           `json:"solved"`
@@ -95,6 +96,7 @@ func GetChallenges(ctx context.Context, uid int32, author bool) ([]Chall, error)
 
 		if author {
 			chall.AuthorTags = &challenge.AuthorTags
+			chall.SortOrder = new(int(challenge.SortOrder))
 		}
 
 		challsData = append(challsData, chall)

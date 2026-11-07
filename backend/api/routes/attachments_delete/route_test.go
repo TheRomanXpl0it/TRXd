@@ -180,6 +180,7 @@ func TestRoute(t *testing.T) {
 			"score_type":  sqlc.ScoreTypeStatic,
 			"solved":      false,
 			"solves":      0,
+			"sort_order":  1,
 			"tags":        []string{},
 			"timeout":     0,
 		}

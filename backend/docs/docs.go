@@ -614,6 +614,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/challenges/order": {
+            "patch": {
+                "description": "Requires **Author** privileges or higher.\nChanges the order of the specified challenge.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "[Author+] Changes the order of a challenge.",
+                "parameters": [
+                    {
+                        "description": "the challenge ID and the new order",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/challenges_order.Data"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Possible errors: ` + "`" + `Invalid JSON format` + "`" + ` | ` + "`" + `Missing required fields` + "`" + ` | ` + "`" + `ChallID must be at least 0` + "`" + ` | ` + "`" + `NewOrder must be at least 0` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Possible errors: ` + "`" + `Challenge not found` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Possible errors: ` + "`" + `Error updating challenge` + "`" + ` | ` + "`" + `Internal server error` + "`" + `",
+                        "schema": {
+                            "$ref": "#/definitions/models.Error"
+                        }
+                    }
+                }
+            }
+        },
         "/api/configs": {
             "get": {
                 "description": "Requires **Admin** privileges.\nRetrieves a list of all configs sorted as defined in the configs file into the backend.",
@@ -2400,6 +2449,9 @@ const docTemplate = `{
                 "solves": {
                     "type": "integer"
                 },
+                "sort_order": {
+                    "type": "integer"
+                },
                 "tags": {
                     "type": "array",
                     "items": {
@@ -2422,6 +2474,22 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                }
+            }
+        },
+        "challenges_order.Data": {
+            "type": "object",
+            "required": [
+                "chall_id",
+                "new_order"
+            ],
+            "properties": {
+                "chall_id": {
+                    "type": "integer"
+                },
+                "new_order": {
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },

@@ -182,6 +182,8 @@ definitions:
         type: boolean
       solves:
         type: integer
+      sort_order:
+        type: integer
       tags:
         items:
           type: string
@@ -197,6 +199,17 @@ definitions:
         type: array
     required:
     - chall_ids
+    type: object
+  challenges_order.Data:
+    properties:
+      chall_id:
+        type: integer
+      new_order:
+        minimum: 0
+        type: integer
+    required:
+    - chall_id
+    - new_order
     type: object
   challenges_update.Data:
     properties:
@@ -1306,6 +1319,42 @@ paths:
           schema:
             $ref: '#/definitions/models.Error'
       summary: '[Author+] Toggles a list of challenges between hidden and visible'
+      tags:
+      - challenges
+  /api/challenges/order:
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Requires **Author** privileges or higher.
+        Changes the order of the specified challenge.
+      parameters:
+      - description: the challenge ID and the new order
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/challenges_order.Data'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: 'Possible errors: `Invalid JSON format` | `Missing required
+            fields` | `ChallID must be at least 0` | `NewOrder must be at least 0`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "404":
+          description: 'Possible errors: `Challenge not found`'
+          schema:
+            $ref: '#/definitions/models.Error'
+        "500":
+          description: 'Possible errors: `Error updating challenge` | `Internal server
+            error`'
+          schema:
+            $ref: '#/definitions/models.Error'
+      summary: '[Author+] Changes the order of a challenge.'
       tags:
       - challenges
   /api/configs:

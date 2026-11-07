@@ -253,6 +253,7 @@ type Challenge struct {
 	AuthorTags   []string     `json:"author_tags"`
 	InstanceType InstanceType `json:"instance_type"`
 	Hidden       bool         `json:"hidden"`
+	SortOrder    int32        `json:"sort_order"`
 	MaxPoints    int32        `json:"max_points"`
 	ScoreType    ScoreType    `json:"score_type"`
 	Points       int32        `json:"points"`

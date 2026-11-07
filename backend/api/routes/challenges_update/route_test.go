@@ -270,6 +270,7 @@ func TestRoute(t *testing.T) {
 				"score_type":  test.testBody["score_type"],
 				"solved":      false,
 				"solves":      0,
+				"sort_order":  3,
 				"tags":        test.testBody["tags"],
 				"timeout":     0,
 			}
@@ -364,6 +365,7 @@ func TestRoute(t *testing.T) {
 		"score_type":  "Dynamic",
 		"solved":      false,
 		"solves":      0,
+		"sort_order":  3,
 		"tags":        testBody["tags"],
 		"timeout":     0,
 	}

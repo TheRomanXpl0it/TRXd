@@ -91,6 +91,7 @@ CREATE TABLE IF NOT EXISTS challenges (
   author_tags VARCHAR(32)[] NOT NULL DEFAULT '{}',
   instance_type instance_type NOT NULL DEFAULT 'Static',
   hidden BOOLEAN NOT NULL DEFAULT TRUE,
+  sort_order INTEGER NOT NULL,
 
   max_points INTEGER NOT NULL,
   score_type score_type NOT NULL,

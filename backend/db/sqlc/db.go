@@ -210,6 +210,9 @@ func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	if q.updateChallengeStmt, err = db.PrepareContext(ctx, updateChallenge); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateChallenge: %w", err)
 	}
+	if q.updateChallengeOrderStmt, err = db.PrepareContext(ctx, updateChallengeOrder); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateChallengeOrder: %w", err)
+	}
 	if q.updateChallengesCategoryStmt, err = db.PrepareContext(ctx, updateChallengesCategory); err != nil {
 		return nil, fmt.Errorf("error preparing query UpdateChallengesCategory: %w", err)
 	}
@@ -549,6 +552,11 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing updateChallengeStmt: %w", cerr)
 		}
 	}
+	if q.updateChallengeOrderStmt != nil {
+		if cerr := q.updateChallengeOrderStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateChallengeOrderStmt: %w", cerr)
+		}
+	}
 	if q.updateChallengesCategoryStmt != nil {
 		if cerr := q.updateChallengesCategoryStmt.Close(); cerr != nil {
 			err = fmt.Errorf("error closing updateChallengesCategoryStmt: %w", cerr)
@@ -690,6 +698,7 @@ type Queries struct {
 	submitStmt                     *sql.Stmt
 	toggleChallengesHiddenStmt     *sql.Stmt
 	updateChallengeStmt            *sql.Stmt
+	updateChallengeOrderStmt       *sql.Stmt
 	updateChallengesCategoryStmt   *sql.Stmt
 	updateConfigStmt               *sql.Stmt
 	updateFlagStmt                 *sql.Stmt
@@ -766,6 +775,7 @@ func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 		submitStmt:                     q.submitStmt,
 		toggleChallengesHiddenStmt:     q.toggleChallengesHiddenStmt,
 		updateChallengeStmt:            q.updateChallengeStmt,
+		updateChallengeOrderStmt:       q.updateChallengeOrderStmt,
 		updateChallengesCategoryStmt:   q.updateChallengesCategoryStmt,
 		updateConfigStmt:               q.updateConfigStmt,
 		updateFlagStmt:                 q.updateFlagStmt,

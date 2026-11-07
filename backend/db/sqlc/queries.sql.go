@@ -283,9 +283,11 @@ func (q *Queries) GetAdminStats(ctx context.Context) (GetAdminStatsRow, error) {
 }
 
 const getAllChallengesInfo = `-- name: GetAllChallengesInfo :many
-WITH tid AS (SELECT team_id FROM users WHERE users.id = $1)
+WITH
+  tid AS (SELECT team_id FROM users WHERE users.id = $1),
+  fixed_order AS (SELECT value::BOOLEAN AS fixed FROM configs WHERE key = 'chall-fixed-order')
 SELECT
-    c.id, c.name, c.category, c.description, c.authors, c.tags, c.author_tags, c.instance_type, c.hidden, c.max_points, c.score_type, c.points, c.solves, c.host, c.port, c.conn_type, c.hash_domain, c.image, c.compose, c.lifetime, c.renewable, c.envs, c.max_memory, c.max_cpu,
+    c.id, c.name, c.category, c.description, c.authors, c.tags, c.author_tags, c.instance_type, c.hidden, c.sort_order, c.max_points, c.score_type, c.points, c.solves, c.host, c.port, c.conn_type, c.hash_domain, c.image, c.compose, c.lifetime, c.renewable, c.envs, c.max_memory, c.max_cpu,
     (s.first_blood IS NOT NULL)::BOOLEAN AS solved,
     COALESCE(s.first_blood, FALSE) AS first_blood,
     (ARRAY_AGG('/' || a.hash || '/' || a.name ORDER BY a.name)
@@ -309,7 +311,12 @@ SELECT
     ON i.chall_id = c.id
       AND i.team_id = (SELECT team_id FROM tid)
   GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id
-  ORDER BY c.hidden ASC, c.points ASC, c.solves DESC, c.id ASC
+  ORDER BY
+    CASE WHEN NOT (SELECT fixed FROM fixed_order) THEN c.hidden END ASC,
+    CASE WHEN NOT (SELECT fixed FROM fixed_order) THEN c.points END ASC,
+    CASE WHEN NOT (SELECT fixed FROM fixed_order) THEN c.solves END DESC,
+    c.sort_order ASC,
+    c.id ASC
 `
 
 type GetAllChallengesInfoRow struct {
@@ -322,6 +329,7 @@ type GetAllChallengesInfoRow struct {
 	AuthorTags   []string       `json:"author_tags"`
 	InstanceType InstanceType   `json:"instance_type"`
 	Hidden       bool           `json:"hidden"`
+	SortOrder    int32          `json:"sort_order"`
 	MaxPoints    int32          `json:"max_points"`
 	ScoreType    ScoreType      `json:"score_type"`
 	Points       int32          `json:"points"`
@@ -366,6 +374,7 @@ func (q *Queries) GetAllChallengesInfo(ctx context.Context, id int32) ([]GetAllC
 			pq.Array(&i.AuthorTags),
 			&i.InstanceType,
 			&i.Hidden,
+			&i.SortOrder,
 			&i.MaxPoints,
 			&i.ScoreType,
 			&i.Points,
@@ -1771,6 +1780,20 @@ func (q *Queries) UpdateChallenge(ctx context.Context, arg UpdateChallengeParams
 		arg.MaxCpu,
 		arg.ChallID,
 	)
+	return err
+}
+
+const updateChallengeOrder = `-- name: UpdateChallengeOrder :exec
+SELECT update_challenge_sort_order($1::INTEGER, $2::INTEGER)
+`
+
+type UpdateChallengeOrderParams struct {
+	ChallID  int32 `json:"chall_id"`
+	NewOrder int32 `json:"new_order"`
+}
+
+func (q *Queries) UpdateChallengeOrder(ctx context.Context, arg UpdateChallengeOrderParams) error {
+	_, err := q.exec(ctx, q.updateChallengeOrderStmt, updateChallengeOrder, arg.ChallID, arg.NewOrder)
 	return err
 }
 

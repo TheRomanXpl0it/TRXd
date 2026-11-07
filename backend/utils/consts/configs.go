@@ -50,6 +50,15 @@ var DefaultConfigsList = []Config{
 		Secret:      false,
 	},
 	{
+		Key:         "chall-fixed-order",
+		Name:        "Challenge Fixed Order",
+		Value:       false,
+		Type:        "bool",
+		Category:    "",
+		Description: "if enabled, challenges will be displayed using their sort_order",
+		Secret:      false,
+	},
+	{
 		Key:         "chall-min-points",
 		Name:        "Challenge Min Points",
 		Value:       50,

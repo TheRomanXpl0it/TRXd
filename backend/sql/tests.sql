@@ -392,8 +392,58 @@ BEGIN
   PERFORM assert(solves=1, 'role_change_chall-3_has_one_solve') FROM challenges WHERE name='chall-3';
   PERFORM assert(solves=1, 'role_change_chall-4_has_one_solve') FROM challenges WHERE name='chall-4';
   PERFORM assert(solves=1, 'role_change_chall-1_has_one_solve') FROM challenges WHERE name='chall-1';
+  
+  -- check sort_order for all challs
+  PERFORM assert(sort_order=1, 'cat_1_sort_order_chall_1') FROM challenges WHERE name='chall-1';
+  PERFORM assert(sort_order=2, 'cat_1_sort_order_chall_4') FROM challenges WHERE name='chall-4';
+  PERFORM assert(sort_order=3, 'cat_1_sort_order_chall_3') FROM challenges WHERE name='chall-3';
+  PERFORM assert(sort_order=1, 'cat_2_sort_order_chall_2') FROM challenges WHERE name='chall-2';
+  PERFORM assert(sort_order=2, 'cat_2_sort_order_chall_5') FROM challenges WHERE name='chall-5';
+
+  -- should append the challenge (the sort order should be the last)
+  INSERT INTO challenges (name, category, description, max_points, score_type) VALUES ('test-chall', 'cat-1', '', 500, 'Dynamic');
+  PERFORM assert(sort_order=4, 'sort_order_insert_new_chall') FROM challenges WHERE name='test-chall';
+
+  -- move chall-3 to the other category so test-chall drops 1 postition
+  UPDATE challenges SET category='cat-2' WHERE name='chall-3';
+  PERFORM assert(sort_order=3, 'sort_order_move_chall_3') FROM challenges WHERE name='chall-3';
+  PERFORM assert(sort_order=3, 'sort_order_drop_1_-position_test_chall') FROM challenges WHERE name='test-chall';
+  
+  -- move back chall-3, so now is after test-chall
+  UPDATE challenges SET category='cat-1' WHERE name='chall-3';
+  PERFORM assert(sort_order=4, 'sort_order_move_back_chall_3') FROM challenges WHERE name='chall-3';
+
+  -- delete test-chall, so chall-3 should dropp off one position
+  DELETE FROM challenges WHERE name='test-chall';
+  PERFORM assert(sort_order=3, 'sort_order_delete_new_chall') FROM challenges WHERE name='chall-3';
+
+  -- move chall-3 below everything, it should be the first then
+  PERFORM update_challenge_sort_order((SELECT id FROM challenges WHERE name='chall-3'), 0);
+  PERFORM assert(sort_order=2, 'sort_order_move_chall_3_too_low_chall_1') FROM challenges WHERE name='chall-1';
+  PERFORM assert(sort_order=1, 'sort_order_move_chall_3_too_low_chall_3') FROM challenges WHERE name='chall-3';
+  PERFORM assert(sort_order=3, 'sort_order_move_chall_3_too_low_chall_4') FROM challenges WHERE name='chall-4';
+
+  -- move chall-3 over everything, it should be the last then
+  PERFORM update_challenge_sort_order((SELECT id FROM challenges WHERE name='chall-3'), 1000);
+  PERFORM assert(sort_order=1, 'sort_order_move_chall_3_too_high_chall_1') FROM challenges WHERE name='chall-1';
+  PERFORM assert(sort_order=3, 'sort_order_move_chall_3_too_high_chall_3') FROM challenges WHERE name='chall-3';
+  PERFORM assert(sort_order=2, 'sort_order_move_chall_3_too_high_chall_4') FROM challenges WHERE name='chall-4';
+
+  -- move chall-3 below chall-4, it should be in the middle
+  PERFORM update_challenge_sort_order((SELECT id FROM challenges WHERE name='chall-3'), 2);
+  PERFORM assert(sort_order=1, 'sort_order_move_chall_3_down_chall_1') FROM challenges WHERE name='chall-1';
+  PERFORM assert(sort_order=2, 'sort_order_move_chall_3_down_chall_3') FROM challenges WHERE name='chall-3';
+  PERFORM assert(sort_order=3, 'sort_order_move_chall_3_down_chall_4') FROM challenges WHERE name='chall-4';
+
+  -- move chall-3 over chall-4, it should be last then
+  PERFORM update_challenge_sort_order((SELECT id FROM challenges WHERE name='chall-3'), 3);
+  PERFORM assert(sort_order=1, 'sort_order_move_chall_3_up_chall_1') FROM challenges WHERE name='chall-1';
+  PERFORM assert(sort_order=3, 'sort_order_move_chall_3_up_chall_3') FROM challenges WHERE name='chall-3';
+  PERFORM assert(sort_order=2, 'sort_order_move_chall_3_up_chall_4') FROM challenges WHERE name='chall-4';
+
 END;
 $$ LANGUAGE plpgsql;
+
 
 /*
 SELECT delete_all();

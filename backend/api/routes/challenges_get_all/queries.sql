@@ -1,6 +1,8 @@
 -- name: GetAllChallengesInfo :many
 -- Retrieve all challenges along with first blood status and instance info for a user
-WITH tid AS (SELECT team_id FROM users WHERE users.id = $1)
+WITH
+  tid AS (SELECT team_id FROM users WHERE users.id = $1),
+  fixed_order AS (SELECT value::BOOLEAN AS fixed FROM configs WHERE key = 'chall-fixed-order')
 SELECT
     c.*,
     (s.first_blood IS NOT NULL)::BOOLEAN AS solved,
@@ -26,4 +28,9 @@ SELECT
     ON i.chall_id = c.id
       AND i.team_id = (SELECT team_id FROM tid)
   GROUP BY c.id, s.first_blood, i.expires_at, i.host, i.port, i.docker_id
-  ORDER BY c.hidden ASC, c.points ASC, c.solves DESC, c.id ASC;
+  ORDER BY
+    CASE WHEN NOT (SELECT fixed FROM fixed_order) THEN c.hidden END ASC,
+    CASE WHEN NOT (SELECT fixed FROM fixed_order) THEN c.points END ASC,
+    CASE WHEN NOT (SELECT fixed FROM fixed_order) THEN c.solves END DESC,
+    c.sort_order ASC,
+    c.id ASC;
