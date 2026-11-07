@@ -11,25 +11,26 @@ describe('NotFound Component', () => {
 		expect(screen.getByText(/page not found/i)).toBeInTheDocument();
 	});
 
-	it('renders navigation buttons', () => {
+	it('renders navigation links and buttons', () => {
 		renderWithProviders(NotFound);
 
-		expect(screen.getByRole('button', { name: /back to home/i })).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: /view challenges/i })).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: /back to home/i })).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: /view challenges/i })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /go back/i })).toBeInTheDocument();
 	});
 
 	it('has correct link to home page', () => {
 		renderWithProviders(NotFound);
 
 		const homeLink = screen.getByRole('link', { name: /back to home/i });
-		expect(homeLink).toHaveAttribute('href', '#/');
+		expect(homeLink).toHaveAttribute('href', '/');
 	});
 
 	it('has correct link to challenges page', () => {
 		renderWithProviders(NotFound);
 
 		const challLink = screen.getByRole('link', { name: /view challenges/i });
-		expect(challLink).toHaveAttribute('href', '#/challenges');
+		expect(challLink).toHaveAttribute('href', '/challenges');
 	});
 
 	it('renders both links as clickable elements', () => {

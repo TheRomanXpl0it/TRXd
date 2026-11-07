@@ -1,14 +1,15 @@
 import { defineConfig } from 'vitest/config';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { resolve } from 'path';
+import { optimizeLucideImports } from './scripts/optimize-lucide';
 
 export default defineConfig({
-	plugins: [svelte({ hot: !process.env.VITEST })],
+	plugins: [optimizeLucideImports(), svelte({ hot: !process.env.VITEST })],
 	test: {
 		environment: 'jsdom',
 		globals: true,
 		setupFiles: ['./src/test/setup.ts'],
-		include: ['src/**/*.{test,spec}.{js,ts}', 'tests/**/*.{test,spec}.{js,ts}'],
+		include: ['tests/**/*.{test,spec}.{js,ts}'],
 		server: {
 			deps: {
 				inline: ['@lucide/svelte', 'bits-ui', 'svelte-sonner', 'clsx', 'tailwind-merge']

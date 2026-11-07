@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { authState } from '$lib/stores/auth';
-	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import NotFound from '$lib/components/NotFound.svelte';
 	import {
 		LayoutDashboard,
 		Cpu,
@@ -11,11 +10,10 @@
 		Settings,
 		Users as UsersIcon,
 		PlusCircle,
-		ShieldAlert,
 		FolderTree,
 		Joystick
 	} from '@lucide/svelte';
-	import { page } from '$app/state';
+	import { page } from '$app/stores';
 
 	interface Props {
 		children?: import('svelte').Snippet;
@@ -26,12 +24,25 @@
 	const isAdmin = $derived(authState.user?.role === 'Admin');
 	const isAuthor = $derived(authState.user?.role === 'Admin' || authState.user?.role === 'Author');
 	const ready = $derived(authState.ready);
+	const currentPath = $derived($page.url?.pathname ?? '');
 
-	onMount(() => {
-		if (ready && !isAuthor) {
-			goto('/');
-		}
-	});
+	const adminOnlyRoutes = [
+		'/admin/instances',
+		'/admin/submissions',
+		'/admin/users',
+		'/admin/teams',
+		'/admin/configs'
+	];
+
+	const isCurrentRouteAdminOnly = $derived(
+		adminOnlyRoutes.some(
+			(prefix) => currentPath === prefix || currentPath.startsWith(prefix + '/')
+		)
+	);
+
+	const isAllowed = $derived(
+		isAuthor && (!isCurrentRouteAdminOnly || isAdmin) && !(currentPath.startsWith('/admin/teams') && authState.userMode)
+	);
 
 	const sections = $derived(
 		[
@@ -82,9 +93,13 @@
 			}))
 			.filter((section) => section.items.length > 0)
 	);
-
-	const currentPath = $derived(page.url.pathname);
 </script>
+
+<svelte:head>
+	{#if ready && !isAllowed}
+		<title>404 Not Found</title>
+	{/if}
+</svelte:head>
 
 {#if !ready}
 	<div class="flex h-[70vh] items-center justify-center">
@@ -92,13 +107,8 @@
 			class="border-primary h-8 w-8 animate-spin rounded-full border-4 border-t-transparent"
 		></div>
 	</div>
-{:else if !isAuthor}
-	<div class="flex h-[70vh] flex-col items-center justify-center gap-4 text-center">
-		<ShieldAlert class="text-destructive h-16 w-16" />
-		<h1 class="text-3xl font-bold">Access Denied</h1>
-		<p class="text-muted-foreground">You do not have permission to access the admin area.</p>
-		<Button href="/">Back to Home</Button>
-	</div>
+{:else if !isAllowed}
+	<NotFound status={404} />
 {:else}
 	<div class="flex flex-col gap-8 lg:flex-row">
 		<!-- Sidebar Navigation -->

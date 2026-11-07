@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { authState } from '$lib/stores/auth';
-import Page from '../routes/admin/users/+page.svelte';
+import Page from '../../../../../src/routes/admin/users/+page.svelte';
 
 const getUserByNameMock = vi.hoisted(() => vi.fn());
 const updateUserRoleMock = vi.hoisted(() => vi.fn());

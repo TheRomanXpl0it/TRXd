@@ -2,7 +2,6 @@
 	import { resetUserPassword, getUserByEmail, getUserByName, updateUserRole } from '$lib/user';
 	import { Button } from '$lib/components/ui/button';
 	import { authState } from '$lib/stores/auth';
-	import { goto } from '$app/navigation';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Card from '$lib/components/ui/card';
@@ -56,13 +55,6 @@
 		if (user?.role === 'Author' || user?.role === 'Admin') return user.role;
 		return 'Player';
 	}
-
-	$effect(() => {
-		if (!authState.ready) return;
-		if (authState.user?.role !== 'Admin') {
-			goto('/admin');
-		}
-	});
 
 	// Debounced auto-search: fires 400ms after the user stops typing
 	$effect(() => {

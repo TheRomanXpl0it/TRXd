@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { authState } from '$lib/stores/auth';
-import Page from '../routes/admin/teams/+page.svelte';
+import Page from '../../../../../src/routes/admin/teams/+page.svelte';
 
 const getTeamByNameMock = vi.hoisted(() => vi.fn());
 const resetTeamPasswordMock = vi.hoisted(() => vi.fn());

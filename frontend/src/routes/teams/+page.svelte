@@ -14,12 +14,7 @@
 	import { Users, Globe } from '@lucide/svelte';
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
-
-	$effect(() => {
-		if (authState.userMode) {
-			goto('/users');
-		}
-	});
+	import NotFound from '$lib/components/NotFound.svelte';
 
 	let perPage = $state(20);
 
@@ -35,7 +30,8 @@
 		queryKey: ['teams', currentPage, perPage],
 		queryFn: () => getTeams(currentPage, perPage),
 		staleTime: 5 * 60 * 1000,
-		placeholderData: (previousData) => previousData
+		placeholderData: (previousData) => previousData,
+		enabled: !authState.userMode
 	}));
 
 	// Handle both PaginatedResponse and flat array (fallback)
@@ -135,6 +131,15 @@
 	}
 </script>
 
+<svelte:head>
+	{#if authState.userMode}
+		<title>404 Not Found</title>
+	{/if}
+</svelte:head>
+
+{#if authState.userMode}
+	<NotFound status={404} />
+{:else}
 <div class="mx-auto max-w-5xl space-y-8 px-6 py-10">
 	{#if error}
 		<ErrorMessage title="Error loading teams" message={error} />
@@ -295,3 +300,4 @@
 		{/if}
 	{/if}
 </div>
+{/if}

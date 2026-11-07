@@ -2,7 +2,6 @@
 	import { getTeamByEmail, getTeamByName, resetTeamPassword } from '$lib/team';
 	import { Button } from '$lib/components/ui/button';
 	import { authState } from '$lib/stores/auth';
-	import { goto } from '$app/navigation';
 	import { Input } from '$lib/components/ui/input';
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
@@ -21,19 +20,6 @@
 	let generatedPassword = $state('');
 	let showResetDialog = $state(false);
 	let resetting = $state(false);
-
-	$effect(() => {
-		if (!authState.ready) return;
-
-		if (authState.user?.role !== 'Admin') {
-			goto('/admin');
-			return;
-		}
-
-		if (authState.userMode) {
-			goto('/admin/users');
-		}
-	});
 
 	$effect(() => {
 		if (!showResetDialog) {

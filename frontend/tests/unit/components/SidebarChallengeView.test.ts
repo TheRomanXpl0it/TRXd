@@ -7,7 +7,9 @@ import { authState } from '$lib/stores/auth';
 vi.mock('$lib/stores/ui.svelte', () => ({
 	uiStore: {
 		challengeView: 'sidebar',
-		setChallengeView: vi.fn()
+		setChallengeView: vi.fn(),
+		isCategoryCollapsed: vi.fn(() => false),
+		toggleCategory: vi.fn()
 	}
 }));
 
