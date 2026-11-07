@@ -42,13 +42,12 @@ func GetUser(ctx context.Context, id int32, admin bool) (*UserData, error) {
 	if admin {
 		data.Email = user.Email
 		data.Role = string(user.Role)
+		data.JoinedAt = &user.CreatedAt
 	}
 	data.Score = user.Score
 	if user.Country.Valid {
 		data.Country = user.Country.String
 	}
-
-	data.JoinedAt = &user.CreatedAt
 
 	data.TeamID = nil
 	if user.TeamID.Valid {

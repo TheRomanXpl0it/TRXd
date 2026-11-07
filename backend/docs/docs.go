@@ -1617,7 +1617,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of teams",
+                        "description": "Gets all team details by ID, the nullable fileds are only returned if the user is itself, if you are an admin or if the user is in user-mode (depends on the field)",
                         "schema": {
                             "$ref": "#/definitions/teams_get.TeamData"
                         }
@@ -2011,7 +2011,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of users",
+                        "description": "Gets all user details by ID, the nullable fileds are only returned if the user is itself, if you are an admin",
                         "schema": {
                             "$ref": "#/definitions/users_get.UserData"
                         }

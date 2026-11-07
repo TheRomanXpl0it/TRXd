@@ -133,8 +133,8 @@ func GetTeam(ctx context.Context, teamID int32, admin bool) (*TeamData, error) {
 
 		teamData.UserID = &user.ID
 		teamData.Role = string(user.Role)
-		teamData.JoinedAt = &user.CreatedAt
 		if admin {
+			teamData.JoinedAt = &user.CreatedAt
 			teamData.Email = user.Email
 		}
 	}

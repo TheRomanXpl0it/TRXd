@@ -3,7 +3,9 @@ FROM node:24-alpine AS frontend
 WORKDIR /app
 COPY ./frontend/package*.json ./
 RUN npm ci
+
 COPY ./frontend ./
+
 ARG GIT_HASH=unknown
 ENV VITE_GIT_HASH=${GIT_HASH}
 RUN npm run build
@@ -32,4 +34,4 @@ COPY --from=backend /app/sql ./sql
 
 EXPOSE 1337
 
-CMD ["/app/trxd"]
+CMD [ "/app/trxd" ]

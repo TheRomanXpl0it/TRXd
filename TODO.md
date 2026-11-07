@@ -37,6 +37,7 @@
  - likes and dislikes for challs (only for who actually solved)
  - kick user from team
  - endpoint to store image files (like badges and pfp)
+ - flag format placeholder for each challenge from the actual flag (parse the format, up to the first open '{', even for regexes, if not present: use a fallback, like "...")
  - flag format validator
  - chall time schedule release
  - login via /verify with a valid token

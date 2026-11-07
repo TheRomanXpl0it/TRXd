@@ -15,7 +15,7 @@ import (
 // @Tags users
 // @Produce json
 // @Param id path int true "User ID"
-// @Success 200 {object} UserData "List of users"
+// @Success 200 {object} UserData "Gets all user details by ID, the nullable fileds are only returned if the user is itself, if you are an admin"
 // @Failure 400 {object} models.Error "Possible errors: `Invalid user ID, must be non negative` | `id must be at least 0`"
 // @Failure 404 {object} models.Error "Possible errors: `User not found`"
 // @Failure 500 {object} models.Error "Possible errors: `Error fetching user`"
@@ -39,7 +39,7 @@ func Route(c *fiber.Ctx) error {
 		allData = uid.(int32) == int32(userID)
 	}
 	if !allData && role != nil {
-		allData = utils.In(role.(sqlc.UserRole), []sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin})
+		allData = role.(sqlc.UserRole) == sqlc.UserRoleAdmin
 	}
 	userData, err := GetUser(c.Context(), int32(userID), allData)
 	if err != nil {

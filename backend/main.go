@@ -176,7 +176,8 @@ func parseFlags(ctx context.Context) {
 	flag.BoolVar(&toggleRegisterFlag, "t", false, "Toggle the allow-register config")
 	flag.StringVar(&user, "r", "", "Register a new admin user with 'username:email:password'")
 	flag.BoolVar(&flushCacheFlag, "f", false, "Flush the system cache")
-	flag.BoolVar(&insertTestDataFlag, "test-data-WARNING-DO-NOT-USE-IN-PRODUCTION", false, "Inserts mocks data into the db")
+	flag.BoolVar(&insertTestDataFlag, "test-data-WARNING-DO-NOT-USE-IN-PRODUCTION", false,
+		"Inserts mocks data into the db, the default admin credentials will be 'admin@email.com:testpass'\nNOTE: all the teams and users passwords are 'testpass'")
 	flag.Parse()
 
 	switch {

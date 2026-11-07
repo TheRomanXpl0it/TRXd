@@ -15,7 +15,7 @@ import (
 // @Tags teams
 // @Produce json
 // @Param id path int true "Team ID"
-// @Success 200 {object} TeamData "List of teams"
+// @Success 200 {object} TeamData "Gets all team details by ID, the nullable fileds are only returned if the user is itself, if you are an admin or if the user is in user-mode (depends on the field)"
 // @Failure 400 {object} models.Error "Possible errors: `Invalid team ID, must be non negative` | `id must be at least 0`"
 // @Failure 404 {object} models.Error "Possible errors: `Team not found`"
 // @Failure 500 {object} models.Error "Possible errors: `Error fetching team`"
@@ -39,7 +39,7 @@ func Route(c *fiber.Ctx) error {
 		allData = tid.(int32) == int32(teamID)
 	}
 	if !allData && role != nil {
-		allData = utils.In(role.(sqlc.UserRole), []sqlc.UserRole{sqlc.UserRoleAuthor, sqlc.UserRoleAdmin})
+		allData = role.(sqlc.UserRole) == sqlc.UserRoleAdmin
 	}
 	teamData, err := GetTeam(c.Context(), int32(teamID), allData)
 	if err != nil {

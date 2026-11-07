@@ -256,7 +256,7 @@ func TestRoute(t *testing.T) {
 		},
 	}
 	session.Get(fmt.Sprintf("/teams/%d", A.ID), nil, http.StatusOK)
-	session.CheckFilteredResponse(expected, "id", "timestamp", "user_id", "joined_at")
+	session.CheckFilteredResponse(expected, "id", "timestamp", "user_id")
 
 	session = test_utils.NewApiTestSession(t, app)
 	session.Post("/login", JSON{"email": "admin@email.com", "password": "testpass"}, http.StatusOK)
