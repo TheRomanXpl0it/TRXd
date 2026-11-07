@@ -80,7 +80,7 @@
 	const searchableTags = (challenge: Challenge) =>
 		isAdmin ? [...(challenge.tags ?? []), ...(challenge.author_tags ?? [])] : (challenge.tags ?? []);
 
-	const sortedChallenges = $derived.by(() => {
+	const filteredChallenges = $derived.by(() => {
 		let list = [...challenges];
 
 		if (isAdmin && !showHidden) {
@@ -105,7 +105,7 @@
 			list = list.filter((c) => searchableTags(c).some((tag) => filterTags.includes(tag)));
 		}
 
-		return list.sort((a, b) => (a.points ?? 0) - (b.points ?? 0));
+		return list;
 	});
 
 	const allTags = $derived(
@@ -181,7 +181,7 @@
 
 
 
-	const grouped = $derived.by(() => groupByCategory(sortedChallenges));
+	const grouped = $derived.by(() => groupByCategory(filteredChallenges));
 
 	function openChallenge(ch: any) {
 		selectedId = ch?.id ?? null;
@@ -354,7 +354,7 @@
 
 {#if selectedId}
 	<ChallengeModal
-		challenge={sortedChallenges.find((c) => c.id === selectedId)}
+		challenge={filteredChallenges.find((c) => c.id === selectedId)}
 		bind:open={openModal}
 		canEdit={isAdmin}
 		onSolved={handleChallengeSolved}

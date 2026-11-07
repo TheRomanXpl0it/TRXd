@@ -323,4 +323,30 @@ describe('Challenges Page', () => {
 		const storedAfter = JSON.parse(localStorage.getItem('collapsed-categories') || '[]');
 		expect(storedAfter).not.toContain('Web');
 	});
+
+	it('preserves the server order of challenges instead of re-sorting by points', async () => {
+		authState.user = { role: 'Player' } as any;
+
+		vi.mocked(createQuery)
+			.mockReturnValueOnce({
+				data: [
+					{ id: 1, name: 'Hard Chall (Order 1)', category: 'Web', points: 500 },
+					{ id: 2, name: 'Easy Chall (Order 2)', category: 'Web', points: 100 },
+					{ id: 3, name: 'Medium Chall (Order 3)', category: 'Web', points: 250 }
+				],
+				isLoading: false,
+				error: null
+			} as any)
+			.mockReturnValueOnce({ data: [], isLoading: false, error: null } as any);
+
+		renderWithProviders(Page);
+
+		const cards = await screen.findAllByRole('heading', { level: 3 });
+		const titles = cards.map((c) => c.textContent?.trim());
+		expect(titles).toEqual([
+			'Hard Chall (Order 1)',
+			'Easy Chall (Order 2)',
+			'Medium Chall (Order 3)'
+		]);
+	});
 });
