@@ -2,7 +2,7 @@
 	import { toast } from 'svelte-sonner';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { goto } from '$app/navigation';
-	import { getChallenges, deleteChallenge } from '$lib/challenges';
+	import { getChallenges, deleteChallenge, groupByCategory } from '$lib/challenges';
 	import { getCategories } from '$lib/categories';
 	import { authState } from '$lib/stores/auth';
 	import { onMount, untrack } from 'svelte';
@@ -180,17 +180,6 @@
 	});
 
 
-
-	function groupByCategory(list: Challenge[]) {
-		const map: Record<string, Challenge[]> = {};
-		for (const c of list) {
-			const label = c.category ?? 'Uncategorized';
-			(map[label] ??= []).push(c);
-		}
-		return Object.entries(map)
-			.sort(([a], [b]) => a.localeCompare(b))
-			.map(([cat, items]) => [cat, items]) as [string, Challenge[]][];
-	}
 
 	const grouped = $derived.by(() => groupByCategory(sortedChallenges));
 

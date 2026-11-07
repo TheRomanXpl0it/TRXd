@@ -25,7 +25,9 @@ vi.mock('$app/navigation', () => ({
 vi.mock('$lib/stores/ui.svelte', () => ({
 	uiStore: {
 		challengeView: 'sidebar',
-		setChallengeView: vi.fn()
+		setChallengeView: vi.fn(),
+		isCategoryCollapsed: vi.fn(() => false),
+		toggleCategory: vi.fn()
 	}
 }));
 
@@ -75,12 +77,16 @@ vi.mock('@tanstack/svelte-query', async (importOriginal) => {
 	};
 });
 
-vi.mock('$lib/challenges', () => ({
-	getChallenges: vi.fn(() => Promise.resolve(challengeData)),
-	deleteChallenge: vi.fn(),
-	getSolves: vi.fn(() => Promise.resolve([])),
-	submitFlag: vi.fn()
-}));
+vi.mock('$lib/challenges', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('$lib/challenges')>();
+	return {
+		...actual,
+		getChallenges: vi.fn(() => Promise.resolve(challengeData)),
+		deleteChallenge: vi.fn(),
+		getSolves: vi.fn(() => Promise.resolve([])),
+		submitFlag: vi.fn()
+	};
+});
 
 vi.mock('$lib/categories', () => ({
 	getCategories: vi.fn(() => Promise.resolve(['Web']))

@@ -30,10 +30,14 @@ vi.mock('@tanstack/svelte-query', async (importOriginal) => {
 	};
 });
 
-vi.mock('$lib/challenges', () => ({
-	getChallenges: vi.fn(),
-	deleteChallenge: vi.fn()
-}));
+vi.mock('$lib/challenges', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('$lib/challenges')>();
+	return {
+		...actual,
+		getChallenges: vi.fn(),
+		deleteChallenge: vi.fn()
+	};
+});
 
 vi.mock('$lib/categories', () => ({
 	getCategories: vi.fn()

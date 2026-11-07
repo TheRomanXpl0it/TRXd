@@ -3,6 +3,7 @@ import { browser } from '$app/environment';
 class UIStore {
 	challengeView = $state<'normal' | 'sidebar'>('normal');
 	collapsedCategories = $state<string[]>([]);
+	collapsedAdminCategories = $state<string[]>([]);
 
 	constructor() {
 		if (browser) {
@@ -10,16 +11,30 @@ class UIStore {
 			if (saved === 'normal' || saved === 'sidebar') {
 				this.challengeView = saved;
 			}
+			this.collapsedCategories = this.loadList('collapsed-categories');
+			this.collapsedAdminCategories = this.loadList('collapsed-admin-categories');
+		}
+	}
+
+	private loadList(key: string): string[] {
+		try {
+			const saved = localStorage.getItem(key);
+			if (saved) {
+				const parsed = JSON.parse(saved);
+				if (Array.isArray(parsed)) return parsed;
+			}
+		} catch {
+			// ignore parse errors
+		}
+		return [];
+	}
+
+	private saveList(key: string, list: string[]) {
+		if (browser) {
 			try {
-				const savedCats = localStorage.getItem('collapsed-categories');
-				if (savedCats) {
-					const parsed = JSON.parse(savedCats);
-					if (Array.isArray(parsed)) {
-						this.collapsedCategories = parsed;
-					}
-				}
+				localStorage.setItem(key, JSON.stringify(list));
 			} catch {
-				// ignore parse errors
+				// ignore storage errors
 			}
 		}
 	}
@@ -41,13 +56,20 @@ class UIStore {
 		} else {
 			this.collapsedCategories = [...this.collapsedCategories, category];
 		}
-		if (browser) {
-			try {
-				localStorage.setItem('collapsed-categories', JSON.stringify(this.collapsedCategories));
-			} catch {
-				// ignore storage errors
-			}
+		this.saveList('collapsed-categories', this.collapsedCategories);
+	}
+
+	isAdminCategoryCollapsed(category: string): boolean {
+		return this.collapsedAdminCategories.includes(category);
+	}
+
+	toggleAdminCategory(category: string) {
+		if (this.collapsedAdminCategories.includes(category)) {
+			this.collapsedAdminCategories = this.collapsedAdminCategories.filter((c) => c !== category);
+		} else {
+			this.collapsedAdminCategories = [...this.collapsedAdminCategories, category];
 		}
+		this.saveList('collapsed-admin-categories', this.collapsedAdminCategories);
 	}
 }
 

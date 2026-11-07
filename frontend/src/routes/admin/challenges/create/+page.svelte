@@ -18,6 +18,7 @@
 	import { createFlags } from '$lib/flags';
 	import { siteContent } from '$lib/site-content';
 	import { goto } from '$app/navigation';
+	import { useQueryClient } from '@tanstack/svelte-query';
 	import {
 		PlusCircle,
 		Flag,
@@ -34,6 +35,8 @@
 	import MonacoEditor from '$lib/components/MonacoEditor.svelte';
 	import { getCategories } from '$lib/categories';
 	import { onMount } from 'svelte';
+
+	const queryClient = useQueryClient();
 
 	// Form State
 	let name = $state('');
@@ -180,8 +183,10 @@
 				await uploadAttachments(fd);
 			}
 
+			queryClient.invalidateQueries({ queryKey: ['challenges'] });
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			toast.success('Challenge created successfully!');
-			goto('/challenges');
+			goto('/admin/challenges');
 		} catch (err: any) {
 			toast.error(err?.message || 'Failed to create challenge');
 		} finally {

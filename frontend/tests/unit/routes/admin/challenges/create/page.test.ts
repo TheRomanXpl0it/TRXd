@@ -117,7 +117,7 @@ describe('Admin Challenge Create Page', () => {
 					conn_type: 'TCP'
 				})
 			);
-			expect(goto).toHaveBeenCalledWith('/challenges');
+			expect(goto).toHaveBeenCalledWith('/admin/challenges');
 		});
 	}, 15000);
 

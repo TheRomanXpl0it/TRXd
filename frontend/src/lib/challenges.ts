@@ -106,3 +106,12 @@ export async function getAdminStats(): Promise<{
 }> {
 	return api('/stats');
 }
+
+export function groupByCategory<T extends { category?: string }>(list: T[]): [string, T[]][] {
+	const map: Record<string, T[]> = {};
+	for (const c of list) {
+		const label = c.category ?? 'Uncategorized';
+		(map[label] ??= []).push(c);
+	}
+	return Object.entries(map).sort(([a], [b]) => a.localeCompare(b));
+}

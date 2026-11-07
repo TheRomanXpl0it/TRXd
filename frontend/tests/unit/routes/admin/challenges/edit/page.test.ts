@@ -5,6 +5,11 @@ import { renderWithProviders } from '../../../../render';
 import Page from '../../../../../../src/routes/admin/challenges/[id]/edit/+page.svelte';
 import { getCategories } from '$lib/categories';
 import { updateChallenge } from '$lib/challenges';
+import { goto } from '$app/navigation';
+
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn()
+}));
 
 vi.mock('$app/stores', async () => {
 	const { readable } = await import('svelte/store');
@@ -99,15 +104,16 @@ describe('Admin Challenge Edit Page', () => {
 			if (clearTags) await user.click(screen.getByRole('button', { name: 'Remove review' }));
 			await user.click(screen.getByRole('button', { name: /update challenge/i }));
 
-			await waitFor(() =>
+			await waitFor(() => {
 				expect(updateChallenge).toHaveBeenCalledWith(
 					expect.objectContaining({
 						chall_id: 42,
 						tags: ['web'],
 						author_tags: clearTags ? [] : ['review']
 					})
-				)
-			);
+				);
+				expect(goto).toHaveBeenCalledWith('/admin/challenges');
+			});
 		}
 	);
 });

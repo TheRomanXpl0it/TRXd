@@ -12,6 +12,7 @@
 	import { siteContent } from '$lib/site-content';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import { useQueryClient } from '@tanstack/svelte-query';
 	import {
 		PlusCircle,
 		Flag,
@@ -32,6 +33,7 @@
 	import type { Challenge } from '$lib/types';
 
 	let { data }: { data: { challenge: Challenge } } = $props();
+	const queryClient = useQueryClient();
 
 	// Form State prefilled
 	let name = $state('');
@@ -256,8 +258,10 @@
 				await uploadAttachments(fd);
 			}
 
+			queryClient.invalidateQueries({ queryKey: ['challenges'] });
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			toast.success('Challenge updated successfully!');
-			goto('/admin');
+			goto('/admin/challenges');
 		} catch (err: any) {
 			toast.error(err?.message || 'Failed to update challenge');
 		} finally {
