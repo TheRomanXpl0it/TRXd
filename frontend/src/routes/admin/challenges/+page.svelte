@@ -23,9 +23,6 @@
 	let selectedIds = $state<Set<number>>(new Set());
 	let togglingHidden = $state(false);
 
-	let editSheetOpen = $state(false);
-	let selectedChallenge = $state<any>(null);
-
 	const isAdmin = $derived(authState.user?.role === 'Admin' || authState.user?.role === 'Author');
 
 	async function loadChallenges() {

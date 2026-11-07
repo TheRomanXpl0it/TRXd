@@ -42,17 +42,10 @@
 		authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin
 	);
 
-	let createChallengeOpen = $state(false);
 	let selectedId = $state<number | null>(null);
 	let countdownEnds: Record<string, number> = $state({});
 	let now = $state(Date.now());
 	const queryClient = useQueryClient();
-
-	const challengeInstanceTypes = [
-		{ value: 'Static', label: 'Static' },
-		{ value: 'Container', label: 'Container' },
-		{ value: 'Compose', label: 'Compose' }
-	];
 
 	let search = $state('');
 	let debouncedSearch = $state('');

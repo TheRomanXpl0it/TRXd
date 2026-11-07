@@ -20,7 +20,6 @@
 	import { createQuery } from '@tanstack/svelte-query';
 	import { authState, loadUser } from '$lib/stores/auth';
 
-	let teamEditOpen = $state(false);
 	let activeTab = $state<'overview' | 'solves'>('overview');
 
 	const currentTeamId = $derived.by(() => {
