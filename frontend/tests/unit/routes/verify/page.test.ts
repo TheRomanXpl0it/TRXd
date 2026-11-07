@@ -48,6 +48,7 @@ describe('Verify Page', () => {
 		window.history.replaceState({}, '', '/verify');
 
 		authState.user = { team_id: null };
+		authState.userMode = false;
 
 		vi.mocked(completeVerifiedRegistration).mockResolvedValue(undefined);
 		vi.mocked(loadUser).mockResolvedValue(undefined);
@@ -100,6 +101,30 @@ describe('Verify Page', () => {
 
 		expect(loadUser).toHaveBeenCalled();
 		expect(goto).toHaveBeenCalledWith('/team');
+	});
+
+	it('redirects to /challenges after verification when userMode is enabled', async () => {
+		authState.userMode = true;
+		window.history.replaceState({}, '', '/verify?token=test-token');
+		const user = userEvent.setup();
+
+		renderWithProviders(Page);
+
+		await user.type(screen.getByLabelText(/username/i), 'tester');
+		await user.type(screen.getByLabelText(/^password$/i), 'password123');
+		await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+		await user.click(screen.getByRole('button', { name: /complete sign up/i }));
+
+		await waitFor(() =>
+			expect(completeVerifiedRegistration).toHaveBeenCalledWith(
+				'test-token',
+				'tester',
+				'password123'
+			)
+		);
+
+		expect(loadUser).toHaveBeenCalled();
+		expect(goto).toHaveBeenCalledWith('/challenges');
 	});
 
 	it('shows backend verification errors to the user', async () => {

@@ -59,6 +59,7 @@ describe('Sign Up Page', () => {
 		window.history.replaceState({}, '', '/signUp');
 
 		authState.user = { team_id: null };
+		authState.userMode = false;
 		authState.emailVerification = false;
 
 		vi.mocked(register).mockResolvedValue(undefined);
@@ -142,6 +143,25 @@ describe('Sign Up Page', () => {
 		expect(requestRegistrationVerification).not.toHaveBeenCalled();
 		expect(completeVerifiedRegistration).not.toHaveBeenCalled();
 		expect(goto).toHaveBeenCalledWith('/team');
+	});
+
+	it('redirects to /challenges after signup when userMode is enabled', async () => {
+		authState.userMode = true;
+		const user = userEvent.setup();
+
+		renderWithProviders(Page);
+
+		await user.type(screen.getByLabelText(/username/i), 'tester');
+		await user.type(screen.getByLabelText(/^email$/i), 'tester@example.com');
+		await user.type(screen.getByLabelText(/^password$/i), 'password123');
+		await user.type(screen.getByLabelText(/confirm password/i), 'password123');
+		await user.click(screen.getByRole('button', { name: /^sign up$/i }));
+
+		await waitFor(() =>
+			expect(register).toHaveBeenCalledWith('tester@example.com', 'password123', 'tester')
+		);
+
+		expect(goto).toHaveBeenCalledWith('/challenges');
 	});
 
 	it('shows backend signup errors to the user', async () => {

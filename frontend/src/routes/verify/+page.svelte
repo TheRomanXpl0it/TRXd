@@ -74,7 +74,7 @@
 
 			await loadUser();
 			toast.success('Email verified. Welcome aboard!');
-			if (authState.user?.team_id) {
+			if (authState.userMode || authState.user?.team_id) {
 				goto('/challenges');
 			} else {
 				goto('/team');
