@@ -17,6 +17,7 @@
 		uploadAttachments
 	} from '$lib/challenges';
 	import { createFlags } from '$lib/flags';
+	import { siteContent } from '$lib/site-content';
 	import {
 		Plus,
 		X,
@@ -488,7 +489,7 @@
 								{#each flags as f, i}
 									<div class="bg-muted/20 flex items-center gap-3 rounded-xl border p-4">
 										<div class="flex-1">
-											<Input bind:value={f.flag} placeholder={'TRX{...}'} class="font-mono" />
+											<Input bind:value={f.flag} placeholder={$siteContent.challenges.flagPlaceholder || 'TRX{...}'} class="font-mono" />
 										</div>
 										<div class="flex items-center gap-2 border-l border-r px-3">
 											<Checkbox id={'re-' + i} bind:checked={f.regex} />

@@ -5,6 +5,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { toast } from 'svelte-sonner';
 	import { submitFlag } from '$lib/challenges';
+	import { siteContent } from '$lib/site-content';
 
 	let {
 		challenge,
@@ -109,7 +110,7 @@
 				<Input
 					bind:this={flagInputElement}
 					class={`h-11 pl-10 text-sm sm:text-base ${flagError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-					placeholder="..."
+					placeholder={$siteContent.challenges.flagPlaceholder || 'TRX{...}'}
 					bind:value={flag}
 					oninput={() => (flagError = false)}
 					aria-invalid={flagError}

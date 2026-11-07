@@ -53,6 +53,9 @@ export interface SiteContent {
 		noLandingPage: boolean;
 		hideCountdown: boolean;
 	};
+	challenges: {
+		flagPlaceholder: string;
+	};
 }
 
 const defaultSiteContent: SiteContent = {
@@ -93,6 +96,9 @@ const defaultSiteContent: SiteContent = {
 	features: {
 		noLandingPage: false,
 		hideCountdown: false
+	},
+	challenges: {
+		flagPlaceholder: 'TRX{...}'
 	}
 };
 
@@ -167,6 +173,7 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 	const auth = isRecord(source.auth) ? source.auth : {};
 	const settings = isRecord(source.settings) ? source.settings : {};
 	const features = isRecord(source.features) ? source.features : {};
+	const challenges = isRecord(source.challenges) ? source.challenges : {};
 
 	const sponsors = Array.isArray(home.sponsors)
 		? home.sponsors.map(normalizeSponsor).filter((item): item is SponsorContent => item !== null)
@@ -234,6 +241,12 @@ export function normalizeSiteContent(value: unknown): SiteContent {
 		features: {
 			noLandingPage: !!features.noLandingPage,
 			hideCountdown: !!features.hideCountdown
+		},
+		challenges: {
+			flagPlaceholder: asString(
+				challenges.flagPlaceholder,
+				defaultSiteContent.challenges.flagPlaceholder
+			)
 		}
 	};
 }

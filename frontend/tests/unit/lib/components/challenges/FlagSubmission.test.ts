@@ -1,11 +1,13 @@
 import { submitFlag } from '$lib/challenges';
 import { toast } from 'svelte-sonner';
 
+import { get } from 'svelte/store';
 import { screen, waitFor } from '@testing-library/svelte';
 import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import FlagSubmission from '$lib/components/challenges/FlagSubmission.svelte';
+import { siteContent } from '$lib/site-content';
 
 // Mock the submitFlag API
 vi.mock('$lib/challenges', () => ({
@@ -33,8 +35,14 @@ function generateRandomFlag(): string {
 }
 
 describe('FlagSubmission Component - User Workflow', () => {
+	const initialSiteContent = get(siteContent);
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+	});
+
+	afterEach(() => {
+		siteContent.set(initialSiteContent);
 	});
 
 	it('allows user to submit a correct flag and shows success', async () => {
@@ -53,7 +61,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		});
 
 		// User types a flag
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		await user.click(input);
 		await user.paste(testFlag);
 
@@ -89,7 +97,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 
 		// Submit wrong flag
 		await user.click(input);
@@ -148,7 +156,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 		});
 
 		expect(screen.getByText(/flag submissions are closed/i)).toBeInTheDocument();
-		expect(screen.queryByPlaceholderText(/TRX\{/i)).not.toBeInTheDocument();
+		expect(screen.queryByLabelText(/enter flag/i)).not.toBeInTheDocument();
 		expect(screen.queryByRole('button', { name: /submit/i })).not.toBeInTheDocument();
 		expect(mockSubmit).not.toHaveBeenCalled();
 	});
@@ -167,7 +175,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		await user.click(input);
 		await user.paste(testFlag);
 
@@ -197,7 +205,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.clear(input);
@@ -246,7 +254,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.click(input);
@@ -280,7 +288,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.click(input);
@@ -319,7 +327,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.click(input);
@@ -356,7 +364,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.click(input);
@@ -395,7 +403,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.click(input);
@@ -433,7 +441,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.click(input);
@@ -468,7 +476,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByPlaceholderText(/TRX\{/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.click(input);
@@ -493,5 +501,22 @@ describe('FlagSubmission Component - User Workflow', () => {
 		await waitFor(() => {
 			expect(screen.getByText(/challenge solved/i)).toBeInTheDocument();
 		});
+	});
+
+	it('displays the configured flag placeholder from siteContent', () => {
+		siteContent.update((content) => ({
+			...content,
+			challenges: { flagPlaceholder: 'FLAG{...}' }
+		}));
+
+		renderWithProviders(FlagSubmission, {
+			props: {
+				challenge: { id: 9999, solved: false },
+				onSolved: vi.fn()
+			}
+		});
+
+		const input = screen.getByLabelText(/enter flag/i);
+		expect(input).toHaveAttribute('placeholder', 'FLAG{...}');
 	});
 });

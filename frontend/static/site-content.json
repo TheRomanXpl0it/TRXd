@@ -36,5 +36,8 @@
   "features": {
     "noLandingPage": true,
     "hideCountdown": false
+  },
+  "challenges": {
+    "flagPlaceholder": "TRX{...}"
   }
 }

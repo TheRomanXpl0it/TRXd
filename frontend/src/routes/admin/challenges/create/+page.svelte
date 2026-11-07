@@ -16,6 +16,7 @@
 		uploadAttachments
 	} from '$lib/challenges';
 	import { createFlags } from '$lib/flags';
+	import { siteContent } from '$lib/site-content';
 	import { goto } from '$app/navigation';
 	import {
 		PlusCircle,
@@ -381,7 +382,7 @@
 							<div class="flex items-center gap-4 rounded-lg border p-4">
 								<div class="flex-1 space-y-2">
 									<Label class="text-muted-foreground text-xs uppercase">Flag</Label>
-									<Input bind:value={flags[i].flag} placeholder="TRX&#123;...&#125;" />
+									<Input bind:value={flags[i].flag} placeholder={$siteContent.challenges.flagPlaceholder || 'TRX{...}'} />
 								</div>
 								<div class="flex items-center gap-2 pt-6">
 									<Checkbox id={`regex-${i}`} bind:checked={flags[i].regex} />
