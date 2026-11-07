@@ -128,9 +128,7 @@ describe('Admin Challenge Create Page', () => {
 		await fireEvent.keyDown(screen.getByLabelText('Category'), { key: 'ArrowDown' });
 		await fireEvent.pointerUp(await screen.findByRole('option', { name: 'Web' }));
 
-		await user.click(screen.getByLabelText('Author-only tags'));
-		await user.type(screen.getByPlaceholderText('Search or create...'), 'review{Enter}');
-		await user.keyboard('{Escape}');
+		await user.type(screen.getByLabelText('Author-only tags'), 'review{Enter}');
 		await user.click(screen.getByRole('button', { name: /^create challenge$/i }));
 
 		await waitFor(() =>

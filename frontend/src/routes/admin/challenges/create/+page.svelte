@@ -30,7 +30,7 @@
 		Plus
 	} from '@lucide/svelte';
 	import CategorySelect from '$lib/components/challenges/CategorySelect.svelte';
-	import TagMultiSelect from '$lib/components/challenges/TagMultiselect.svelte';
+	import TagInput from '$lib/components/challenges/TagInput.svelte';
 	import MonacoEditor from '$lib/components/MonacoEditor.svelte';
 	import { getCategories } from '$lib/categories';
 	import { onMount } from 'svelte';
@@ -347,18 +347,19 @@
 						</div>
 
 						<div class="space-y-2 border-t pt-6">
-							<Label class="flex items-center gap-2">
+							<Label for="challenge-tags" class="flex items-center gap-2">
 								<TagsIcon class="h-4 w-4 opacity-70" />
 								Tags
 							</Label>
-							<TagMultiSelect
+							<TagInput
+								id="challenge-tags"
 								bind:value={tags}
 								placeholder="Add keywords (e.g. pwn, web, crypto)..."
 							/>
 						</div>
 						<div class="space-y-2">
 							<Label for="author-tags">Author-only tags</Label>
-							<TagMultiSelect
+							<TagInput
 								id="author-tags"
 								bind:value={authorTags}
 								placeholder="Add author-only tags..."
