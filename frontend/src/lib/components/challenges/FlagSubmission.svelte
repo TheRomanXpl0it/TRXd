@@ -109,7 +109,7 @@
 				<Input
 					bind:this={flagInputElement}
 					class={`h-11 pl-10 text-sm sm:text-base ${flagError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
-					placeholder="TRX{'{'}...{'}'}"
+					placeholder="..."
 					bind:value={flag}
 					oninput={() => (flagError = false)}
 					aria-invalid={flagError}
