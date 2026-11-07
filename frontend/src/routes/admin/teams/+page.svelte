@@ -61,15 +61,15 @@
 
 		try {
 			const q = query.trim();
-			let team: any = null;
+			let teams: any[] = [];
 
 			if (searchType === 'email') {
-				team = await getTeamByEmail(q);
+				teams = await getTeamByEmail(q);
 			} else {
-				team = await getTeamByName(q);
+				teams = await getTeamByName(q);
 			}
 
-			results = team ? [team] : [];
+			results = teams;
 		} catch (err: any) {
 			const msg: string = err?.message?.toLowerCase() ?? '';
 			const isNotFound =
