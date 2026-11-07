@@ -97,7 +97,12 @@
 	<div class="flex flex-wrap items-center gap-1.5 md:gap-2">
 		<Tooltip.Root>
 			<Tooltip.Trigger>
-				<Popover.Root bind:open={categoriesOpen}>
+				<Popover.Root
+					bind:open={categoriesOpen}
+					onOpenChange={(isOpen) => {
+						if (isOpen) tagsOpen = false;
+					}}
+				>
 					<Popover.Trigger>
 						{#snippet child({ props })}
 							<Button
@@ -160,7 +165,12 @@
 
 		<Tooltip.Root>
 			<Tooltip.Trigger>
-				<Popover.Root bind:open={tagsOpen}>
+				<Popover.Root
+					bind:open={tagsOpen}
+					onOpenChange={(isOpen) => {
+						if (isOpen) categoriesOpen = false;
+					}}
+				>
 					<Popover.Trigger>
 						{#snippet child({ props })}
 							<Button

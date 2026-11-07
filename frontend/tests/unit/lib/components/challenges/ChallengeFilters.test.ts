@@ -190,4 +190,27 @@ describe('ChallengeFilters Component', () => {
 		await user.click(toggleButton);
 		expect(showHidden).toBe(false);
 	});
+
+	it('closes other popovers when clicking Categories or Tags', async () => {
+		const user = userEvent.setup();
+
+		renderWithProviders(ChallengeFilters, { props: defaultProps });
+
+		const categoriesButton = await screen.findByRole('button', { name: /filter by categories/i });
+		const tagsButton = await screen.findByRole('button', { name: /filter by tags/i });
+
+		// Open Categories
+		await user.click(categoriesButton);
+		expect(await screen.findByText('Web')).toBeInTheDocument();
+
+		// Click Tags: Categories should close immediately and Tags should open
+		await user.click(tagsButton);
+		expect(await screen.findByText('easy')).toBeInTheDocument();
+		expect(screen.queryByText('Web')).not.toBeInTheDocument();
+
+		// Click Categories: Tags should close immediately and Categories should open
+		await user.click(categoriesButton);
+		expect(await screen.findByText('Web')).toBeInTheDocument();
+		expect(screen.queryByText('easy')).not.toBeInTheDocument();
+	});
 });
