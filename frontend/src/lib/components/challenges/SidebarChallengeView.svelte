@@ -63,7 +63,6 @@
 	let activeChallenge = $state<Challenge | null>(null);
 	let activeTab = $state<'details' | 'solves'>('details');
 	let search = $state('');
-	let collapsedCats = $state<Set<string>>(new Set());
 	let solves = $state<any[]>([]);
 	let loadingSolves = $state(false);
 	let mobileShowSide = $state(true);
@@ -123,13 +122,6 @@
 			}
 		}
 	});
-
-	function toggleCategory(cat: string) {
-		const next = new Set(collapsedCats);
-		if (next.has(cat)) next.delete(cat);
-		else next.add(cat);
-		collapsedCats = next;
-	}
 
 	$effect(() => {
 		if (!activeChallenge && filteredGrouped.length > 0 && filteredGrouped[0][1].length > 0) {
@@ -231,10 +223,10 @@
 		<div class="custom-scrollbar flex-1 overflow-y-auto scroll-smooth">
 			<div class="space-y-2 p-3">
 				{#each filteredGrouped as [category, items]}
-					{@const isCollapsed = collapsedCats.has(category)}
+					{@const isCollapsed = uiStore.isCategoryCollapsed(category)}
 					<div class="space-y-1">
 						<button
-							onclick={() => toggleCategory(category)}
+							onclick={() => uiStore.toggleCategory(category)}
 							class="bg-muted/40 dark:bg-muted/20 hover:bg-muted/60 dark:hover:bg-muted/30 text-muted-foreground hover:text-foreground group flex w-full items-center justify-between rounded-md px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-all"
 						>
 							<div class="flex items-center gap-2">

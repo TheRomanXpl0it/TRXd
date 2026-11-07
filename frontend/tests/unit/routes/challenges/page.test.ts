@@ -4,6 +4,7 @@ import { renderWithProviders } from '../../render';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Page from '../../../../src/routes/challenges/+page.svelte';
 import { authState } from '$lib/stores/auth';
+import { uiStore } from '$lib/stores/ui.svelte';
 import { createQuery } from '@tanstack/svelte-query';
 import { tick } from 'svelte';
 
@@ -270,5 +271,52 @@ describe('Challenges Page', () => {
 			expect(screen.getByText('Public Chall')).toBeInTheDocument();
 		});
 		expect(toggleButton).toHaveTextContent(/Hide hidden/i);
+	});
+
+	it('collapses category challenges on click and persists to localStorage', async () => {
+		const user = userEvent.setup();
+		authState.user = { role: 'Player' } as any;
+		uiStore.collapsedCategories = [];
+		localStorage.clear();
+
+		vi.mocked(createQuery)
+			.mockReturnValueOnce({
+				data: [
+					{ id: 1, name: 'Web Chall 1', category: 'Web', points: 100 },
+					{ id: 2, name: 'Crypto Chall 1', category: 'Crypto', points: 100 }
+				],
+				isLoading: false,
+				error: null
+			} as any)
+			.mockReturnValueOnce({ data: [], isLoading: false, error: null } as any);
+
+		renderWithProviders(Page);
+
+		expect(await screen.findByText('Web Chall 1')).toBeInTheDocument();
+		expect(screen.getByText('Crypto Chall 1')).toBeInTheDocument();
+
+		const webToggle = screen.getByRole('button', { name: 'Toggle Web category' });
+		expect(webToggle).toHaveAttribute('aria-expanded', 'true');
+
+		await user.click(webToggle);
+
+		await waitFor(() => {
+			expect(screen.queryByText('Web Chall 1')).not.toBeInTheDocument();
+			expect(screen.getByText('Crypto Chall 1')).toBeInTheDocument();
+		});
+		expect(webToggle).toHaveAttribute('aria-expanded', 'false');
+
+		const stored = JSON.parse(localStorage.getItem('collapsed-categories') || '[]');
+		expect(stored).toContain('Web');
+
+		await user.click(webToggle);
+
+		await waitFor(() => {
+			expect(screen.getByText('Web Chall 1')).toBeInTheDocument();
+		});
+		expect(webToggle).toHaveAttribute('aria-expanded', 'true');
+
+		const storedAfter = JSON.parse(localStorage.getItem('collapsed-categories') || '[]');
+		expect(storedAfter).not.toContain('Web');
 	});
 });

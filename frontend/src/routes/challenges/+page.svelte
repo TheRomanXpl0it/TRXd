@@ -325,19 +325,34 @@
 {:else}
 	<div class="space-y-10 pb-20">
 		{#each grouped as [category, items]}
+			{@const isCollapsed = uiStore.isCategoryCollapsed(category)}
 			<div>
-				<h2 class="text-muted-foreground/60 mb-4 text-sm font-black uppercase tracking-tighter">
-					{category}
-				</h2>
-				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-					{#each items as ch (ch.id)}
-						<ChallengeCard
-							challenge={ch}
-							countdown={countdowns[ch.id] ?? 0}
-							onclick={() => openChallenge(ch)}
+				<h2 class="mb-4">
+					<button
+						type="button"
+						onclick={() => uiStore.toggleCategory(category)}
+						class="text-muted-foreground/60 hover:text-foreground flex items-center gap-1.5 text-sm font-black uppercase tracking-tighter transition-colors select-none"
+						aria-expanded={!isCollapsed}
+						aria-label={`Toggle ${category} category`}
+					>
+						<ChevronDown
+							class="h-4 w-4 transition-transform duration-200 {isCollapsed ? '-rotate-90' : ''}"
 						/>
-					{/each}
-				</div>
+						<span>{category}</span>
+						<span class="text-xs font-semibold opacity-60">({items.length})</span>
+					</button>
+				</h2>
+				{#if !isCollapsed}
+					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+						{#each items as ch (ch.id)}
+							<ChallengeCard
+								challenge={ch}
+								countdown={countdowns[ch.id] ?? 0}
+								onclick={() => openChallenge(ch)}
+							/>
+						{/each}
+					</div>
+				{/if}
 			</div>
 		{/each}
 		{#if grouped.length === 0}
