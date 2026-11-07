@@ -32,5 +32,65 @@ describe('formatConnectionString', () => {
 				sslWithoutPort: true
 			})
 		).toBe('nc challenge.example 31337');
+
+		expect(
+			formatConnectionString({
+				host: 'challenge.example',
+				port: 80,
+				connType: 'TCP'
+			})
+		).toBe('nc challenge.example 80');
+	});
+
+	it('omits redundant default ports for http (80) and https (443)', () => {
+		expect(
+			formatConnectionString({
+				host: 'web.example.com',
+				port: 80,
+				connType: 'HTTP'
+			})
+		).toBe('http://web.example.com');
+
+		expect(
+			formatConnectionString({
+				host: 'web.example.com',
+				port: '80',
+				connType: 'HTTP'
+			})
+		).toBe('http://web.example.com');
+
+		expect(
+			formatConnectionString({
+				host: 'secure.example.com',
+				port: 443,
+				connType: 'HTTPS'
+			})
+		).toBe('https://secure.example.com');
+
+		expect(
+			formatConnectionString({
+				host: 'secure.example.com',
+				port: '443',
+				connType: 'HTTPS'
+			})
+		).toBe('https://secure.example.com');
+	});
+
+	it('preserves non-default ports for http and https', () => {
+		expect(
+			formatConnectionString({
+				host: 'web.example.com',
+				port: 8080,
+				connType: 'HTTP'
+			})
+		).toBe('http://web.example.com:8080');
+
+		expect(
+			formatConnectionString({
+				host: 'secure.example.com',
+				port: 8443,
+				connType: 'HTTPS'
+			})
+		).toBe('https://secure.example.com:8443');
 	});
 });
