@@ -37,6 +37,10 @@ func Route(c *fiber.Ctx) error {
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
 	}
+	userMode, err := db.GetConfig(c.Context(), "user-mode")
+	if err != nil {
+		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
+	}
 	startTime, err := db.GetConfig(c.Context(), "start-time")
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
@@ -48,6 +52,7 @@ func Route(c *fiber.Ctx) error {
 
 	info := Response{
 		EmailVerification: emailVerification == "true",
+		UserMode:          new(userMode == "true"),
 	}
 	if startTime != "" {
 		info.StartTime = startTime
@@ -62,7 +67,6 @@ func Route(c *fiber.Ctx) error {
 	}
 
 	uid := uidLocal.(int32)
-
 	user, err := db.GetUserByID(c.Context(), uid)
 	if err != nil {
 		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingUser, err)
@@ -74,11 +78,6 @@ func Route(c *fiber.Ctx) error {
 	info.Name = user.Name
 	info.Role = string(user.Role)
 
-	userMode, err := db.GetConfig(c.Context(), "user-mode")
-	if err != nil {
-		return utils.Error(c, fiber.StatusInternalServerError, consts.ErrorFetchingConfig, err)
-	}
-	info.UserMode = new(userMode == "true")
 	if user.Country.Valid {
 		info.Country = user.Country.String
 	}

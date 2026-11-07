@@ -27,6 +27,7 @@ func TestRoute(t *testing.T) {
 
 	expected := JSON{
 		"email_verification": false,
+		"user_mode":          false,
 	}
 	session.Get("/info", nil, http.StatusOK)
 	session.CheckResponse(expected)
