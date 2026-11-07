@@ -2,7 +2,6 @@
 	import {
 		getChallenges,
 		deleteChallenge,
-		getCategories,
 		toggleChallengesHidden
 	} from '$lib/challenges';
 	import { onMount } from 'svelte';
@@ -29,8 +28,6 @@
 
 	const isAdmin = $derived(authState.user?.role === 'Admin' || authState.user?.role === 'Author');
 
-	let categoriesList = $state<{ label: string; value: string }[]>([]);
-
 	async function loadChallenges() {
 		if (!isAdmin) return;
 		loading = true;
@@ -39,8 +36,6 @@
 		try {
 			// Admins/Authors get all challenges, even hidden ones.
 			challenges = await getChallenges();
-			const cats = await getCategories();
-			categoriesList = (cats || []).map((c: any) => ({ label: c.name, value: c.name }));
 		} catch (err: any) {
 			error = err?.message ?? 'Failed to load challenges';
 		} finally {

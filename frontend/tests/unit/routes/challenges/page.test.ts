@@ -44,13 +44,6 @@ vi.mock('$lib/env', () => ({
 	}
 }));
 
-// Mock the admin-only modal and controls to prevent errors from dynamic imports or missing aliases
-vi.mock('$lib/components/challenges/CreateChallengeModal.svelte', () => ({
-	default: () => null
-}));
-vi.mock('$lib/components/challenges/AdminControls.svelte', () => ({
-	default: () => null
-}));
 
 describe('Challenges Page', () => {
 	beforeEach(() => {

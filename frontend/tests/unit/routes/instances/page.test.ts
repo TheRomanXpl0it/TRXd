@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 
 import { renderWithProviders } from '../../render';
-import Page from '../../../../src/routes/instances/+page.svelte';
+import Page from '../../../../src/routes/admin/instances/+page.svelte';
 import { getInstances } from '$lib/instances';
 
 vi.mock('$app/navigation', () => ({

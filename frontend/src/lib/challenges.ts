@@ -1,5 +1,5 @@
 import { api } from '$lib/api';
-import type { Challenge, Category, Solve } from '$lib/types';
+import type { Challenge, Solve } from '$lib/types';
 
 export async function getSolves(chall_id: string | number): Promise<Solve[]> {
 	const ch = await api<Solve[]>(`/challenges/${chall_id}/solves`);
@@ -39,10 +39,6 @@ export async function deleteSubmission(id: number | string): Promise<any> {
 		method: 'DELETE',
 		body: JSON.stringify({ sub_id: Number(id) })
 	});
-}
-
-export async function getCategories(): Promise<Category[]> {
-	return api<Category[]>('/categories');
 }
 
 export async function createChallenge(
