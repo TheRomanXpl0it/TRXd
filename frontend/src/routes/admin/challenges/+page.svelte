@@ -10,7 +10,7 @@
 	import { uiStore } from '$lib/stores/ui.svelte';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { Button } from '$lib/components/ui/button';
-	import { Trash2, Pencil, RefreshCw, UserCog, EyeOff, ChevronDown } from '@lucide/svelte';
+	import { Trash2, Pencil, RefreshCw, UserCog, Eye, EyeOff, ChevronDown } from '@lucide/svelte';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -161,23 +161,23 @@
 										<Table.Header class="bg-transparent [&_tr]:border-b-0">
 											<Table.Row class="border-none hover:bg-transparent">
 												<Table.Head
-													class="text-muted-foreground/70 h-8 w-[40px] py-1 pl-4 text-[10px] font-bold uppercase tracking-wider"
+													class="text-muted-foreground/70 h-8 w-[40px] py-1 pl-4 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
 												></Table.Head>
 												<Table.Head
-													class="text-muted-foreground/70 h-8 w-[60px] py-1 text-[10px] font-bold uppercase tracking-wider"
+													class="text-muted-foreground/70 h-8 w-[60px] py-1 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
 													>ID</Table.Head
 												>
 												<Table.Head
-													class="text-muted-foreground/70 h-8 py-1 text-[10px] font-bold uppercase tracking-wider"
+													class="text-muted-foreground/70 h-8 py-1 pl-4 sm:pl-0 text-[10px] font-bold uppercase tracking-wider"
 													>Name</Table.Head
 												>
 												<Table.Head
-													class="text-muted-foreground/70 h-8 py-1 text-[10px] font-bold uppercase tracking-wider"
+													class="text-muted-foreground/70 h-8 py-1 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
 													>Author tags</Table.Head
 												>
 												<Table.Head
 													class="text-muted-foreground/70 h-8 py-1 text-[10px] font-bold uppercase tracking-wider"
-													>Status</Table.Head
+													>Visible</Table.Head
 												>
 												<Table.Head
 													class="text-muted-foreground/70 h-8 py-1 text-right text-[10px] font-bold uppercase tracking-wider"
@@ -200,14 +200,14 @@
 														? 'bg-muted/30'
 														: ''}"
 												>
-													<Table.Cell class="py-1 pl-4">
+													<Table.Cell class="py-1 pl-4 hidden sm:table-cell">
 														<Checkbox
 															checked={selectedIds.has(chall.id)}
 															onCheckedChange={() => toggleSelect(chall.id)}
 														/>
 													</Table.Cell>
-													<Table.Cell class="text-muted-foreground/60 py-1 font-medium">{chall.id}</Table.Cell>
-													<Table.Cell class="py-1 font-bold">
+													<Table.Cell class="text-muted-foreground/60 py-1 font-medium hidden sm:table-cell">{chall.id}</Table.Cell>
+													<Table.Cell class="py-1 pl-4 sm:pl-0 font-bold">
 														{chall.name}
 														{#if chall.authors && chall.authors.length > 0}
 															<div
@@ -218,18 +218,20 @@
 															</div>
 														{/if}
 													</Table.Cell>
-													<Table.Cell class="py-1">
+													<Table.Cell class="py-1 hidden sm:table-cell">
 														<AuthorTags tags={chall.author_tags} />
 													</Table.Cell>
 													<Table.Cell class="py-1">
 														{#if chall.hidden}
+															<EyeOff class="h-4 w-4 text-amber-500 sm:hidden" />
 															<Badge
-																class="border-amber-500/20 bg-amber-500/10 px-2 py-0 text-[10px] font-bold uppercase tracking-wider text-amber-500"
+																class="hidden sm:inline-flex border-amber-500/20 bg-amber-500/10 px-2 py-0 text-[10px] font-bold uppercase tracking-wider text-amber-500"
 																>Hidden</Badge
 															>
 														{:else}
+															<Eye class="h-4 w-4 text-green-500 sm:hidden" />
 															<Badge
-																class="border-green-500/20 bg-green-500/10 px-2 py-0 text-[10px] font-bold uppercase tracking-wider text-green-500"
+																class="hidden sm:inline-flex border-green-500/20 bg-green-500/10 px-2 py-0 text-[10px] font-bold uppercase tracking-wider text-green-500"
 																>Visible</Badge
 															>
 														{/if}

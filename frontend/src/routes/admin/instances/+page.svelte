@@ -110,18 +110,18 @@
 							<Table.Row class="border-none hover:bg-transparent">
 								<Table.Head
 									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
-									>Team (id)</Table.Head
+									>Team<span class="hidden sm:inline"> (id)</span></Table.Head
 								>
 								<Table.Head
 									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
-									>Challenge (id)</Table.Head
+									>Challenge<span class="hidden sm:inline"> (id)</span></Table.Head
 								>
 								<Table.Head
-									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
+									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
 									>Docker id</Table.Head
 								>
 								<Table.Head
-									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
+									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
 									>Connection</Table.Head
 								>
 								<Table.Head
@@ -139,18 +139,18 @@
 								<Table.Row class="group border-none transition-colors">
 									<Table.Cell class="font-medium">
 										{inst.team_name}
-										<span class="text-muted-foreground text-xs">({inst.team_id})</span>
+										<span class="text-muted-foreground text-xs hidden sm:inline">({inst.team_id})</span>
 									</Table.Cell>
 									<Table.Cell>
 										{inst.chall_name}
-										<span class="text-muted-foreground text-xs">({inst.chall_id})</span>
+										<span class="text-muted-foreground text-xs hidden sm:inline">({inst.chall_id})</span>
 									</Table.Cell>
-									<Table.Cell class="max-w-[180px] truncate" title={inst.docker_id || ''}>
+									<Table.Cell class="max-w-[180px] truncate hidden sm:table-cell" title={inst.docker_id || ''}>
 										<code class="bg-muted rounded px-1.5 py-0.5 text-xs"
 											>{inst.docker_id || '-'}</code
 										>
 									</Table.Cell>
-									<Table.Cell>
+									<Table.Cell class="hidden sm:table-cell">
 										<code class="bg-muted rounded px-1.5 py-0.5 text-xs">{formatConn(inst)}</code>
 									</Table.Cell>
 									<Table.Cell class="font-mono text-xs">

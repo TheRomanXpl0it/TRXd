@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getSubmissions, deleteSubmission } from '$lib/challenges';
 	import { authState } from '$lib/stores/auth';
+	import { formatTimeAgo } from '$lib/utils/time';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Trash2, RefreshCw, CheckCircle, XCircle, Droplet, Eye, EyeOff } from '@lucide/svelte';
@@ -106,9 +107,9 @@
 				<Table.Root>
 					<Table.Header class="bg-transparent [&_tr]:border-b-0">
 						<Table.Row class="hover:bg-transparent border-none">
-							<Table.Head class="text-muted-foreground/70 w-[60px] text-[10px] font-bold uppercase tracking-wider">ID</Table.Head>
+							<Table.Head class="text-muted-foreground/70 w-[60px] text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell">ID</Table.Head>
 							{#if !authState.userMode}
-								<Table.Head class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider">User</Table.Head>
+								<Table.Head class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell">User</Table.Head>
 							{/if}
 							<Table.Head class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider">Team</Table.Head>
 							<Table.Head class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider">Challenge</Table.Head>
@@ -121,9 +122,9 @@
 					<Table.Body>
 						{#each submissions as sub (sub.id)}
 							<Table.Row class="group border-none transition-colors">
-								<Table.Cell class="font-mono text-xs">{sub.id}</Table.Cell>
+								<Table.Cell class="font-mono text-xs hidden sm:table-cell">{sub.id}</Table.Cell>
 								{#if !authState.userMode}
-									<Table.Cell class="max-w-[120px] truncate">
+									<Table.Cell class="max-w-[120px] truncate hidden sm:table-cell">
 										{sub.user_name}
 									</Table.Cell>
 								{/if}
@@ -151,10 +152,10 @@
 									<div class="flex items-center gap-1">
 										{#if sub.status === 'Correct'}
 											<CheckCircle class="w-4 h-4 text-green-500" />
-											<span class="text-xs text-green-500">Correct</span>
+											<span class="hidden sm:inline text-xs text-green-500">Correct</span>
 										{:else}
 											<XCircle class="w-4 h-4 text-destructive" />
-											<span class="text-xs text-destructive">Incorrect</span>
+											<span class="hidden sm:inline text-xs text-destructive">Incorrect</span>
 										{/if}
 										{#if sub.first_blood}
 											<Droplet class="w-3 h-3 text-red-500 fill-red-500" />
@@ -162,7 +163,8 @@
 									</div>
 								</Table.Cell>
 								<Table.Cell class="text-[10px] text-muted-foreground whitespace-nowrap">
-									{new Date(sub.timestamp).toLocaleString()}
+									<span class="sm:hidden">{formatTimeAgo(sub.timestamp)}</span>
+									<span class="hidden sm:inline">{new Date(sub.timestamp).toLocaleString()}</span>
 								</Table.Cell>
 								<Table.Cell class="text-right">
 									<Button
