@@ -64,7 +64,7 @@ describe('Admin +layout.svelte', () => {
 		render(AdminLayout);
 
 		expect(screen.getByText('404')).toBeInTheDocument();
-		expect(screen.queryByText('Configs')).not.toBeInTheDocument();
+		expect(screen.queryByText('Configuration')).not.toBeInTheDocument();
 	});
 
 	it('renders admin navigation when Author visits /admin', async () => {
@@ -74,7 +74,7 @@ describe('Admin +layout.svelte', () => {
 
 		expect(screen.queryByText('404')).not.toBeInTheDocument();
 		expect(screen.getByText('Overview')).toBeInTheDocument();
-		expect(screen.getByText('Manage Challenges')).toBeInTheDocument();
+		expect(screen.getByText('Manage challenges')).toBeInTheDocument();
 	});
 
 	it('renders full navigation when Admin visits /admin/configs', async () => {
@@ -83,6 +83,6 @@ describe('Admin +layout.svelte', () => {
 		render(AdminLayout);
 
 		expect(screen.queryByText('404')).not.toBeInTheDocument();
-		expect(screen.getByText('Configs')).toBeInTheDocument();
+		expect(screen.getByText('Configuration')).toBeInTheDocument();
 	});
 });

@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<title>500 Error</title>
+		<title>Error</title>
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<meta name="robots" content="noindex" />
 		<style>
@@ -80,11 +80,30 @@
 		</style>
 	</head>
 	<body>
-		<main>
-			<h1>500</h1>
-			<p><strong>Internal Server Error</strong></p>
-			<p class="muted">An unexpected error occurred. Please try again or head back home.</p>
+		<main id="error-container">
+			<h1 id="status-heading">%sveltekit.status%</h1>
+			<p><strong id="error-message">%sveltekit.error.message%</strong></p>
 			<a href="/" class="button">Go back home</a>
 		</main>
+		<script>
+			try {
+				const statusEl = document.getElementById('status-heading');
+				const msgEl = document.getElementById('error-message');
+				const statusText = statusEl?.textContent?.trim();
+				const msgText = msgEl?.textContent?.trim() || '';
+				const isConn = !navigator.onLine || statusText === '500' || statusText === '502' || statusText === '503' || statusText === '504' || msgText === 'Internal Error' || /fetch|connect|network/i.test(msgText);
+				if (isConn) {
+					if (statusEl) {
+						statusEl.textContent = 'Connection error';
+						statusEl.style.fontSize = 'clamp(2rem, 6vw, 3rem)';
+					}
+					if (msgEl) {
+						msgEl.textContent = 'Unable to connect to the server. Please check your connection and try again.';
+					}
+				} else if (msgText === 'Internal Error') {
+					if (msgEl) msgEl.textContent = '';
+				}
+			} catch (_) {}
+		</script>
 	</body>
 </html>

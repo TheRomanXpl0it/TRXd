@@ -21,7 +21,7 @@
 
 <button
 	type="button"
-	class="relative flex min-h-[136px] w-full cursor-pointer flex-col overflow-hidden rounded-[10px] border-2 border-transparent p-5 text-left shadow-md transition-all duration-300 hover:border-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:hover:border-zinc-800 {challenge.solved
+	class="relative flex min-h-[136px] w-full cursor-pointer flex-col overflow-hidden rounded-[10px] border-2 border-transparent p-4 text-left shadow-md transition-all duration-300 hover:border-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400 dark:hover:border-zinc-800 {challenge.solved
 		? 'solve-surface'
 		: 'bg-[#fafafa] dark:bg-zinc-900'} {challenge.hidden && isPrivileged ? 'opacity-75' : ''}"
 	{onclick}
@@ -55,25 +55,23 @@
 	</div>
 
 	<!-- Tags -->
-	{#if challenge.tags && challenge.tags.length > 0}
-		<div class="mb-4 flex flex-wrap gap-1.5">
-			{#each challenge.tags as tag}
-				<span
-					class="inline-flex items-center rounded-full bg-black/5 px-2.5 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-white/10 dark:text-zinc-400"
-				>
-					{tag}
-				</span>
-			{/each}
+	{#if (challenge.tags && challenge.tags.length > 0) || (isPrivileged && challenge.author_tags?.length)}
+		<div class="mb-3 flex flex-wrap items-center gap-1.5">
+			{#if challenge.tags}
+				{#each challenge.tags as tag}
+					<span
+						class="inline-flex items-center rounded-full bg-black/5 px-2.5 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-white/10 dark:text-zinc-400"
+					>
+						{tag}
+					</span>
+				{/each}
+			{/if}
+			{#if isPrivileged && challenge.author_tags?.length}
+				<AuthorTags tags={challenge.author_tags} />
+			{/if}
 		</div>
 	{:else}
-		<div class="mb-4"></div>
-	{/if}
-
-	<!-- Points / Footer -->
-	{#if isPrivileged && challenge.author_tags?.length}
-		<div class="mb-4">
-			<AuthorTags tags={challenge.author_tags} />
-		</div>
+		<div class="mb-3"></div>
 	{/if}
 
 	<div class="mt-auto flex items-center justify-between">

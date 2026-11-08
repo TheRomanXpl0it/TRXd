@@ -18,13 +18,13 @@
 	const layouts: { id: LayoutId; name: string; icon: typeof LayoutGrid; description: string }[] = [
 		{
 			id: 'normal',
-			name: 'Grid View',
+			name: 'Grid view',
 			icon: LayoutGrid,
 			description: 'Classic responsive grid of challenge cards.'
 		},
 		{
 			id: 'sidebar',
-			name: 'Split View',
+			name: 'Split view',
 			icon: SquareSplitHorizontal,
 			description: 'Sidebar navigation with integrated challenge details.'
 		}
@@ -75,8 +75,8 @@
 						onclick={() => selectTheme(theme.id)}
 						class="flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 p-4 transition-all {selectedTheme ===
 						theme.id
-							? 'border-primary bg-primary/5'
-							: 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'}"
+							? 'border-primary bg-primary/10'
+							: 'border-muted bg-card hover:border-muted-foreground/50 hover:bg-muted/50'}"
 					>
 						<theme.icon
 							class="h-6 w-6 {selectedTheme === theme.id
@@ -92,7 +92,7 @@
 
 	<Card.Root>
 		<Card.Header>
-			<Card.Title>Challenge Layout</Card.Title>
+			<Card.Title>Challenge layout</Card.Title>
 			<Card.Description>Choose how you want to browse and solve challenges.</Card.Description>
 		</Card.Header>
 		<Card.Content>
@@ -102,12 +102,12 @@
 						onclick={() => (selectedLayout = layout.id)}
 						class="flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 text-left transition-all {selectedLayout ===
 						layout.id
-							? 'border-primary bg-primary/5'
-							: 'border-muted hover:border-muted-foreground/50 hover:bg-muted/50'}"
+							? 'border-primary bg-primary/10'
+							: 'border-muted bg-card hover:border-muted-foreground/50 hover:bg-muted/50'}"
 					>
 						<div
 							class="mt-1 rounded-lg p-2 {selectedLayout === layout.id
-								? 'bg-primary/10 text-primary'
+								? 'bg-primary/20 text-primary'
 								: 'bg-muted text-muted-foreground'}"
 						>
 							<layout.icon class="h-5 w-5" />
@@ -120,7 +120,7 @@
 				{/each}
 			</div>
 		</Card.Content>
-		<Card.Footer class="bg-muted/20 mt-4 flex justify-end border-t px-6 py-4">
+		<Card.Footer class="flex justify-end">
 			<Button onclick={applySettings} disabled={!hasChanges}>Apply</Button>
 		</Card.Footer>
 	</Card.Root>

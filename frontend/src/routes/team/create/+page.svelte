@@ -78,7 +78,7 @@
 				>
 					<ShieldPlus strokeWidth={1.5} class="h-8 w-8" />
 				</div>
-				<Card.Title class="text-2xl font-bold tracking-tight">Create Team</Card.Title>
+				<Card.Title class="text-2xl font-bold tracking-tight">Create a team</Card.Title>
 			</Card.Header>
 		</div>
 
@@ -86,7 +86,7 @@
 			<Card.Content class="space-y-6 p-0">
 				<div class="space-y-4">
 					<div class="space-y-2">
-						<Label for="reg-name" class="font-medium">Team Name</Label>
+						<Label for="reg-name" class="font-medium">Team name</Label>
 						<Input
 							id="reg-name"
 							placeholder="e.g. TheRomanXpl0it"
@@ -97,7 +97,7 @@
 					</div>
 
 					<div class="space-y-2">
-						<Label for="reg-pass" class="font-medium">Team Password</Label>
+						<Label for="reg-pass" class="font-medium">Team password</Label>
 						<Input
 							id="reg-pass"
 							type="password"
@@ -109,7 +109,7 @@
 					</div>
 
 					<div class="space-y-2">
-						<Label for="confirm-pass" class="font-medium">Confirm Password</Label>
+						<Label for="confirm-pass" class="font-medium">Confirm password</Label>
 						<Input
 							id="confirm-pass"
 							type="password"

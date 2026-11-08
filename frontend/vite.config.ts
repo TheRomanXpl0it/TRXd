@@ -26,7 +26,15 @@ export default defineConfig({
 			'/api': {
 				target: 'http://localhost:1337',
 				changeOrigin: true,
-				secure: false
+				secure: false,
+				configure: (proxy) => {
+					proxy.on('error', (_err, _req, res) => {
+						if ('writeHead' in res && !res.headersSent) {
+							res.writeHead(503, { 'Content-Type': 'application/json' });
+							res.end(JSON.stringify({ error: 'Cannot connect to server. Please check your connection.' }));
+						}
+					});
+				}
 			}
 		}
 	},

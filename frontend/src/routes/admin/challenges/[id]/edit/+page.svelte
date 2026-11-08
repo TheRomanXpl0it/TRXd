@@ -286,7 +286,7 @@
 				<Edit class="h-8 w-8" />
 			</div>
 			<div>
-				<h1 class="text-3xl font-bold tracking-tight">Edit Challenge</h1>
+				<h1 class="text-3xl font-bold tracking-tight">Edit challenge</h1>
 				<p class="text-muted-foreground mt-1">Update challenge settings</p>
 			</div>
 		</div>
@@ -296,7 +296,7 @@
 			{:else}
 				<Save class="h-4 w-4" />
 			{/if}
-			Update Challenge
+			Update challenge
 		</Button>
 	</div>
 

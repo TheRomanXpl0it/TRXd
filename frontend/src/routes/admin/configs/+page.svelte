@@ -334,7 +334,7 @@
 				<Spinner class="mr-2 h-4 w-4" />
 				Saving...
 			{:else}
-				Save Changes
+				Save changes
 			{/if}
 		</Button>
 	</div>

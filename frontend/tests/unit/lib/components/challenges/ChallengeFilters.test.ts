@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/svelte';
+import { screen } from '@testing-library/svelte';
 import { renderWithProviders } from '../../../render';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -7,13 +7,7 @@ import ChallengeFilters from '$lib/components/challenges/ChallengeFilters.svelte
 describe('ChallengeFilters Component', () => {
 	const defaultProps = {
 		search: '',
-		filterCategories: [],
 		filterTags: [],
-		categories: [
-			{ value: 'web', label: 'Web' },
-			{ value: 'crypto', label: 'Crypto' },
-			{ value: 'pwn', label: 'Pwn' }
-		],
 		allTags: ['easy', 'medium', 'hard'],
 		activeFiltersCount: 0
 	};
@@ -76,13 +70,7 @@ describe('ChallengeFilters Component', () => {
 		expect(searchInput).toHaveValue('');
 	});
 
-	it('renders categories filter button', async () => {
-		renderWithProviders(ChallengeFilters, { props: defaultProps });
-
-		expect(await screen.findByRole('button', { name: /filter by categories/i })).toBeInTheDocument();
-	});
-
-	it('renders tags filter button', async () => {
+	it('renders tags filter icon button', async () => {
 		renderWithProviders(ChallengeFilters, { props: defaultProps });
 
 		expect(await screen.findByRole('button', { name: /filter by tags/i })).toBeInTheDocument();
@@ -94,7 +82,7 @@ describe('ChallengeFilters Component', () => {
 		});
 
 		expect(
-			await screen.findByRole('button', { name: /clear all filters \(3 active\)/i })
+			await screen.findByRole('button', { name: /clear all filters/i })
 		).toBeInTheDocument();
 	});
 
@@ -108,19 +96,6 @@ describe('ChallengeFilters Component', () => {
 		expect(screen.queryByRole('button', { name: /clear all filters/i })).not.toBeInTheDocument();
 	});
 
-	it('renders all available categories in categories popover', async () => {
-		const user = userEvent.setup();
-
-		renderWithProviders(ChallengeFilters, { props: defaultProps });
-
-		const categoriesButton = await screen.findByRole('button', { name: /filter by categories/i });
-		await user.click(categoriesButton);
-
-		expect(await screen.findByText('Web')).toBeInTheDocument();
-		expect(await screen.findByText('Crypto')).toBeInTheDocument();
-		expect(await screen.findByText('Pwn')).toBeInTheDocument();
-	});
-
 	it('renders all available tags in tags popover', async () => {
 		const user = userEvent.setup();
 
@@ -132,17 +107,6 @@ describe('ChallengeFilters Component', () => {
 		expect(await screen.findByText('easy')).toBeInTheDocument();
 		expect(await screen.findByText('medium')).toBeInTheDocument();
 		expect(await screen.findByText('hard')).toBeInTheDocument();
-	});
-
-	it('has search input in categories popover', async () => {
-		const user = userEvent.setup();
-
-		renderWithProviders(ChallengeFilters, { props: defaultProps });
-
-		const categoriesButton = await screen.findByRole('button', { name: /filter by categories/i });
-		await user.click(categoriesButton);
-
-		expect(await screen.findByPlaceholderText(/search categories/i)).toBeInTheDocument();
 	});
 
 	it('has search input in tags popover', async () => {
@@ -184,33 +148,16 @@ describe('ChallengeFilters Component', () => {
 
 		const toggleButton = await screen.findByTestId('toggle-hidden-challenges');
 		expect(toggleButton).toBeInTheDocument();
-		expect(toggleButton).toHaveTextContent(/Hide hidden/i);
 		expect(toggleButton).toHaveAttribute('aria-label', 'Hide hidden challenges');
 
 		await user.click(toggleButton);
 		expect(showHidden).toBe(false);
 	});
 
-	it('closes other popovers when clicking Categories or Tags', async () => {
-		const user = userEvent.setup();
-
+	it('renders grid and sidebar view toggle buttons', async () => {
 		renderWithProviders(ChallengeFilters, { props: defaultProps });
 
-		const categoriesButton = await screen.findByRole('button', { name: /filter by categories/i });
-		const tagsButton = await screen.findByRole('button', { name: /filter by tags/i });
-
-		// Open Categories
-		await user.click(categoriesButton);
-		expect(await screen.findByText('Web')).toBeInTheDocument();
-
-		// Click Tags: Categories should close immediately and Tags should open
-		await user.click(tagsButton);
-		expect(await screen.findByText('easy')).toBeInTheDocument();
-		expect(screen.queryByText('Web')).not.toBeInTheDocument();
-
-		// Click Categories: Tags should close immediately and Categories should open
-		await user.click(categoriesButton);
-		expect(await screen.findByText('Web')).toBeInTheDocument();
-		expect(screen.queryByText('easy')).not.toBeInTheDocument();
+		expect(await screen.findByTestId('toggle-view-grid')).toBeInTheDocument();
+		expect(await screen.findByTestId('toggle-view-sidebar')).toBeInTheDocument();
 	});
 });

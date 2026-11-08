@@ -39,50 +39,52 @@
 		</Table.Body>
 	</Table.Root>
 {:else}
-	<Table.Root class="w-full">
-		<Table.Header class="bg-transparent [&_tr]:border-b-0">
-			<Table.Row class="hover:bg-transparent">
-				<Table.Head
-					class="text-muted-foreground/70 w-[10%] text-[10px] font-bold uppercase tracking-wider"
-					>#</Table.Head
-				>
-				<Table.Head
-					class="text-muted-foreground/70 w-[50%] text-[10px] font-bold uppercase tracking-wider"
-					>{authState.userMode ? 'Player' : 'Team'}</Table.Head
-				>
-				<Table.Head
-					class="text-muted-foreground/70 w-[40%] text-right text-[10px] font-bold uppercase tracking-wider"
-					>Date</Table.Head
-				>
-			</Table.Row>
-		</Table.Header>
-
-		<Table.Body>
-			{#each sortedSolves as s, i}
-				<Table.Row class="border-b-0 transition-colors">
-					<Table.Cell class="font-medium">
-						{#if i === 0}
-							<Droplet class="h-4 w-4 text-red-500" />
-						{:else}
-							<span class="text-muted-foreground font-mono text-xs">{i + 1}</span>
-						{/if}
-					</Table.Cell>
-					<Table.Cell class="py-2">
-						<a
-							href={authState.userMode ? '/account/' + s.id : '/team/' + s.id}
-							onclick={(e) => goItem(s.id, e)}
-							class="cursor-pointer font-medium hover:underline"
-						>
-							{truncateName(s.name)}
-						</a>
-					</Table.Cell>
-					<Table.Cell
-						class="text-muted-foreground whitespace-nowrap py-2 text-right font-mono text-xs"
+	<div class="w-full overflow-x-auto">
+		<Table.Root class="w-full">
+			<Table.Header class="bg-transparent [&_tr]:border-b-0">
+				<Table.Row class="hover:bg-transparent">
+					<Table.Head
+						class="text-muted-foreground/70 w-[10%] text-[10px] font-bold uppercase tracking-wider"
+						>#</Table.Head
 					>
-						{new Date(t(s)).toLocaleString('en-GB')}
-					</Table.Cell>
+					<Table.Head
+						class="text-muted-foreground/70 w-[50%] text-[10px] font-bold uppercase tracking-wider"
+						>{authState.userMode ? 'Player' : 'Team'}</Table.Head
+					>
+					<Table.Head
+						class="text-muted-foreground/70 w-[40%] text-right text-[10px] font-bold uppercase tracking-wider"
+						>Date</Table.Head
+					>
 				</Table.Row>
-			{/each}
-		</Table.Body>
-	</Table.Root>
+			</Table.Header>
+
+			<Table.Body>
+				{#each sortedSolves as s, i}
+					<Table.Row class="border-b-0 transition-colors">
+						<Table.Cell class="font-medium">
+							{#if i === 0}
+								<Droplet class="h-4 w-4 text-red-500" />
+							{:else}
+								<span class="text-muted-foreground font-mono text-xs">{i + 1}</span>
+							{/if}
+						</Table.Cell>
+						<Table.Cell class="py-2">
+							<a
+								href={authState.userMode ? '/account/' + s.id : '/team/' + s.id}
+								onclick={(e) => goItem(s.id, e)}
+								class="cursor-pointer font-medium hover:underline"
+							>
+								{truncateName(s.name)}
+							</a>
+						</Table.Cell>
+						<Table.Cell
+							class="text-muted-foreground whitespace-nowrap py-2 text-right font-mono text-xs"
+						>
+							{new Date(t(s)).toLocaleString('en-GB')}
+						</Table.Cell>
+					</Table.Row>
+				{/each}
+			</Table.Body>
+		</Table.Root>
+	</div>
 {/if}

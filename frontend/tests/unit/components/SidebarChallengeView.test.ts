@@ -134,13 +134,21 @@ describe('SidebarChallengeView', () => {
 
 		const toggle = await screen.findByTestId('sidebar-toggle-hidden-challenges');
 		expect(toggle).toBeInTheDocument();
-		expect(toggle).toHaveTextContent(/Hide hidden/i);
+		expect(toggle).toHaveAttribute('aria-label', 'Hide hidden challenges');
 		expect(screen.getByRole('button', { name: /web hidden/i })).toBeInTheDocument();
 
 		await fireEvent.click(toggle);
 
-		expect(toggle).toHaveTextContent(/Show hidden/i);
+		expect(toggle).toHaveAttribute('aria-label', 'Show hidden challenges');
 		expect(screen.queryByRole('button', { name: /web hidden/i })).not.toBeInTheDocument();
 		expect(screen.getByRole('button', { name: /web visible/i })).toBeInTheDocument();
+	});
+
+	it('renders tag filter button before view toggle button', async () => {
+		render(SidebarChallengeView, { grouped: groupedMock });
+
+		const tagFilter = screen.getByTestId('filter-by-tags');
+		const viewToggle = screen.getByTestId('toggle-view-grid');
+		expect(tagFilter.compareDocumentPosition(viewToggle) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
 	});
 });

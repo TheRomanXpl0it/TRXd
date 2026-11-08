@@ -142,13 +142,13 @@
 
 <div class="space-y-6">
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">User Management</h1>
+		<h1 class="text-3xl font-bold tracking-tight">Manage users</h1>
 		<p class="text-muted-foreground mt-1">{pageDescription}</p>
 	</div>
 
 	<Card.Root>
 		<Card.Header>
-			<Card.Title class="text-lg">Search Users</Card.Title>
+			<Card.Title class="text-lg">Search users</Card.Title>
 			<Card.Description>{searchDescription}</Card.Description>
 		</Card.Header>
 		<Card.Content>

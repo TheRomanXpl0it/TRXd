@@ -46,6 +46,8 @@ export interface Team {
 	score?: number;
 	role?: 'User' | 'Admin' | 'Author'; // Match User role enum exactly
 	total_category_challenges?: { category: string; count: number }[];
+	created_at?: string;
+	joined_at?: string;
 }
 
 export interface Category {

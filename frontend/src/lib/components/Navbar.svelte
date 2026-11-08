@@ -145,7 +145,7 @@
 								<Button
 									variant="ghost"
 									{...props}
-									class="group relative flex h-14 w-auto items-center justify-end rounded-2xl border border-transparent px-2 transition-all active:scale-[0.98] sm:h-20 sm:justify-between sm:px-4 lg:w-60 lg:px-5"
+									class="group relative flex h-14 w-auto items-center justify-end rounded-none hover:rounded-none border border-transparent px-2 transition-all active:scale-[0.98] sm:h-20 sm:justify-between sm:px-4 lg:w-60 lg:px-5"
 								>
 									<div class="flex items-center gap-2 sm:gap-4">
 										<div
@@ -180,23 +180,23 @@
 							class="border-muted/50 animate-in fade-in zoom-in-95 w-60 p-2 shadow-2xl backdrop-blur-2xl duration-200"
 						>
 							<div class="space-y-0.5">
+								<DropdownMenu.Item
+									onclick={() => goto('/account')}
+									class="cursor-pointer gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors"
+								>
+									<User class="h-4.5 w-4.5 opacity-70" />
+									<span>View profile</span>
+								</DropdownMenu.Item>
+
 								{#if !userMode && user.team_id}
 									<DropdownMenu.Item
 										onclick={() => goto('/team')}
 										class="cursor-pointer gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors"
 									>
 										<ShieldHalf class="h-4.5 w-4.5 opacity-70" />
-										<span>My Team</span>
+										<span>View team</span>
 									</DropdownMenu.Item>
 								{/if}
-
-								<DropdownMenu.Item
-									onclick={() => goto('/account')}
-									class="cursor-pointer gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors"
-								>
-									<User class="h-4.5 w-4.5 opacity-70" />
-									<span>My Profile</span>
-								</DropdownMenu.Item>
 
 								<DropdownMenu.Item
 									onclick={() => goto('/settings')}
@@ -212,7 +212,7 @@
 										class="cursor-pointer gap-3 rounded-md px-3 py-2.5 text-sm font-semibold opacity-80 hover:opacity-100"
 									>
 										<LayoutDashboard class="h-4.5 w-4.5" />
-										<span>Admin Dashboard</span>
+										<span>Admin dashboard</span>
 									</DropdownMenu.Item>
 								{/if}
 							</div>
@@ -223,7 +223,7 @@
 								class="text-destructive cursor-pointer gap-3 rounded-md px-3 py-2.5 text-sm font-bold"
 							>
 								<LogOut class="h-4.5 w-4.5" />
-								<span>Sign Out</span>
+								<span>Sign out</span>
 							</DropdownMenu.Item>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>
@@ -234,7 +234,7 @@
 						size="lg"
 						class="shadow-primary/20 px-8 font-bold shadow-lg transition-all"
 					>
-						Sign In
+						Sign in
 					</Button>
 				{/if}
 			</div>

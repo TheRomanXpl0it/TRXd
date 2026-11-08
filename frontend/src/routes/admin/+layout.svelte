@@ -55,13 +55,13 @@
 				items: [
 					{ title: 'Categories', href: '/admin/categories', icon: FolderTree, adminOnly: false },
 					{
-						title: 'Manage Challenges',
+						title: 'Manage challenges',
 						href: '/admin/challenges',
 						icon: Joystick,
 						adminOnly: false
 					},
 					{
-						title: 'Create Challenge',
+						title: 'Create challenge',
 						href: '/admin/challenges/create',
 						icon: PlusCircle,
 						adminOnly: false
@@ -71,17 +71,17 @@
 			{
 				title: 'Admin',
 				items: [
-					{ title: 'Instances', href: '/admin/instances', icon: Cpu, adminOnly: true },
 					{ title: 'Submissions', href: '/admin/submissions', icon: Flag, adminOnly: true },
-					{ title: 'Users Control', href: '/admin/users', icon: UsersIcon, adminOnly: true },
+					{ title: 'Instances', href: '/admin/instances', icon: Cpu, adminOnly: true },
+					{ title: 'Manage users', href: '/admin/users', icon: UsersIcon, adminOnly: true },
 					{
-						title: 'Teams Control',
+						title: 'Manage teams',
 						href: '/admin/teams',
 						icon: UsersIcon,
 						adminOnly: true,
 						hideInUserMode: true
 					},
-					{ title: 'Configs', href: '/admin/configs', icon: Settings, adminOnly: true }
+					{ title: 'Configuration', href: '/admin/configs', icon: Settings, adminOnly: true }
 				]
 			}
 		]
@@ -110,7 +110,7 @@
 {:else if !isAllowed}
 	<NotFound status={404} />
 {:else}
-	<div class="flex flex-col gap-8 lg:flex-row">
+	<div class="flex flex-col gap-8 lg:flex-row py-8">
 		<!-- Sidebar Navigation -->
 		<aside class="w-full shrink-0 lg:w-64">
 			<nav class="flex flex-col gap-6 lg:overflow-visible lg:pb-0">

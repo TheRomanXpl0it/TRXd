@@ -3,7 +3,6 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { goto } from '$app/navigation';
 	import { getChallenges, deleteChallenge, groupByCategory } from '$lib/challenges';
-	import { getCategories } from '$lib/categories';
 	import { authState } from '$lib/stores/auth';
 	import { onMount, untrack } from 'svelte';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
@@ -49,7 +48,6 @@
 
 	let search = $state('');
 	let debouncedSearch = $state('');
-	let filterCategories = $state<string[]>([]);
 	let filterTags = $state<string[]>([]);
 	let showHidden = $state(true);
 	let openModal = $state(false);
@@ -62,20 +60,8 @@
 		refetchInterval: 30000
 	}));
 
-	const categoriesQuery = createQuery(() => ({
-		queryKey: ['categories'],
-		queryFn: getCategories,
-		enabled: authState.ready && !!authState.user
-	}));
-
 	const challenges = $derived((challengesQuery.data as Challenge[]) ?? ([] as Challenge[]));
-	const categories = $derived(
-		((categoriesQuery.data as string[]) ?? ([] as string[])).map((c: string) => ({
-			value: c,
-			label: c
-		}))
-	);
-	const loading = $derived(challengesQuery.isLoading || categoriesQuery.isLoading);
+	const loading = $derived(challengesQuery.isLoading);
 	const error = $derived(challengesQuery.error?.message);
 	const searchableTags = (challenge: Challenge) =>
 		isAdmin ? [...(challenge.tags ?? []), ...(challenge.author_tags ?? [])] : (challenge.tags ?? []);
@@ -95,10 +81,6 @@
 					(c.category ?? '').toLowerCase().includes(s) ||
 					searchableTags(c).some((tag) => tag.toLowerCase().includes(s))
 			);
-		}
-
-		if (filterCategories.length > 0) {
-			list = list.filter((c) => filterCategories.includes(c.category ?? 'Uncategorized'));
 		}
 
 		if (filterTags.length > 0) {
@@ -135,7 +117,7 @@
 		return res;
 	});
 
-	const activeFiltersCount = $derived((filterCategories?.length ?? 0) + (filterTags?.length ?? 0));
+	const activeFiltersCount = $derived(filterTags?.length ?? 0);
 
 	// delete confirmation modal state
 	let confirmDeleteOpen = $state(false);
@@ -243,13 +225,11 @@
 	<div class="mb-10 w-full">
 		<ChallengeFilters
 			bind:search
-			bind:filterCategories
 			bind:filterTags
 			bind:showHidden
 			canSeeHidden={isAdmin}
-			{categories}
 			{allTags}
-			{activeFiltersCount}
+			activeFiltersCount={filterTags.length}
 		/>
 	</div>
 {/if}
@@ -309,6 +289,8 @@
 			onCountdownUpdate={updateCountdown}
 			{submissionsClosed}
 			bind:showHidden
+			bind:filterTags
+			{allTags}
 		/>
 	</div>
 {:else}
@@ -320,7 +302,7 @@
 					<button
 						type="button"
 						onclick={() => uiStore.toggleCategory(category)}
-						class="text-muted-foreground/60 hover:text-foreground flex items-center gap-1.5 text-sm font-black uppercase tracking-tighter transition-colors select-none"
+						class="text-foreground/80 hover:text-foreground dark:text-zinc-300 dark:hover:text-white flex items-center gap-1.5 text-sm font-black uppercase tracking-tighter transition-colors select-none"
 						aria-expanded={!isCollapsed}
 						aria-label={`Toggle ${category} category`}
 					>

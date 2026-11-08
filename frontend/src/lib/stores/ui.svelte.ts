@@ -4,12 +4,17 @@ class UIStore {
 	challengeView = $state<'normal' | 'sidebar'>('normal');
 	collapsedCategories = $state<string[]>([]);
 	collapsedAdminCategories = $state<string[]>([]);
+	showAuthorTags = $state<boolean>(true);
 
 	constructor() {
 		if (browser) {
 			const saved = localStorage.getItem('challenge-view-preference');
 			if (saved === 'normal' || saved === 'sidebar') {
 				this.challengeView = saved;
+			}
+			const savedAuthorTags = localStorage.getItem('show-author-tags');
+			if (savedAuthorTags !== null) {
+				this.showAuthorTags = savedAuthorTags === 'true';
 			}
 			this.collapsedCategories = this.loadList('collapsed-categories');
 			this.collapsedAdminCategories = this.loadList('collapsed-admin-categories');
@@ -43,6 +48,13 @@ class UIStore {
 		this.challengeView = view;
 		if (browser) {
 			localStorage.setItem('challenge-view-preference', view);
+		}
+	}
+
+	toggleAuthorTags() {
+		this.showAuthorTags = !this.showAuthorTags;
+		if (browser) {
+			localStorage.setItem('show-author-tags', String(this.showAuthorTags));
 		}
 	}
 

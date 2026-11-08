@@ -13,7 +13,7 @@
 
 	let {
 		value = $bindable(''),
-		placeholder = 'Select country',
+		placeholder = 'No nationality',
 		id,
 		className = ''
 	} = $props<{
@@ -35,6 +35,13 @@
 
 	function selectItem(item: CountryItem) {
 		value = item.value;
+		open = false;
+		countrySearch = '';
+		tick().then(() => triggerRef?.focus());
+	}
+
+	function clearCountry() {
+		value = '';
 		open = false;
 		countrySearch = '';
 		tick().then(() => triggerRef?.focus());
@@ -87,6 +94,27 @@
 					/>
 				</div>
 			</div>
+
+			{#if !countrySearch || 'no nationality'.includes(countrySearch.toLowerCase().trim())}
+				<div class="border-b p-1">
+					<button
+						type="button"
+						role="option"
+						aria-selected={!value}
+						class="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none"
+						onclick={clearCountry}
+					>
+						<div class="flex w-full items-center gap-2">
+							<div class="flex h-4 w-4 items-center justify-center">
+								{#if !value}
+									<CheckIcon class="h-4 w-4" />
+								{/if}
+							</div>
+							<span class="text-muted-foreground">No nationality</span>
+						</div>
+					</button>
+				</div>
+			{/if}
 
 			{#if filteredCountries.length === 0}
 				<div class="text-muted-foreground flex flex-col items-center justify-center py-6">

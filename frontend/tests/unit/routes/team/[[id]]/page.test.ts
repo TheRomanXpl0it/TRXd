@@ -1,4 +1,5 @@
 import { screen } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../render';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Page from '../../../../../src/routes/team/[[id]]/+page.svelte';
@@ -11,7 +12,7 @@ vi.mock('$lib/stores/auth', () => ({
 	authState: {
 		user: { id: 1, team_id: 10 },
 		ready: true,
-		userMode: true,
+		userMode: false,
 		startTime: null
 	},
 	loadUser: vi.fn()
@@ -24,7 +25,8 @@ vi.mock('@tanstack/svelte-query', async (importOriginal) => {
 		createQuery: vi.fn(),
 		useQueryClient: vi.fn(() => ({
 			setQueryData: vi.fn(),
-			refetchQueries: vi.fn()
+			refetchQueries: vi.fn(),
+			invalidateQueries: vi.fn()
 		}))
 	};
 });
@@ -42,7 +44,8 @@ vi.mock('$app/stores', () => ({
 }));
 
 vi.mock('$lib/team', () => ({
-	getTeam: vi.fn()
+	getTeam: vi.fn(),
+	updateTeam: vi.fn()
 }));
 
 vi.mock('$lib/components/RadarChart.svelte', () => ({
@@ -62,27 +65,88 @@ describe('Team Profile Page', () => {
 	});
 
 	it('hides statistics cards when competition is upcoming', () => {
-		// Set authState to upcoming
 		authState.ready = true;
 		authState.startTime = new Date(Date.now() + 100000).toISOString();
 
 		renderWithProviders(Page);
 
-		// Cards that should be HIDDEN
 		expect(screen.queryByText('Category Breakdown')).not.toBeInTheDocument();
-
-		// Basic team info should still be there
 		expect(screen.getByText('Test Team')).toBeInTheDocument();
 	});
 
 	it('shows statistics cards when competition has started', () => {
-		// Set authState to NOT upcoming
 		authState.ready = true;
 		authState.startTime = new Date(Date.now() - 100000).toISOString();
 
 		renderWithProviders(Page);
 
-		// Cards that should be VISIBLE
 		expect(screen.getByText('Category Breakdown')).toBeInTheDocument();
+	});
+
+	it('renders pencil button and opens edit team dialog for own team', async () => {
+		const user = userEvent.setup();
+		authState.ready = true;
+		authState.user = { id: 1, team_id: 10 } as any;
+
+		(createQuery as any).mockReturnValue({
+			data: {
+				id: 10,
+				name: 'CyberDefenders',
+				country: 'ITA',
+				members: [{ id: 1, name: 'Alice' }],
+				solves: [],
+				badges: []
+			},
+			isLoading: false,
+			error: null
+		});
+
+		renderWithProviders(Page);
+
+		const editBtn = screen.getByRole('button', { name: /edit team profile/i });
+		expect(editBtn).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: /^settings$/i })).toHaveAttribute(
+			'href',
+			'/settings/team'
+		);
+
+		await user.click(editBtn);
+
+		expect(await screen.findByRole('dialog')).toBeInTheDocument();
+		expect(screen.getByRole('heading', { name: /edit team/i })).toBeInTheDocument();
+		expect(screen.getByLabelText(/team name/i)).toHaveValue('CyberDefenders');
+	});
+
+	it('renders country row below team name, members count, and joined date with day', async () => {
+		authState.ready = true;
+		authState.user = { id: 2, team_id: 99 } as any;
+
+		(createQuery as any).mockReturnValue({
+			data: {
+				id: 10,
+				name: 'AlphaSquad',
+				role: 'Admin',
+				country: 'DEU',
+				email: 'alpha@example.com',
+				members: [{ id: 1 }, { id: 2 }],
+				joined_at: '2026-02-14T00:00:00Z',
+				solves: [],
+				badges: []
+			},
+			isLoading: false,
+			error: null
+		});
+
+		renderWithProviders(Page);
+
+		expect(await screen.findByText('AlphaSquad')).toBeInTheDocument();
+		expect(screen.getByText('Admin')).toBeInTheDocument();
+		expect(screen.getByText('Germany')).toBeInTheDocument();
+		expect(screen.getByText('alpha@example.com')).toBeInTheDocument();
+		expect(screen.getByText('2 members')).toBeInTheDocument();
+		const expectedDate = new Date('2026-02-14T00:00:00Z');
+		const pad = (n: number) => String(n).padStart(2, '0');
+		const expectedDateStr = `${pad(expectedDate.getDate())}/${pad(expectedDate.getMonth() + 1)}/${expectedDate.getFullYear()}`;
+		expect(screen.getByText(new RegExp(expectedDateStr))).toBeInTheDocument();
 	});
 });

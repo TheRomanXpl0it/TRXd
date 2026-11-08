@@ -1,74 +1,30 @@
 <script lang="ts">
 	import { Button } from '@/components/ui/button';
 	import { Input } from '$lib/components/ui/input/index.js';
-	import * as Popover from '$lib/components/ui/popover/index.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
-	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
-	import { X, Filter, Shapes, Eye, EyeOff } from '@lucide/svelte';
-	import VirtualList from '@sveltejs/svelte-virtual-list';
+	import { X, Eye, EyeOff, LockKeyhole } from '@lucide/svelte';
+	import TagFilterPopover from './TagFilterPopover.svelte';
+	import ViewToggle from './ViewToggle.svelte';
+	import { uiStore } from '$lib/stores/ui.svelte';
 
 	let {
 		search = $bindable(''),
-		filterCategories = $bindable([]),
 		filterTags = $bindable([]),
 		showHidden = $bindable(true),
 		canSeeHidden = false,
-		categories = [],
 		allTags = [],
-		activeFiltersCount = 0,
-		isAllExpanded = false
+		activeFiltersCount = 0
 	}: {
 		search: string;
-		filterCategories: string[];
 		filterTags: string[];
 		showHidden?: boolean;
 		canSeeHidden?: boolean;
-		categories: Array<{ value: string; label: string }>;
 		allTags: string[];
-		activeFiltersCount: number;
-		isAllExpanded?: boolean;
+		activeFiltersCount?: number;
 	} = $props();
 
-	let tagsOpen = $state(false);
-	let categoriesOpen = $state(false);
-	let categorySearch = $state('');
-	let tagSearch = $state('');
-
-	const filteredCategories = $derived(
-		categorySearch
-			? categories
-					.filter((c) => c.label.toLowerCase().includes(categorySearch.toLowerCase()))
-					.sort()
-			: categories
-	);
-
-	const filteredTags = $derived(
-		tagSearch ? allTags.filter((t) => t.toLowerCase().includes(tagSearch.toLowerCase())) : allTags
-	);
-
 	function clearFilters() {
-		filterCategories = [];
 		filterTags = [];
-	}
-
-	function toggleCategory(value: string) {
-		const idx = filterCategories.indexOf(value);
-		if (idx > -1) {
-			filterCategories.splice(idx, 1);
-			filterCategories = [...filterCategories];
-		} else {
-			filterCategories = [...filterCategories, value];
-		}
-	}
-
-	function toggleTag(value: string) {
-		const idx = filterTags.indexOf(value);
-		if (idx > -1) {
-			filterTags.splice(idx, 1);
-			filterTags = [...filterTags];
-		} else {
-			filterTags = [...filterTags, value];
-		}
 	}
 </script>
 
@@ -95,152 +51,50 @@
 	</div>
 
 	<div class="flex flex-wrap items-center gap-1.5 md:gap-2">
-		<Tooltip.Root>
-			<Tooltip.Trigger>
-				<Popover.Root
-					bind:open={categoriesOpen}
-					onOpenChange={(isOpen) => {
-						if (isOpen) tagsOpen = false;
-					}}
-				>
-					<Popover.Trigger>
-						{#snippet child({ props })}
-							<Button
-								{...props}
-								variant="outline"
-								class="flex h-9 shrink-0 cursor-pointer items-center gap-1 px-3 md:h-10 md:px-4"
-								aria-label={filterCategories.length > 0
-									? `${filterCategories.length} categories selected`
-									: 'Filter by categories'}
-							>
-								<Shapes class="h-4 w-4 shrink-0" aria-hidden="true" />
-								<span class="hidden sm:inline">Categories</span>
-							</Button>
-						{/snippet}
-					</Popover.Trigger>
-					<Popover.Content class="w-[260px] p-1">
-						<div class="px-2 py-1.5">
-							<Input bind:value={categorySearch} placeholder="Search categories..." class="h-8" />
-						</div>
-						{#if filteredCategories.length === 0}
-							<div class="text-muted-foreground py-6 text-center text-sm">No categories found.</div>
-						{:else if filteredCategories.length > 20}
-							<div class="px-1" style="height: 300px;">
-								<VirtualList items={filteredCategories} let:item>
-									<button
-										type="button"
-										class="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-										onclick={() => toggleCategory(item.value)}
-									>
-										<Checkbox
-											checked={filterCategories.includes(item.value)}
-											aria-label="Filter by {item.label}"
-										/>
-										<span class="ml-2">{item.label}</span>
-									</button>
-								</VirtualList>
-							</div>
-						{:else}
-							<div class="max-h-[300px] overflow-y-auto px-1">
-								{#each filteredCategories as item (item.value)}
-									<button
-										type="button"
-										class="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-										onclick={() => toggleCategory(item.value)}
-									>
-										<Checkbox
-											checked={filterCategories.includes(item.value)}
-											aria-label="Filter by {item.label}"
-										/>
-										<span class="ml-2">{item.label}</span>
-									</button>
-								{/each}
-							</div>
-						{/if}
-					</Popover.Content>
-				</Popover.Root>
-			</Tooltip.Trigger>
-			<Tooltip.Content>Filter by Category</Tooltip.Content>
-		</Tooltip.Root>
+		<!-- 1. Tag filter (icon-only button, hover "Filter by tags") -->
+		<TagFilterPopover bind:filterTags {allTags} />
 
-		<Tooltip.Root>
-			<Tooltip.Trigger>
-				<Popover.Root
-					bind:open={tagsOpen}
-					onOpenChange={(isOpen) => {
-						if (isOpen) categoriesOpen = false;
-					}}
-				>
-					<Popover.Trigger>
-						{#snippet child({ props })}
-							<Button
-								{...props}
-								variant="outline"
-								class="flex h-9 shrink-0 items-center gap-1 px-3 md:h-10 md:px-4"
-								aria-label={filterTags.length > 0
-									? `${filterTags.length} tags selected`
-									: 'Filter by tags'}
-							>
-								<Filter class="h-4 w-4 shrink-0" aria-hidden="true" />
-								<span class="hidden sm:inline">Tags</span>
-							</Button>
-						{/snippet}
-					</Popover.Trigger>
-					<Popover.Content class="w-[260px] p-1">
-						<div class="px-2 py-1.5">
-							<Input bind:value={tagSearch} placeholder="Search tags..." class="h-8" />
-						</div>
-						{#if filteredTags.length === 0}
-							<div class="text-muted-foreground py-6 text-center text-sm">No tags found.</div>
-						{:else if filteredTags.length > 20}
-							<div class="px-1" style="height: 300px;">
-								<VirtualList items={filteredTags} let:item>
-									<button
-										type="button"
-										class="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-										onclick={() => toggleTag(item)}
-									>
-										<Checkbox checked={filterTags.includes(item)} aria-label="Filter by {item}" />
-										<span class="ml-2">{item}</span>
-									</button>
-								</VirtualList>
-							</div>
-						{:else}
-							<div class="max-h-[300px] overflow-y-auto px-1">
-								{#each filteredTags as item}
-									<button
-										type="button"
-										class="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-										onclick={() => toggleTag(item)}
-									>
-										<Checkbox checked={filterTags.includes(item)} aria-label="Filter by {item}" />
-										<span class="ml-2">{item}</span>
-									</button>
-								{/each}
-							</div>
-						{/if}
-					</Popover.Content>
-				</Popover.Root>
-			</Tooltip.Trigger>
-			<Tooltip.Content>Filter by Tag</Tooltip.Content>
-		</Tooltip.Root>
+		<!-- 2. Grid/Sidebar toggle (split-button for all roles) -->
+		<ViewToggle />
 
 		{#if canSeeHidden}
+			<!-- 3. Author tags toggle (authors/admins only) -->
+			<Tooltip.Root>
+				<Tooltip.Trigger>
+					<Button
+						variant={uiStore.showAuthorTags ? 'outline' : 'secondary'}
+						size="icon"
+						class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
+						onclick={() => uiStore.toggleAuthorTags()}
+						aria-label={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
+						title={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
+						data-testid="toggle-author-tags"
+					>
+						<LockKeyhole
+							class="h-4 w-4 shrink-0 {uiStore.showAuthorTags ? '' : 'opacity-40'}"
+							aria-hidden="true"
+						/>
+					</Button>
+				</Tooltip.Trigger>
+				<Tooltip.Content>{uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}</Tooltip.Content>
+			</Tooltip.Root>
+
+			<!-- 4. Hidden challenges toggle (authors/admins only, eye icon only) -->
 			<Tooltip.Root>
 				<Tooltip.Trigger>
 					<Button
 						variant={showHidden ? 'outline' : 'secondary'}
-						class="flex h-9 shrink-0 cursor-pointer items-center gap-1.5 px-3 md:h-10 md:px-4"
+						size="icon"
+						class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
 						onclick={() => (showHidden = !showHidden)}
 						aria-label={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
+						title={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
 						data-testid="toggle-hidden-challenges"
 					>
 						{#if showHidden}
 							<Eye class="h-4 w-4 shrink-0 opacity-60" aria-hidden="true" />
-							<span class="hidden sm:inline">Hide hidden</span>
 						{:else}
 							<EyeOff class="h-4 w-4 shrink-0 text-zinc-600 dark:text-zinc-300" aria-hidden="true" />
-							<span class="hidden sm:inline">Show hidden</span>
 						{/if}
 					</Button>
 				</Tooltip.Trigger>
@@ -248,13 +102,13 @@
 			</Tooltip.Root>
 		{/if}
 
-		{#if activeFiltersCount > 0}
+		{#if activeFiltersCount > 0 || filterTags.length > 0}
 			<Button
 				variant="ghost"
 				size="icon"
-				class="h-9 shrink-0 cursor-pointer md:h-10"
+				class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
 				onclick={clearFilters}
-				aria-label="Clear all filters ({activeFiltersCount} active)"
+				aria-label="Clear all filters"
 			>
 				<X class="h-4 w-4" aria-hidden="true" />
 			</Button>

@@ -91,13 +91,13 @@
 
 <div class="space-y-6">
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Team Management</h1>
+		<h1 class="text-3xl font-bold tracking-tight">Manage teams</h1>
 		<p class="text-muted-foreground mt-1">Search teams and manage join credentials</p>
 	</div>
 
 	<Card.Root>
 		<Card.Header>
-			<Card.Title class="text-lg">Search Teams</Card.Title>
+			<Card.Title class="text-lg">Search teams</Card.Title>
 			<Card.Description>Look up a team by its exact name or email address</Card.Description>
 		</Card.Header>
 		<Card.Content>

@@ -211,7 +211,7 @@
 				<PlusCircle class="h-8 w-8" />
 			</div>
 			<div>
-				<h1 class="text-3xl font-bold tracking-tight">Create Challenge</h1>
+				<h1 class="text-3xl font-bold tracking-tight">Create challenge</h1>
 				<p class="text-muted-foreground mt-1">Configure all challenge settings in one go</p>
 			</div>
 		</div>
@@ -221,7 +221,7 @@
 			{:else}
 				<Save class="h-4 w-4" />
 			{/if}
-			Create Challenge
+			Create challenge
 		</Button>
 	</div>
 

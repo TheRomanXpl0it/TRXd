@@ -128,45 +128,47 @@
 					<p>No categories found.</p>
 				</div>
 			{:else}
-				<Table.Root>
-					<Table.Header class="bg-transparent [&_tr]:border-b-0">
-						<Table.Row class="border-none hover:bg-transparent">
-							<Table.Head
-								class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
-								>Name</Table.Head
-							>
-							<Table.Head
-								class="text-muted-foreground/70 bg-transparent text-right text-[10px] font-bold uppercase tracking-wider"
-								>Actions</Table.Head
-							>
-						</Table.Row>
-					</Table.Header>
-					<Table.Body>
-						{#each categories as name (name)}
-							<Table.Row class="hover:bg-muted/50 group border-none transition-colors">
-								<Table.Cell class="max-w-[200px] truncate font-medium">{name}</Table.Cell>
-								<Table.Cell class="flex items-center justify-end gap-1 text-right">
-									<Button
-										variant="ghost"
-										size="icon"
-										class="text-muted-foreground hover:text-primary h-8 w-8 transition-colors"
-										onclick={() => handleRename(name)}
-									>
-										<Pencil class="h-4 w-4" />
-									</Button>
-									<Button
-										variant="ghost"
-										size="icon"
-										class="text-muted-foreground hover:text-destructive h-8 w-8 transition-colors"
-										onclick={() => handleDelete(name)}
-									>
-										<Trash2 class="h-4 w-4" />
-									</Button>
-								</Table.Cell>
+				<div class="w-full overflow-x-auto">
+					<Table.Root>
+						<Table.Header class="bg-transparent [&_tr]:border-b-0">
+							<Table.Row class="border-none hover:bg-transparent">
+								<Table.Head
+									class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
+									>Name</Table.Head
+								>
+								<Table.Head
+									class="text-muted-foreground/70 bg-transparent text-right text-[10px] font-bold uppercase tracking-wider"
+									>Actions</Table.Head
+								>
 							</Table.Row>
-						{/each}
-					</Table.Body>
-				</Table.Root>
+						</Table.Header>
+						<Table.Body>
+							{#each categories as name (name)}
+								<Table.Row class="hover:bg-muted/50 group border-none transition-colors">
+									<Table.Cell class="max-w-[200px] truncate font-medium">{name}</Table.Cell>
+									<Table.Cell class="flex items-center justify-end gap-1 text-right">
+										<Button
+											variant="ghost"
+											size="icon"
+											class="text-muted-foreground hover:text-primary h-8 w-8 transition-colors"
+											onclick={() => handleRename(name)}
+										>
+											<Pencil class="h-4 w-4" />
+										</Button>
+										<Button
+											variant="ghost"
+											size="icon"
+											class="text-muted-foreground hover:text-destructive h-8 w-8 transition-colors"
+											onclick={() => handleDelete(name)}
+										>
+											<Trash2 class="h-4 w-4" />
+										</Button>
+									</Table.Cell>
+								</Table.Row>
+							{/each}
+						</Table.Body>
+					</Table.Root>
+				</div>
 			{/if}
 		</Card.Content>
 	</Card.Root>

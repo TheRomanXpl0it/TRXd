@@ -65,7 +65,7 @@
 				>
 					<Users strokeWidth={1.5} class="h-8 w-8" />
 				</div>
-				<Card.Title class="text-2xl font-bold tracking-tight">Join a Team</Card.Title>
+				<Card.Title class="text-2xl font-bold tracking-tight">Join a team</Card.Title>
 				<Card.Description class="text-muted-foreground text-base">
 					Enter your team's access credentials to join
 				</Card.Description>
@@ -76,7 +76,7 @@
 			<Card.Content class="space-y-6 p-0">
 				<div class="space-y-4">
 					<div class="space-y-2">
-						<Label for="join-name" class="font-medium">Team Name</Label>
+						<Label for="join-name" class="font-medium">Team name</Label>
 						<Input
 							id="join-name"
 							placeholder="e.g. TheRomanXpl0it"
@@ -87,7 +87,7 @@
 					</div>
 
 					<div class="space-y-2">
-						<Label for="join-pass" class="font-medium">Team Password</Label>
+						<Label for="join-pass" class="font-medium">Team password</Label>
 						<Input
 							id="join-pass"
 							type="password"

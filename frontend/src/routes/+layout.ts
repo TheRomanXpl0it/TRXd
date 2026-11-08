@@ -7,8 +7,12 @@ export const ssr = false; // Disable SSR since TRXd relies heavily on client-sid
 export const prerender = false;
 
 export async function load({ url }: { url: URL }) {
-	// Let the user state initialize
-	await loadUser(false);
+	try {
+		// Let the user state initialize
+		await loadUser(false);
+	} catch {
+		// Connection error during initial load, allow page to render without crashing root
+	}
 
 	// Alias / to /home if "No Landing Page" is enabled
 	if (url.pathname === '/') {

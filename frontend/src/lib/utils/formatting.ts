@@ -40,3 +40,17 @@ export function truncateText(text: string, maxLength: number = 32): string {
 	if (!text || text.length <= maxLength) return text;
 	return text.slice(0, maxLength) + '...';
 }
+
+export function formatDateTime24h(iso?: string | number | Date): string {
+	if (!iso) return '-';
+	const d = new Date(iso);
+	if (Number.isNaN(+d)) return '-';
+	const pad = (n: number) => String(n).padStart(2, '0');
+	const day = pad(d.getDate());
+	const month = pad(d.getMonth() + 1);
+	const year = d.getFullYear();
+	const hours = pad(d.getHours());
+	const minutes = pad(d.getMinutes());
+	const seconds = pad(d.getSeconds());
+	return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+}

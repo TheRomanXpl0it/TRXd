@@ -78,7 +78,7 @@
 	}
 </script>
 
-<div class="relative z-10 mx-auto max-w-6xl space-y-12 px-4 py-8 sm:px-6 sm:py-12">
+<div class="relative z-10 mx-auto max-w-7xl space-y-6 py-8">
 	<!-- Compact Mode Toggle -->
 	<div class="absolute right-4 top-4 z-10 sm:right-8 sm:top-8">
 		<Button

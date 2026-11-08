@@ -108,7 +108,7 @@
 		<ChartLine class="h-5 w-5 opacity-70" />
 		<h3 class="text-xl font-semibold">Solves</h3>
 	</div>
-	<div class="mx-4 px-4 sm:mx-8 sm:px-6">
+	<div class="mx-4 overflow-x-auto px-4 sm:mx-8 sm:px-6">
 		<Table class="w-full">
 			<TableHeader class="bg-transparent [&_tr]:border-b-0">
 				<TableRow class="hover:bg-transparent">

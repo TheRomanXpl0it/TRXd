@@ -1,18 +1,15 @@
 <script lang="ts">
 	import { authState } from '$lib/stores/auth';
 	import * as Card from '$lib/components/ui/card';
-	import { Button } from '$lib/components/ui/button';
 	import { Badge } from '$lib/components/ui/badge';
 	import {
-		LayoutDashboard,
 		Cpu,
 		Flag,
-		Settings,
 		Users as UsersIcon,
-		PlusCircle,
 		Activity
 	} from '@lucide/svelte';
 	import { getAdminStats } from '$lib/challenges';
+	import { getInstances } from '$lib/instances';
 
 	const user = $derived(authState.user);
 	const ready = $derived(authState.ready);
@@ -20,6 +17,7 @@
 	const canViewStats = $derived(user?.role === 'Admin' || user?.role === 'Author');
 
 	let statsData = $state<any>(null);
+	let instancesData = $state<any[] | null>(null);
 	let statsLoading = $state(false);
 
 	async function loadStats() {
@@ -27,9 +25,15 @@
 
 		statsLoading = true;
 		try {
-			statsData = await getAdminStats();
+			const [stats, instances] = await Promise.all([
+				getAdminStats(),
+				getInstances().catch(() => [])
+			]);
+			statsData = stats;
+			instancesData = Array.isArray(instances) ? instances : [];
 		} catch {
 			statsData = null;
+			instancesData = null;
 		} finally {
 			statsLoading = false;
 		}
@@ -66,65 +70,30 @@
 			icon: Activity,
 			color: 'text-purple-500',
 			bgColor: 'bg-purple-500/10'
+		},
+		{
+			title: 'Instances',
+			value: instancesData !== null ? `${instancesData.length}` : '…',
+			sub: instancesData !== null
+				? `${instancesData.length === 1 ? '1 active instance' : `${instancesData.length} active instances`}`
+				: 'loading…',
+			icon: Cpu,
+			color: 'text-amber-500',
+			bgColor: 'bg-amber-500/10'
 		}
 	]);
-
-	const quickLinks = $derived(
-		[
-			{
-				title: 'Instances',
-				href: '/admin/instances',
-				icon: Cpu,
-				desc: 'Manage containerized challenges',
-				adminOnly: true
-			},
-			{
-				title: 'Submissions',
-				href: '/admin/submissions',
-				icon: Flag,
-				desc: 'Review recent flag submits',
-				adminOnly: true
-			},
-			{
-				title: 'Users',
-				href: '/admin/users',
-				icon: UsersIcon,
-				desc: authState.userMode
-					? 'Manage team-backed user accounts and passwords'
-					: 'Manage user accounts and passwords',
-				adminOnly: true
-			},
-			{
-				title: 'Teams Control',
-				href: '/admin/teams',
-				icon: UsersIcon,
-				desc: 'Manage teams and regenerate join passwords',
-				adminOnly: true,
-				hideInUserMode: true
-			},
-			{
-				title: 'Create Challenge',
-				href: '/admin/challenges/create',
-				icon: PlusCircle,
-				desc: 'Unified creation flow',
-				adminOnly: false
-			}
-		].filter(
-			(link) => (!link.adminOnly || isAdmin) && !(link.hideInUserMode && authState.userMode)
-		)
-	);
 </script>
 
-<div class="space-y-8">
+<div class="space-y-6">
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+		<h1 class="text-3xl font-bold tracking-tight">Admin dashboard</h1>
 		<p class="text-muted-foreground mt-1">
 			Welcome back, <span class="text-foreground font-medium">{user?.name}</span>. You are logged in
 			as <Badge variant="secondary" class="ml-1 capitalize">{user?.role}</Badge>
 		</p>
 	</div>
 
-	<div class="grid gap-4 md:grid-cols-3">
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		{#each stats as stat}
 			<Card.Root>
 				<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -138,28 +107,6 @@
 					<p class="text-muted-foreground mt-1 text-xs">{stat.sub ?? 'Total count in database'}</p>
 				</Card.Content>
 			</Card.Root>
-		{/each}
-	</div>
-
-	<div class="grid gap-4 md:grid-cols-2">
-		{#each quickLinks as link}
-			<a href={link.href} class="group">
-				<Card.Root class="hover:border-primary/50 transition-shadow hover:shadow-md">
-					<Card.Header class="flex flex-row items-start gap-4 space-y-0">
-						<div
-							class="bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground rounded-lg p-3 transition-colors"
-						>
-							<link.icon class="h-6 w-6" />
-						</div>
-						<div class="space-y-1">
-							<Card.Title class="group-hover:text-primary text-lg transition-colors"
-								>{link.title}</Card.Title
-							>
-							<Card.Description>{link.desc}</Card.Description>
-						</div>
-					</Card.Header>
-				</Card.Root>
-			</a>
 		{/each}
 	</div>
 </div>

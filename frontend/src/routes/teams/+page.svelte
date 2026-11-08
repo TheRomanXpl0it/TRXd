@@ -14,6 +14,7 @@
 	import { Users, Globe } from '@lucide/svelte';
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
+	import { getCountryByIso3 } from '$lib/utils/countries';
 	import NotFound from '$lib/components/NotFound.svelte';
 
 	let perPage = $state(20);
@@ -140,7 +141,7 @@
 {#if authState.userMode}
 	<NotFound status={404} />
 {:else}
-<div class="mx-auto max-w-5xl space-y-8 px-6 py-10">
+<div class="mx-auto max-w-5xl space-y-6 py-8">
 	{#if error}
 		<ErrorMessage title="Error loading teams" message={error} />
 	{:else}
@@ -215,14 +216,14 @@
 
 											<Table.Cell>
 												{#if team.country}
-													{@const iso2 = getCountryIso2(team.country)}
+													{@const country = getCountryByIso3(team.country)}
 													<div class="flex items-center gap-2">
 														<div
-															class="bg-background relative flex h-6 w-8 items-center justify-center overflow-hidden rounded border shadow-sm"
+															class="bg-background relative flex h-6 w-8 shrink-0 items-center justify-center overflow-hidden rounded border shadow-sm"
 														>
-															{#if iso2}
+															{#if country?.iso2}
 																<CountryFlag
-																	country={iso2}
+																	country={country.iso2}
 																	width={32}
 																	height={32}
 																	class="h-full w-full object-cover"
@@ -231,7 +232,9 @@
 																<Globe class="text-muted-foreground h-4 w-4" />
 															{/if}
 														</div>
-														<span class="text-foreground/80 text-sm">{team.country}</span>
+														<span class="text-foreground text-sm font-medium">
+															{country?.label ?? team.country}
+														</span>
 													</div>
 												{:else}
 													<span class="text-muted-foreground text-sm italic">Not specified</span>

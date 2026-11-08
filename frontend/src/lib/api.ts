@@ -56,13 +56,22 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 		headers.set('X-CSRF-Token', csrf);
 	}
 
-	const res = await fetch(urlOf(path), {
-		credentials: 'include',
-		mode: 'cors',
-		...init,
-		headers,
-		body
-	});
+	let res: Response;
+	try {
+		res = await fetch(urlOf(path), {
+			credentials: 'include',
+			mode: 'cors',
+			...init,
+			headers,
+			body
+		});
+	} catch (err: any) {
+		throw new Error(
+			err?.message && !err.message.toLowerCase().includes('fetch')
+				? err.message
+				: 'Cannot connect to server. Please check your connection.'
+		);
+	}
 
 	if (!res.ok) {
 		let errorMessage = res.statusText;
@@ -77,6 +86,11 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 			}
 		} catch {
 			// use default statusText if parsing fails
+		}
+		if (res.status === 502 || res.status === 503 || res.status === 504) {
+			if (!errorMessage || errorMessage === res.statusText) {
+				errorMessage = 'Cannot connect to server. Please check your connection.';
+			}
 		}
 		throw new Error(errorMessage);
 	}

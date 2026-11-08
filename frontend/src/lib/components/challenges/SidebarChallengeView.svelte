@@ -17,7 +17,8 @@
 		Monitor,
 		Clock,
 		Eye,
-		EyeOff
+		EyeOff,
+		LockKeyhole
 	} from '@lucide/svelte';
 	import { cn } from '$lib/utils';
 	import type { Challenge } from '$lib/types';
@@ -28,11 +29,14 @@
 	import { slide } from 'svelte/transition';
 	import { Input } from '$lib/components/ui/input';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { getSolves } from '$lib/challenges';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { fmtTimeLeft } from '$lib/utils/time';
 	import { formatConnectionString } from '$lib/utils/connection';
 	import { authState } from '$lib/stores/auth';
+	import TagFilterPopover from './TagFilterPopover.svelte';
+	import ViewToggle from './ViewToggle.svelte';
 
 	let {
 		grouped,
@@ -41,7 +45,9 @@
 		countdowns = {} as Record<string | number, number>,
 		onCountdownUpdate,
 		submissionsClosed = false,
-		showHidden = $bindable(true)
+		showHidden = $bindable(true),
+		filterTags = $bindable([] as string[]),
+		allTags = [] as string[]
 	}: {
 		grouped: [string, Challenge[]][];
 		onSolved?: () => void;
@@ -50,6 +56,8 @@
 		onCountdownUpdate?: (id: string | number, newCountdown: number) => void;
 		submissionsClosed?: boolean;
 		showHidden?: boolean;
+		filterTags?: string[];
+		allTags?: string[];
 	} = $props();
 
 	import { uiStore } from '$lib/stores/ui.svelte';
@@ -72,6 +80,19 @@
 		if (isPrivileged && !showHidden) {
 			currentGrouped = currentGrouped
 				.map(([cat, items]) => [cat, items.filter((ch) => !ch.hidden)])
+				.filter(([_, items]) => items.length > 0) as [string, Challenge[]][];
+		}
+		if (filterTags.length > 0) {
+			currentGrouped = currentGrouped
+				.map(([cat, items]) => [
+					cat,
+					items.filter((ch) => {
+						const tags = isPrivileged
+							? [...(ch.tags ?? []), ...(ch.author_tags ?? [])]
+							: (ch.tags ?? []);
+						return filterTags.some((t) => tags.includes(t));
+					})
+				])
 				.filter(([_, items]) => items.length > 0) as [string, Challenge[]][];
 		}
 		if (!search.trim()) return currentGrouped;
@@ -183,45 +204,78 @@
 			mobileShowSide ? 'flex' : 'hidden lg:flex'
 		)}
 	>
-		<div class="border-border/15 bg-background/12 space-y-4 border-b px-5 py-6">
-			<div class="flex items-center justify-between px-1">
-				<h2 class="text-muted-foreground/40 text-[10px] font-black uppercase tracking-[0.2em]">
+		<div class="border-border/15 bg-background/12 border-b px-4 py-3">
+			<div class="flex items-center justify-between gap-2">
+				<h2 class="text-muted-foreground/50 text-[10px] font-black uppercase tracking-[0.2em]">
 					Challenges
 				</h2>
-				{#if isPrivileged}
-					<Button
-						variant={showHidden ? 'ghost' : 'secondary'}
-						size="sm"
-						class="text-muted-foreground hover:text-foreground flex h-6 cursor-pointer items-center gap-1.5 px-2 text-[10px] font-bold"
-						onclick={() => (showHidden = !showHidden)}
-						aria-label={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
-						title={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
-						data-testid="sidebar-toggle-hidden-challenges"
-					>
-						{#if showHidden}
-							<Eye class="h-3 w-3" aria-hidden="true" />
-							<span>Hide hidden</span>
-						{:else}
-							<EyeOff class="h-3 w-3 opacity-60" aria-hidden="true" />
-							<span>Show hidden</span>
-						{/if}
-					</Button>
-				{/if}
+				<div class="flex items-center gap-1">
+					<!-- 1. Tag filter (icon-only, hover "Filter by tags") -->
+					<TagFilterPopover bind:filterTags {allTags} size="sm" />
+
+					<!-- 2. Grid/Sidebar toggle -->
+					<ViewToggle size="sm" />
+
+					{#if isPrivileged}
+						<!-- 3. Author tags toggle (authors/admins only) -->
+						<Tooltip.Root>
+							<Tooltip.Trigger>
+								<Button
+									variant={uiStore.showAuthorTags ? 'ghost' : 'secondary'}
+									size="icon"
+									class="h-8 w-8 shrink-0 cursor-pointer"
+									onclick={() => uiStore.toggleAuthorTags()}
+									aria-label={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
+									title={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
+									data-testid="sidebar-toggle-author-tags"
+								>
+									<LockKeyhole
+										class="h-3.5 w-3.5 shrink-0 {uiStore.showAuthorTags ? '' : 'opacity-40'}"
+										aria-hidden="true"
+									/>
+								</Button>
+							</Tooltip.Trigger>
+							<Tooltip.Content>{uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}</Tooltip.Content>
+						</Tooltip.Root>
+
+						<!-- 4. Hidden challenges toggle (authors/admins only, eye icon only) -->
+						<Tooltip.Root>
+							<Tooltip.Trigger>
+								<Button
+									variant={showHidden ? 'ghost' : 'secondary'}
+									size="icon"
+									class="h-8 w-8 shrink-0 cursor-pointer"
+									onclick={() => (showHidden = !showHidden)}
+									aria-label={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
+									title={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
+									data-testid="sidebar-toggle-hidden-challenges"
+								>
+									{#if showHidden}
+										<Eye class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+									{:else}
+										<EyeOff class="h-3.5 w-3.5 shrink-0 text-zinc-600 dark:text-zinc-300" aria-hidden="true" />
+									{/if}
+								</Button>
+							</Tooltip.Trigger>
+							<Tooltip.Content>{showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}</Tooltip.Content>
+						</Tooltip.Root>
+					{/if}
+				</div>
 			</div>
-			<div class="group relative">
+			<div class="group relative mt-2">
 				<Search
 					class="text-muted-foreground/30 group-focus-within:text-primary/50 absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 transition-colors"
 				/>
 				<Input
 					placeholder="Search tasks..."
 					bind:value={search}
-					class="bg-muted/30 focus-visible:ring-primary/20 h-9 rounded-lg border-none pl-9 text-xs shadow-inner"
+					class="bg-muted/30 focus-visible:ring-primary/20 h-8 rounded-lg border-none pl-9 text-xs shadow-inner"
 				/>
 			</div>
 		</div>
 
 		<div class="custom-scrollbar flex-1 overflow-y-auto scroll-smooth">
-			<div class="space-y-2 p-3">
+			<div class="space-y-1 p-2">
 				{#each filteredGrouped as [category, items]}
 					{@const isCollapsed = uiStore.isCategoryCollapsed(category)}
 					<div class="space-y-1">
@@ -429,12 +483,12 @@
 				<div class="bg-background/4 px-8">
 					<div class="border-border/12 flex justify-center border-b pb-4 pt-4">
 						<div
-							class="bg-muted text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1"
+							class="bg-muted/40 text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1 backdrop-blur-sm"
 						>
 							<button
 								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 								'details'
-									? 'bg-background text-foreground shadow-sm'
+									? 'bg-background/45 text-foreground shadow-sm backdrop-blur-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
 								onclick={() => (activeTab = 'details')}
 							>
@@ -444,7 +498,7 @@
 							<button
 								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 								'solves'
-									? 'bg-background text-foreground shadow-sm'
+									? 'bg-background/45 text-foreground shadow-sm backdrop-blur-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
 								onclick={() => (activeTab = 'solves')}
 							>
@@ -531,10 +585,10 @@
 											<div class="bg-border h-px flex-1"></div>
 										</h3>
 										<div
-											class="bg-muted/20 flex items-center justify-between gap-4 rounded-xl border border-dashed p-5 font-mono text-sm"
+											class="bg-muted/20 flex items-center justify-between gap-4 rounded-xl border border-dashed border-border p-5 font-mono text-sm"
 										>
 											<code
-												class="bg-background/38 overflow-x-auto whitespace-nowrap rounded border px-3 py-1 text-base font-bold backdrop-blur-sm"
+												class="bg-background/38 overflow-x-auto whitespace-nowrap rounded border border-border px-3 py-1 text-base font-bold backdrop-blur-sm"
 												>{connectionString}</code
 											>
 											{#if connectionString.startsWith('http')}
@@ -578,7 +632,7 @@
 
 			<!-- Sticky flag submission footer (details tab only) -->
 			{#if activeTab === 'details'}
-				<div class="bg-background/8 shrink-0 border-t border-border/10 px-8 pb-8 pt-2 shadow-none">
+				<div class="bg-background/8 shrink-0 border-t border-border/10 px-8 pb-8 pt-4 shadow-none">
 					<div class="mx-auto max-w-4xl">
 						{#key activeChallenge.id}
 							<FlagSubmission
@@ -595,7 +649,7 @@
 			{/if}
 		{:else}
 			<div class="flex flex-1 flex-col items-center justify-center p-20 text-center">
-				<div class="bg-muted/20 mb-8 rounded-full border-2 border-dashed p-12">
+				<div class="bg-muted/20 border-border mb-8 rounded-full border-2 border-dashed p-12">
 					<Flag class="text-muted-foreground/30 h-12 w-12" />
 				</div>
 				<p class="mb-2 text-xl font-bold tracking-tight">Select a Challenge</p>
