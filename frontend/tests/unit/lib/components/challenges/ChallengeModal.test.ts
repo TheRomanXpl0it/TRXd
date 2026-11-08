@@ -24,12 +24,12 @@ vi.mock('$lib/instances', () => ({
 	stopInstance: vi.fn()
 }));
 
-function generateRandomChallenge(overrides = {}) {
+function createTestChallenge(overrides = {}) {
 	return {
-		id: Math.floor(Math.random() * 10000),
-		name: `Challenge ${Math.floor(Math.random() * 100)}`,
+		id: 42,
+		name: 'Challenge 42',
 		description: 'This is a test challenge description',
-		points: Math.floor(Math.random() * 500) + 50,
+		points: 100,
 		tags: ['web', 'crypto'],
 		difficulty: 'medium',
 		solves: 0,
@@ -59,7 +59,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('renders challenge name and description', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			name: 'Test Challenge',
 			description: 'Test description here'
 		});
@@ -76,7 +76,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('displays all tags', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			tags: ['web', 'pwn', 'forensics']
 		});
 
@@ -93,7 +93,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('shows blood icon for unsolved challenges', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			solves: 0
 		});
 
@@ -108,7 +108,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('shows solves count as clickable button when solves > 0', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			solves: 5
 		});
 
@@ -124,7 +124,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('opens the solves tab when solves button is clicked', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			solves: 3
 		});
 		const user = userEvent.setup();
@@ -143,7 +143,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('displays challenge authors', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			authors: ['Alice', 'Bob', 'Charlie']
 		});
 
@@ -158,7 +158,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('shows admin controls when isAdmin is true', async () => {
-		const challenge = generateRandomChallenge();
+		const challenge = createTestChallenge();
 
 		renderWithProviders(ChallengeModal, {
 			props: {
@@ -173,7 +173,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('shows an edit link near the title when editing is allowed', async () => {
-		const challenge = generateRandomChallenge({ id: 42, name: 'Editable Challenge' });
+		const challenge = createTestChallenge({ id: 42, name: 'Editable Challenge' });
 
 		renderWithProviders(ChallengeModal, {
 			props: {
@@ -188,7 +188,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('hides admin controls when isAdmin is false', () => {
-		const challenge = generateRandomChallenge();
+		const challenge = createTestChallenge();
 
 		renderWithProviders(ChallengeModal, {
 			props: {
@@ -203,7 +203,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('calls onEdit when edit button is clicked', async () => {
-		const challenge = generateRandomChallenge();
+		const challenge = createTestChallenge();
 		const onEdit = vi.fn();
 		const user = userEvent.setup();
 
@@ -223,7 +223,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('calls onDelete when delete button is clicked', async () => {
-		const challenge = generateRandomChallenge();
+		const challenge = createTestChallenge();
 		const onDelete = vi.fn();
 		const user = userEvent.setup();
 
@@ -243,7 +243,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('displays attachments section when attachments exist', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			attachments: ['/files/challenge1.zip', '/files/challenge2.txt']
 		});
 
@@ -260,7 +260,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('does not display attachments section when no attachments', () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			attachments: []
 		});
 
@@ -275,7 +275,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('attachment links have correct attributes', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			attachments: ['/files/test.zip']
 		});
 
@@ -293,7 +293,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('shows connection string for non-instance challenges with host', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			instance: false,
 			host: 'ctf.example.com',
 			port: 1337
@@ -311,7 +311,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('copies connection string to clipboard when clicked', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			instance: false,
 			host: 'ctf.example.com',
 			port: 8080
@@ -343,7 +343,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('does not show connection section for instance challenges', () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			instance: true,
 			host: 'ctf.example.com',
 			port: 1337
@@ -363,7 +363,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('handles connection string without port', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			instance: false,
 			host: 'ctf.example.com',
 			port: null
@@ -380,7 +380,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('handles clipboard copy failure gracefully', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			instance: false,
 			host: 'ctf.example.com',
 			port: 1337
@@ -411,7 +411,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('uses singular "solve" for solves count of 1', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			solves: 1
 		});
 
@@ -426,7 +426,7 @@ describe('ChallengeModal Component', () => {
 	});
 
 	it('uses plural "solves" for solves count > 1', async () => {
-		const challenge = generateRandomChallenge({
+		const challenge = createTestChallenge({
 			solves: 10
 		});
 

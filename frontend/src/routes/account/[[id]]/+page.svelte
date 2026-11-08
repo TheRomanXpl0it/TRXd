@@ -34,12 +34,13 @@
 
 	// Derive currentUserId from params/user
 	const currentUserId = $derived.by(() => {
-		if (!authState.ready || !authState.user) return null;
+		if (!authState.ready) return null;
 
 		const routeKey = normalizeKey($page.params.id);
 		if (routeKey) return validateId(routeKey);
 
 		// Fallback to own profile
+		if (!authState.user) return null;
 		const fallbackKey = authState.userMode ? authState.user.team_id : authState.user.id;
 
 		return fallbackKey ? validateId(String(fallbackKey)) : null;

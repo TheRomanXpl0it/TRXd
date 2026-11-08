@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import RadarChart from '$lib/components/RadarChart.svelte';
 
 describe('RadarChart', () => {
-	it("renders the placeholder message when competition hasn't started (no totalChallenges)", () => {
+	it('renders the placeholder message when no category data available', () => {
 		renderWithProviders(RadarChart, {
 			props: {
 				solves: [],
@@ -12,7 +12,7 @@ describe('RadarChart', () => {
 			}
 		});
 
-		expect(screen.getByText("The competition hasn't started yet")).toBeInTheDocument();
+		expect(screen.getByText('No category solve data available')).toBeInTheDocument();
 	});
 
 	it('prepares to render the chart when totalChallenges are provided', () => {
@@ -26,7 +26,7 @@ describe('RadarChart', () => {
 			}
 		});
 
-		expect(screen.queryByText("The competition hasn't started yet")).not.toBeInTheDocument();
+		expect(screen.queryByText('No category solve data available')).not.toBeInTheDocument();
 		const chartDiv = container.querySelector('div.w-full');
 		expect(chartDiv).toBeDefined();
 	});

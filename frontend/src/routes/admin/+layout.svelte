@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { authState } from '$lib/stores/auth';
-	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import NotFound from '$lib/components/NotFound.svelte';

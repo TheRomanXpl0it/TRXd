@@ -9,7 +9,6 @@
 		Settings,
 		Users,
 		LayoutDashboard,
-		ChevronDown,
 		Menu
 	} from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -145,6 +144,7 @@
 								<Button
 									variant="ghost"
 									{...props}
+									aria-label={user.name || 'User profile'}
 									class="group relative flex h-14 w-auto items-center justify-end rounded-none hover:rounded-none border border-transparent px-2 transition-all active:scale-[0.98] sm:h-20 sm:justify-between sm:px-4 lg:w-60 lg:px-5"
 								>
 									<div class="flex items-center gap-2 sm:gap-4">

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import SidebarChallengeView from '../../../src/lib/components/challenges/SidebarChallengeView.svelte';
+import SidebarChallengeView from '$lib/components/challenges/SidebarChallengeView.svelte';
 import { uiStore } from '$lib/stores/ui.svelte';
 import { authState } from '$lib/stores/auth';
 

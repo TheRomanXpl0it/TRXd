@@ -13,7 +13,6 @@
 		Info,
 		Trophy,
 		Users,
-		Monitor,
 		Clock,
 		Eye,
 		EyeOff,
@@ -127,12 +126,6 @@
 			loadingSolves = false;
 		}
 	}
-
-	$effect(() => {
-		if (activeChallenge && activeTab === 'solves') {
-			loadSolves();
-		}
-	});
 
 	$effect(() => {
 		if (activeChallenge) {

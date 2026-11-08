@@ -8,7 +8,6 @@
 	import { page as pageStore } from '$app/stores';
 	import ErrorMessage from '$lib/components/ui/error-message.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
-	import countries from '$lib/data/countries.json';
 	import EmptyState from '$lib/components/ui/empty-state.svelte';
 	import { UserCircle, Globe } from '@lucide/svelte';
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
@@ -16,6 +15,7 @@
 	import { getCountryByIso3 } from '$lib/utils/countries';
 
 	import { authState } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 
 	let perPage = $state(20);
 
@@ -45,51 +45,9 @@
 	const loading = $derived(usersQuery.isLoading);
 	const error = $derived(usersQuery.error?.message ?? null);
 
-	// Helper to convert ISO3 to ISO2 for flag icons
-	function getCountryIso2(iso3: string): string | null {
-		const country = (countries as any[]).find((c) => c.iso3?.toUpperCase() === iso3?.toUpperCase());
-		return country?.iso2?.toUpperCase() ?? null;
-	}
-
 	function truncateName(name: string, maxLength = 32): string {
 		if (!name || name.length <= maxLength) return name;
 		return name.slice(0, maxLength) + '...';
-	}
-
-	function getInitials(name: string): string {
-		return name
-			.split(' ')
-			.map((n) => n[0])
-			.slice(0, 2)
-			.join('')
-			.toUpperCase();
-	}
-
-	function getAvatarColor(name: string): string {
-		const colors = [
-			'bg-red-500',
-			'bg-orange-500',
-			'bg-amber-500',
-			'bg-yellow-500',
-			'bg-lime-500',
-			'bg-green-500',
-			'bg-emerald-500',
-			'bg-teal-500',
-			'bg-cyan-500',
-			'bg-sky-500',
-			'bg-blue-500',
-			'bg-indigo-500',
-			'bg-violet-500',
-			'bg-purple-500',
-			'bg-fuchsia-500',
-			'bg-pink-500',
-			'bg-rose-500'
-		];
-		let hash = 0;
-		for (let i = 0; i < name.length; i++) {
-			hash = name.charCodeAt(i) + ((hash << 5) - hash);
-		}
-		return colors[Math.abs(hash) % colors.length];
 	}
 
 	function getRoleBadgeVariant(role: string): string {
@@ -142,6 +100,14 @@
 		}, 0);
 	}
 </script>
+
+<svelte:head>
+	{#if !authState.userMode}
+		<title>404 Not Found</title>
+	{:else}
+		<title>Users - {$siteContent.brand.browserTitle}</title>
+	{/if}
+</svelte:head>
 
 <div class="mx-auto max-w-5xl space-y-6 py-8">
 	{#if error}

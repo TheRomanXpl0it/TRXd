@@ -49,7 +49,7 @@
 				href="/challenges"
 				class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-6 py-3 font-semibold transition-colors"
 			>
-				View Challenges
+				View challenges
 			</a>
 			<a
 				href={$siteContent.home.secondaryCtaHref}

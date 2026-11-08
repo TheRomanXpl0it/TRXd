@@ -6,7 +6,7 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import DateTimePicker from '$lib/components/ui/date-time-picker.svelte';
-	import { authState } from '$lib/stores/auth';
+	import { authState, loadUser } from '$lib/stores/auth';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import * as Card from '$lib/components/ui/card';
@@ -313,6 +313,7 @@
 			}
 			await Promise.all(changes.map((change) => updateConfigs(change)));
 			showSuccess('Configuration updated successfully.');
+			loadUser(true).catch(() => {});
 			await loadConfigs(); // Reload to sync state
 		} catch (e: any) {
 			showError(e, 'Failed to save configuration.');

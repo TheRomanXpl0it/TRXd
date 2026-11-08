@@ -80,7 +80,7 @@
 		</span>
 		{#if challenge.solves !== undefined}
 			<span class="text-[11px] font-medium uppercase tracking-widest text-zinc-400">
-				{challenge.solves} Solves
+				{challenge.solves} solves
 			</span>
 		{/if}
 	</div>

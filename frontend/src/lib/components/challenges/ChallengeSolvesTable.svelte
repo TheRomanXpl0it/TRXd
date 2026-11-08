@@ -1,7 +1,6 @@
 <script lang="ts">
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { Droplet, Trophy } from '@lucide/svelte';
-	import { goto } from '$app/navigation';
 	import { authState } from '$lib/stores/auth';
 	import type { Solve } from '$lib/types';
 	import EmptyState from '$lib/components/ui/empty-state.svelte';
@@ -9,12 +8,6 @@
 	let { solves = [] }: { solves?: Solve[] } = $props();
 
 	const t = (s: Solve) => new Date(s.timestamp).getTime();
-
-	function goItem(id: number | undefined, ev?: Event) {
-		if (!id) return;
-		if (ev) ev.preventDefault();
-		authState.userMode ? goto(`/account/${id}`) : goto(`/team/${id}`);
-	}
 
 	function truncateName(name: string, maxLength = 32): string {
 		if (!name || name.length <= maxLength) return name;
@@ -71,7 +64,6 @@
 						<Table.Cell class="py-2">
 							<a
 								href={authState.userMode ? '/account/' + s.id : '/team/' + s.id}
-								onclick={(e) => goItem(s.id, e)}
 								class="cursor-pointer font-medium hover:underline"
 							>
 								{truncateName(s.name)}

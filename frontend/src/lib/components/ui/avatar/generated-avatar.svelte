@@ -1,9 +1,15 @@
+<script module lang="ts">
+	let avatarCounter = 0;
+</script>
+
 <script lang="ts">
 	let {
 		seed,
 		size = 120,
 		class: className = ''
 	} = $props<{ seed: string; size?: number; class?: string }>();
+
+	const uid = `av-${++avatarCounter}`;
 
 	// --- 1. Deterministic Randomness ---
 	function cyrb128(input: any) {
@@ -143,7 +149,7 @@
 		return {
 			palette,
 			layers,
-			uniqueId: `av-${seedNum}`
+			uniqueId: uid
 		};
 	});
 </script>
@@ -158,13 +164,15 @@
 		.bg};"
 >
 	<defs>
-		<filter id="{config.uniqueId}-paper">
-			<feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise" />
-			<feDiffuseLighting in="noise" lighting-color="white" surfaceScale="1">
-				<feDistantLight azimuth="45" elevation="60" />
-			</feDiffuseLighting>
-			<feComposite operator="in" in2="SourceGraphic" />
-		</filter>
+		{#if size >= 64}
+			<filter id="{config.uniqueId}-paper">
+				<feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise" />
+				<feDiffuseLighting in="noise" lighting-color="white" surfaceScale="1">
+					<feDistantLight azimuth="45" elevation="60" />
+				</feDiffuseLighting>
+				<feComposite operator="in" in2="SourceGraphic" />
+			</filter>
+		{/if}
 
 		<filter id="{config.uniqueId}-shadow" x="-50%" y="-50%" width="200%" height="200%">
 			<feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000" flood-opacity="0.25" />
@@ -214,13 +222,15 @@
 			</g>
 		{/each}
 
-		<rect
-			width="100"
-			height="100"
-			filter="url(#{config.uniqueId}-paper)"
-			opacity="0.4"
-			style="mix-blend-mode: soft-light;"
-		/>
+		{#if size >= 64}
+			<rect
+				width="100"
+				height="100"
+				filter="url(#{config.uniqueId}-paper)"
+				opacity="0.4"
+				style="mix-blend-mode: soft-light;"
+			/>
+		{/if}
 
 		<circle
 			cx="50"

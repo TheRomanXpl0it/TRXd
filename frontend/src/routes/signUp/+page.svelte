@@ -153,6 +153,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Sign up - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
+
 <div class="flex min-h-[80vh] items-center justify-center px-4 py-12">
 	<Card.Root
 		class="bg-card/50 mx-auto w-full max-w-md border-0 shadow-xl backdrop-blur-sm sm:max-w-[450px]"

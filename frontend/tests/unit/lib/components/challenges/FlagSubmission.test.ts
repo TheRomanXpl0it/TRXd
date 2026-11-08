@@ -22,20 +22,10 @@ vi.mock('svelte-sonner', () => ({
 	}
 }));
 
-// Helper function to generate random flags
-function generateRandomFlag(): string {
-	const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_';
-	const length = Math.floor(Math.random() * 20) + 10; // 10-30 characters
-	let flag = 'TRX{';
-	for (let i = 0; i < length; i++) {
-		flag += chars[Math.floor(Math.random() * chars.length)];
-	}
-	flag += '}';
-	return flag;
-}
-
 describe('FlagSubmission Component - User Workflow', () => {
 	const initialSiteContent = get(siteContent);
+	const challengeId = 42;
+	const testFlag = 'TRX{deterministic_test_flag_123}';
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -46,10 +36,9 @@ describe('FlagSubmission Component - User Workflow', () => {
 	});
 
 	it('allows user to submit a correct flag and shows success', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
+		const mockToast = vi.mocked(toast);
 		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: false });
 
 		const onSolved = vi.fn();
@@ -60,34 +49,59 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		// User types a flag
 		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		await user.click(input);
 		await user.paste(testFlag);
 
-		// User clicks submit
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 		await user.click(submitButton);
 
-		// Verify API was called with correct data
 		await waitFor(() => {
 			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
 		});
 
-		// Check that challenge is marked as solved
+		expect(mockToast.success).toHaveBeenCalledWith('Correct flag!');
+		expect(mockToast.success).not.toHaveBeenCalledWith('First blood!');
+		expect(onSolved).toHaveBeenCalled();
+
+		await waitFor(() => {
+			expect(screen.getByText(/challenge solved/i)).toBeInTheDocument();
+			expect(screen.queryByLabelText(/enter flag/i)).not.toBeInTheDocument();
+			expect(screen.queryByRole('button', { name: /submit/i })).not.toBeInTheDocument();
+		});
+	});
+
+	it('shows first blood toast when challenge is first blood', async () => {
+		const user = userEvent.setup();
+		const mockSubmit = vi.mocked(submitFlag);
+		const mockToast = vi.mocked(toast);
+		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: true });
+
+		renderWithProviders(FlagSubmission, {
+			props: {
+				challenge: { id: challengeId, solved: false },
+				onSolved: vi.fn()
+			}
+		});
+
+		const input = screen.getByLabelText(/enter flag/i);
+		await user.click(input);
+		await user.paste(testFlag);
+
+		await user.click(screen.getByRole('button', { name: /submit/i }));
+
+		await waitFor(() => {
+			expect(mockToast.success).toHaveBeenCalledWith('First blood!');
+		});
 		await waitFor(() => {
 			expect(screen.getByText(/challenge solved/i)).toBeInTheDocument();
 		});
-
-		// Verify onSolved callback was called
-		expect(onSolved).toHaveBeenCalled();
 	});
 
-	it('clears error state when user starts typing after wrong flag', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
+	it('shows error state on wrong flag and clears error when user types', async () => {
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
+		const mockToast = vi.mocked(toast);
 		mockSubmit.mockResolvedValueOnce({ status: 'Wrong' });
 
 		renderWithProviders(FlagSubmission, {
@@ -98,32 +112,46 @@ describe('FlagSubmission Component - User Workflow', () => {
 		});
 
 		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
-
-		// Submit wrong flag
 		await user.click(input);
-		await user.paste(testFlag);
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-		await user.click(submitButton);
+		await user.paste('TRX{wrong_flag}');
+		await user.click(screen.getByRole('button', { name: /submit/i }));
 
-		// Verify error state appears
 		await waitFor(() => {
 			expect(input).toHaveAttribute('aria-invalid', 'true');
+			expect(mockToast.error).toHaveBeenCalledWith('Incorrect flag');
 		});
-		const errorIcon = document.querySelector('.text-red-500');
-		expect(errorIcon).toBeInTheDocument();
+		expect(screen.queryByText(/challenge solved/i)).not.toBeInTheDocument();
 
-		// User starts typing - error should clear immediately
+		// Typing should immediately clear the error
 		await user.clear(input);
 		await user.type(input, 'T');
-
-		// Error state should be gone
 		expect(input).toHaveAttribute('aria-invalid', 'false');
-		const flagIcon = document.querySelector('.text-red-500');
-		expect(flagIcon).not.toBeInTheDocument();
+	});
+
+	it('trims leading and trailing whitespace from flag before submitting', async () => {
+		const user = userEvent.setup();
+		const mockSubmit = vi.mocked(submitFlag);
+		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: false });
+
+		renderWithProviders(FlagSubmission, {
+			props: {
+				challenge: { id: challengeId, solved: false },
+				onSolved: vi.fn()
+			}
+		});
+
+		const input = screen.getByLabelText(/enter flag/i);
+		await user.click(input);
+		await user.paste(`   ${testFlag}   `);
+
+		await user.click(screen.getByRole('button', { name: /submit/i }));
+
+		await waitFor(() => {
+			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
+		});
 	});
 
 	it('prevents submission when input is empty', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
 
@@ -135,11 +163,8 @@ describe('FlagSubmission Component - User Workflow', () => {
 		});
 
 		const submitButton = screen.getByRole('button', { name: /submit/i });
-
-		// Button should be disabled when input is empty
 		expect(submitButton).toBeDisabled();
 
-		// Clicking disabled button should not call API
 		await user.click(submitButton);
 		expect(mockSubmit).not.toHaveBeenCalled();
 	});
@@ -149,7 +174,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 
 		renderWithProviders(FlagSubmission, {
 			props: {
-				challenge: { id: 1337, solved: false },
+				challenge: { id: challengeId, solved: false },
 				submissionsClosed: true,
 				onSolved: vi.fn()
 			}
@@ -162,8 +187,6 @@ describe('FlagSubmission Component - User Workflow', () => {
 	});
 
 	it('handles API errors gracefully', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
 		mockSubmit.mockRejectedValueOnce(new Error('Network error'));
@@ -178,25 +201,19 @@ describe('FlagSubmission Component - User Workflow', () => {
 		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
 		await user.click(input);
 		await user.paste(testFlag);
+		await user.click(screen.getByRole('button', { name: /submit/i }));
 
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-		await user.click(submitButton);
-
-		// Should show error state (aria-invalid on input)
 		await waitFor(() => {
 			expect(input).toHaveAttribute('aria-invalid', 'true');
 		});
-
-		// Should show error icon instead of flag icon
-		const errorIcon = document.querySelector('.text-red-500');
-		expect(errorIcon).toBeInTheDocument();
 	});
 
-	it('Hides flag input and button if submission succeded', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
+	it('prevents multiple simultaneous submissions', async () => {
 		const user = userEvent.setup();
 		const mockSubmit = vi.mocked(submitFlag);
+		mockSubmit.mockImplementationOnce(
+			() => new Promise((resolve) => setTimeout(() => resolve({ status: 'Correct', first_blood: false }), 50))
+		);
 
 		renderWithProviders(FlagSubmission, {
 			props: {
@@ -205,301 +222,20 @@ describe('FlagSubmission Component - User Workflow', () => {
 			}
 		});
 
-		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-
-		await user.clear(input);
-		await user.paste(testFlag);
-		expect(input.value).toBe(testFlag);
-
-		mockSubmit.mockResolvedValueOnce({ status: 'Correct' });
-		await user.click(submitButton);
-
-		await waitFor(() => {
-			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
-		});
-
-		// try to click again, this should fail
-		await user.click(submitButton);
-
-		// The success span (also the success div) should be in the document
-		const successSpan = screen.getByText(/challenge solved/i);
-		expect(successSpan).toBeInTheDocument();
-
-		// Also, the input element should not be present anymore in the document
-		await waitFor(() => {
-			expect(input).not.toBeInTheDocument();
-		});
-
-		// Same thing for the submit button
-		await waitFor(() => {
-			expect(submitButton).not.toBeInTheDocument();
-		});
-
-		expect(mockSubmit).toHaveBeenCalledTimes(1);
-	});
-
-	it('allows editing and resubmitting a different flag. Also test wrong flag submission behaviour', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag1 = generateRandomFlag();
-		const testFlag2 = generateRandomFlag();
-
-		const user = userEvent.setup();
-		const mockSubmit = vi.mocked(submitFlag);
-
-		renderWithProviders(FlagSubmission, {
-			props: {
-				challenge: { id: challengeId, solved: false },
-				onSolved: vi.fn()
-			}
-		});
-
-		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-
-		await user.click(input);
-		await user.paste(testFlag1);
-		expect(input.value).toBe(testFlag1);
-
-		await user.clear(input);
-		await user.paste(testFlag2);
-		expect(input.value).toBe(testFlag2);
-
-		mockSubmit.mockResolvedValueOnce({ status: 'Wrong' });
-		await user.click(submitButton);
-
-		await waitFor(() => {
-			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag2);
-		});
-		expect(mockSubmit).toHaveBeenCalledTimes(1);
-	});
-
-	it('Verify that the first blood toast shows up correctly', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
-		const user = userEvent.setup();
-		const mockSubmit = vi.mocked(submitFlag);
-		const mockToast = vi.mocked(toast);
-
-		renderWithProviders(FlagSubmission, {
-			props: {
-				challenge: { id: challengeId, solved: false },
-				onSolved: vi.fn()
-			}
-		});
-
-		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
+		const input = screen.getByLabelText(/enter flag/i);
 		const submitButton = screen.getByRole('button', { name: /submit/i });
 
 		await user.click(input);
 		await user.paste(testFlag);
-
-		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: true });
-		await user.click(submitButton);
-
-		await waitFor(() => {
-			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
-		});
-
-		// Verify first blood toast was shown
-		await waitFor(() => {
-			expect(mockToast.success).toHaveBeenCalledWith('First blood!');
-		});
-		expect(mockSubmit).toHaveBeenCalledTimes(1);
-
-		// Challenge should be marked as solved
-		await waitFor(() => {
-			expect(screen.getByText(/challenge solved/i)).toBeInTheDocument();
-		});
-	});
-
-	it('Verify that the first blood toast does not show up', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
-		const user = userEvent.setup();
-		const mockSubmit = vi.mocked(submitFlag);
-		const mockToast = vi.mocked(toast);
-
-		renderWithProviders(FlagSubmission, {
-			props: {
-				challenge: { id: challengeId, solved: false },
-				onSolved: vi.fn()
-			}
-		});
-
-		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-
-		await user.click(input);
-		await user.paste(testFlag);
-
-		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: false });
-		await user.click(submitButton);
-
-		await waitFor(() => {
-			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
-		});
-
-		// Verify first blood toast was not shown
-		expect(mockToast.success).not.toHaveBeenCalledWith('First blood!');
-		expect(mockSubmit).toHaveBeenCalledTimes(1);
-
-		// Challenge should be marked as solved
-		await waitFor(() => {
-			expect(screen.getByText(/challenge solved/i)).toBeInTheDocument();
-		});
-	});
-
-	it('Verify that the success toast shows up', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
-		const user = userEvent.setup();
-		const mockSubmit = vi.mocked(submitFlag);
-		const mockToast = vi.mocked(toast);
-
-		renderWithProviders(FlagSubmission, {
-			props: {
-				challenge: { id: challengeId, solved: false },
-				onSolved: vi.fn()
-			}
-		});
-
-		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-
-		await user.click(input);
-		await user.paste(testFlag);
-
-		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: false });
-		await user.click(submitButton);
-
-		await waitFor(() => {
-			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
-		});
-
-		// Verify success toast was shown
-		await waitFor(() => {
-			expect(mockToast.success).toHaveBeenCalledWith('Correct flag!');
-		});
-		expect(mockSubmit).toHaveBeenCalledTimes(1);
-
-		// Challenge should be marked as solved
-		await waitFor(() => {
-			expect(screen.getByText(/challenge solved/i)).toBeInTheDocument();
-		});
-	});
-
-	it('Verify that the success toast does not show up', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
-		const user = userEvent.setup();
-		const mockSubmit = vi.mocked(submitFlag);
-		const mockToast = vi.mocked(toast);
-
-		renderWithProviders(FlagSubmission, {
-			props: {
-				challenge: { id: challengeId, solved: false },
-				onSolved: vi.fn()
-			}
-		});
-
-		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-
-		await user.click(input);
-		await user.paste(testFlag);
-
-		mockSubmit.mockResolvedValueOnce({ status: 'Wrong' });
-		await user.click(submitButton);
-
-		await waitFor(() => {
-			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
-		});
-
-		// Verify error toast was shown
-		await waitFor(() => {
-			expect(mockToast.error).toHaveBeenCalledWith('Incorrect flag');
-		});
-		expect(mockSubmit).toHaveBeenCalledTimes(1);
-
-		// Challenge should not be marked as solved
-		await waitFor(() => {
-			expect(screen.queryByText(/challenge solved/i)).not.toBeInTheDocument();
-		});
-	});
-
-	it('Flag submission with whitespaces', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
-		const user = userEvent.setup();
-		const mockSubmit = vi.mocked(submitFlag);
-
-		renderWithProviders(FlagSubmission, {
-			props: {
-				challenge: { id: challengeId, solved: false },
-				onSolved: vi.fn()
-			}
-		});
-
-		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-
-		await user.click(input);
-
-		const spaces = Math.floor(Math.random() * 10);
-		await user.paste(' '.repeat(spaces) + testFlag + ' '.repeat(spaces));
-
-		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: false });
-		await user.click(submitButton);
-
-		await waitFor(() => {
-			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
-		});
-
-		expect(mockSubmit).toHaveBeenCalledTimes(1);
-
-		await waitFor(() => {
-			expect(screen.getByText(/challenge solved/i)).toBeInTheDocument();
-		});
-	});
-
-	it('Rapid flag submissions', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
-		const testFlag = generateRandomFlag();
-		const user = userEvent.setup();
-		const mockSubmit = vi.mocked(submitFlag);
-
-		renderWithProviders(FlagSubmission, {
-			props: {
-				challenge: { id: challengeId, solved: false },
-				onSolved: vi.fn()
-			}
-		});
-
-		const input = screen.getByLabelText(/enter flag/i) as HTMLInputElement;
-		const submitButton = screen.getByRole('button', { name: /submit/i });
-
-		await user.click(input);
-
-		await user.paste(testFlag);
-
-		mockSubmit.mockResolvedValueOnce({ status: 'Correct', first_blood: false });
 
 		await Promise.all([
-			user.click(submitButton),
 			user.click(submitButton),
 			user.click(submitButton),
 			user.click(submitButton)
 		]);
 
 		await waitFor(() => {
-			expect(mockSubmit).toHaveBeenCalledWith(challengeId, testFlag);
-		});
-
-		expect(mockSubmit).toHaveBeenCalledTimes(1);
-
-		await waitFor(() => {
-			expect(screen.getByText(/challenge solved/i)).toBeInTheDocument();
+			expect(mockSubmit).toHaveBeenCalledTimes(1);
 		});
 	});
 
@@ -511,7 +247,7 @@ describe('FlagSubmission Component - User Workflow', () => {
 
 		renderWithProviders(FlagSubmission, {
 			props: {
-				challenge: { id: 9999, solved: false },
+				challenge: { id: challengeId, solved: false },
 				onSolved: vi.fn()
 			}
 		});

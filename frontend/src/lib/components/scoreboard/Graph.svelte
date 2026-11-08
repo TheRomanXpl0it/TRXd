@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { mode } from 'mode-watcher';
 
 	interface Props {
 		data?: any[];
@@ -54,7 +53,6 @@
 	let containerWidth = $state(1000);
 	let hovered = $state<HoverState | null>(null);
 
-	const isDark = $derived(mode.current === 'dark');
 	const endLimitMs = $derived(toDate(timeMax)?.getTime() ?? Infinity);
 	const chartHeightSetting = $derived(compact ? 280 : 320);
 	const chartTop = $derived(compact ? 10 : 14);
@@ -344,8 +342,6 @@
 			return;
 		}
 
-		const targetTime =
-			timeDomain.start.getTime() + ((x - chartLeft) / chartWidth) * timeDomain.span;
 		const source =
 			highlightedTeam === null
 				? flatChartData
@@ -353,20 +349,26 @@
 
 		let point: ChartPoint | null = null;
 		let bestDistance = Infinity;
+		let bestX = 0;
+		let bestY = 0;
 
 		for (const candidate of source) {
-			const distance = Math.abs(candidate.date.getTime() - targetTime);
+			const px = clamp(xFor(candidate.date), chartLeft, chartRight);
+			const py = yFor(candidate.value);
+			const distance = Math.hypot(x - px, y - py);
 			if (distance < bestDistance) {
 				bestDistance = distance;
 				point = candidate;
+				bestX = px;
+				bestY = py;
 			}
 		}
 
 		hovered = point
 			? {
 					point,
-					x: clamp(xFor(point.date), chartLeft, chartRight),
-					y: yFor(point.value),
+					x: bestX,
+					y: bestY,
 					cursorX: x,
 					cursorY: y
 				}
@@ -385,8 +387,7 @@
 		style={height ? `height: ${height}` : `height: ${compact ? '280px' : '320px'}`}
 	>
 		{#if renderedSeries.length > 0}
-			{#key isDark}
-				<svg
+			<svg
 					class="h-full w-full select-none"
 					viewBox={`0 0 ${containerWidth} ${chartHeightSetting}`}
 					role="img"
@@ -485,7 +486,6 @@
 						</div>
 					</div>
 				{/if}
-			{/key}
 		{:else}
 			<div
 				class="text-muted-foreground flex h-full items-center justify-center font-mono text-sm uppercase tracking-widest"

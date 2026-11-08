@@ -15,20 +15,22 @@ describe('AccountScoreboard', () => {
 
 		await tick();
 
-		// Clicking headers does not remove rows
+		// Initially sorted by timestamp desc: X (newer) before Y (older)
+		let rows = screen.getAllByRole('row');
+		expect(rows[1]).toHaveTextContent('X');
+		expect(rows[2]).toHaveTextContent('Y');
+
+		// Click points header -> sorts asc by points (X: 50, Y: 150)
 		const pointsHeader = screen.getByText(/points/i);
 		await fireEvent.click(pointsHeader);
 		await tick();
 
-		const challengeHeader = screen.getByText(/challenge/i);
-		await fireEvent.click(challengeHeader);
+		// Click points header again -> sorts desc by points (Y: 150, X: 50)
+		await fireEvent.click(pointsHeader);
 		await tick();
 
-		const categoryHeader = screen.getByText(/category/i);
-		await fireEvent.click(categoryHeader);
-		await tick();
-
-		expect(await screen.findByText('X')).toBeInTheDocument();
-		expect(await screen.findByText('Y')).toBeInTheDocument();
+		rows = screen.getAllByRole('row');
+		expect(rows[1]).toHaveTextContent('Y');
+		expect(rows[2]).toHaveTextContent('X');
 	});
 });

@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { authState } from '$lib/stores/auth';
 	import { Button } from '$lib/components/ui/button';
-	import { Trash2, ServerIcon, RefreshCw } from '@lucide/svelte';
+	import { Trash2, RefreshCw } from '@lucide/svelte';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';

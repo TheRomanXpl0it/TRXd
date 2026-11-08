@@ -39,41 +39,43 @@
 		<p class="text-muted-foreground">Change your password to keep your account secure.</p>
 	</div>
 
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Change password</Card.Title>
-			<Card.Description>Enter and confirm your new password below.</Card.Description>
-		</Card.Header>
-		<Card.Content class="space-y-4">
-			<div class="grid gap-4 md:grid-cols-2">
-				<div class="space-y-2">
-					<Label for="new-password">New password</Label>
-					<Input
-						id="new-password"
-						type="password"
-						bind:value={newPassword}
-						placeholder="••••••••"
-					/>
+	<form onsubmit={(e) => { e.preventDefault(); handleChangePassword(); }}>
+		<Card.Root>
+			<Card.Header>
+				<Card.Title>Change password</Card.Title>
+				<Card.Description>Enter and confirm your new password below.</Card.Description>
+			</Card.Header>
+			<Card.Content class="space-y-4">
+				<div class="grid gap-4 md:grid-cols-2">
+					<div class="space-y-2">
+						<Label for="new-password">New password</Label>
+						<Input
+							id="new-password"
+							type="password"
+							bind:value={newPassword}
+							placeholder="••••••••"
+						/>
+					</div>
+					<div class="space-y-2">
+						<Label for="confirm-password">Confirm password</Label>
+						<Input
+							id="confirm-password"
+							type="password"
+							bind:value={confirmPassword}
+							placeholder="••••••••"
+						/>
+					</div>
 				</div>
-				<div class="space-y-2">
-					<Label for="confirm-password">Confirm password</Label>
-					<Input
-						id="confirm-password"
-						type="password"
-						bind:value={confirmPassword}
-						placeholder="••••••••"
-					/>
-				</div>
-			</div>
-		</Card.Content>
-		<Card.Footer>
-			<Button
-				variant="outline"
-				onclick={handleChangePassword}
-				disabled={resettingPassword || !newPassword}
-			>
-				{#if resettingPassword}Updating...{:else}Change password{/if}
-			</Button>
-		</Card.Footer>
-	</Card.Root>
+			</Card.Content>
+			<Card.Footer>
+				<Button
+					type="submit"
+					variant="outline"
+					disabled={resettingPassword || !newPassword}
+				>
+					{#if resettingPassword}Updating...{:else}Change password{/if}
+				</Button>
+			</Card.Footer>
+		</Card.Root>
+	</form>
 </div>

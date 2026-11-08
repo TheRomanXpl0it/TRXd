@@ -10,7 +10,7 @@
 	import { uiStore } from '$lib/stores/ui.svelte';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { Button } from '$lib/components/ui/button';
-	import { Trash2, Pencil, RefreshCw, UserCog, Eye, EyeOff, ChevronDown } from '@lucide/svelte';
+	import { Trash2, Pencil, RefreshCw, UserCog, EyeOff, ChevronDown } from '@lucide/svelte';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';

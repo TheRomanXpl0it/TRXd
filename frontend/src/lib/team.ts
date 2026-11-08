@@ -92,7 +92,7 @@ export async function getTeamInviteToken(): Promise<{ token: string }> {
 }
 
 export async function joinTeamWithToken(token: string): Promise<BaseResponse> {
-	return api<BaseResponse>(`/teams/join?token=${token}`);
+	return api<BaseResponse>(`/teams/join?token=${encodeURIComponent(token)}`);
 }
 
 export async function getTeamByEmail(email: string): Promise<Team[]> {

@@ -8,15 +8,27 @@ export type CountryItem = {
 	iso2: string;
 };
 
-export function getCountryItems(): CountryItem[] {
-	return (countries as Country[])
+const sortedCountryItems: CountryItem[] = (countries as Country[])
+	.filter((c) => c.iso3)
+	.map((c) => ({
+		value: c.iso3!.toUpperCase(),
+		label: c.name,
+		iso2: c.iso2.toUpperCase()
+	}))
+	.sort((a, b) => a.label.localeCompare(b.label));
+
+const countryMapByIso3 = new Map<string, CountryItem>(
+	sortedCountryItems.map((c) => [c.value, c])
+);
+
+const countryIso2MapByIso3 = new Map<string, string>(
+	(countries as Country[])
 		.filter((c) => c.iso3)
-		.map((c) => ({
-			value: c.iso3!.toUpperCase(),
-			label: c.name,
-			iso2: c.iso2.toUpperCase()
-		}))
-		.sort((a, b) => a.label.localeCompare(b.label));
+		.map((c) => [c.iso3!.toUpperCase(), c.iso2.toUpperCase()])
+);
+
+export function getCountryItems(): CountryItem[] {
+	return sortedCountryItems;
 }
 
 export function filterCountries(items: CountryItem[], search: string): CountryItem[] {
@@ -30,13 +42,11 @@ export function filterCountries(items: CountryItem[], search: string): CountryIt
 }
 
 export function getCountryByIso3(iso3: string): CountryItem | null {
-	const items = getCountryItems();
-	return items.find((c) => c.value === iso3.toUpperCase()) ?? null;
+	if (!iso3) return null;
+	return countryMapByIso3.get(iso3.toUpperCase()) ?? null;
 }
 
 export function getCountryIso2(iso3: string): string | null {
-	const country = (countries as Country[]).find(
-		(c) => c.iso3?.toUpperCase() === iso3?.toUpperCase()
-	);
-	return country?.iso2?.toUpperCase() ?? null;
+	if (!iso3) return null;
+	return countryIso2MapByIso3.get(iso3.toUpperCase()) ?? null;
 }

@@ -10,12 +10,23 @@
 	import { goto } from '$app/navigation';
 	import { authState, loadUser } from '$lib/stores/auth';
 	import { Lock } from '@lucide/svelte';
+	import { siteContent } from '$lib/site-content';
 
 	// --- State (Svelte 5 runes) ----------------------------------------------
 
 	let email = $state('');
 	let password = $state('');
 	let remember = $state(false);
+
+	$effect(() => {
+		if (typeof localStorage !== 'undefined') {
+			const saved = localStorage.getItem('trxd_remember_email');
+			if (saved) {
+				email = saved;
+				remember = true;
+			}
+		}
+	});
 
 	let loading = $state(false);
 	let errorMsg = $state<string | null>(null);
@@ -67,9 +78,22 @@
 
 			await loadUser();
 
+			if (remember && typeof localStorage !== 'undefined') {
+				localStorage.setItem('trxd_remember_email', email);
+			} else if (typeof localStorage !== 'undefined') {
+				localStorage.removeItem('trxd_remember_email');
+			}
+
 			toast.success('Welcome back!');
 
-			// Redirect based on team presence
+			const redirectParam = typeof window !== 'undefined'
+				? new URL(window.location.href).searchParams.get('redirect')
+				: null;
+			if (redirectParam && redirectParam.startsWith('/')) {
+				goto(redirectParam);
+				return;
+			}
+
 			// Redirect based on team presence or user mode
 			if (authState.userMode || authState.user?.team_id) {
 				goto('/challenges');
@@ -85,6 +109,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Sign in - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 <div class="flex min-h-[80vh] items-center justify-center px-4 py-12">
 	<Card.Root

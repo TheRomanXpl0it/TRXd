@@ -5,16 +5,13 @@
 export async function copyToClipboard(text: string): Promise<void> {
 	if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-	console.log('[Clipboard] Attempting to copy text...');
-
 	// Try the modern API first
 	if (navigator?.clipboard?.writeText && window.isSecureContext) {
 		try {
 			await navigator.clipboard.writeText(text);
-			console.log('[Clipboard] Successfully copied using navigator.clipboard');
 			return;
-		} catch (err) {
-			console.warn('[Clipboard] navigator.clipboard failed, trying fallback:', err);
+		} catch {
+			// Try fallback
 		}
 	}
 
@@ -40,13 +37,10 @@ export async function copyToClipboard(text: string): Promise<void> {
 		textArea.focus({ preventScroll: true });
 		textArea.select();
 		const successful = document.execCommand('copy');
-		if (successful) {
-			console.log('[Clipboard] Successfully copied using execCommand fallback');
-		} else {
+		if (!successful) {
 			throw new Error('document.execCommand("copy") returned false');
 		}
-	} catch (err) {
-		console.error('[Clipboard] Fallback copy failed:', err);
+	} catch {
 		throw new Error('Failed to copy to clipboard');
 	} finally {
 		document.body.removeChild(textArea);

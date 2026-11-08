@@ -43,12 +43,6 @@ vi.mock('$lib/categories', () => ({
 	getCategories: vi.fn()
 }));
 
-vi.mock('$lib/env', () => ({
-	config: {
-		startTime: null
-	}
-}));
-
 
 describe('Challenges Page', () => {
 	beforeEach(() => {

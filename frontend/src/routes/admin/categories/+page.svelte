@@ -7,6 +7,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import { toast } from 'svelte-sonner';
 	import { getCategories, createCategory, deleteCategory, updateCategory } from '$lib/categories';
+	import { useQueryClient } from '@tanstack/svelte-query';
 	import { siteContent } from '$lib/site-content';
 	import { onMount } from 'svelte';
 	import { Plus, Trash2, FolderTree, Pencil } from '@lucide/svelte';
@@ -15,6 +16,8 @@
 	let loading = $state(true);
 	let creating = $state(false);
 	let categoryName = $state('');
+
+	const queryClient = useQueryClient();
 
 	async function loadCategories() {
 		loading = true;
@@ -37,6 +40,8 @@
 			await createCategory(categoryName.trim());
 			toast.success(`Category "${categoryName}" created`);
 			categoryName = '';
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
+			queryClient.invalidateQueries({ queryKey: ['challenges'] });
 			await loadCategories();
 		} catch (err: any) {
 			toast.error(err?.message ?? 'Failed to create category');
@@ -51,6 +56,8 @@
 		try {
 			await deleteCategory(name);
 			toast.success(`Category "${name}" deleted`);
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
+			queryClient.invalidateQueries({ queryKey: ['challenges'] });
 			await loadCategories();
 		} catch (err: any) {
 			toast.error(err?.message ?? 'Failed to delete category');
@@ -64,6 +71,8 @@
 		try {
 			await updateCategory(name, newName.trim());
 			toast.success(`Category renamed to "${newName}"`);
+			queryClient.invalidateQueries({ queryKey: ['categories'] });
+			queryClient.invalidateQueries({ queryKey: ['challenges'] });
 			await loadCategories();
 		} catch (err: any) {
 			toast.error(err?.message ?? 'Failed to rename category');

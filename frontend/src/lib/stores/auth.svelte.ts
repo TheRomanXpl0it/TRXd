@@ -36,13 +36,15 @@ export async function loadUser(force = true) {
 			}
 
 			if (userfetched) {
+				if (typeof userfetched.user_mode === 'boolean') {
+					authState.userMode = userfetched.user_mode;
+				}
 				authState.emailVerification = userfetched.email_verification ?? true;
 				authState.startTime = userfetched.start_time ?? null;
 				authState.endTime = userfetched.end_time ?? null;
 			}
 
 			if (userfetched && userfetched.id) {
-				authState.userMode = userfetched.user_mode;
 				authState.user = userfetched;
 			} else {
 				authState.user = null;

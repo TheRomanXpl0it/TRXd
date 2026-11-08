@@ -55,5 +55,9 @@ describe('Admin teams page', () => {
 
 		expect(resetTeamPasswordMock).toHaveBeenCalledWith(42);
 		expect(await screen.findByText('new-secret-pass')).toBeInTheDocument();
+
+		const closeBtn = screen.getAllByRole('button', { name: /close/i })[0];
+		await fireEvent.click(closeBtn);
+		await new Promise((r) => setTimeout(r, 100));
 	});
 });

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { authState } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { 
 		User, 
@@ -10,6 +9,7 @@
 		ShieldHalf
 	} from '@lucide/svelte';
 	import { page } from '$app/state';
+	import { siteContent } from '$lib/site-content';
 
 	interface Props {
 		children?: import('svelte').Snippet;
@@ -20,7 +20,7 @@
 	const ready = $derived(authState.ready);
 	const user = $derived(authState.user);
 
-	onMount(() => {
+	$effect(() => {
 		if (ready && !user) {
 			goto('/signIn');
 		}
@@ -28,7 +28,7 @@
 
 	const items = $derived([
 		{ title: 'Account', href: '/settings/profile', icon: User },
-		...(!authState.userMode && user?.team_id ? [
+		...(!authState.userMode ? [
 			{ title: 'Team', href: '/settings/team', icon: ShieldHalf }
 		] : []),
 		{ title: 'Appearance', href: '/settings/appearance', icon: Palette }
@@ -36,6 +36,10 @@
 
 	const currentPath = $derived(page.url.pathname);
 </script>
+
+<svelte:head>
+	<title>Settings - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 {#if !ready}
 	<div class="flex h-[70vh] items-center justify-center">

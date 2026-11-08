@@ -3,7 +3,7 @@
 	import { authState } from '$lib/stores/auth';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Trash2, MessageSquareShare, RefreshCw, CheckCircle, XCircle, Droplet, Eye, EyeOff } from '@lucide/svelte';
+	import { Trash2, RefreshCw, CheckCircle, XCircle, Droplet, Eye, EyeOff } from '@lucide/svelte';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Pagination from '$lib/components/ui/pagination';

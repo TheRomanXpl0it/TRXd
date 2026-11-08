@@ -59,6 +59,26 @@ if (typeof window !== 'undefined' && !HTMLElement.prototype.hasPointerCapture) {
 	HTMLElement.prototype.releasePointerCapture = () => {};
 }
 
+// Bits UI schedules a 24ms setTimeout on body-scroll-lock cleanup that can fire after JSDOM teardown.
+const fallbackDoc = {
+	body: {
+		setAttribute: () => {},
+		style: { removeProperty: () => {} }
+	}
+};
+let activeDoc: any = typeof document !== 'undefined' ? document : fallbackDoc;
+try {
+	Object.defineProperty(globalThis, 'document', {
+		get: () => activeDoc ?? fallbackDoc,
+		set: (d) => {
+			activeDoc = d;
+		},
+		configurable: true
+	});
+} catch {
+	// ignore if cannot redefine
+}
+
 // Polyfill localStorage for Node/JSDOM test environment
 const storageMap = new Map<string, string>();
 const localStorageMock = {
@@ -87,9 +107,6 @@ try {
 }
 
 // Ensure each test starts with a clean DOM
-afterEach(async () => {
+afterEach(() => {
 	cleanup();
-	// Allow any asynchronous cleanups (like bits-ui body-scroll-lock) to complete
-	// before the JSDOM environment is torn down.
-	await new Promise((resolve) => setTimeout(resolve, 50));
 });

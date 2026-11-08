@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { Users, ArrowLeft } from '@lucide/svelte';
 	import { authState, loadUser } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 
 	$effect(() => {
 		if (authState.ready && authState.user?.team_id) {
@@ -33,7 +34,7 @@
 		try {
 			await joinTeam(joinName, joinPassword);
 			await loadUser(true);
-			toast.success('Team Joined, welcome aboard!');
+			toast.success('Team joined, welcome aboard!');
 			goto('/team');
 		} catch (err: any) {
 			joinError = err?.message ?? 'Failed to join team.';
@@ -45,7 +46,7 @@
 </script>
 
 <svelte:head>
-	<title>Join Team - TRXd</title>
+	<title>Join team | {$siteContent.brand.shortName}</title>
 </svelte:head>
 
 <div class="flex min-h-[80vh] flex-col items-center justify-center px-4 py-12">

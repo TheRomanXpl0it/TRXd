@@ -73,7 +73,7 @@
 
 	$effect(() => {
 		if (!editor || !monacoLib) return;
-		if (!value) return;
+		if (value === undefined || value === null) return;
 
 		const currentValue = editor.getValue();
 		if (currentValue !== value) {

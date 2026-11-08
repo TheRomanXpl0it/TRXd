@@ -27,10 +27,10 @@ export async function load({ url }: { url: URL }) {
 	const isGuestOnlyRoute = guestOnlyRoutes.some((r) => url.pathname.startsWith(r));
 
 	// Routes that are public for EVERYONE
-	const publicRoutes = ['/', '/home', '/scoreboard', '/teams', '/users', '/404'];
-	const isPublicRoute = publicRoutes.some((r) =>
-		r === '/' ? url.pathname === '/' : url.pathname.startsWith(r)
-	);
+	const publicRoutes = ['/', '/home', '/scoreboard', '/teams', '/users', '/404', '/join'];
+	const isPublicRoute =
+		publicRoutes.some((r) => (r === '/' ? url.pathname === '/' : url.pathname.startsWith(r))) ||
+		/^\/(team|account)\/\d+/.test(url.pathname);
 
 	// Let /admin pass through so admin/+layout.svelte can render 404 directly without crashing root load
 	if (!authState.user && !isPublicRoute && !isGuestOnlyRoute && !url.pathname.startsWith('/admin')) {

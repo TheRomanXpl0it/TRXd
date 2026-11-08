@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import DateTimePickerHarness from '../../../test/fixtures/date-time-picker-harness.svelte';
+import DateTimePickerHarness from '../../../fixtures/date-time-picker-harness.svelte';
 
 function getCalendarDay(label: string): HTMLButtonElement {
 	const day = screen

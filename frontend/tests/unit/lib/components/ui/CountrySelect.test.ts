@@ -93,6 +93,7 @@ describe('CountrySelect Component', () => {
 
         await waitFor(() => {
             expect(screen.queryByPlaceholderText('Search countries...')).not.toBeInTheDocument();
+            expect(screen.getByRole('combobox')).toHaveTextContent('ITA');
         });
     });
 });

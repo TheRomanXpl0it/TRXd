@@ -41,6 +41,22 @@ describe('Root Layout Auth Guard', () => {
 		await expect(load({ url: new URL('http://localhost/signIn') } as any)).resolves.toEqual({});
 	});
 
+	it('allows public access to specific team and account profiles for unauthenticated visitors', async () => {
+		authState.user = null;
+		await expect(load({ url: new URL('http://localhost/team/42') } as any)).resolves.toEqual({});
+		await expect(load({ url: new URL('http://localhost/account/7') } as any)).resolves.toEqual({});
+	});
+
+	it('redirects unauthenticated visitors away from /team or /account without id', async () => {
+		authState.user = null;
+		await expect(load({ url: new URL('http://localhost/team') } as any)).rejects.toSatisfy(
+			(err) => isRedirect(err) && err.location === '/signIn'
+		);
+		await expect(load({ url: new URL('http://localhost/account') } as any)).rejects.toSatisfy(
+			(err) => isRedirect(err) && err.location === '/signIn'
+		);
+	});
+
 	it('redirects logged-in users away from guest-only routes', async () => {
 		authState.user = { role: 'User' };
 		await expect(load({ url: new URL('http://localhost/signIn') } as any)).rejects.toSatisfy(

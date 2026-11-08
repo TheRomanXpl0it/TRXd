@@ -3,12 +3,17 @@
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
-	import { loadUser } from '$lib/stores/auth';
+	import { loadUser, authState } from '$lib/stores/auth';
 	import { joinTeamWithToken } from '$lib/team';
 
 	let { data } = $props();
 
 	onMount(async () => {
+		if (!authState.user) {
+			toast.info('Please sign in to accept the team invite.');
+			goto(`/signIn?redirect=${encodeURIComponent('/join?token=' + encodeURIComponent(data.token))}`);
+			return;
+		}
 		try {
 			await joinTeamWithToken(data.token);
 			toast.success('Joined team successfully!');
@@ -17,7 +22,7 @@
 		} catch (err: any) {
 			console.error('Failed to join team:', err);
 			toast.error(err?.message ?? 'Failed to join team. The link might be invalid or expired.');
-			goto('/teams');
+			goto('/team');
 		}
 	});
 </script>

@@ -17,6 +17,7 @@
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
 	import { Globe } from '@lucide/svelte';
 	import countries from '$lib/data/countries.json';
+	import { siteContent } from '$lib/site-content';
 
 	// Pre-process countries into a map for O(1) lookups
 	const countryMap = new Map(
@@ -77,6 +78,10 @@
 		return countryMap.get(iso3.toUpperCase()) ?? null;
 	}
 </script>
+
+<svelte:head>
+	<title>Scoreboard - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 <div class="relative z-10 mx-auto max-w-7xl space-y-6 py-8">
 	<!-- Compact Mode Toggle -->

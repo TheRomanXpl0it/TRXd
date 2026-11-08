@@ -8,6 +8,7 @@
 	import { toast } from 'svelte-sonner';
 	import { ShieldPlus, ArrowLeft } from '@lucide/svelte';
 	import { authState, loadUser } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 
 	$effect(() => {
 		if (authState.ready && authState.user?.team_id) {
@@ -46,7 +47,7 @@
 		try {
 			await createTeam(registerName, registerPassword);
 			await loadUser(true);
-			toast.success('Team Created successfully!');
+			toast.success('Team created successfully!');
 			goto('/team');
 		} catch (err: any) {
 			registerError = err?.message ?? 'Failed to register team.';
@@ -58,7 +59,7 @@
 </script>
 
 <svelte:head>
-	<title>Create Team - TRXd</title>
+	<title>Create team | {$siteContent.brand.shortName}</title>
 </svelte:head>
 
 <div class="flex min-h-[80vh] flex-col items-center justify-center px-4 py-12">

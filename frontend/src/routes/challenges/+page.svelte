@@ -1,27 +1,23 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
-	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { goto } from '$app/navigation';
-	import { getChallenges, deleteChallenge, groupByCategory } from '$lib/challenges';
+	import { getChallenges, groupByCategory } from '$lib/challenges';
 	import { authState } from '$lib/stores/auth';
-	import { onMount, untrack } from 'svelte';
-	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
+	import { untrack } from 'svelte';
+	import { createQuery } from '@tanstack/svelte-query';
 
 	import ChallengeFilters from '$lib/components/challenges/ChallengeFilters.svelte';
 	import ChallengeCard from '$lib/components/challenges/ChallengeCard.svelte';
 	import ChallengeModal from '$lib/components/challenges/ChallengeModal.svelte';
 	import WaitingPage from '$lib/components/challenges/WaitingPage.svelte';
-	import { Flag, Users, Trophy, ChevronDown, Search, Monitor } from '@lucide/svelte';
-	import { slide } from 'svelte/transition';
+	import { Users, ChevronDown } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
 	import type { Challenge } from '$lib/types';
 
-	import { config } from '$lib/env';
 	import SidebarChallengeView from '$lib/components/challenges/SidebarChallengeView.svelte';
 
 	import { uiStore } from '$lib/stores/ui.svelte';
-	import { copyToClipboard as copy } from '$lib/utils/clipboard';
+	import { siteContent } from '$lib/site-content';
 
 	// Use uiStore for reactive view preference
 	const challengeView = $derived(uiStore.challengeView);
@@ -44,7 +40,6 @@
 	let selectedId = $state<number | null>(null);
 	let countdownEnds: Record<string, number> = $state({});
 	let now = $state(Date.now());
-	const queryClient = useQueryClient();
 
 	let search = $state('');
 	let debouncedSearch = $state('');
@@ -117,13 +112,6 @@
 		return res;
 	});
 
-	const activeFiltersCount = $derived(filterTags?.length ?? 0);
-
-	// delete confirmation modal state
-	let confirmDeleteOpen = $state(false);
-	let deleting = $state(false);
-	let toDelete: any = $state(null);
-
 	// Update countdown ends when challenges data changes
 	$effect(() => {
 		const currentChallenges = challenges;
@@ -161,8 +149,6 @@
 		}
 	});
 
-
-
 	const grouped = $derived.by(() => groupByCategory(filteredChallenges));
 
 	function openChallenge(ch: any) {
@@ -181,15 +167,6 @@
 		}
 	});
 
-	async function copyToClipboard(text: string) {
-		try {
-			await copy(text);
-			toast.success('Copied to clipboard!');
-		} catch (err) {
-			toast.error('Failed to copy to clipboard.');
-		}
-	}
-
 	function updateCountdown(id: string | number, newCountdown: number) {
 		if (newCountdown <= 0) {
 			delete countdownEnds[id];
@@ -202,24 +179,11 @@
 		// Refetch challenges to get updated data
 		challengesQuery.refetch();
 	}
-
-	async function confirmDelete() {
-		if (!toDelete?.id) return;
-		deleting = true;
-		try {
-			await deleteChallenge(toDelete.id);
-			toast.success('Challenge deleted.');
-			confirmDeleteOpen = false;
-			openModal = false;
-			toDelete = null;
-			challengesQuery.refetch();
-		} catch (err: any) {
-			toast.error(err?.message ?? 'Failed to delete challenge.');
-		} finally {
-			deleting = false;
-		}
-	}
 </script>
+
+<svelte:head>
+	<title>Challenges - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 {#if (!upcoming || isAdmin) && challengeView !== 'sidebar'}
 	<div class="mb-10 w-full">

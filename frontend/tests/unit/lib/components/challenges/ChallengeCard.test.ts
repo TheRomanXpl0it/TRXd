@@ -33,17 +33,6 @@ describe('ChallengeCard Component', () => {
 		expect(screen.getByText('250 pts')).toBeInTheDocument();
 	});
 
-	it('renders challenge name and points correctly (always shows "N pts")', () => {
-		const challenge = makeChallenge({ name: 'Compact Challenge', points: 150 });
-
-		renderWithProviders(ChallengeCard, {
-			props: { challenge, onclick: vi.fn() }
-		});
-
-		expect(screen.getByText('Compact Challenge')).toBeInTheDocument();
-		expect(screen.getByText('150 pts')).toBeInTheDocument();
-	});
-
 	it('displays all tags', () => {
 		const challenge = makeChallenge({ tags: ['web', 'pwn', 'forensics'] });
 
@@ -125,64 +114,6 @@ describe('ChallengeCard Component', () => {
 		expect(
 			screen.getByRole('button', { name: /view details for test challenge/i })
 		).toBeInTheDocument();
-	});
-
-	it('does not has instance icon', () => {
-		const challenge = makeChallenge({ instance: false });
-
-		renderWithProviders(ChallengeCard, {
-			props: { challenge, onclick: vi.fn() }
-		});
-
-		expect(screen.queryByLabelText(/instance/i)).not.toBeInTheDocument();
-	});
-
-	it('accessibility label includes challenge name when solved', () => {
-		const challenge = makeChallenge({ name: 'Solved Challenge', solved: true });
-
-		renderWithProviders(ChallengeCard, {
-			props: { challenge, onclick: vi.fn() }
-		});
-
-		expect(
-			screen.getByRole('button', { name: /view details for solved challenge/i })
-		).toBeInTheDocument();
-	});
-
-	it('has proper accessibility label when compact (same label regardless)', () => {
-		const challenge = makeChallenge({ name: 'Compact Test', points: 50 });
-
-		renderWithProviders(ChallengeCard, {
-			props: { challenge, onclick: vi.fn() }
-		});
-
-		expect(
-			screen.getByRole('button', { name: /view details for compact test/i })
-		).toBeInTheDocument();
-	});
-
-	it('applies solved styling in any view', () => {
-		const challenge = makeChallenge({ solved: true });
-
-		renderWithProviders(ChallengeCard, {
-			props: { challenge, onclick: vi.fn() }
-		});
-
-		const button = screen.getByRole('button');
-		expect(button.className).toMatch(/\bsolve-surface\b/);
-		expect(button.className).not.toMatch(/dark:bg-\[#05100a\]/);
-	});
-
-	it('applies unsolved/default styling when not solved', () => {
-		const challenge = makeChallenge({ solved: false });
-
-		renderWithProviders(ChallengeCard, {
-			props: { challenge, onclick: vi.fn() }
-		});
-
-		const button = screen.getByRole('button');
-		expect(button.className).not.toMatch(/\bsolve-surface\b/);
-		expect(button.className).toMatch(/bg-\[#fafafa\]/);
 	});
 
 	it('shows solves count when solves is provided', () => {

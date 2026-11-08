@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
-	import { Users, Pencil, Award, LayoutGrid, List, Mail, Medal, Calendar } from '@lucide/svelte';
+	import { Users, Pencil, LayoutGrid, List, Mail, Medal, Calendar } from '@lucide/svelte';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 
 	import SolveListTable from '$lib/components/team/TeamScoreboard.svelte';
@@ -14,8 +14,6 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import CountrySelect from '$lib/components/ui/country-select.svelte';
-	import { toast } from 'svelte-sonner';
-	import { Link } from '@lucide/svelte';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
 	import RadarChart from '$lib/components/RadarChart.svelte';

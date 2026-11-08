@@ -49,7 +49,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('starts instance when clicking Start Instance button', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockStart = vi.mocked(startInstance);
 		const mockToast = vi.mocked(toast);
@@ -97,7 +97,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('stops instance when clicking stop button', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockStop = vi.mocked(stopInstance);
 		const mockToast = vi.mocked(toast);
@@ -139,7 +139,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('copies connection string to clipboard when clicking running instance', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockToast = vi.mocked(toast);
 
@@ -181,7 +181,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('shows error toast when instance creation fails', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockStart = vi.mocked(startInstance);
 		const mockToast = vi.mocked(toast);
@@ -211,7 +211,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('shows error toast when instance stop fails', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockStop = vi.mocked(stopInstance);
 		const mockToast = vi.mocked(toast);
@@ -244,7 +244,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('disables start button during instance creation', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockStart = vi.mocked(startInstance);
 
@@ -277,7 +277,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('disables stop button during instance destruction', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockStop = vi.mocked(stopInstance);
 
@@ -312,7 +312,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('prevents multiple simultaneous instance creation requests', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockStart = vi.mocked(startInstance);
 
@@ -343,7 +343,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('formats countdown timer correctly for hours', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'test.com',
@@ -363,7 +363,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('formats countdown timer correctly for minutes', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'test.com',
@@ -383,7 +383,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('formats countdown timer correctly for seconds only', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'test.com',
@@ -403,7 +403,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('displays connection string with port', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'ctf.example.com',
@@ -423,7 +423,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('displays connection string without port when port is null', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'ctf.example.com',
@@ -443,7 +443,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('displays ssl command for hash-domain tcp instances without a port', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			conn_type: 'TCP',
@@ -464,7 +464,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('uses the flat challenge hash-domain field when instance_hash_domain is absent', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			conn_type: 'TCP',
@@ -502,7 +502,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('handles clipboard copy failure gracefully', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const user = userEvent.setup();
 		const mockToast = vi.mocked(toast);
 
@@ -535,7 +535,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('shows start button when countdown is 0', () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = { id: challengeId, instance_host: null, instance_port: null, timeout: null };
 
 		renderWithProviders(InstanceControls, {
@@ -554,7 +554,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('shows running instance button when countdown is greater than 0', () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'ctf.example.com',
@@ -578,7 +578,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('updates displayed countdown when prop changes', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'ctf.example.com',
@@ -609,7 +609,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('switches to start button when countdown reaches 0', async () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'ctf.example.com',
@@ -648,7 +648,7 @@ describe('InstanceControls Component', () => {
 	});
 
 	it('handles negative countdown values as 0', () => {
-		const challengeId = Math.floor(Math.random() * 10000);
+		const challengeId = 42;
 		const challenge = {
 			id: challengeId,
 			instance_host: 'ctf.example.com',

@@ -43,7 +43,7 @@
 		inviteLoading = true;
 		try {
 			const { token } = await getTeamInviteToken();
-			const url = `${window.location.origin}/join?token=${token}`;
+			const url = `${window.location.origin}/join?token=${encodeURIComponent(token)}`;
 			await copyToClipboard(url);
 			inviteCopied = true;
 			toast.success('Invite link copied to clipboard!');
@@ -121,37 +121,39 @@
 		</Card.Root>
 
 		<!-- Security Card -->
-		<Card.Root>
-			<Card.Header>
-				<Card.Title>Security</Card.Title>
-				<Card.Description>Update the team password</Card.Description>
-			</Card.Header>
-			<Card.Content class="space-y-4">
-				<div class="grid gap-4 md:grid-cols-2">
-					<div class="space-y-2">
-						<Label for="new-token">New team password</Label>
-						<Input id="new-token" type="password" bind:value={newPassword} placeholder="••••••••" />
+		<form onsubmit={(e) => { e.preventDefault(); handleChangePassword(); }}>
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Security</Card.Title>
+					<Card.Description>Update the team password</Card.Description>
+				</Card.Header>
+				<Card.Content class="space-y-4">
+					<div class="grid gap-4 md:grid-cols-2">
+						<div class="space-y-2">
+							<Label for="new-token">New team password</Label>
+							<Input id="new-token" type="password" bind:value={newPassword} placeholder="••••••••" />
+						</div>
+						<div class="space-y-2">
+							<Label for="confirm-token">Confirm new password</Label>
+							<Input
+								id="confirm-token"
+								type="password"
+								bind:value={confirmPassword}
+								placeholder="••••••••"
+							/>
+						</div>
 					</div>
-					<div class="space-y-2">
-						<Label for="confirm-token">Confirm new password</Label>
-						<Input
-							id="confirm-token"
-							type="password"
-							bind:value={confirmPassword}
-							placeholder="••••••••"
-						/>
-					</div>
-				</div>
-			</Card.Content>
-			<Card.Footer>
-				<Button
-					variant="outline"
-					onclick={handleChangePassword}
-					disabled={resettingPassword || !newPassword}
-				>
-					{#if resettingPassword}Updating...{:else}Update team password{/if}
-				</Button>
-			</Card.Footer>
-		</Card.Root>
+				</Card.Content>
+				<Card.Footer>
+					<Button
+						type="submit"
+						variant="outline"
+						disabled={resettingPassword || !newPassword}
+					>
+						{#if resettingPassword}Updating...{:else}Update team password{/if}
+					</Button>
+				</Card.Footer>
+			</Card.Root>
+		</form>
 	{/if}
 </div>

@@ -105,7 +105,7 @@
 </script>
 
 <div class="flex min-h-[350px] w-full items-center justify-center p-4">
-	{#if chartItems.length > 0}
+	{#if chartItems.length >= 3}
 		<div class="relative h-[350px] w-full max-w-[390px]">
 			<svg
 				class="h-full w-full overflow-visible"
@@ -193,9 +193,23 @@
 				</div>
 			{/if}
 		</div>
+	{:else if chartItems.length > 0}
+		<div class="flex w-full max-w-sm flex-col gap-4">
+			{#each chartItems as item}
+				<div class="space-y-1.5">
+					<div class="flex justify-between text-xs font-semibold">
+						<span>{item.label}</span>
+						<span class="font-mono text-muted-foreground">{item.value}%</span>
+					</div>
+					<div class="h-2 w-full rounded-full bg-muted overflow-hidden">
+						<div class="h-full bg-primary transition-all duration-300" style="width: {item.value}%"></div>
+					</div>
+				</div>
+			{/each}
+		</div>
 	{:else}
 		<div class="text-muted-foreground font-mono text-xs uppercase tracking-widest opacity-50">
-			The competition hasn't started yet
+			No category solve data available
 		</div>
 	{/if}
 </div>
