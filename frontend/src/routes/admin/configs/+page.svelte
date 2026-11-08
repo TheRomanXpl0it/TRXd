@@ -93,11 +93,10 @@
 	function getCategoryLabel(category: Config['category']): string {
 		const value = String(category ?? '').trim();
 		if (!value) return 'General';
-		return value
-			.split(/[-_\s]+/)
-			.filter(Boolean)
-			.map((chunk) => chunk.charAt(0).toUpperCase() + chunk.slice(1))
-			.join(' ');
+		const words = value.split(/[-_\s]+/).filter(Boolean);
+		if (words.length === 0) return 'General';
+		const str = words.join(' ').toLowerCase();
+		return str.charAt(0).toUpperCase() + str.slice(1);
 	}
 
 	function getCategoryKey(category: Config['category']): string {

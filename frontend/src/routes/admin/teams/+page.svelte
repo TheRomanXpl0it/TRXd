@@ -249,7 +249,7 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<ShieldAlert class="text-destructive h-5 w-5" />
-				Regenerate Join Password
+				Regenerate join password
 			</Dialog.Title>
 			<Dialog.Description>
 				Create a new join password for <span class="text-foreground font-bold"
@@ -273,7 +273,7 @@
 				{#if resetting}
 					<Spinner class="mr-2 h-4 w-4" />
 				{/if}
-				{generatedPassword ? 'Regenerate Password' : 'Generate Password'}
+				{generatedPassword ? 'Regenerate password' : 'Generate password'}
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

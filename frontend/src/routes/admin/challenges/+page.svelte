@@ -110,7 +110,7 @@
 					{:else}
 						<EyeOff class="h-4 w-4" />
 					{/if}
-					Toggle Hidden ({selectedIds.size})
+					Toggle hidden ({selectedIds.size})
 				</Button>
 			{/if}
 
@@ -173,7 +173,7 @@
 												>
 												<Table.Head
 													class="text-muted-foreground/70 h-8 py-1 text-[10px] font-bold uppercase tracking-wider"
-													>Author Tags</Table.Head
+													>Author tags</Table.Head
 												>
 												<Table.Head
 													class="text-muted-foreground/70 h-8 py-1 text-[10px] font-bold uppercase tracking-wider"

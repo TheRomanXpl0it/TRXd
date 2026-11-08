@@ -280,17 +280,17 @@
 </script>
 
 <div class="max-w-4xl space-y-8 pb-20">
-	<div class="flex items-center justify-between">
+	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div class="flex items-center gap-4">
 			<div class="bg-primary/10 text-primary rounded-full p-3">
 				<Edit class="h-8 w-8" />
 			</div>
 			<div>
-				<h1 class="text-3xl font-bold tracking-tight">Edit challenge</h1>
-				<p class="text-muted-foreground mt-1">Update challenge settings</p>
+				<h1 class="text-2xl sm:text-3xl font-bold tracking-tight">Edit challenge</h1>
+				<p class="text-muted-foreground mt-1 text-sm">Update challenge settings</p>
 			</div>
 		</div>
-		<Button size="lg" onclick={handleSubmit} disabled={loading} class="gap-2 px-8">
+		<Button size="lg" onclick={handleSubmit} disabled={loading} class="w-full sm:w-auto gap-2 px-8">
 			{#if loading}
 				<Spinner class="h-4 w-4" />
 			{:else}
@@ -300,48 +300,48 @@
 		</Button>
 	</div>
 
-	<div class="flex justify-center">
+	<div class="flex w-full justify-start sm:justify-center overflow-x-auto pb-1">
 		<div
-			class="bg-muted text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1"
+			class="bg-muted text-muted-foreground inline-flex h-9 sm:h-10 shrink-0 items-center gap-1 rounded-lg p-1"
 		>
 			<button
-				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
+				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 sm:px-6 py-1.5 text-xs sm:text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 				'info'
-					? 'bg-background text-foreground px-6 py-1.5 shadow-sm'
+					? 'bg-background text-foreground shadow-sm'
 					: 'hover:bg-background/50 hover:text-foreground'}"
 				onclick={() => (activeTab = 'info')}
 			>
-				<Info class="mr-2 h-4 w-4" />
+				<Info class="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
 				Metadata
 			</button>
 			<button
-				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
+				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 sm:px-6 py-1.5 text-xs sm:text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 				'flags'
 					? 'bg-background text-foreground shadow-sm'
 					: 'hover:bg-background/50 hover:text-foreground'}"
 				onclick={() => (activeTab = 'flags')}
 			>
-				<Flag class="mr-2 h-4 w-4" />
+				<Flag class="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
 				Flags
 			</button>
 			<button
-				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
+				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 sm:px-6 py-1.5 text-xs sm:text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 				'deployment'
 					? 'bg-background text-foreground shadow-sm'
 					: 'hover:bg-background/50 hover:text-foreground'}"
 				onclick={() => (activeTab = 'deployment')}
 			>
-				<Cpu class="mr-2 h-4 w-4" />
+				<Cpu class="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
 				Deployment
 			</button>
 			<button
-				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
+				class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-3.5 sm:px-6 py-1.5 text-xs sm:text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 				'attachments'
 					? 'bg-background text-foreground shadow-sm'
 					: 'hover:bg-background/50 hover:text-foreground'}"
 				onclick={() => (activeTab = 'attachments')}
 			>
-				<Paperclip class="mr-2 h-4 w-4" />
+				<Paperclip class="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
 				Attachments
 			</button>
 		</div>
@@ -352,13 +352,13 @@
 			<div class="mt-6">
 				<Card.Root>
 					<Card.Header>
-						<Card.Title>Basic Information</Card.Title>
+						<Card.Title>Basic information</Card.Title>
 						<Card.Description>Name, category, and core settings of the challenge.</Card.Description>
 					</Card.Header>
 					<Card.Content class="space-y-6">
 						<div class="grid gap-6 sm:grid-cols-2">
 							<div class="space-y-2">
-								<Label for="name">Challenge Name*</Label>
+								<Label for="name">Challenge name*</Label>
 								<Input id="name" bind:value={name} placeholder="E.g. My Awesome Challenge" />
 							</div>
 							<div class="space-y-2">
@@ -366,7 +366,7 @@
 								<CategorySelect
 									items={categories}
 									bind:value={category}
-									placeholder="Select Category..."
+									placeholder="Select category..."
 								/>
 							</div>
 						</div>
@@ -384,11 +384,11 @@
 						<div class="grid gap-6 sm:grid-cols-2">
 							<div class="space-y-4">
 								<div class="space-y-2">
-									<Label for="instance_type">Instance Type</Label>
+									<Label for="instance_type">Instance type</Label>
 									<CategorySelect items={challengeInstanceTypes} bind:value={instance_type} />
 								</div>
 								<div class="space-y-2">
-									<Label for="points">Initial Points</Label>
+									<Label for="points">Initial points</Label>
 									<Input id="points" type="number" bind:value={points} />
 								</div>
 							</div>
@@ -400,7 +400,7 @@
 								<div class="flex flex-col justify-end gap-3 pt-3">
 									<div class="flex items-center gap-3">
 										<Checkbox id="dynamic" bind:checked={dynamicScore} />
-										<Label for="dynamic" class="cursor-pointer text-sm">Dynamic Scoring</Label>
+										<Label for="dynamic" class="cursor-pointer text-sm">Dynamic scoring</Label>
 									</div>
 									<div class="flex items-center gap-3">
 										<Checkbox id="hidden" bind:checked={hidden} />
@@ -442,28 +442,30 @@
 								>Manage correct answers for this challenge (Add new flags).</Card.Description
 							>
 						</div>
-						<Button variant="outline" size="sm" onclick={addFlag}>Add Flag</Button>
+						<Button variant="outline" size="sm" onclick={addFlag}>Add flag</Button>
 					</Card.Header>
 					<Card.Content class="space-y-4">
 						{#each flags as _, i}
-							<div class="flex items-center gap-4 rounded-lg border p-4">
+							<div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-lg border p-4">
 								<div class="flex-1 space-y-2">
 									<Label class="text-muted-foreground text-xs uppercase">Flag</Label>
 									<Input bind:value={flags[i].flag} placeholder={$siteContent.challenges.flagPlaceholder || 'TRX{...}'} />
 								</div>
-								<div class="flex items-center gap-2 pt-6">
-									<Checkbox id={`regex-${i}`} bind:checked={flags[i].regex} />
-									<Label for={`regex-${i}`} class="cursor-pointer text-sm">Regex</Label>
+								<div class="flex items-center justify-between sm:justify-start gap-4 sm:pt-6">
+									<div class="flex items-center gap-2">
+										<Checkbox id={`regex-${i}`} bind:checked={flags[i].regex} />
+										<Label for={`regex-${i}`} class="cursor-pointer text-sm">Regex</Label>
+									</div>
+									<Button
+										variant="ghost"
+										size="icon"
+										class="text-destructive"
+										onclick={() => removeFlag(i)}
+										disabled={flags.length === 1}
+									>
+										<PlusCircle class="h-4 w-4 rotate-45" />
+									</Button>
 								</div>
-								<Button
-									variant="ghost"
-									size="icon"
-									class="text-destructive mt-6"
-									onclick={() => removeFlag(i)}
-									disabled={flags.length === 1}
-								>
-									<PlusCircle class="h-4 w-4 rotate-45" />
-								</Button>
 							</div>
 						{/each}
 					</Card.Content>
@@ -473,7 +475,7 @@
 			<div class="mt-6">
 				<Card.Root>
 					<Card.Header>
-						<Card.Title>Deployment Settings</Card.Title>
+						<Card.Title>Deployment settings</Card.Title>
 						<Card.Description
 							>Configure Docker settings for containerized challenges.</Card.Description
 						>
@@ -483,7 +485,7 @@
 							<div class="animate-in fade-in slide-in-from-top-2 space-y-4">
 								{#if instance_type === 'Container'}
 									<div class="space-y-2">
-										<Label for="image">Docker Image Name</Label>
+										<Label for="image">Docker image name</Label>
 										<Input
 											id="image"
 											bind:value={imageName}
@@ -492,7 +494,7 @@
 									</div>
 								{:else}
 									<div class="space-y-4">
-										<Label for="compose">Docker Compose YAML</Label>
+										<Label for="compose">Docker compose YAML</Label>
 										<div class="h-[400px] overflow-hidden rounded-md border">
 											<MonacoEditor bind:value={composeFile} language="yaml" class="h-full" />
 										</div>
@@ -509,7 +511,7 @@
 										<Input id="ram" type="number" bind:value={maxMemory} placeholder="256" />
 									</div>
 									<div class="space-y-2">
-										<Label for="life">Lifetime (Seconds)</Label>
+										<Label for="life">Lifetime (seconds)</Label>
 										<Input id="life" type="number" bind:value={lifetime} placeholder="3600" />
 									</div>
 								</div>
@@ -517,7 +519,7 @@
 								<div class="flex gap-6 pt-2">
 									<div class="flex items-center gap-3">
 										<Checkbox id="hashDomain" bind:checked={hashDomain} />
-										<Label for="hashDomain" class="cursor-pointer text-sm">Hash Domain</Label>
+										<Label for="hashDomain" class="cursor-pointer text-sm">Hash domain</Label>
 									</div>
 									<div class="flex items-center gap-3">
 										<Checkbox id="renewable" bind:checked={renewable} />
@@ -529,7 +531,7 @@
 								<div class="space-y-4 border-t pt-6">
 									<div class="flex items-center justify-between">
 										<div class="space-y-1">
-											<Label class="text-sm font-bold">Environment Variables</Label>
+											<Label class="text-sm font-bold">Environment variables</Label>
 											<p class="text-muted-foreground text-xs">
 												Dynamic variables for your containers.
 											</p>
@@ -540,7 +542,7 @@
 											size="sm"
 											onclick={() => (envVars = [...envVars, { name: '', value: '' }])}
 										>
-											<Plus class="mr-2 h-4 w-4" /> Add Variable
+											<Plus class="mr-2 h-4 w-4" /> Add variable
 										</Button>
 									</div>
 									<div class="space-y-2">
@@ -577,7 +579,7 @@
 							class={`animate-in fade-in slide-in-from-top-2 space-y-4 ${instance_type !== 'Static' ? 'border-t pt-6' : ''}`}
 						>
 							<div class="space-y-2">
-								<Label for="host">Connecting Host (optional)</Label>
+								<Label for="host">Connecting host (optional)</Label>
 								<Input id="host" bind:value={host} placeholder="e.g. chal.myctf.com" />
 							</div>
 							<div class="grid gap-6 sm:grid-cols-2">
@@ -586,7 +588,7 @@
 									<Input id="port" type="number" bind:value={port} placeholder="1337" />
 								</div>
 								<div class="space-y-2">
-									<Label for="connType">Connection Type</Label>
+									<Label for="connType">Connection type</Label>
 									<CategorySelect items={connTypes} bind:value={connType} />
 								</div>
 							</div>
@@ -635,7 +637,7 @@
 						{#if attachments.length > 0}
 							<div class="space-y-3">
 								<h5 class="text-muted-foreground text-xs font-black uppercase tracking-widest">
-									Selected Files ({attachments.length})
+									Selected files ({attachments.length})
 								</h5>
 								<div class="grid gap-2">
 									{#each attachments as file, i}
@@ -664,7 +666,7 @@
 						{#if existingAttachments.length > 0}
 							<div class="space-y-3 border-t pt-4">
 								<h5 class="text-muted-foreground text-xs font-black uppercase tracking-widest">
-									Existing Attachments ({existingAttachments.length})
+									Existing attachments ({existingAttachments.length})
 								</h5>
 								<div class="grid gap-2">
 									{#each existingAttachments as existingFile}

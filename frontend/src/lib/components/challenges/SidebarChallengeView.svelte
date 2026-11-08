@@ -1,7 +1,6 @@
 <script lang="ts">
 	import AuthorTags from './AuthorTags.svelte';
 	import * as Card from '$lib/components/ui/card';
-	import { Badge } from '$lib/components/ui/badge';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import {
 		Flag,
@@ -384,59 +383,22 @@
 		{#if activeChallenge}
 			<!-- Scrollable zone: header + tabs + content (excluding flag submission) -->
 			<div class="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
-				<header class="border-border/12 bg-background/6 border-b px-8 py-10">
+				<header class="border-border/12 bg-background/6 border-b px-6 py-4 sm:px-8 sm:py-5">
 					<div
-						class="mx-auto flex max-w-5xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
+						class="mx-auto flex max-w-5xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
 					>
-						<div class="min-w-0 space-y-4">
-							<div class="flex flex-wrap items-center gap-3">
-								<Button
-									variant="ghost"
-									size="sm"
-									class="text-primary hover:bg-primary/5 -ml-3 h-8 gap-2 px-3 text-[10px] font-bold uppercase tracking-widest lg:hidden"
-									onclick={() => (mobileShowSide = true)}
-								>
-									<ChevronDown class="h-4 w-4 rotate-90" />
-									Back to List
-								</Button>
-								<Badge
-									variant="secondary"
-									class="bg-primary/10 text-primary border-none px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest"
-								>
-									{activeChallenge.category}
-								</Badge>
-								{#if activeChallenge.solved}
-									<Badge
-										class="solve-surface solve-text-strong border-none px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest"
-									>
-										Solved
-									</Badge>
-								{/if}
-								{#if activeChallenge.hidden && isPrivileged}
-									<Badge
-										variant="outline"
-										class="border-zinc-400/20 bg-zinc-400/10 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
-									>
-										<EyeOff class="mr-1.5 h-3 w-3" />
-										Hidden
-									</Badge>
-								{/if}
-								{#if activeChallenge.tags && activeChallenge.tags.length > 0}
-									<div class="flex gap-2">
-										{#each activeChallenge.tags as tag}
-											<Badge
-												variant="outline"
-												class="bg-muted/30 text-muted-foreground border-none px-2.5 py-0.5 text-xs font-bold uppercase tracking-widest"
-											>
-												#{tag}
-											</Badge>
-										{/each}
-									</div>
-								{/if}
-								<AuthorTags tags={activeChallenge.author_tags} />
-							</div>
+						<div class="min-w-0 space-y-2">
+							<Button
+								variant="ghost"
+								size="sm"
+								class="text-primary hover:bg-primary/5 -ml-3 h-8 gap-2 px-3 text-[10px] font-bold uppercase tracking-widest lg:hidden"
+								onclick={() => (mobileShowSide = true)}
+							>
+								<ChevronDown class="h-4 w-4 rotate-90" />
+								Back to list
+							</Button>
 							<h1
-								class="text-foreground break-words pb-1 text-3xl font-black leading-tight tracking-tighter sm:text-5xl"
+								class="text-foreground break-words pb-0.5 text-3xl font-black leading-tight tracking-tighter sm:text-5xl"
 							>
 								{activeChallenge.name}
 							</h1>
@@ -480,13 +442,13 @@
 				</header>
 
 				<!-- Standard Tabs -->
-				<div class="bg-background/4 px-8">
-					<div class="border-border/12 flex justify-center border-b pb-4 pt-4">
+				<div class="bg-background/4 px-6 sm:px-8">
+					<div class="border-border/12 flex justify-center border-b pb-3 pt-3">
 						<div
-							class="bg-muted/40 text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1 backdrop-blur-sm"
+							class="bg-muted/40 text-muted-foreground inline-flex h-9 items-center justify-center gap-1 rounded-lg p-1 backdrop-blur-sm"
 						>
 							<button
-								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
+								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-5 py-1 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 								'details'
 									? 'bg-background/45 text-foreground shadow-sm backdrop-blur-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
@@ -496,7 +458,7 @@
 								Details
 							</button>
 							<button
-								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
+								class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-5 py-1 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 								'solves'
 									? 'bg-background/45 text-foreground shadow-sm backdrop-blur-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
@@ -508,13 +470,13 @@
 						</div>
 					</div>
 
-					<div class="mx-auto max-w-4xl space-y-8 p-4 sm:space-y-12 sm:p-10">
+					<div class="mx-auto max-w-4xl space-y-4 p-4 sm:space-y-6 sm:p-6">
 						{#if activeTab === 'details'}
-							<div class="animate-in fade-in m-0 space-y-10 duration-300">
+							<div class="animate-in fade-in m-0 space-y-4 sm:space-y-5 duration-300">
 								<!-- Description -->
 								<section>
 									<h3
-										class="text-muted-foreground/60 mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest"
+										class="text-muted-foreground/60 mb-2.5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest"
 									>
 										Description
 										<div class="bg-border h-px flex-1"></div>
@@ -522,7 +484,7 @@
 									<div class="prose prose-neutral dark:prose-invert max-w-none">
 										<Markdown
 											content={activeChallenge.description}
-											class="text-lg font-medium leading-relaxed tracking-tight break-words"
+											class="text-base sm:text-lg font-medium leading-relaxed tracking-tight break-words"
 										/>
 									</div>
 								</section>
@@ -531,18 +493,18 @@
 								{#if activeChallenge.attachments && activeChallenge.attachments.length > 0}
 									<section>
 										<h3
-											class="text-muted-foreground/60 mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest"
+											class="text-muted-foreground/60 mb-2.5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest"
 										>
 											Resources
 											<div class="bg-border h-px flex-1"></div>
 										</h3>
-										<div class="flex flex-wrap gap-3">
+										<div class="flex flex-wrap gap-2.5">
 											{#each activeChallenge.attachments as file}
 												<a
 													href={`/attachments/${activeChallenge.id}/${file.replace(/^\/+/, '')}`}
 													target="_blank"
 													rel="noopener noreferrer"
-													class="bg-muted/20 hover:bg-primary/5 hover:border-primary/20 group inline-flex items-center gap-3 rounded-lg border px-4 py-2.5 text-sm font-bold transition-all"
+													class="bg-muted/20 hover:bg-primary/5 hover:border-primary/20 group inline-flex items-center gap-2.5 rounded-lg border px-3.5 py-2 text-sm font-bold transition-all"
 												>
 													<Download class="h-4 w-4 opacity-40 group-hover:opacity-100" />
 													<span>{file.split('/').pop()}</span>
@@ -556,7 +518,7 @@
 								{#if activeChallenge.instance || isDynamicType}
 									<section>
 										<h3
-											class="text-muted-foreground/60 mb-4 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest"
+											class="text-muted-foreground/60 mb-2.5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest"
 										>
 											<span class="shrink-0">Instance Management</span>
 											<div class="bg-border h-px flex-1"></div>
@@ -579,13 +541,13 @@
 								{:else if !isDynamicType && activeChallenge.host && activeChallenge.host !== 'localhost' && activeChallenge.host !== '127.0.0.1' && connectionString}
 									<section>
 										<h3
-											class="text-muted-foreground/60 mb-6 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest"
+											class="text-muted-foreground/60 mb-2.5 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest"
 										>
 											Connection Info
 											<div class="bg-border h-px flex-1"></div>
 										</h3>
 										<div
-											class="bg-muted/20 flex items-center justify-between gap-4 rounded-xl border border-dashed border-border p-5 font-mono text-sm"
+											class="bg-muted/20 flex items-center justify-between gap-4 rounded-xl border border-dashed border-border p-3.5 sm:p-4 font-mono text-sm"
 										>
 											<code
 												class="bg-background/38 overflow-x-auto whitespace-nowrap rounded border border-border px-3 py-1 text-base font-bold backdrop-blur-sm"

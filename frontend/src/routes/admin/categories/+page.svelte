@@ -74,18 +74,18 @@
 </script>
 
 <svelte:head>
-	<title>Category Management | {$siteContent.brand.adminTitleSuffix}</title>
+	<title>Categories | {$siteContent.brand.adminTitleSuffix}</title>
 </svelte:head>
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Category Management</h1>
+		<h1 class="text-3xl font-bold tracking-tight">Categories</h1>
 		<p class="text-muted-foreground mt-2">Manage challenge categories for the platform.</p>
 	</div>
 
 	<Card.Root>
 		<Card.Header>
-			<Card.Title>Add New Category</Card.Title>
+			<Card.Title>Add new category</Card.Title>
 			<Card.Description>Create a new category for challenges.</Card.Description>
 		</Card.Header>
 		<Card.Content>
@@ -114,7 +114,7 @@
 
 	<Card.Root>
 		<Card.Header>
-			<Card.Title>Existing Categories</Card.Title>
+			<Card.Title>Existing categories</Card.Title>
 			<Card.Description>A list of all currently registered categories.</Card.Description>
 		</Card.Header>
 		<Card.Content>

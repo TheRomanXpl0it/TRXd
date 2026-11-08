@@ -51,7 +51,7 @@ describe('Admin teams page', () => {
 		expect(screen.getByText('ITA')).toBeInTheDocument();
 
 		await fireEvent.click(screen.getByRole('button', { name: /Reset/i }));
-		await fireEvent.click(screen.getByRole('button', { name: 'Generate Password' }));
+		await fireEvent.click(screen.getByRole('button', { name: /generate password/i }));
 
 		expect(resetTeamPasswordMock).toHaveBeenCalledWith(42);
 		expect(await screen.findByText('new-secret-pass')).toBeInTheDocument();

@@ -110,15 +110,15 @@
 							<Table.Row class="border-none hover:bg-transparent">
 								<Table.Head
 									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
-									>Team (ID)</Table.Head
+									>Team (id)</Table.Head
 								>
 								<Table.Head
 									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
-									>Challenge (ID)</Table.Head
+									>Challenge (id)</Table.Head
 								>
 								<Table.Head
 									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"
-									>Docker ID</Table.Head
+									>Docker id</Table.Head
 								>
 								<Table.Head
 									class="text-muted-foreground/70 text-[10px] font-bold uppercase tracking-wider"

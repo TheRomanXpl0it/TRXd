@@ -75,7 +75,7 @@ describe('Admin Challenge Edit Page', () => {
 		expect(screen.getByLabelText(/Max CPU/i)).toHaveValue('1.5');
 		expect(screen.getByLabelText(/Max RAM/i)).toHaveValue(768);
 		expect(screen.getByLabelText(/Lifetime/i)).toHaveValue(2400);
-		expect(screen.getByRole('checkbox', { name: 'Hash Domain' })).toBeChecked();
+		expect(screen.getByRole('checkbox', { name: /hash domain/i })).toBeChecked();
 		expect(screen.getByRole('checkbox', { name: 'Renewable' })).toBeChecked();
 		expect(screen.getByPlaceholderText('KEY')).toHaveValue('FLAG_PATH');
 		expect(screen.getByPlaceholderText('VALUE')).toHaveValue('/flag');

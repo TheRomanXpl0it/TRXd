@@ -15,7 +15,7 @@
 </script>
 
 <div
-	class="inline-flex items-center rounded-md border border-border bg-card p-0.5"
+	class="inline-flex items-center rounded-md border border-input bg-background dark:bg-input/30 p-0.5 shadow-xs"
 	role="group"
 	aria-label="Toggle challenge view"
 >

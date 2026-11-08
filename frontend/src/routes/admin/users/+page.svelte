@@ -351,7 +351,7 @@
 		<Dialog.Header>
 			<Dialog.Title class="flex items-center gap-2">
 				<ShieldAlert class="text-destructive h-5 w-5" />
-				Change Password
+				Change password
 			</Dialog.Title>
 			<Dialog.Description>
 				Updating password for <span class="text-foreground font-bold">{selectedUser?.name}</span>.
@@ -359,7 +359,7 @@
 		</Dialog.Header>
 		<div class="grid gap-4 py-4">
 			<div class="space-y-2">
-				<Label for="new-password">New Password</Label>
+				<Label for="new-password">New password</Label>
 				<Input id="new-password" type="password" bind:value={newPassword} placeholder="••••••••" />
 			</div>
 		</div>
@@ -373,7 +373,7 @@
 				{#if resetting}
 					<Spinner class="mr-2 h-4 w-4" />
 				{/if}
-				Update Password
+				Update password
 			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>

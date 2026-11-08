@@ -95,7 +95,7 @@ describe('Admin Challenges Page', () => {
 
 		renderWithProviders(Page);
 
-		expect(await screen.findByText('Author Tags')).toBeInTheDocument();
+		expect(await screen.findByText(/author tags/i)).toBeInTheDocument();
 		expect(screen.getByText('private-hint')).toBeInTheDocument();
 		expect(screen.getByText('sec-note')).toBeInTheDocument();
 	});
