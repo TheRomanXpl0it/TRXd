@@ -125,14 +125,41 @@
 								<Table.Cell class="font-mono text-xs hidden sm:table-cell">{sub.id}</Table.Cell>
 								{#if !authState.userMode}
 									<Table.Cell class="max-w-[120px] truncate hidden sm:table-cell">
-										{sub.user_name}
+										{#if sub.user_id}
+											<a
+												href="/account/{sub.user_id}"
+												class="text-inherit no-underline hover:underline cursor-pointer"
+											>
+												{sub.user_name}
+											</a>
+										{:else}
+											{sub.user_name}
+										{/if}
 									</Table.Cell>
 								{/if}
 								<Table.Cell class="max-w-[120px] truncate">
-									{sub.team_name}
+									{#if sub.team_id}
+										<a
+											href={authState.userMode ? `/account/${sub.user_id || sub.team_id}` : `/team/${sub.team_id}`}
+											class="text-inherit no-underline hover:underline cursor-pointer"
+										>
+											{sub.team_name}
+										</a>
+									{:else}
+										{sub.team_name}
+									{/if}
 								</Table.Cell>
 								<Table.Cell class="font-medium max-w-[120px] truncate">
-									{sub.chall_name}
+									{#if sub.chall_id}
+										<a
+											href="/challenges?id={sub.chall_id}"
+											class="text-inherit no-underline hover:underline cursor-pointer"
+										>
+											{sub.chall_name}
+										</a>
+									{:else}
+										{sub.chall_name}
+									{/if}
 								</Table.Cell>
 								<Table.Cell class="max-w-[200px]">
 									<div class="flex items-center gap-2">

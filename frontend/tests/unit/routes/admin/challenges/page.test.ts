@@ -50,7 +50,11 @@ describe('Admin Challenges Page', () => {
 	it('groups challenges by category and renders headers with counts', async () => {
 		renderWithProviders(Page);
 
-		expect(await screen.findByText('Web Chall 1')).toBeInTheDocument();
+		const link = await screen.findByRole('link', { name: 'Web Chall 1' });
+		expect(link).toBeInTheDocument();
+		expect(link).toHaveAttribute('href', '/challenges?id=1');
+		expect(link.className).toContain('no-underline');
+		expect(link.className).toContain('hover:underline');
 		expect(screen.getByText('Crypto Chall 1')).toBeInTheDocument();
 
 		expect(screen.getByRole('button', { name: 'Toggle Web category' })).toBeInTheDocument();

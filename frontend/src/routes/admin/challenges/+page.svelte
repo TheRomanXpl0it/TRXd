@@ -408,7 +408,12 @@
 													</Table.Cell>
 													<Table.Cell class="text-muted-foreground/60 py-1 font-medium hidden sm:table-cell">{chall.id}</Table.Cell>
 													<Table.Cell class="py-1 pl-4 sm:pl-0 font-bold">
-														{chall.name}
+														<a
+															href="/challenges?id={chall.id}"
+															class="text-inherit no-underline hover:underline cursor-pointer"
+														>
+															{chall.name}
+														</a>
 														{#if chall.authors && chall.authors.length > 0}
 															<div
 																class="text-muted-foreground/50 flex items-center gap-1.5 text-xs font-medium"

@@ -109,7 +109,18 @@
 				{:else}
 					{#each sortedSolves as solve (solve.id ?? solve.timestamp ?? solve.name)}
 						<Table.Row class="border-b-0 transition-colors">
-							<Table.Cell class="font-medium">{solve.name ?? '-'}</Table.Cell>
+							<Table.Cell class="font-medium">
+								{#if solve.id}
+									<a
+										href="/challenges?id={solve.id}"
+										class="text-inherit no-underline hover:underline cursor-pointer"
+									>
+										{solve.name ?? '-'}
+									</a>
+								{:else}
+									{solve.name ?? '-'}
+								{/if}
+							</Table.Cell>
 							<Table.Cell>
 								<StatusBadge variant="category">{solve.category ?? '-'}</StatusBadge>
 							</Table.Cell>

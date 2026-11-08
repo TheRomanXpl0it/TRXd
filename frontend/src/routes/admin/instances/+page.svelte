@@ -138,11 +138,29 @@
 							{#each instances as inst (`${inst.team_id}-${inst.chall_id}`)}
 								<Table.Row class="group border-none transition-colors">
 									<Table.Cell class="font-medium">
-										{inst.team_name}
+										{#if inst.team_id}
+											<a
+												href={authState.userMode ? `/account/${inst.team_id}` : `/team/${inst.team_id}`}
+												class="text-inherit no-underline hover:underline cursor-pointer"
+											>
+												{inst.team_name}
+											</a>
+										{:else}
+											{inst.team_name}
+										{/if}
 										<span class="text-muted-foreground text-xs hidden sm:inline">({inst.team_id})</span>
 									</Table.Cell>
 									<Table.Cell>
-										{inst.chall_name}
+										{#if inst.chall_id}
+											<a
+												href="/challenges?id={inst.chall_id}"
+												class="text-inherit no-underline hover:underline cursor-pointer"
+											>
+												{inst.chall_name}
+											</a>
+										{:else}
+											{inst.chall_name}
+										{/if}
 										<span class="text-muted-foreground text-xs hidden sm:inline">({inst.chall_id})</span>
 									</Table.Cell>
 									<Table.Cell class="max-w-[180px] truncate hidden sm:table-cell" title={inst.docker_id || ''}>

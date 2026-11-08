@@ -156,7 +156,18 @@
 				{:else}
 					{#each rows as s (s.id ?? s.timestamp ?? s.name ?? Math.random())}
 						<TableRow class="border-b-0 transition-colors">
-							<TableCell class="font-medium">{truncateName(s.name ?? '-')}</TableCell>
+							<TableCell class="font-medium">
+								{#if s.id}
+									<a
+										href="/challenges?id={s.id}"
+										class="text-inherit no-underline hover:underline cursor-pointer"
+									>
+										{truncateName(s.name ?? '-')}
+									</a>
+								{:else}
+									{truncateName(s.name ?? '-')}
+								{/if}
+							</TableCell>
 							<TableCell>
 								<span class="text-muted-foreground text-xs font-medium">
 									{s.category ?? '-'}
@@ -167,7 +178,18 @@
 									{getPoints(s)}
 								</div>
 							</TableCell>
-							<TableCell>{truncateName(solverName(s.user_id))}</TableCell>
+							<TableCell>
+								{#if s.user_id}
+									<a
+										href="/account/{s.user_id}"
+										class="text-inherit no-underline hover:underline cursor-pointer"
+									>
+										{truncateName(solverName(s.user_id))}
+									</a>
+								{:else}
+									{truncateName(solverName(s.user_id))}
+								{/if}
+							</TableCell>
 
 							<TableCell class="text-right">
 								<Tooltip.Root>

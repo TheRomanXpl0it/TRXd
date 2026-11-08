@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 	import { getChallenges, groupByCategory } from '$lib/challenges';
 	import { authState } from '$lib/stores/auth';
 	import { untrack } from 'svelte';
@@ -164,6 +165,19 @@
 	$effect(() => {
 		if (challengeView !== 'sidebar' && selectedId && !openModal) {
 			closeModal();
+		}
+	});
+
+	let handledUrlParam = $state<string | null>(null);
+	$effect(() => {
+		const targetParam = $page?.url?.searchParams?.get('id') || $page?.url?.searchParams?.get('challenge');
+		if (targetParam && targetParam !== handledUrlParam && challenges.length > 0) {
+			handledUrlParam = targetParam;
+			const targetId = Number(targetParam);
+			const found = challenges.find((c) => c.id === targetId);
+			if (found) {
+				openChallenge(found);
+			}
 		}
 	});
 

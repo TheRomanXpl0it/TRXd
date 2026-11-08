@@ -33,6 +33,7 @@
 	import { fmtTimeLeft } from '$lib/utils/time';
 	import { formatConnectionString } from '$lib/utils/connection';
 	import { authState } from '$lib/stores/auth';
+	import { page } from '$app/stores';
 	import TagFilterPopover from './TagFilterPopover.svelte';
 	import ViewToggle from './ViewToggle.svelte';
 
@@ -144,6 +145,22 @@
 				activeChallenge = { ...filteredGrouped[0][1][0] };
 			} else {
 				activeChallenge = null;
+			}
+		}
+	});
+
+	let handledUrlParam = $state<string | null>(null);
+	$effect(() => {
+		const targetParam = $page?.url?.searchParams?.get('id') || $page?.url?.searchParams?.get('challenge');
+		if (targetParam && targetParam !== handledUrlParam && filteredGrouped.length > 0) {
+			handledUrlParam = targetParam;
+			const targetId = Number(targetParam);
+			for (const [_, items] of filteredGrouped) {
+				const found = items.find((c) => c.id === targetId);
+				if (found) {
+					selectChallenge(found);
+					break;
+				}
 			}
 		}
 	});
