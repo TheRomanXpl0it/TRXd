@@ -168,7 +168,7 @@
 						<div role="list" aria-label="Challenge tags" class="contents">
 							{#each challenge.tags as tag}
 								<span
-									class="inline-flex items-center rounded-full bg-black/5 px-2.5 py-0.5 text-xs font-medium dark:bg-white/10"
+									class="bg-muted/75 text-muted-foreground inline-flex items-center rounded-full border border-border/60 px-2.5 py-0.5 text-xs font-medium"
 									role="listitem"
 								>
 									{tag}

@@ -95,6 +95,14 @@ export async function toggleChallengesHidden(challIds: number[]): Promise<void> 
 	});
 }
 
+export async function updateChallengeOrder(chall_id: number, new_order: number): Promise<void> {
+	return api<void>('/challenges/order', {
+		headers: { 'content-type': 'application/json' },
+		method: 'PATCH',
+		body: JSON.stringify({ chall_id, new_order })
+	});
+}
+
 export async function getAdminStats(): Promise<{
 	total_users: number;
 	total_players: number;

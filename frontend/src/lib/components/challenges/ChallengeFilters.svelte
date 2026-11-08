@@ -51,35 +51,8 @@
 	</div>
 
 	<div class="flex flex-wrap items-center gap-1.5 md:gap-2">
-		<!-- 1. Tag filter (icon-only button, hover "Filter by tags") -->
-		<TagFilterPopover bind:filterTags {allTags} />
-
-		<!-- 2. Grid/Sidebar toggle (split-button for all roles) -->
-		<ViewToggle />
-
 		{#if canSeeHidden}
-			<!-- 3. Author tags toggle (authors/admins only) -->
-			<Tooltip.Root>
-				<Tooltip.Trigger>
-					<Button
-						variant={uiStore.showAuthorTags ? 'outline' : 'secondary'}
-						size="icon"
-						class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
-						onclick={() => uiStore.toggleAuthorTags()}
-						aria-label={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
-						title={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
-						data-testid="toggle-author-tags"
-					>
-						<LockKeyhole
-							class="h-4 w-4 shrink-0 {uiStore.showAuthorTags ? '' : 'opacity-40'}"
-							aria-hidden="true"
-						/>
-					</Button>
-				</Tooltip.Trigger>
-				<Tooltip.Content>{uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}</Tooltip.Content>
-			</Tooltip.Root>
-
-			<!-- 4. Hidden challenges toggle (authors/admins only, eye icon only) -->
+			<!-- 1. Hidden challenges toggle (authors/admins only, eye icon only) -->
 			<Tooltip.Root>
 				<Tooltip.Trigger>
 					<Button
@@ -100,7 +73,34 @@
 				</Tooltip.Trigger>
 				<Tooltip.Content>{showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}</Tooltip.Content>
 			</Tooltip.Root>
+
+			<!-- 2. Author tags toggle (authors/admins only) -->
+			<Tooltip.Root>
+				<Tooltip.Trigger>
+					<Button
+						variant={uiStore.showAuthorTags ? 'outline' : 'secondary'}
+						size="icon"
+						class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
+						onclick={() => uiStore.toggleAuthorTags()}
+						aria-label={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
+						title={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
+						data-testid="toggle-author-tags"
+					>
+						<LockKeyhole
+							class="h-4 w-4 shrink-0 {uiStore.showAuthorTags ? '' : 'opacity-40'}"
+							aria-hidden="true"
+						/>
+					</Button>
+				</Tooltip.Trigger>
+				<Tooltip.Content>{uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}</Tooltip.Content>
+			</Tooltip.Root>
 		{/if}
+
+		<!-- 3. Tag filter (icon-only button, hover "Filter by tags") -->
+		<TagFilterPopover bind:filterTags {allTags} />
+
+		<!-- 4. Grid/Sidebar toggle (split-button for all roles) -->
+		<ViewToggle />
 
 		{#if activeFiltersCount > 0 || filterTags.length > 0}
 			<Button

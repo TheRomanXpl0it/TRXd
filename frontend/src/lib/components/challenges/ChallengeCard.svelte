@@ -60,7 +60,7 @@
 			{#if challenge.tags}
 				{#each challenge.tags as tag}
 					<span
-						class="inline-flex items-center rounded-full bg-black/5 px-2.5 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-white/10 dark:text-zinc-400"
+						class="bg-muted/75 text-muted-foreground inline-flex items-center rounded-full border border-border/60 px-2.5 py-0.5 text-[11px] font-medium"
 					>
 						{tag}
 					</span>

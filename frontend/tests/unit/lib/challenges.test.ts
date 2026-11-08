@@ -9,7 +9,8 @@ import {
 	getChallenge,
 	getChallenges,
 	getSolves,
-	updateChallenge
+	updateChallenge,
+	updateChallengeOrder
 } from '$lib/challenges';
 
 describe('frontend challenge requests', () => {
@@ -69,4 +70,14 @@ describe('frontend challenge requests', () => {
 			else expect(body.author_tags).toEqual(authorTags);
 		}
 	);
+
+	it('sends challenge ID and new order to /challenges/order', async () => {
+		await updateChallengeOrder(12, 3);
+
+		expect(api).toHaveBeenCalledWith('/challenges/order', {
+			headers: { 'content-type': 'application/json' },
+			method: 'PATCH',
+			body: JSON.stringify({ chall_id: 12, new_order: 3 })
+		});
+	});
 });
