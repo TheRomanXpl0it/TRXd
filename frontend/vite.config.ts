@@ -41,10 +41,7 @@ export default defineConfig({
 	ssr: {
 		noExternal: [
 			'bits-ui',
-			'vaul-svelte',
-			'svelte-sonner',
-			'svelte-motion',
-			'paneforge'
+			'svelte-sonner'
 		]
 	},
 	build: {

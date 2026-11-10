@@ -256,7 +256,7 @@
 
 	const textColor = $derived('var(--muted-foreground)');
 	const gridColor = $derived('var(--border)');
-	const clipPathId = 'score-history-clip';
+	const clipPathId = `score-history-clip-${Math.random().toString(36).slice(2, 9)}`;
 
 	function clamp(value: number, min: number, max: number) {
 		return Math.min(Math.max(value, min), max);

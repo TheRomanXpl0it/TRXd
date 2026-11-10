@@ -235,7 +235,7 @@
 									{#if showHidden}
 										<Eye class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
 									{:else}
-										<EyeOff class="h-3.5 w-3.5 shrink-0 text-zinc-600 dark:text-zinc-300" aria-hidden="true" />
+										<EyeOff class="h-3.5 w-3.5 shrink-0 opacity-40" aria-hidden="true" />
 									{/if}
 								</Button>
 							</Tooltip.Trigger>

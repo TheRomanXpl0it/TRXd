@@ -53,7 +53,7 @@ describe('Author-only tags', () => {
 
 	it('displays author tags in the challenge detail dialog', async () => {
 		authState.user = { role: 'Author' } as any;
-		renderWithProviders(ChallengeModal, {
+		const { unmount } = renderWithProviders(ChallengeModal, {
 			open: true,
 			challenge: { id: 42, name: 'Web Challenge', tags: ['web'], author_tags: ['review'] }
 		});
@@ -61,5 +61,9 @@ describe('Author-only tags', () => {
 		expect(await screen.findByText('review')).toBeInTheDocument();
 		expect(screen.getByRole('list', { name: 'Challenge tags' })).toHaveTextContent('web');
 		expect(screen.getByRole('list', { name: 'Challenge tags' })).not.toHaveTextContent('review');
+
+		unmount();
+		// Let bits-ui body-scroll-lock cleanup timer fire before environment teardown
+		await new Promise((r) => setTimeout(r, 50));
 	});
 });

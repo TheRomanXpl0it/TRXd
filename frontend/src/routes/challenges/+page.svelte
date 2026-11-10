@@ -262,6 +262,7 @@
 	>
 		<SidebarChallengeView
 			{grouped}
+			onSolved={handleChallengeSolved}
 			onOpenChallenge={openChallenge}
 			{countdowns}
 			onCountdownUpdate={updateCountdown}
@@ -314,7 +315,7 @@
 
 {#if selectedId}
 	<ChallengeModal
-		challenge={filteredChallenges.find((c) => c.id === selectedId)}
+		challenge={challenges.find((c) => c.id === selectedId)}
 		bind:open={openModal}
 		canEdit={isAdmin}
 		onSolved={handleChallengeSolved}

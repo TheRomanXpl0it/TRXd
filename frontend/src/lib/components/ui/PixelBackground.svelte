@@ -29,6 +29,7 @@
 	let COLS = 0;
 	let ROWS = 0;
 	let grid: any[] = [];
+	let nextGrid: any[] = [];
 	let recentActivity: number[] = [];
 	let lastTime = 0;
 	let animationFrame: number;
@@ -222,6 +223,7 @@
 		ROWS = newRows;
 
 		grid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => randomCell(0.03)));
+		nextGrid = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => createCell(0, 0, 0)));
 
 		seedInitialPatterns();
 		recentActivity = [];
@@ -258,14 +260,18 @@
 	}
 
 	function nextGeneration() {
-		const next = grid.map((row) =>
-			row.map((cell: any) => ({
-				s: cell.s,
-				a: cell.a,
-				g: Math.max(0, cell.g * 0.94),
-				t: cell.t
-			}))
-		);
+		if (!grid.length || !nextGrid.length) return;
+
+		for (let y = 0; y < ROWS; y++) {
+			for (let x = 0; x < COLS; x++) {
+				const cell = grid[y][x];
+				const nCell = nextGrid[y][x];
+				nCell.s = cell.s;
+				nCell.a = cell.a;
+				nCell.g = Math.max(0, cell.g * 0.94);
+				nCell.t = cell.t;
+			}
+		}
 
 		let flips = 0;
 
@@ -275,18 +281,18 @@
 				const neighbors = countNeighbors(x, y);
 
 				if (cell.s === 0 && neighbors === 3) {
-					next[y][x].s = 1;
-					next[y][x].a = 0;
-					next[y][x].g = 1;
+					nextGrid[y][x].s = 1;
+					nextGrid[y][x].a = 0;
+					nextGrid[y][x].g = 1;
 					flips++;
 				} else if (cell.s === 1 && (neighbors < 2 || neighbors > 3)) {
-					next[y][x].s = 0;
-					next[y][x].a = 0;
-					next[y][x].g = 0.35;
+					nextGrid[y][x].s = 0;
+					nextGrid[y][x].a = 0;
+					nextGrid[y][x].g = 0.35;
 					flips++;
 				} else if (cell.s === 1) {
-					next[y][x].a = Math.min(MAX_AGE, cell.a + 1);
-					next[y][x].g = Math.max(next[y][x].g, 0.18);
+					nextGrid[y][x].a = Math.min(MAX_AGE, cell.a + 1);
+					nextGrid[y][x].g = Math.max(nextGrid[y][x].g, 0.18);
 				}
 			}
 		}
@@ -299,20 +305,22 @@
 			: 0;
 
 		if (avgActivity < Math.max(3, COLS * ROWS * 0.004)) {
-			if (Math.random() > 0.45) injectSpecificPattern(next, 'glider');
-			if (Math.random() > 0.65) injectSpecificPattern(next, 'lwss');
-			if (Math.random() > 0.88) injectSpecificPattern(next, 'mwss');
+			if (Math.random() > 0.45) injectSpecificPattern(nextGrid, 'glider');
+			if (Math.random() > 0.65) injectSpecificPattern(nextGrid, 'lwss');
+			if (Math.random() > 0.88) injectSpecificPattern(nextGrid, 'mwss');
 		}
 
 		if (Math.random() > 0.992) {
-			injectWeightedPattern(next);
+			injectWeightedPattern(nextGrid);
 		}
 
 		if (Math.random() > 0.997 && COLS > 60 && ROWS > 35) {
-			injectSpecificPattern(next, 'gosper');
+			injectSpecificPattern(nextGrid, 'gosper');
 		}
 
-		grid = next;
+		const temp = grid;
+		grid = nextGrid;
+		nextGrid = temp;
 	}
 
 	function injectWeightedPattern(targetGrid: any[][], gentle = false) {
@@ -396,20 +404,26 @@
 		}
 	}
 
+	const rgbCache = new Map<string, string>();
 	function hexToRgba(hex: string, alpha: number) {
-		const clean = hex.replace('#', '');
-		const full =
-			clean.length === 3
-				? clean
-						.split('')
-						.map((c) => c + c)
-						.join('')
-				: clean;
-		const bigint = parseInt(full, 16);
-		const r = (bigint >> 16) & 255;
-		const g = (bigint >> 8) & 255;
-		const b = bigint & 255;
-		return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+		let prefix = rgbCache.get(hex);
+		if (!prefix) {
+			const clean = hex.replace('#', '');
+			const full =
+				clean.length === 3
+					? clean
+							.split('')
+							.map((c) => c + c)
+							.join('')
+					: clean;
+			const bigint = parseInt(full, 16);
+			const r = (bigint >> 16) & 255;
+			const g = (bigint >> 8) & 255;
+			const b = bigint & 255;
+			prefix = `${r}, ${g}, ${b}`;
+			rgbCache.set(hex, prefix);
+		}
+		return `rgba(${prefix}, ${alpha})`;
 	}
 
 	function animate(time: number) {

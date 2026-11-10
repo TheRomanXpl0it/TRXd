@@ -16,6 +16,7 @@
 
 	import { authState } from '$lib/stores/auth';
 	import { siteContent } from '$lib/site-content';
+	import NotFound from '$lib/components/NotFound.svelte';
 
 	let perPage = $state(20);
 
@@ -33,7 +34,8 @@
 		queryKey: ['users', currentPage, perPage],
 		queryFn: () => getUsers(currentPage, perPage),
 		staleTime: 5 * 60 * 1000,
-		placeholderData: (previousData) => previousData
+		placeholderData: (previousData) => previousData,
+		enabled: authState.userMode
 	}));
 
 	// Handle both PaginatedResponse and flat array (fallback)
@@ -109,6 +111,9 @@
 	{/if}
 </svelte:head>
 
+{#if !authState.userMode}
+	<NotFound status={404} />
+{:else}
 <div class="mx-auto max-w-5xl space-y-6 py-8">
 	{#if error}
 		<ErrorMessage title="Error loading users" message={error} />
@@ -290,3 +295,4 @@
 		{/if}
 	{/if}
 </div>
+{/if}

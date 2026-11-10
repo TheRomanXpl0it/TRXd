@@ -48,6 +48,7 @@
 		{
 			title: 'Challenges',
 			href: '/admin/challenges',
+			adminOnly: false,
 			value: statsData
 				? `${statsData.total_released_challenges}/${statsData.total_challenges}`
 				: '…',
@@ -59,6 +60,7 @@
 		{
 			title: 'Users',
 			href: '/admin/users',
+			adminOnly: true,
 			value: statsData ? `${statsData.total_players}` : '…',
 			sub: statsData ? `${statsData.total_users} total accounts` : 'loading…',
 			icon: UsersIcon,
@@ -68,6 +70,7 @@
 		{
 			title: 'Submissions',
 			href: '/admin/submissions',
+			adminOnly: true,
 			value: statsData ? `${statsData.total_correct_submissions}` : '…',
 			sub: statsData ? `${statsData.total_submissions} total attempts` : 'loading…',
 			icon: Activity,
@@ -77,6 +80,7 @@
 		{
 			title: 'Instances',
 			href: '/admin/instances',
+			adminOnly: true,
 			value: instancesData !== null ? `${instancesData.length}` : '…',
 			sub: instancesData !== null
 				? `${instancesData.length === 1 ? '1 active instance' : `${instancesData.length} active instances`}`
@@ -99,8 +103,13 @@
 
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		{#each stats as stat}
-			<a href={stat.href} class="no-underline text-inherit block transition-transform hover:-translate-y-0.5">
-				<Card.Root class="h-full hover:border-primary/50 transition-colors">
+			{@const isLink = !stat.adminOnly || isAdmin}
+			<svelte:element
+				this={isLink ? 'a' : 'div'}
+				href={isLink ? stat.href : undefined}
+				class="no-underline text-inherit block transition-transform {isLink ? 'hover:-translate-y-0.5' : ''}"
+			>
+				<Card.Root class="h-full {isLink ? 'hover:border-primary/50 transition-colors' : ''}">
 					<Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
 						<Card.Title class="text-sm font-medium">{stat.title}</Card.Title>
 						<div class="{stat.bgColor} {stat.color} rounded-md p-2">
@@ -112,7 +121,7 @@
 						<p class="text-muted-foreground mt-1 text-xs">{stat.sub ?? 'Total count in database'}</p>
 					</Card.Content>
 				</Card.Root>
-			</a>
+			</svelte:element>
 		{/each}
 	</div>
 </div>

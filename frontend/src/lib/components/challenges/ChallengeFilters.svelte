@@ -65,9 +65,9 @@
 						data-testid="toggle-hidden-challenges"
 					>
 						{#if showHidden}
-							<Eye class="h-4 w-4 shrink-0 opacity-60" aria-hidden="true" />
+							<Eye class="h-4 w-4 shrink-0" aria-hidden="true" />
 						{:else}
-							<EyeOff class="h-4 w-4 shrink-0 text-zinc-600 dark:text-zinc-300" aria-hidden="true" />
+							<EyeOff class="h-4 w-4 shrink-0 opacity-40" aria-hidden="true" />
 						{/if}
 					</Button>
 				</Tooltip.Trigger>

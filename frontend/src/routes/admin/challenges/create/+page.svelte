@@ -127,9 +127,15 @@
 			);
 
 			// 2. Fetch the newly created challenge to get its ID
-			const all = await getChallenges();
-			const newChall = all.sort((a, b: any) => b.id - a.id).find((c) => c.name === name.trim());
-			const challId = newChall?.id || baseRes.id;
+			let challId = baseRes?.id;
+			if (!challId) {
+				const all = await getChallenges();
+				const newChall = all.find((c) => c.name === name.trim() && (!c.category || c.category === category));
+				challId = newChall?.id;
+			}
+			if (!challId) {
+				throw new Error('Challenge created, but failed to retrieve its ID.');
+			}
 
 			// 3. Update Advanced Fields
 			const authors = authorsCsv

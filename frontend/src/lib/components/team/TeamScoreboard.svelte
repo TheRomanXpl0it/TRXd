@@ -154,7 +154,7 @@
 						</TableCell>
 					</TableRow>
 				{:else}
-					{#each rows as s (s.id ?? s.timestamp ?? s.name ?? Math.random())}
+					{#each rows as s, i (s.id ?? s.timestamp ?? s.name ?? i)}
 						<TableRow class="border-b-0 transition-colors">
 							<TableCell class="font-medium">
 								{#if s.id}

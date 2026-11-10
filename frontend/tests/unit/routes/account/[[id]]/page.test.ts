@@ -59,6 +59,9 @@ vi.mock('$lib/components/RadarChart.svelte', () => ({
 describe('Account Profile Page', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		authState.user = { id: 1, role: 'User' } as any;
+		authState.ready = true;
+		authState.startTime = null;
 
 		// Default mock for user query
 		(createQuery as any).mockReturnValue({
@@ -66,6 +69,16 @@ describe('Account Profile Page', () => {
 			isLoading: false,
 			error: null
 		});
+	});
+
+	it('renders public profile for unauthenticated visitors when route has id', () => {
+		authState.ready = true;
+		authState.user = null;
+
+		renderWithProviders(Page);
+
+		expect(screen.queryByText("You're not signed in.")).not.toBeInTheDocument();
+		expect(screen.getByText('Test User')).toBeInTheDocument();
 	});
 
 	it('hides statistics cards when competition is upcoming', () => {

@@ -37,7 +37,6 @@
 		"@sveltejs/adapter-static": "^3.0.8",
 		"@sveltejs/kit": "^2.43.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.0",
-		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.18",
 		"@tailwindcss/vite": "^4.1.13",
 		"@testing-library/jest-dom": "^6.9.1",
@@ -54,7 +53,6 @@
 		"prettier-plugin-tailwindcss": "^0.6.14",
 		"svelte": "^5.39.5",
 		"svelte-check": "^4.3.2",
-		"svelte-sidebar-menu": "^0.9.12",
 		"svelte-sonner": "^1.0.5",
 		"tailwind-merge": "^3.3.1",
 		"tailwind-variants": "^3.2.2",
@@ -65,7 +63,6 @@
 		"vitest": "^4.0.8"
 	},
 	"dependencies": {
-		"@dvcol/svelte-simple-router": "^2.7.2",
 		"@sveltejs/svelte-virtual-list": "^3.0.1",
 		"@tanstack/svelte-query": "^6.0.5",
 		"country-flag-icons": "^1.5.21",
