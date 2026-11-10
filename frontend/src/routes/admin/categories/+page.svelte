@@ -5,15 +5,16 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
-	import { toast } from 'svelte-sonner';
+	import { showSuccess, showError } from '$lib/utils/toast';
 	import { getCategories, createCategory, deleteCategory, updateCategory } from '$lib/categories';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { siteContent } from '$lib/site-content';
 	import { onMount } from 'svelte';
-	import { Plus, Trash2, FolderTree, Pencil } from '@lucide/svelte';
+	import { Plus, Trash2, Pencil, RefreshCw } from '@lucide/svelte';
 
 	let categories = $state<string[]>([]);
 	let loading = $state(true);
+	let error = $state<string | null>(null);
 	let creating = $state(false);
 	let categoryName = $state('');
 
@@ -21,11 +22,13 @@
 
 	async function loadCategories() {
 		loading = true;
+		error = null;
 		try {
 			const res = await getCategories();
 			categories = [...res].sort((a, b) => a.localeCompare(b));
 		} catch (err: any) {
-			toast.error(err?.message ?? 'Failed to load categories');
+			error = err?.message ?? 'Failed to load categories';
+			showError(err, 'Failed to load categories.');
 		} finally {
 			loading = false;
 		}
@@ -33,18 +36,19 @@
 
 	async function handleCreate(e: SubmitEvent) {
 		e.preventDefault();
-		if (!categoryName.trim()) return;
+		const name = categoryName.trim();
+		if (!name) return;
 
 		creating = true;
 		try {
-			await createCategory(categoryName.trim());
-			toast.success(`Category "${categoryName}" created`);
+			await createCategory(name);
+			showSuccess(`Category "${name}" created.`);
 			categoryName = '';
 			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			queryClient.invalidateQueries({ queryKey: ['challenges'] });
 			await loadCategories();
 		} catch (err: any) {
-			toast.error(err?.message ?? 'Failed to create category');
+			showError(err, 'Failed to create category.');
 		} finally {
 			creating = false;
 		}
@@ -55,12 +59,12 @@
 
 		try {
 			await deleteCategory(name);
-			toast.success(`Category "${name}" deleted`);
+			showSuccess(`Category "${name}" deleted.`);
 			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			queryClient.invalidateQueries({ queryKey: ['challenges'] });
 			await loadCategories();
 		} catch (err: any) {
-			toast.error(err?.message ?? 'Failed to delete category');
+			showError(err, 'Failed to delete category.');
 		}
 	}
 
@@ -70,12 +74,12 @@
 
 		try {
 			await updateCategory(name, newName.trim());
-			toast.success(`Category renamed to "${newName}"`);
+			showSuccess(`Category renamed to "${newName.trim()}".`);
 			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			queryClient.invalidateQueries({ queryKey: ['challenges'] });
 			await loadCategories();
 		} catch (err: any) {
-			toast.error(err?.message ?? 'Failed to rename category');
+			showError(err, 'Failed to rename category.');
 		}
 	}
 
@@ -86,34 +90,41 @@
 	<title>Categories | {$siteContent.brand.adminTitleSuffix}</title>
 </svelte:head>
 
-<div class="space-y-8">
-	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Categories</h1>
-		<p class="text-muted-foreground mt-2">Manage challenge categories for the platform.</p>
+<div class="space-y-6">
+	<div class="flex items-center justify-between">
+		<div>
+			<h1 class="text-3xl font-bold tracking-tight">Categories</h1>
+			<p class="text-muted-foreground mt-1">Manage challenge categories for the platform</p>
+		</div>
+		<Button variant="outline" size="sm" onclick={loadCategories} disabled={loading}>
+			<RefreshCw class="mr-2 h-4 w-4 {loading ? 'animate-spin' : ''}" />
+			Refresh
+		</Button>
 	</div>
 
 	<Card.Root>
-		<Card.Header>
-			<Card.Title>Add new category</Card.Title>
-			<Card.Description>Create a new category for challenges.</Card.Description>
+		<Card.Header class="pb-3">
+			<Card.Title class="text-lg">Add new category</Card.Title>
+			<Card.Description>Create a new category for challenges</Card.Description>
 		</Card.Header>
 		<Card.Content>
-			<form onsubmit={handleCreate} class="flex max-w-md items-end gap-4">
-				<div class="grid w-full gap-1.5">
-					<Label for="name">Name</Label>
+			<form onsubmit={handleCreate} class="flex max-w-md items-center gap-3">
+				<div class="grid flex-1 gap-1.5">
+					<Label for="name" class="sr-only">Category Name</Label>
 					<Input
 						id="name"
 						placeholder="e.g. Pwn, Web, Crypto"
 						bind:value={categoryName}
 						disabled={creating}
+						class="h-9"
 					/>
 				</div>
-				<Button type="submit" disabled={creating || !categoryName.trim()} class="shrink-0">
+				<Button type="submit" size="sm" disabled={creating || !categoryName.trim()} class="shrink-0 gap-1.5">
 					{#if creating}
-						<Spinner class="mr-2 h-4 w-4" />
+						<Spinner class="h-4 w-4" />
 						Adding...
 					{:else}
-						<Plus class="mr-2 h-4 w-4" />
+						<Plus class="h-4 w-4" />
 						Add
 					{/if}
 				</Button>
@@ -121,56 +132,57 @@
 		</Card.Content>
 	</Card.Root>
 
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Existing categories</Card.Title>
-			<Card.Description>A list of all currently registered categories.</Card.Description>
-		</Card.Header>
-		<Card.Content>
-			{#if loading}
-				<div class="flex h-32 items-center justify-center">
-					<Spinner class="h-8 w-8" />
-				</div>
-			{:else if categories.length === 0}
-				<div class="text-muted-foreground flex h-32 flex-col items-center justify-center gap-2">
-					<FolderTree class="h-10 w-10 opacity-20" />
-					<p>No categories found.</p>
-				</div>
-			{:else}
+	{#if loading && categories.length === 0}
+		<div class="flex flex-col items-center justify-center py-12">
+			<Spinner class="mb-4 h-8 w-8" />
+			<p class="text-muted-foreground">Loading categories...</p>
+		</div>
+	{:else if error && categories.length === 0}
+		<div class="rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive">
+			<p class="font-semibold">Error loading categories</p>
+			<p class="text-sm">{error}</p>
+		</div>
+	{:else if categories.length === 0}
+		<Card.Root class="p-8 text-center text-muted-foreground">No categories found.</Card.Root>
+	{:else}
+		<Card.Root class="overflow-hidden border-0 shadow-sm">
+			<Card.Content class="p-0">
 				<div class="w-full overflow-x-auto">
 					<Table.Root>
 						<Table.Header class="bg-transparent [&_tr]:border-b-0">
 							<Table.Row class="border-none hover:bg-transparent">
 								<Table.Head
-									class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
+									class="text-muted-foreground/70 h-8 py-1 pl-4 text-[10px] font-bold uppercase tracking-wider"
 									>Name</Table.Head
 								>
 								<Table.Head
-									class="text-muted-foreground/70 bg-transparent text-right text-[10px] font-bold uppercase tracking-wider"
+									class="text-muted-foreground/70 h-8 py-1 pr-4 text-right text-[10px] font-bold uppercase tracking-wider"
 									>Actions</Table.Head
 								>
 							</Table.Row>
 						</Table.Header>
 						<Table.Body>
 							{#each categories as name (name)}
-								<Table.Row class="hover:bg-muted/50 group border-none transition-colors">
-									<Table.Cell class="max-w-[200px] truncate font-medium">{name}</Table.Cell>
-									<Table.Cell class="flex items-center justify-end gap-1 text-right">
+								<Table.Row class="hover:bg-muted/30 group border-none transition-colors">
+									<Table.Cell class="py-1 pl-4 font-bold">{name}</Table.Cell>
+									<Table.Cell class="space-x-1 whitespace-nowrap py-1 pr-4 text-right">
 										<Button
 											variant="ghost"
 											size="icon"
-											class="text-muted-foreground hover:text-primary h-8 w-8 transition-colors"
+											class="text-muted-foreground hover:text-primary h-7 w-7 transition-colors"
 											onclick={() => handleRename(name)}
+											aria-label={`Rename ${name}`}
 										>
-											<Pencil class="h-4 w-4" />
+											<Pencil class="h-3.5 w-3.5" />
 										</Button>
 										<Button
 											variant="ghost"
 											size="icon"
-											class="text-muted-foreground hover:text-destructive h-8 w-8 transition-colors"
+											class="text-muted-foreground hover:text-destructive h-7 w-7 transition-colors"
 											onclick={() => handleDelete(name)}
+											aria-label={`Delete ${name}`}
 										>
-											<Trash2 class="h-4 w-4" />
+											<Trash2 class="h-3.5 w-3.5" />
 										</Button>
 									</Table.Cell>
 								</Table.Row>
@@ -178,7 +190,7 @@
 						</Table.Body>
 					</Table.Root>
 				</div>
-			{/if}
-		</Card.Content>
-	</Card.Root>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 </div>

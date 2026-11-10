@@ -17,7 +17,6 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
 	import { Label } from '$lib/components/ui/label';
 	import { goto } from '$app/navigation';
@@ -123,6 +122,23 @@
 			loadChallenges();
 		} catch (err: any) {
 			showError(err, 'Failed to toggle challenges.');
+		} finally {
+			togglingHidden = false;
+		}
+	}
+
+	async function toggleSingleChallengeHidden(chall: any) {
+		const action = chall.hidden ? 'show' : 'hide';
+		if (!confirm(`Are you sure you want to ${action} "${chall.name}"?`)) return;
+
+		togglingHidden = true;
+		try {
+			await toggleChallengesHidden([chall.id]);
+			showSuccess(`Challenge "${chall.name}" is now ${chall.hidden ? 'visible' : 'hidden'}.`);
+			queryClient.invalidateQueries({ queryKey: ['challenges'] });
+			await loadChallenges();
+		} catch (err: any) {
+			showError(err, `Failed to ${action} challenge.`);
 		} finally {
 			togglingHidden = false;
 		}
@@ -338,15 +354,19 @@
 													class="text-muted-foreground/70 h-8 w-[32px] py-1 pl-3 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
 												></Table.Head>
 												<Table.Head
-													class="text-muted-foreground/70 h-8 w-[40px] py-1 pl-2 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
+													class="text-muted-foreground/70 h-8 w-[40px] py-1 pl-3 sm:pl-2 text-[10px] font-bold uppercase tracking-wider"
 												></Table.Head>
 												<Table.Head
 													class="text-muted-foreground/70 h-8 w-[60px] py-1 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
 													>ID</Table.Head
 												>
 												<Table.Head
-													class="text-muted-foreground/70 h-8 py-1 pl-4 sm:pl-0 text-[10px] font-bold uppercase tracking-wider"
+													class="text-muted-foreground/70 h-8 py-1 pl-2.5 sm:pl-2 text-[10px] font-bold uppercase tracking-wider"
 													>Name</Table.Head
+												>
+												<Table.Head
+													class="text-muted-foreground/70 h-8 py-1 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
+													>Tags</Table.Head
 												>
 												<Table.Head
 													class="text-muted-foreground/70 h-8 py-1 text-[10px] font-bold uppercase tracking-wider hidden sm:table-cell"
@@ -400,14 +420,15 @@
 															<GripVertical class="h-4 w-4" />
 														</div>
 													</Table.Cell>
-													<Table.Cell class="py-1 pl-2 hidden sm:table-cell">
+													<Table.Cell class="py-1 pl-3 sm:pl-2">
 														<Checkbox
 															checked={selectedIds.has(chall.id)}
 															onCheckedChange={() => toggleSelect(chall.id)}
+															aria-label={`Select ${chall.name}`}
 														/>
 													</Table.Cell>
 													<Table.Cell class="text-muted-foreground/60 py-1 font-medium hidden sm:table-cell">{chall.id}</Table.Cell>
-													<Table.Cell class="py-1 pl-4 sm:pl-0 font-bold">
+													<Table.Cell class="py-1 pl-2.5 sm:pl-2 font-bold">
 														<a
 															href="/challenges?id={chall.id}"
 															class="text-inherit no-underline hover:underline cursor-pointer"
@@ -424,22 +445,36 @@
 														{/if}
 													</Table.Cell>
 													<Table.Cell class="py-1 hidden sm:table-cell">
+														{#if chall.tags && chall.tags.length > 0}
+															<div class="inline-flex flex-wrap items-center gap-1.5">
+																{#each chall.tags as tag}
+																	<span
+																		class="bg-muted/75 text-muted-foreground inline-flex items-center rounded-full border border-border/60 px-2 py-0.5 text-[11px] font-medium"
+																	>
+																		{tag}
+																	</span>
+																{/each}
+															</div>
+														{/if}
+													</Table.Cell>
+													<Table.Cell class="py-1 hidden sm:table-cell">
 														<AuthorTags tags={chall.author_tags} />
 													</Table.Cell>
 													<Table.Cell class="py-1">
-														{#if chall.hidden}
-															<EyeOff class="h-4 w-4 text-amber-500 sm:hidden" />
-															<Badge
-																class="hidden sm:inline-flex border-amber-500/20 bg-amber-500/10 px-2 py-0 text-[10px] font-bold uppercase tracking-wider text-amber-500"
-																>Hidden</Badge
-															>
-														{:else}
-															<Eye class="h-4 w-4 text-green-500 sm:hidden" />
-															<Badge
-																class="hidden sm:inline-flex border-green-500/20 bg-green-500/10 px-2 py-0 text-[10px] font-bold uppercase tracking-wider text-green-500"
-																>Visible</Badge
-															>
-														{/if}
+														<button
+															type="button"
+															class="inline-flex items-center justify-center rounded p-1 hover:bg-muted/50 transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+															disabled={togglingHidden}
+															onclick={() => toggleSingleChallengeHidden(chall)}
+															title={chall.hidden ? 'Hidden - click to show' : 'Visible - click to hide'}
+															aria-label={chall.hidden ? `Hidden. Click to show ${chall.name}` : `Visible. Click to hide ${chall.name}`}
+														>
+															{#if chall.hidden}
+																<EyeOff class="h-4 w-4 text-amber-500" />
+															{:else}
+																<Eye class="h-4 w-4 text-green-500" />
+															{/if}
+														</button>
 													</Table.Cell>
 													<Table.Cell class="text-primary py-1 text-right font-mono font-bold"
 														>{chall.points ?? chall.max_points}</Table.Cell

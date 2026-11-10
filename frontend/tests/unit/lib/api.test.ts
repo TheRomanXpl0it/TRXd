@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { api } from '$lib/api';
+import { api, ApiError } from '$lib/api';
 
 describe('api transport client', () => {
 	const originalFetch = globalThis.fetch;
@@ -142,5 +142,57 @@ describe('api transport client', () => {
 		await expect(api('/offline')).rejects.toThrow(
 			'Cannot connect to server. Please check your connection.'
 		);
+	});
+
+	it('throws ApiError with status and invokes window.alert on 500 for non-GET in admin', async () => {
+		const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+		const originalPath = window.location.pathname;
+		window.history.pushState({}, '', '/admin/challenges');
+
+		mockFetch.mockResolvedValueOnce(
+			new Response(JSON.stringify({ error: 'Database transaction crashed' }), {
+				status: 500,
+				statusText: 'Internal Server Error',
+				headers: { 'content-type': 'application/json' }
+			})
+		);
+
+		let thrownErr: any;
+		try {
+			await api('/challenges/order', { method: 'PATCH', body: JSON.stringify({ chall_id: 1, new_order: 2 }) });
+		} catch (err) {
+			thrownErr = err;
+		}
+
+		expect(thrownErr).toBeInstanceOf(ApiError);
+		expect(thrownErr.status).toBe(500);
+		expect(thrownErr.message).toBe('Database transaction crashed');
+
+		expect(alertSpy).toHaveBeenCalledWith(
+			expect.stringContaining('Server Error (500): Database transaction crashed')
+		);
+
+		window.history.pushState({}, '', originalPath);
+		alertSpy.mockRestore();
+	});
+
+	it('does NOT invoke window.alert on 500 for GET requests in admin', async () => {
+		const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
+		const originalPath = window.location.pathname;
+		window.history.pushState({}, '', '/admin/challenges');
+
+		mockFetch.mockResolvedValueOnce(
+			new Response(JSON.stringify({ error: 'Server error' }), {
+				status: 500,
+				statusText: 'Internal Server Error',
+				headers: { 'content-type': 'application/json' }
+			})
+		);
+
+		await expect(api('/challenges')).rejects.toThrow('Server error');
+		expect(alertSpy).not.toHaveBeenCalled();
+
+		window.history.pushState({}, '', originalPath);
+		alertSpy.mockRestore();
 	});
 });

@@ -1,4 +1,5 @@
 import { screen, waitFor } from '@testing-library/svelte';
+import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderWithProviders } from '../../../render';
 import Page from '../../../../../src/routes/admin/categories/+page.svelte';
@@ -36,5 +37,27 @@ describe('Admin Categories Page', () => {
 
 		expect(await screen.findByText('Crypto')).toBeInTheDocument();
 		expect(screen.getByText('Web')).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Rename Web' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Delete Web' })).toBeInTheDocument();
+	});
+
+	it('creates a new category on form submission', async () => {
+		const user = userEvent.setup();
+		renderWithProviders(Page);
+
+		const input = await screen.findByPlaceholderText(/e\.g\. Pwn, Web, Crypto/i);
+		const submitBtn = screen.getByRole('button', { name: /add/i });
+
+		await user.type(input, 'Forensics');
+		await user.click(submitBtn);
+
+		expect(createCategory).toHaveBeenCalledWith('Forensics');
+	});
+
+	it('renders empty state when no categories exist', async () => {
+		vi.mocked(getCategories).mockResolvedValue([]);
+		renderWithProviders(Page);
+
+		expect(await screen.findByText('No categories found.')).toBeInTheDocument();
 	});
 });

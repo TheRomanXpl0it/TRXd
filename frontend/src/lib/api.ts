@@ -28,6 +28,20 @@ function getCookie(name: string): string | null {
 
 import type { BaseResponse } from './types';
 
+export class ApiError extends Error {
+	status: number;
+	response?: Response;
+	data?: any;
+
+	constructor(message: string, status: number, response?: Response, data?: any) {
+		super(message);
+		this.name = 'ApiError';
+		this.status = status;
+		this.response = response;
+		this.data = data;
+	}
+}
+
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 	const headers = new Headers(init.headers ?? {});
 
@@ -73,10 +87,14 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 		);
 	}
 
+	const method = (init.method || 'GET').toUpperCase();
+
 	if (!res.ok) {
 		let errorMessage = res.statusText;
+		let parsedData: any = undefined;
 		try {
 			const errorBody = await parse<BaseResponse>(res);
+			parsedData = errorBody;
 			if (typeof errorBody === 'object' && errorBody?.error) {
 				errorMessage = errorBody.error;
 			} else if (typeof errorBody === 'object' && errorBody?.message) {
@@ -92,7 +110,22 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 				errorMessage = 'Cannot connect to server. Please check your connection.';
 			}
 		}
-		throw new Error(errorMessage);
+
+		if (res.status >= 500 && method !== 'GET') {
+			if (
+				typeof window !== 'undefined' &&
+				(window.location.pathname.startsWith('/admin') || path.startsWith('/admin'))
+			) {
+				const alertText = `Server Error (${res.status}): ${errorMessage || 'Internal Server Error'}\n\nAn unexpected server error occurred while performing this action.`;
+				try {
+					window.alert(alertText);
+				} catch {
+					// safe fallback in environments where alert is not supported
+				}
+			}
+		}
+
+		throw new ApiError(errorMessage, res.status, res, parsedData);
 	}
 
 	return parse<T>(res);

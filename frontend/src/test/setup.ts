@@ -53,6 +53,11 @@ if (typeof window !== 'undefined' && !HTMLElement.prototype.scrollIntoView) {
 	HTMLElement.prototype.scrollIntoView = vi.fn();
 }
 
+if (typeof window !== 'undefined') {
+	if (!window.alert) window.alert = vi.fn();
+	if (!window.confirm) window.confirm = vi.fn(() => true);
+}
+
 // Bits UI releases pointer capture when opening a Select. JSDOM does not implement these APIs.
 if (typeof window !== 'undefined' && !HTMLElement.prototype.hasPointerCapture) {
 	HTMLElement.prototype.hasPointerCapture = () => false;

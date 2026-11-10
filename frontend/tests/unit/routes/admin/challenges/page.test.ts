@@ -155,4 +155,81 @@ describe('Admin Challenges Page', () => {
 		expect(checkbox).toBeChecked();
 		expect(label.className).toContain('font-bold');
 	});
+
+	it('renders tags column before author tags and renders eye visibility icons', async () => {
+		vi.mocked(getChallenges).mockResolvedValue([
+			{
+				id: 1,
+				name: 'Web Chall 1',
+				category: 'Web',
+				tags: ['web-intro'],
+				author_tags: ['private-hint'],
+				points: 100,
+				solves: 0,
+				hidden: false
+			},
+			{
+				id: 2,
+				name: 'Web Chall 2',
+				category: 'Web',
+				tags: ['crypto-hard'],
+				author_tags: [],
+				points: 200,
+				solves: 0,
+				hidden: true
+			}
+		] as any);
+
+		renderWithProviders(Page);
+
+		expect(await screen.findByRole('columnheader', { name: 'Tags' })).toBeInTheDocument();
+		expect(screen.getByRole('columnheader', { name: 'Author tags' })).toBeInTheDocument();
+		expect(screen.getByText('web-intro')).toBeInTheDocument();
+		expect(screen.getByText('crypto-hard')).toBeInTheDocument();
+
+		// Check selection checkbox on row
+		expect(screen.getByRole('checkbox', { name: 'Select Web Chall 1' })).toBeInTheDocument();
+		expect(screen.getByRole('checkbox', { name: 'Select Web Chall 2' })).toBeInTheDocument();
+
+		// Check visible and hidden eye icons
+		const visibleBtn = screen.getByRole('button', { name: /visible\. click to hide web chall 1/i });
+		const hiddenBtn = screen.getByRole('button', { name: /hidden\. click to show web chall 2/i });
+		expect(visibleBtn).toBeInTheDocument();
+		expect(visibleBtn.querySelector('svg')).toHaveClass('text-green-500');
+		expect(hiddenBtn).toBeInTheDocument();
+		expect(hiddenBtn.querySelector('svg')).toHaveClass('text-amber-500');
+	});
+
+	it('toggles challenge visibility on eye button click after browser confirm', async () => {
+		const confirmSpy = vi.spyOn(window, 'confirm');
+		vi.mocked(getChallenges).mockResolvedValue([
+			{
+				id: 1,
+				name: 'Web Chall 1',
+				category: 'Web',
+				points: 100,
+				solves: 0,
+				hidden: false
+			}
+		] as any);
+
+		renderWithProviders(Page);
+
+		const hideBtn = await screen.findByRole('button', { name: /visible\. click to hide web chall 1/i });
+		expect(hideBtn).toBeInTheDocument();
+
+		// Case 1: Admin cancels confirm
+		confirmSpy.mockReturnValueOnce(false);
+		await userEvent.click(hideBtn);
+		expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to hide "Web Chall 1"?');
+		expect(toggleChallengesHidden).not.toHaveBeenCalled();
+
+		// Case 2: Admin accepts confirm
+		confirmSpy.mockReturnValueOnce(true);
+		await userEvent.click(hideBtn);
+		expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to hide "Web Chall 1"?');
+		expect(toggleChallengesHidden).toHaveBeenCalledWith([1]);
+
+		confirmSpy.mockRestore();
+	});
 });
