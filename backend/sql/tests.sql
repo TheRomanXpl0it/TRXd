@@ -413,6 +413,11 @@ BEGIN
   UPDATE challenges SET category='cat-1' WHERE name='chall-3';
   PERFORM assert(sort_order=4, 'sort_order_move_back_chall_3') FROM challenges WHERE name='chall-3';
 
+  -- update test-chall category to itself, so it should not change the sort order
+  UPDATE challenges SET category='cat-1' WHERE name='test-chall';
+  PERFORM assert(sort_order=3, 'sort_order_move_test_chall_same_category') FROM challenges WHERE name='test-chall';
+  PERFORM assert(sort_order=4, 'sort_order_move_test_chall_same_category_chall_3') FROM challenges WHERE name='chall-3';
+
   -- delete test-chall, so chall-3 should dropp off one position
   DELETE FROM challenges WHERE name='test-chall';
   PERFORM assert(sort_order=3, 'sort_order_delete_new_chall') FROM challenges WHERE name='chall-3';
@@ -434,6 +439,12 @@ BEGIN
   PERFORM assert(sort_order=1, 'sort_order_move_chall_3_down_chall_1') FROM challenges WHERE name='chall-1';
   PERFORM assert(sort_order=2, 'sort_order_move_chall_3_down_chall_3') FROM challenges WHERE name='chall-3';
   PERFORM assert(sort_order=3, 'sort_order_move_chall_3_down_chall_4') FROM challenges WHERE name='chall-4';
+  
+  -- move chall-3 in the same place, it should be unchanged
+  PERFORM update_challenge_sort_order((SELECT id FROM challenges WHERE name='chall-3'), 2);
+  PERFORM assert(sort_order=1, 'sort_order_move_chall_3_same_chall_1') FROM challenges WHERE name='chall-1';
+  PERFORM assert(sort_order=2, 'sort_order_move_chall_3_same_chall_3') FROM challenges WHERE name='chall-3';
+  PERFORM assert(sort_order=3, 'sort_order_move_chall_3_same_chall_4') FROM challenges WHERE name='chall-4';
 
   -- move chall-3 over chall-4, it should be last then
   PERFORM update_challenge_sort_order((SELECT id FROM challenges WHERE name='chall-3'), 3);

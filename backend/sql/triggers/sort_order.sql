@@ -83,4 +83,5 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER tr_sort_order_update_challenge_category
 AFTER UPDATE OF category ON challenges
 FOR EACH ROW
+WHEN (OLD.category IS DISTINCT FROM NEW.category)
 EXECUTE FUNCTION fn_sort_order_update_challenge_category();
