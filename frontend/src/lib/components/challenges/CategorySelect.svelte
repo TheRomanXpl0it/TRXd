@@ -19,7 +19,7 @@
 		className = '',
 		widthClass = 'w-[220px]',
 		id = ''
-	} = $props<{
+	}: {
 		items?: Item[];
 		value?: string;
 		placeholder?: string;
@@ -28,7 +28,7 @@
 		className?: string;
 		widthClass?: string;
 		id?: string;
-	}>();
+	} = $props();
 
 	let open = $state(false);
 	let triggerRef = $state<HTMLButtonElement>(null!);

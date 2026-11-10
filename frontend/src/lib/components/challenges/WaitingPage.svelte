@@ -2,10 +2,10 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { Code, Database, Lock, Shield } from '@lucide/svelte';
 
-	let { startTime, title = 'Starting soon' } = $props<{
+	let { startTime, title = 'Starting soon' }: {
 		startTime: string | null;
 		title?: string;
-	}>();
+	} = $props();
 
 	let timeLeft = $state({
 		days: 0,

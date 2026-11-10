@@ -6,7 +6,7 @@
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { formatDate, formatTimeSince, formatNumber } from '$lib/utils/formatting';
 
-	let { solves } = $props<{ solves: any[] | undefined }>();
+	let { solves }: { solves: any[] | undefined } = $props();
 
 	type SortKey = 'name' | 'category' | 'points' | 'timestamp';
 

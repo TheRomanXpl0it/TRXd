@@ -2,10 +2,10 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 
-	let { Component, innerProps = $bindable({}) } = $props<{
+	let { Component, innerProps = $bindable({}) }: {
 		Component: any;
 		innerProps?: any;
-	}>();
+	} = $props();
 
 	const queryClient = new QueryClient({
 		defaultOptions: {

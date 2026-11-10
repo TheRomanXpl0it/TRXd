@@ -16,12 +16,12 @@
 		class: className = '',
 		width = 32,
 		height = 32
-	} = $props<{
+	}: {
 		country: string;
 		class?: string;
 		width?: number | string;
 		height?: number | string;
-	}>();
+	} = $props();
 
 	let flagUrl = $state('');
 	let loadId = 0;

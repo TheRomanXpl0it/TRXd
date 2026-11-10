@@ -16,12 +16,12 @@
 		placeholder = 'No nationality',
 		id,
 		className = ''
-	} = $props<{
+	}: {
 		value?: string;
 		placeholder?: string;
 		id?: string;
 		className?: string;
-	}>();
+	} = $props();
 
 	const countryItems = getCountryItems();
 	let countrySearch = $state('');

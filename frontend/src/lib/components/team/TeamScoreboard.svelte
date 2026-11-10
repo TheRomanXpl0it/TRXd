@@ -12,7 +12,7 @@
 	import { formatTimeSince } from '$lib/utils/formatting';
 
 	// Prop (team contains solves[] and members[])
-	let { team } = $props<{ team: any }>();
+	let { team }: { team: any } = $props();
 	const solves = $derived(Array.isArray(team?.solves) ? team.solves : []);
 
 	// Map of memberId -> memberName for quick lookup

@@ -13,7 +13,7 @@
 		hint,
 		multiline = false,
 		rows = 3
-	} = $props<{
+	}: {
 		id: string;
 		label: string;
 		value?: string;
@@ -23,7 +23,7 @@
 		hint?: string;
 		multiline?: boolean;
 		rows?: number;
-	}>();
+	} = $props();
 </script>
 
 <div class="space-y-2">

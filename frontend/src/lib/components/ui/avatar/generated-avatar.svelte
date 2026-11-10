@@ -7,7 +7,7 @@
 		seed,
 		size = 120,
 		class: className = ''
-	} = $props<{ seed: string; size?: number; class?: string }>();
+	}: { seed: string; size?: number; class?: string } = $props();
 
 	const uid = `av-${++avatarCounter}`;
 

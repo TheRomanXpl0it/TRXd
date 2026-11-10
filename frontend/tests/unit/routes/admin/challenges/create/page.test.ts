@@ -73,7 +73,7 @@ describe('Admin Challenge Create Page', () => {
 		await user.type(screen.getByLabelText(/challenge name/i), 'Container Test');
 
 		const categorySelect = screen.getByLabelText('Category');
-		const instanceTypeSelect = screen.getByRole('combobox');
+		const instanceTypeSelect = screen.getAllByRole('combobox')[1];
 
 		expect(categorySelect).toHaveClass('rounded-lg');
 		await fireEvent.keyDown(categorySelect, { key: 'ArrowDown' });
@@ -91,7 +91,8 @@ describe('Admin Challenge Create Page', () => {
 		await user.type(screen.getByLabelText(/connecting host/i), 'container.trxd.cc');
 		await user.type(screen.getByLabelText(/^port$/i), '31337');
 
-		const connTypeSelect = screen.getByRole('combobox');
+		const comboboxes = screen.getAllByRole('combobox');
+		const connTypeSelect = comboboxes[comboboxes.length - 1];
 		await user.click(connTypeSelect);
 		const tcpOptions = await screen.findAllByText('TCP');
 		await user.click(tcpOptions[tcpOptions.length - 1]);

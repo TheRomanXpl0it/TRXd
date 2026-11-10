@@ -4,11 +4,11 @@
 		children,
 		variant = 'default',
 		class: className = ''
-	} = $props<{
+	}: {
 		children: Snippet;
 		variant?: 'default' | 'category' | 'type';
 		class?: string;
-	}>();
+	} = $props();
 
 	const baseClasses = 'inline-flex items-center rounded px-2 py-0.5 text-xs font-medium';
 

@@ -9,14 +9,14 @@
 		edgeOverlayOpacity = 0.92,
 		darkEdgeOverlayOpacity = 0.84,
 		theme = 'default'
-	} = $props<{
+	}: {
 		opacity?: number;
 		overlayOpacity?: number;
 		blurAmount?: number;
 		edgeOverlayOpacity?: number;
 		darkEdgeOverlayOpacity?: number;
 		theme?: PixelBackgroundTheme;
-	}>();
+	} = $props();
 
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D | null;

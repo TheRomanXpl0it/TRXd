@@ -5,11 +5,11 @@
 		placeholder = 'Add tags...',
 		value = $bindable<string[]>([]),
 		id
-	} = $props<{
+	}: {
 		placeholder?: string;
 		value?: string[];
 		id?: string;
-	}>();
+	} = $props();
 
 	let inputVal = $state('');
 	let inputEl: HTMLInputElement | null = null;
