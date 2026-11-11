@@ -10,7 +10,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import * as Card from '$lib/components/ui/card';
-	import { Eye, EyeOff } from '@lucide/svelte';
+	import { Eye, EyeOff, RefreshCw } from '@lucide/svelte';
 
 	type ConfigType =
 		| 'bool'
@@ -329,14 +329,20 @@
 			<h1 class="text-3xl font-bold tracking-tight">Configuration</h1>
 			<p class="text-muted-foreground mt-1">Manage global platform settings</p>
 		</div>
-		<Button onclick={save} disabled={saving || !hasChanges || hasInvalidValues}>
-			{#if saving}
-				<Spinner class="mr-2 h-4 w-4" />
-				Saving...
-			{:else}
-				Save changes
-			{/if}
-		</Button>
+		<div class="flex items-center gap-2">
+			<Button variant="outline" size="sm" onclick={loadConfigs} disabled={loading || saving || !isAdmin}>
+				<RefreshCw class="mr-2 h-4 w-4 {loading ? 'animate-spin' : ''}" />
+				Refresh
+			</Button>
+			<Button size="sm" onclick={save} disabled={saving || !hasChanges || hasInvalidValues}>
+				{#if saving}
+					<Spinner class="mr-2 h-4 w-4" />
+					Saving...
+				{:else}
+					Save changes
+				{/if}
+			</Button>
+		</div>
 	</div>
 
 	{#if loading}

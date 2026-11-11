@@ -73,6 +73,7 @@ export interface Challenge {
 	min_points?: number;
 	initial_points?: number;
 	decay?: number;
+	sort_order?: number;
 
 	// Metadata
 	tags: string[];

@@ -2,16 +2,18 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { getChallenges, groupByCategory } from '$lib/challenges';
+	import { getChallenges, groupByCategory, updateChallengeOrder } from '$lib/challenges';
 	import { authState } from '$lib/stores/auth';
 	import { untrack } from 'svelte';
-	import { createQuery } from '@tanstack/svelte-query';
+	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
+	import { getConfigs } from '$lib/config';
+	import { showSuccess, showError } from '$lib/utils/toast';
 
 	import ChallengeFilters from '$lib/components/challenges/ChallengeFilters.svelte';
 	import ChallengeCard from '$lib/components/challenges/ChallengeCard.svelte';
 	import ChallengeModal from '$lib/components/challenges/ChallengeModal.svelte';
 	import WaitingPage from '$lib/components/challenges/WaitingPage.svelte';
-	import { Users, ChevronDown } from '@lucide/svelte';
+	import { Users, ChevronDown, Ellipsis } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import type { Challenge } from '$lib/types';
 
@@ -25,6 +27,30 @@
 
 	// 1. Basic Auth Deriveds
 	const isAdmin = $derived(authState.user?.role === 'Admin' || authState.user?.role === 'Author');
+	const isFullAdmin = $derived(authState.user?.role === 'Admin');
+	let fixedOrderEnabled = $state(false);
+	const queryClient = useQueryClient();
+
+	async function loadFixedOrderConfig() {
+		if (!isFullAdmin) return;
+		try {
+			const confs = await getConfigs();
+			const fixedConf = Array.isArray(confs)
+				? confs.find((c: any) => c.key === 'chall-fixed-order')
+				: null;
+			fixedOrderEnabled = fixedConf?.value === true || fixedConf?.value === 'true';
+		} catch {
+			fixedOrderEnabled = false;
+		}
+	}
+
+	$effect(() => {
+		if (isFullAdmin) {
+			loadFixedOrderConfig();
+		} else {
+			fixedOrderEnabled = false;
+		}
+	});
 	const upcoming = $derived.by(() => {
 		if (!authState.ready || !authState.startTime) return false;
 		return new Date(authState.startTime).getTime() > Date.now();
@@ -150,7 +176,119 @@
 		}
 	});
 
-	const grouped = $derived.by(() => groupByCategory(filteredChallenges));
+	const canDragReorder = $derived(
+		isFullAdmin &&
+		fixedOrderEnabled &&
+		challengeView !== 'sidebar' &&
+		!debouncedSearch &&
+		filterTags.length === 0
+	);
+
+	const grouped = $derived.by(() => {
+		const raw = groupByCategory(filteredChallenges);
+		if (isFullAdmin && fixedOrderEnabled) {
+			return raw.map(([cat, items]) => [
+				cat,
+				items.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+			] as [string, Challenge[]]);
+		}
+		return raw;
+	});
+
+	let draggedChall = $state<{ id: number; category: string; sort_order?: number } | null>(null);
+	let dropTargetId = $state<number | null>(null);
+	let isReordering = $state(false);
+
+	function handleDragStart(e: DragEvent, ch: any, category: string) {
+		if (!canDragReorder) return;
+		draggedChall = { id: ch.id, category, sort_order: ch.sort_order };
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/plain', String(ch.id));
+			const card = (e.currentTarget as HTMLElement | null)?.closest('[data-challenge-card]');
+			if (card && typeof e.dataTransfer.setDragImage === 'function') {
+				e.dataTransfer.setDragImage(card, 30, 20);
+			}
+		}
+	}
+
+	function handleDragOver(e: DragEvent, ch: any, category: string) {
+		if (!draggedChall || draggedChall.category !== category || draggedChall.id === ch.id) {
+			return;
+		}
+		e.preventDefault();
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'move';
+		}
+		dropTargetId = ch.id;
+	}
+
+	function handleDragLeave(e: DragEvent, ch: any) {
+		const related = e.relatedTarget as Node | null;
+		const current = e.currentTarget as Node | null;
+		if (current && related && current.contains(related)) {
+			return;
+		}
+		if (dropTargetId === ch.id) {
+			dropTargetId = null;
+		}
+	}
+
+	function handleDragEnd() {
+		draggedChall = null;
+		dropTargetId = null;
+	}
+
+	async function handleDrop(e: DragEvent, targetChall: any, category: string, categoryItems: any[]) {
+		e.preventDefault();
+		if (!draggedChall || draggedChall.category !== category || draggedChall.id === targetChall.id) {
+			handleDragEnd();
+			return;
+		}
+
+		const sourceId = draggedChall.id;
+		const sourceOrder = draggedChall.sort_order;
+		const targetId = targetChall.id;
+		handleDragEnd();
+
+		const fromIndex = categoryItems.findIndex((c) => c.id === sourceId);
+		const toIndex = categoryItems.findIndex((c) => c.id === targetId);
+		if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
+
+		const newOrder = typeof targetChall.sort_order === 'number'
+			? targetChall.sort_order
+			: (toIndex + 1);
+
+		if (sourceOrder !== undefined && sourceOrder === newOrder) return;
+
+		const prevData = queryClient.getQueryData<Challenge[]>(['challenges']);
+		if (prevData) {
+			const updated = [...prevData];
+			const fromIdx = updated.findIndex((c) => c.id === sourceId);
+			const toIdx = updated.findIndex((c) => c.id === targetId);
+			if (fromIdx !== -1 && toIdx !== -1) {
+				const [moved] = updated.splice(fromIdx, 1);
+				moved.sort_order = newOrder;
+				updated.splice(toIdx, 0, moved);
+				queryClient.setQueryData(['challenges'], updated);
+			}
+		}
+
+		isReordering = true;
+		try {
+			await updateChallengeOrder(sourceId, newOrder);
+			showSuccess('Challenge reordered.');
+			queryClient.invalidateQueries({ queryKey: ['challenges'] });
+		} catch (err: any) {
+			if (prevData) {
+				queryClient.setQueryData(['challenges'], prevData);
+			}
+			queryClient.invalidateQueries({ queryKey: ['challenges'] });
+			showError(err, 'Failed to reorder challenge.');
+		} finally {
+			isReordering = false;
+		}
+	}
 
 	function openChallenge(ch: any) {
 		selectedId = ch?.id ?? null;
@@ -293,13 +431,44 @@
 					</button>
 				</h2>
 				{#if !isCollapsed}
-					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					<div class="grid grid-cols-1 gap-4 pt-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 						{#each items as ch (ch.id)}
-							<ChallengeCard
-								challenge={ch}
-								countdown={countdowns[ch.id] ?? 0}
-								onclick={() => openChallenge(ch)}
-							/>
+							<div
+								role="group"
+								aria-label={`Challenge card ${ch.name}`}
+								class="group relative transition-all duration-200 {draggedChall?.id === ch.id
+									? 'opacity-40 scale-[0.98]'
+									: ''} {dropTargetId === ch.id
+									? 'ring-2 ring-primary ring-offset-2 rounded-[10px]'
+									: ''}"
+								ondragover={(e) => handleDragOver(e, ch, category)}
+								ondragleave={(e) => handleDragLeave(e, ch)}
+								ondrop={(e) => handleDrop(e, ch, category, items)}
+								data-challenge-card
+							>
+								{#if canDragReorder}
+									<div
+										role="button"
+										tabindex="0"
+										draggable="true"
+										aria-label={`Drag to reorder ${ch.name}`}
+										class="absolute -top-2.5 left-1/2 -translate-x-1/2 z-20 hidden sm:flex items-center justify-center rounded-full border border-border bg-background px-2 py-0.5 text-muted-foreground/60 shadow-sm cursor-grab active:cursor-grabbing hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity select-none"
+										ondragstart={(e) => handleDragStart(e, ch, category)}
+										ondragend={handleDragEnd}
+										onclick={(e) => e.stopPropagation()}
+										onkeydown={(e) => {
+											if (e.key === ' ' || e.key === 'Enter') e.preventDefault();
+										}}
+									>
+										<Ellipsis class="h-3.5 w-3.5" />
+									</div>
+								{/if}
+								<ChallengeCard
+									challenge={ch}
+									countdown={countdowns[ch.id] ?? 0}
+									onclick={() => openChallenge(ch)}
+								/>
+							</div>
 						{/each}
 					</div>
 				{/if}

@@ -178,4 +178,40 @@ describe('Admin configs page', () => {
 		expect(showSuccessMock).toHaveBeenCalled();
 		expect(showErrorMock).not.toHaveBeenCalled();
 	});
+
+	it('refreshes configs when clicking the refresh button', async () => {
+		getConfigsMock.mockResolvedValueOnce([
+			{
+				key: 'site-name',
+				type: 'string',
+				value: 'Old Name',
+				category: 'general',
+				name: 'Site Name'
+			}
+		]);
+
+		render(Page);
+		await screen.findByText('Site Name');
+		const input = screen.getByDisplayValue('Old Name');
+		expect(input).toBeInTheDocument();
+
+		getConfigsMock.mockResolvedValueOnce([
+			{
+				key: 'site-name',
+				type: 'string',
+				value: 'New Refreshed Name',
+				category: 'general',
+				name: 'Site Name'
+			}
+		]);
+
+		const refreshBtn = screen.getByRole('button', { name: /Refresh/i });
+		expect(refreshBtn).toBeInTheDocument();
+		await fireEvent.click(refreshBtn);
+
+		await waitFor(() => {
+			expect(getConfigsMock).toHaveBeenCalledTimes(2);
+			expect(screen.getByDisplayValue('New Refreshed Name')).toBeInTheDocument();
+		});
+	});
 });

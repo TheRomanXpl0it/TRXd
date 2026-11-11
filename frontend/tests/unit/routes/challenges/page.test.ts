@@ -6,9 +6,13 @@ import Page from '../../../../src/routes/challenges/+page.svelte';
 import { authState } from '$lib/stores/auth';
 import { uiStore } from '$lib/stores/ui.svelte';
 import { createQuery } from '@tanstack/svelte-query';
+import { getConfigs } from '$lib/config';
 import { tick } from 'svelte';
 
 // Mock dependencies
+vi.mock('$lib/config', () => ({
+	getConfigs: vi.fn().mockResolvedValue([])
+}));
 vi.mock('$lib/stores/auth', () => ({
 	authState: {
 		user: null,
@@ -25,7 +29,8 @@ vi.mock('@tanstack/svelte-query', async (importOriginal) => {
 		createQuery: vi.fn(),
 		useQueryClient: vi.fn(() => ({
 			setQueryData: vi.fn(),
-			refetchQueries: vi.fn()
+			refetchQueries: vi.fn(),
+			invalidateQueries: vi.fn()
 		}))
 	};
 });
@@ -324,5 +329,66 @@ describe('Challenges Page', () => {
 			'Easy Chall (Order 2)',
 			'Medium Chall (Order 3)'
 		]);
+	});
+
+	it('renders three horizontal dots drag handle for Admins when chall-fixed-order is enabled in grid view', async () => {
+		authState.user = { role: 'Admin' } as any;
+		uiStore.challengeView = 'normal';
+		vi.mocked(getConfigs).mockResolvedValue([
+			{ key: 'chall-fixed-order', value: 'true' }
+		] as any);
+
+		vi.mocked(createQuery).mockReturnValue({
+			data: [
+				{ id: 10, name: 'Web One', category: 'Web', points: 100, sort_order: 1 },
+				{ id: 11, name: 'Web Two', category: 'Web', points: 200, sort_order: 2 }
+			],
+			isLoading: false,
+			error: null
+		} as any);
+
+		renderWithProviders(Page);
+
+		const handle = await screen.findByRole('button', { name: 'Drag to reorder Web One' });
+		expect(handle).toBeInTheDocument();
+		expect(handle).toHaveAttribute('draggable', 'true');
+	});
+
+	it('does NOT render drag handle for Authors or Players even if fixed order is enabled', async () => {
+		authState.user = { role: 'Author' } as any;
+		uiStore.challengeView = 'normal';
+		vi.mocked(getConfigs).mockResolvedValue([
+			{ key: 'chall-fixed-order', value: 'true' }
+		] as any);
+
+		vi.mocked(createQuery).mockReturnValue({
+			data: [{ id: 10, name: 'Web One', category: 'Web', points: 100, sort_order: 1 }],
+			isLoading: false,
+			error: null
+		} as any);
+
+		renderWithProviders(Page);
+
+		await screen.findByText('Web One');
+		expect(screen.queryByRole('button', { name: 'Drag to reorder Web One' })).not.toBeInTheDocument();
+	});
+
+	it('does NOT render drag handle for Admins when chall-fixed-order is false', async () => {
+		authState.user = { role: 'Admin' } as any;
+		uiStore.challengeView = 'normal';
+		vi.mocked(getConfigs).mockResolvedValue([
+			{ key: 'chall-fixed-order', value: 'false' }
+		] as any);
+
+		vi.mocked(createQuery).mockReturnValue({
+			data: [{ id: 10, name: 'Web One', category: 'Web', points: 100, sort_order: 1 }],
+			isLoading: false,
+			error: null
+		} as any);
+
+		renderWithProviders(Page);
+
+		await screen.findByText('Web One');
+		expect(screen.queryByRole('button', { name: 'Drag to reorder Web One' })).not.toBeInTheDocument();
 	});
 });
