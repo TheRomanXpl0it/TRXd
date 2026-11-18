@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { resetUserPassword, getUserByEmail, getUserByName, updateUserRole } from '$lib/user';
+	import {
+		getUsers,
+		resetUserPassword,
+		getUserByEmail,
+		getUserByName,
+		updateUserRole
+	} from '$lib/user';
 	import { Button } from '$lib/components/ui/button';
 	import { authState } from '$lib/stores/auth';
 	import { siteContent } from '$lib/site-content';
@@ -8,11 +14,15 @@
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import * as Select from '$lib/components/ui/select';
+	import * as Pagination from '$lib/components/ui/pagination';
+	import ErrorMessage from '$lib/components/ui/error-message.svelte';
 	import { Select as SelectPrimitive } from 'bits-ui';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { Search, KeyRound, User as UserIcon, ExternalLink, ShieldAlert } from '@lucide/svelte';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import * as Dialog from '$lib/components/ui/dialog';
+
+	const perPage = 20;
 
 	let query = $state('');
 	let searchType = $state<'name' | 'email'>('name');
@@ -20,30 +30,26 @@
 	let results = $state<any[]>([]);
 	let searched = $state(false);
 
+	let browseUsers = $state<any[]>([]);
+	let browseTotal = $state(0);
+	let browsePage = $state(1);
+	let browseLoading = $state(false);
+	let browseError = $state<string | null>(null);
+	let fetchedInitial = $state(false);
+
 	let selectedUser = $state<any>(null);
 	let newPassword = $state('');
 	let showResetDialog = $state(false);
 	let resetting = $state(false);
 	let changingRoleIds = $state<Set<number>>(new Set());
 	let searchRequestId = 0;
+	let browseRequestId = 0;
 
 	const userMode = $derived(authState.userMode);
-	const lookupSubject = $derived(userMode ? 'team name' : 'name');
-	const pageDescription = $derived(
-		userMode
-			? 'Search users through their team records and manage account security'
-			: 'Search users and manage account security'
-	);
-	const searchDescription = $derived(
-		userMode
-			? 'Look up a user by the exact team name or by the linked email address'
-			: 'Look up a user by their exact name or email address'
-	);
-	const namePlaceholder = $derived(
-		userMode ? 'Exact team name (e.g. team rocket)' : 'Exact username (e.g. alice)'
-	);
-	const identityHeader = $derived(userMode ? 'Team / Email' : 'Name / Username');
-	const emptyStateLabel = $derived(userMode ? 'team' : 'user');
+	const isAdmin = $derived(authState.user?.role === 'Admin');
+	const isSearching = $derived(query.trim().length > 0);
+	const displayedUsers = $derived(isSearching ? results : browseUsers);
+	const browsePages = $derived(Math.ceil(browseTotal / perPage));
 	const resetTargetId = $derived(
 		selectedUser ? (userMode ? (selectedUser.user_id ?? null) : selectedUser.id) : null
 	);
@@ -57,6 +63,31 @@
 		if (user?.role === 'Author' || user?.role === 'Admin') return user.role;
 		return 'Player';
 	}
+
+	async function loadUsers(page = 1) {
+		if (!isAdmin) return;
+		const reqId = ++browseRequestId;
+		browseLoading = true;
+		browseError = null;
+		try {
+			const res = await getUsers(page, perPage);
+			if (reqId !== browseRequestId) return;
+			browseUsers = Array.isArray(res?.data) ? res.data : [];
+			browseTotal = res?.pagination?.total ?? browseUsers.length;
+			browsePage = page;
+		} catch (err: any) {
+			if (reqId !== browseRequestId) return;
+			browseError = err?.message ?? 'Failed to load users';
+		} finally {
+			if (reqId === browseRequestId) browseLoading = false;
+		}
+	}
+
+	$effect(() => {
+		if (!authState.ready || !isAdmin || fetchedInitial) return;
+		fetchedInitial = true;
+		loadUsers(1);
+	});
 
 	// Debounced auto-search: fires 400ms after the user stops typing
 	$effect(() => {
@@ -133,6 +164,9 @@
 			results = results.map((result) =>
 				getRoleTargetId(result) === userId ? { ...result, role: newRole } : result
 			);
+			browseUsers = browseUsers.map((entry) =>
+				getRoleTargetId(entry) === userId ? { ...entry, role: newRole } : entry
+			);
 			showSuccess(`Role for ${user.name} updated to ${newRole}.`);
 		} catch (err: any) {
 			showError(err, 'Failed to update user role');
@@ -151,13 +185,13 @@
 <div class="space-y-6">
 	<div>
 		<h1 class="text-3xl font-bold tracking-tight">Manage users</h1>
-		<p class="text-muted-foreground mt-1">{pageDescription}</p>
+		<p class="text-muted-foreground mt-1">Manage users, roles, and account security</p>
 	</div>
 
 	<Card.Root>
 		<Card.Header>
 			<Card.Title class="text-lg">Search users</Card.Title>
-			<Card.Description>{searchDescription}</Card.Description>
+			<Card.Description>Look up a user by name or email address</Card.Description>
 		</Card.Header>
 		<Card.Content>
 			<form
@@ -184,7 +218,7 @@
 							searched = false;
 						}}
 					>
-						{userMode ? 'Team' : 'Name'}
+						Name
 					</button>
 					<button
 						type="button"
@@ -213,9 +247,7 @@
 					{/if}
 					<Input
 						bind:value={query}
-						placeholder={searchType === 'name'
-							? namePlaceholder
-							: 'Email address (e.g. alice@ctf.io)'}
+						placeholder={searchType === 'name' ? 'Name' : 'Email'}
 						class="pl-9"
 					/>
 				</div>
@@ -224,7 +256,14 @@
 		</Card.Content>
 	</Card.Root>
 
-	{#if results.length > 0}
+	{#if !isSearching && browseLoading && browseUsers.length === 0}
+		<div class="flex flex-col items-center justify-center py-12">
+			<Spinner class="mb-4 h-8 w-8" />
+			<p class="text-muted-foreground">Loading users...</p>
+		</div>
+	{:else if !isSearching && browseError && browseUsers.length === 0}
+		<ErrorMessage title="Error loading users" message={browseError} />
+	{:else if displayedUsers.length > 0}
 		<Card.Root class="overflow-hidden border-0 shadow-sm">
 			<Card.Content class="p-0">
 				<div class="relative mx-4 overflow-auto sm:mx-6">
@@ -237,7 +276,7 @@
 								>
 								<Table.Head
 									class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
-									>{identityHeader}</Table.Head
+									>User</Table.Head
 								>
 								<Table.Head
 									class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
@@ -250,7 +289,7 @@
 							</Table.Row>
 						</Table.Header>
 						<Table.Body>
-							{#each results as user (user.id)}
+							{#each displayedUsers as user (user.id)}
 								{@const roleTargetId = getRoleTargetId(user)}
 								{@const editableRole = getEditableRole(user)}
 								<Table.Row class="hover:bg-muted/50 group border-none transition-colors">
@@ -258,14 +297,8 @@
 									<Table.Cell>
 										<div class="flex flex-col">
 											<span class="text-sm font-medium">{user.name}</span>
-											{#if userMode}
-												<span class="text-muted-foreground text-xs">
-													{user.email || 'No email set'}
-												</span>
-											{:else}
-												<span class="text-muted-foreground text-xs"
-													>@{user.username || user.name}</span
-												>
+											{#if user.email}
+												<span class="text-muted-foreground text-xs">{user.email}</span>
 											{/if}
 										</div>
 									</Table.Cell>
@@ -278,6 +311,9 @@
 										>
 											<Select.Trigger
 												aria-label={`Role for ${user.name}`}
+												title={userMode && roleTargetId === null
+													? 'Search by name or email to edit role'
+													: undefined}
 												class="border-border/80 bg-card hover:bg-accent/60 focus-visible:ring-primary/30 h-9 min-w-29 rounded-lg px-3 text-xs font-semibold shadow-xs transition-all"
 											>
 												<SelectPrimitive.Value />
@@ -311,26 +347,28 @@
 									</Table.Cell>
 									<Table.Cell class="text-right">
 										<div class="flex items-center justify-end gap-1">
-											<a
-												href="/account/{user.id}"
-												target="_blank"
-												rel="noopener noreferrer"
-												class="text-muted-foreground hover:text-foreground hover:bg-muted inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs transition-colors"
-											>
-												<ExternalLink class="h-3.5 w-3.5" />
-												Profile
-											</a>
 											{#if !userMode || user.user_id}
 												<Button
 													variant="ghost"
 													size="sm"
-													class="text-muted-foreground hover:text-foreground h-8 gap-2 transition-colors"
+													class="text-muted-foreground hover:text-foreground h-8 gap-1.5 px-2.5 text-xs transition-colors"
 													onclick={() => openReset(user)}
 												>
 													<KeyRound class="h-3.5 w-3.5" />
 													Reset
 												</Button>
 											{/if}
+											<Button
+												variant="ghost"
+												size="sm"
+												href="/account/{user.id}"
+												target="_blank"
+												rel="noopener noreferrer"
+												class="text-muted-foreground hover:text-foreground h-8 gap-1.5 px-2.5 text-xs transition-colors"
+											>
+												<ExternalLink class="h-3.5 w-3.5" />
+												Profile
+											</Button>
 										</div>
 									</Table.Cell>
 								</Table.Row>
@@ -340,16 +378,54 @@
 				</div>
 			</Card.Content>
 		</Card.Root>
-	{:else if searched && query && !loading}
+
+		{#if !isSearching && browsePages > 1}
+			<div class="mt-4 flex justify-center">
+				<Pagination.Root
+					count={browseTotal}
+					{perPage}
+					page={browsePage}
+					onPageChange={(p) => loadUsers(p)}
+					siblingCount={1}
+				>
+					{#snippet children({ pages, currentPage })}
+						<Pagination.Content>
+							<Pagination.Item>
+								<Pagination.PrevButton />
+							</Pagination.Item>
+							{#each pages as page (page.key)}
+								{#if page.type === 'ellipsis'}
+									<Pagination.Item>
+										<Pagination.Ellipsis />
+									</Pagination.Item>
+								{:else}
+									<Pagination.Item>
+										<Pagination.Link {page} isActive={currentPage === page.value}>
+											{page.value}
+										</Pagination.Link>
+									</Pagination.Item>
+								{/if}
+							{/each}
+							<Pagination.Item>
+								<Pagination.NextButton />
+							</Pagination.Item>
+						</Pagination.Content>
+					{/snippet}
+				</Pagination.Root>
+			</div>
+		{/if}
+	{:else if isSearching && searched && !loading}
 		<div
 			class="bg-muted/20 flex flex-col items-center justify-center rounded-lg border border-dashed py-12"
 		>
 			<UserIcon class="text-muted-foreground mb-2 h-10 w-10 opacity-20" />
 			<p class="text-muted-foreground text-sm">
-				No {emptyStateLabel} found with {searchType === 'name' ? lookupSubject : 'email'}
+				No user found with {searchType === 'name' ? 'name' : 'email'}
 				<span class="text-foreground font-medium">"{query}"</span>
 			</p>
 		</div>
+	{:else if !isSearching && !browseLoading}
+		<Card.Root class="text-muted-foreground p-8 text-center">No users found.</Card.Root>
 	{/if}
 </div>
 

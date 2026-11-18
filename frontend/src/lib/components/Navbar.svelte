@@ -29,7 +29,7 @@
 	const navItems = [
 		{ title: 'Challenges', url: '/challenges', icon: Joystick },
 		{ title: 'Scoreboard', url: '/scoreboard', icon: Trophy },
-		{ title: 'Users', url: '/users', icon: Users, authOnly: true },
+		{ title: 'Users', url: '/users', icon: Users, authOnly: true, staffOnlyInTeamMode: true },
 		{ title: 'Teams', url: '/teams', icon: ShieldHalf, authOnly: true, teamModeOnly: true }
 	];
 
@@ -41,6 +41,7 @@
 		navItems.filter((item) => {
 			if (item.authOnly && !user) return false;
 			if (item.teamModeOnly && userMode) return false;
+			if (item.staffOnlyInTeamMode && !userMode && !isAuthor) return false;
 			return true;
 		})
 	);
