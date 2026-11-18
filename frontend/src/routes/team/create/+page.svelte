@@ -9,9 +9,11 @@
 	import { ShieldPlus, ArrowLeft } from '@lucide/svelte';
 	import { authState, loadUser } from '$lib/stores/auth';
 	import { siteContent } from '$lib/site-content';
+	import NotFound from '$lib/components/NotFound.svelte';
+	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
 
 	$effect(() => {
-		if (authState.ready && authState.user?.team_id) {
+		if (authState.ready && !authState.userMode && authState.user?.team_id) {
 			goto('/team');
 		}
 	});
@@ -45,7 +47,7 @@
 
 		registerLoading = true;
 		try {
-			await createTeam(registerName, registerPassword);
+			await createTeam(registerName.trim(), registerPassword);
 			await loadUser(true);
 			toast.success('Team created successfully!');
 			goto('/team');
@@ -59,9 +61,16 @@
 </script>
 
 <svelte:head>
-	<title>Create team | {$siteContent.brand.shortName}</title>
+	{#if authState.userMode}
+		<title>404 Not Found</title>
+	{:else}
+		<title>Create team | {$siteContent.brand.shortName}</title>
+	{/if}
 </svelte:head>
 
+{#if authState.userMode}
+	<NotFound status={404} />
+{:else}
 <div class="flex min-h-[80vh] flex-col items-center justify-center px-4 py-12">
 	<div class="mx-auto mb-4 w-full max-w-md sm:max-w-[420px]">
 		<Button variant="ghost" onclick={() => goto('/team')} class="gap-2">
@@ -133,9 +142,7 @@
 					size="lg"
 				>
 					{#if registerLoading}
-						<span
-							class="border-background mr-2 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"
-						></span>
+						<Spinner class="mr-2 h-4 w-4" />
 						Creating...
 					{:else}
 						Create New Team
@@ -163,3 +170,4 @@
 		</form>
 	</Card.Root>
 </div>
+{/if}

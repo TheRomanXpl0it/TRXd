@@ -4,9 +4,8 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 	import ScoreHistory from '$lib/components/scoreboard/Graph.svelte';
-	import { Trophy, LayoutDashboard, Layout } from '@lucide/svelte';
-	import { getScoreboard, getGraphData } from '@/scoreboard';
-	import { goto } from '$app/navigation';
+	import { Trophy, LayoutDashboard, Layout, Globe } from '@lucide/svelte';
+	import { getScoreboard, getGraphData } from '$lib/scoreboard';
 	import { authState } from '$lib/stores/auth';
 	import ErrorMessage from '$lib/components/ui/error-message.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
@@ -15,14 +14,9 @@
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
-	import { Globe } from '@lucide/svelte';
-	import countries from '$lib/data/countries.json';
+	import { getCountryIso2 } from '$lib/utils/countries';
+	import { truncateText } from '$lib/utils/formatting';
 	import { siteContent } from '$lib/site-content';
-
-	// Pre-process countries into a map for O(1) lookups
-	const countryMap = new Map(
-		(countries as any[]).map((c) => [c.iso3?.toUpperCase(), c.iso2?.toUpperCase()])
-	);
 
 	let perPage = $state(20);
 	let currentPage = $state(1);
@@ -46,36 +40,21 @@
 	const isPaginated = $derived(!!rawData?.pagination);
 	const scoreboardData = $derived(Array.isArray(rawData) ? rawData : (rawData?.data ?? []));
 	const graphData = $derived(graphQuery.data ?? []);
-	const loading = $derived(scoreboardQuery.isLoading || graphQuery.isLoading);
+	const loading = $derived(scoreboardQuery.isLoading);
 	const error = $derived(scoreboardQuery.error?.message ?? graphQuery.error?.message ?? null);
 
 	// Sort logic handled by backend but safety here
 	const sorted = $derived(Array.isArray(scoreboardData) ? [...scoreboardData] : []);
 	const count = $derived(isPaginated ? (rawData?.pagination?.total ?? 0) : sorted.length);
 
-	$effect(() => {
-		if (currentPage > 1) {
-			setTimeout(() => {
-				const paginationEl = document.getElementById('pagination-controls');
-				if (paginationEl) {
-					paginationEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-				}
-			}, 0);
-		}
-	});
-
-	function truncateName(name: string, maxLength = 32): string {
-		if (!name || name.length <= maxLength) return name;
-		return name.slice(0, maxLength) + '...';
-	}
-
 	function handlePageChange(newPage: number) {
 		currentPage = newPage;
-	}
-
-	function getCountryIso2(iso3: string): string | null {
-		if (!iso3) return null;
-		return countryMap.get(iso3.toUpperCase()) ?? null;
+		setTimeout(() => {
+			document.getElementById('scoreboard-table')?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'start'
+			});
+		}, 0);
 	}
 </script>
 
@@ -84,13 +63,18 @@
 </svelte:head>
 
 <div class="relative z-10 mx-auto max-w-7xl space-y-6 py-8">
-	<!-- Compact Mode Toggle -->
-	<div class="absolute right-4 top-4 z-10 sm:right-8 sm:top-8">
+	<!-- Header Region -->
+	<div class="mb-8 mt-2 flex items-center justify-between gap-4">
+		<div class="w-9"></div>
+		<h1 class="text-foreground text-center text-5xl font-black tracking-tighter sm:text-6xl">
+			Scoreboard
+		</h1>
 		<Button
 			variant="ghost"
 			size="icon"
 			class="text-muted-foreground/50 hover:text-foreground hover:bg-muted/50 cursor-pointer transition-colors"
 			onclick={() => (isCompact = !isCompact)}
+			aria-label={isCompact ? 'Full View' : 'Compact View (Hide Legend)'}
 			title={isCompact ? 'Full View' : 'Compact View (Hide Legend)'}
 		>
 			{#if isCompact}
@@ -99,11 +83,6 @@
 				<Layout class="h-4 w-4" />
 			{/if}
 		</Button>
-	</div>
-
-	<!-- Header Region -->
-	<div class="mb-8 mt-2 text-center">
-		<h1 class="text-foreground text-5xl font-black tracking-tighter sm:text-6xl">Scoreboard</h1>
 	</div>
 
 	{#if error}
@@ -119,7 +98,7 @@
 				timeMax={authState.endTime}
 			/>
 		</div>
-		<Card.Root class="mt-8 overflow-hidden border-0 shadow-sm">
+		<Card.Root id="scoreboard-table" class="mt-8 overflow-hidden border-0 shadow-sm">
 			<Card.Content class="p-0">
 				<div class="relative mx-4 overflow-auto sm:mx-6">
 					<Table.Root>
@@ -202,7 +181,7 @@
 														<div
 															class="border-border h-8 w-8 shrink-0 overflow-hidden rounded-full border"
 														>
-															<GeneratedAvatar seed={row.name} class="h-full w-full" />
+															<GeneratedAvatar seed={row.name} size={32} class="h-full w-full" />
 														</div>
 
 														{#if row.country}
@@ -225,7 +204,7 @@
 														{/if}
 													</div>
 													<span class="text-foreground font-semibold">
-														{truncateName(row.name)}
+														{truncateText(row.name)}
 													</span>
 												</a>
 											</Table.Cell>
@@ -235,11 +214,10 @@
 													<div class="flex flex-wrap gap-1">
 														{#each row.badges as b}
 															<Tooltip.Root>
-																<Tooltip.Trigger>
-																	<span
-																		class="bg-muted text-muted-foreground rounded-md border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider"
-																		>{b.name}</span
-																	>
+																<Tooltip.Trigger
+																	class="bg-muted text-muted-foreground rounded-md border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider"
+																>
+																	{b.name}
 																</Tooltip.Trigger>
 																{#if b.description}
 																	<Tooltip.Content>

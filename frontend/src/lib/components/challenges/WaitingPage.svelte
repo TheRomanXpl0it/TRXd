@@ -1,10 +1,14 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
 	import { Code, Database, Lock, Shield } from '@lucide/svelte';
 
-	let { startTime, title = 'Starting soon' }: {
+	let {
+		startTime,
+		title = 'Starting soon',
+		onStart
+	}: {
 		startTime: string | null;
 		title?: string;
+		onStart?: () => void;
 	} = $props();
 
 	let timeLeft = $state({
@@ -15,52 +19,57 @@
 		total: 0
 	});
 
-	let interval: any;
-
-	function updateCountdown() {
-		if (!startTime) return;
-
-		const start = new Date(startTime).getTime();
-		const now = new Date().getTime();
-		const diff = start - now;
-
-		if (diff <= 0) {
+	$effect(() => {
+		const target = startTime ? new Date(startTime).getTime() : NaN;
+		if (!startTime || Number.isNaN(target)) {
 			timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
-			if (interval) clearInterval(interval);
-			if (typeof window !== 'undefined') window.location.reload();
 			return;
 		}
 
-		timeLeft = {
-			days: Math.floor(diff / (1000 * 60 * 60 * 24)),
-			hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-			minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-			seconds: Math.floor((diff % (1000 * 60)) / 1000),
-			total: diff
+		let startedNotified = false;
+		const updateCountdown = () => {
+			const diff = target - Date.now();
+			if (diff <= 0) {
+				timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
+				if (!startedNotified) {
+					startedNotified = true;
+					onStart?.();
+				}
+				return false;
+			}
+
+			timeLeft = {
+				days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+				hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+				minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+				seconds: Math.floor((diff % (1000 * 60)) / 1000),
+				total: diff
+			};
+			return true;
 		};
-	}
 
-	onMount(() => {
-		updateCountdown();
-		interval = setInterval(updateCountdown, 1000);
+		if (!updateCountdown()) return;
+
+		const interval = setInterval(() => {
+			if (!updateCountdown()) clearInterval(interval);
+		}, 1000);
+
+		return () => clearInterval(interval);
 	});
 
-	onDestroy(() => {
-		if (interval) clearInterval(interval);
+	const formattedStartTime = $derived.by(() => {
+		if (!startTime) return 'To be announced';
+		const date = new Date(startTime);
+		if (Number.isNaN(date.getTime())) return 'To be announced';
+		return date.toLocaleString('en-GB', {
+			weekday: 'long',
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
 	});
-
-	const formattedStartTime = $derived(
-		startTime
-			? new Date(startTime).toLocaleString('en-GB', {
-					weekday: 'long',
-					year: 'numeric',
-					month: 'long',
-					day: 'numeric',
-					hour: '2-digit',
-					minute: '2-digit'
-				})
-			: 'To be announced'
-	);
 
 	const floatingIcons = [
 		{ icon: Code, top: '15%', left: '10%', delay: '0s', size: 24, speed: '12s' },
@@ -136,5 +145,11 @@
 	.animate-float {
 		animation: float var(--float-speed) ease-in-out infinite;
 		animation-delay: var(--float-delay);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.animate-float {
+			animation: none;
+		}
 	}
 </style>

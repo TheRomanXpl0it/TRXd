@@ -53,3 +53,38 @@ export function formatConnectionString({
 
 	return str;
 }
+
+export function isDynamicChallenge(challenge: any): boolean {
+	return Boolean(
+		challenge?.instance_type === 'Container' ||
+			challenge?.instance_type === 'Compose' ||
+			challenge?.image ||
+			challenge?.compose ||
+			challenge?.ghost
+	);
+}
+
+export function getChallengeConnectionString(challenge: any): string {
+	if (!challenge || isDynamicChallenge(challenge) || challenge.instance) return '';
+	const host = String(challenge.host ?? '').trim();
+	if (!host) return '';
+
+	if (challenge.connection_info) {
+		return String(challenge.connection_info);
+	}
+
+	return formatConnectionString({
+		host,
+		port: challenge.port,
+		connType: challenge.conn_type
+	});
+}
+
+export function getAttachmentHref(challengeId: string | number, attachment: string): string {
+	const cleanPath = String(attachment ?? '')
+		.replace(/^\/+/, '')
+		.split('/')
+		.map((segment) => encodeURIComponent(segment))
+		.join('/');
+	return `/attachments/${encodeURIComponent(String(challengeId))}/${cleanPath}`;
+}

@@ -1,24 +1,14 @@
 <script lang="ts">
-	import * as Table from '$lib/components/ui/table/index.js';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
-	import { getUsers } from '@/user';
+	import { getUsers } from '$lib/user';
 	import { goto } from '$app/navigation';
 	import { page as pageStore } from '$app/stores';
-	import ErrorMessage from '$lib/components/ui/error-message.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
-	import EmptyState from '$lib/components/ui/empty-state.svelte';
-	import { UserCircle, Globe } from '@lucide/svelte';
-	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
-	import CountryFlag from '$lib/components/ui/country-flag.svelte';
-	import { getCountryByIso3 } from '$lib/utils/countries';
-
+	import { UserCircle } from '@lucide/svelte';
 	import { authState } from '$lib/stores/auth';
 	import { siteContent } from '$lib/site-content';
-	import NotFound from '$lib/components/NotFound.svelte';
+	import DirectoryTable from '$lib/components/DirectoryTable.svelte';
 
-	let perPage = $state(20);
+	const perPage = 20;
 
 	function parsePageParam(value: string | null): number {
 		if (!value) return 1;
@@ -27,51 +17,23 @@
 	}
 
 	let currentPage = $state(parsePageParam($pageStore.url.searchParams.get('page')));
-
 	const isAdmin = $derived(authState.user?.role === 'Admin');
 
 	const usersQuery = createQuery(() => ({
 		queryKey: ['users', currentPage, perPage],
 		queryFn: () => getUsers(currentPage, perPage),
 		staleTime: 5 * 60 * 1000,
-		placeholderData: (previousData) => previousData,
-		enabled: authState.userMode
+		placeholderData: (previousData) => previousData
 	}));
 
-	// Handle both PaginatedResponse and flat array (fallback)
 	const rawData = $derived(usersQuery.data);
 	const isPaginated = $derived(!!rawData?.pagination);
 	const usersData = $derived(Array.isArray(rawData) ? rawData : (rawData?.data ?? []));
-	const totalCount = $derived(isPaginated ? (rawData?.pagination?.total ?? 0) : usersData.length);
-
-	const loading = $derived(usersQuery.isLoading);
-	const error = $derived(usersQuery.error?.message ?? null);
-
-	function truncateName(name: string, maxLength = 32): string {
-		if (!name || name.length <= maxLength) return name;
-		return name.slice(0, maxLength) + '...';
-	}
-
-	function getRoleBadgeVariant(role: string): string {
-		const r = role?.toLowerCase() || 'player';
-		if (r === 'admin')
-			return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800';
-		if (r === 'author')
-			return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800';
-		if (r === 'spectator')
-			return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700';
-		return 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 border-blue-200 dark:border-blue-800';
-	}
-
-	// Sort alphabetically by name
-	const sorted = $derived(
-		(Array.isArray(usersData) ? [...usersData] : []).sort((a, b) =>
-			(a?.name || '').localeCompare(b?.name || '')
-		)
+	const count = $derived(isPaginated ? (rawData?.pagination?.total ?? 0) : usersData.length);
+	const pageRows = $derived(
+		isPaginated ? usersData : usersData.slice((currentPage - 1) * perPage, currentPage * perPage)
 	);
-	const count = $derived(totalCount);
 
-	// Keep pagination state synchronized with URL for browser history navigation.
 	$effect(() => {
 		const pageFromUrl = parsePageParam($pageStore.url.searchParams.get('page'));
 		if (currentPage !== pageFromUrl) {
@@ -81,7 +43,6 @@
 
 	function handlePageChange(newPage: number) {
 		currentPage = newPage;
-		// Sync URL
 		const nextUrl = new URL($pageStore.url);
 		if (newPage > 1) {
 			nextUrl.searchParams.set('page', String(newPage));
@@ -93,206 +54,32 @@
 		if (nextHref !== currentHref) {
 			goto(nextHref, { replaceState: true, noScroll: true, keepFocus: true });
 		}
-		// Scroll to pagination
 		setTimeout(() => {
-			const paginationEl = document.getElementById('pagination-controls');
-			if (paginationEl) {
-				paginationEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-			}
+			document.getElementById('directory-table')?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'start'
+			});
 		}, 0);
 	}
 </script>
 
 <svelte:head>
-	{#if !authState.userMode}
-		<title>404 Not Found</title>
-	{:else}
-		<title>Users - {$siteContent.brand.browserTitle}</title>
-	{/if}
+	<title>Users - {$siteContent.brand.browserTitle}</title>
 </svelte:head>
 
-{#if !authState.userMode}
-	<NotFound status={404} />
-{:else}
-<div class="mx-auto max-w-5xl space-y-6 py-8">
-	{#if error}
-		<ErrorMessage title="Error loading users" message={error} />
-	{:else}
-		<Card.Root class="overflow-hidden border-0 shadow-sm">
-			<Card.Content class="p-0">
-				<div class="relative mx-4 overflow-auto sm:mx-6">
-					<Table.Root>
-						<Table.Header class="bg-transparent [&_tr]:border-b-0">
-							<Table.Row class="hover:bg-transparent">
-								<Table.Head
-									class="text-muted-foreground/70 w-[300px] bg-transparent text-[10px] font-bold uppercase tracking-wider"
-									>User</Table.Head
-								>
-								<Table.Head
-									class="text-muted-foreground/70 w-[200px] bg-transparent text-[10px] font-bold uppercase tracking-wider"
-									>Country</Table.Head
-								>
-								{#if isAdmin}
-									<Table.Head
-										class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
-										>Role</Table.Head
-									>
-								{/if}
-								<Table.Head
-									class="text-muted-foreground/70 bg-transparent text-right text-[10px] font-bold uppercase tracking-wider"
-									>Stats</Table.Head
-								>
-							</Table.Row>
-						</Table.Header>
-						<Table.Body>
-							{#if loading && usersData.length === 0}
-								{#each Array(5) as _}
-									<Table.Row>
-										<Table.Cell>
-											<Skeleton class="h-4 w-[150px]" />
-										</Table.Cell>
-										<Table.Cell><Skeleton class="h-5 w-[100px]" /></Table.Cell>
-										{#if isAdmin}
-											<Table.Cell><Skeleton class="h-6 w-[80px] rounded-full" /></Table.Cell>
-										{/if}
-										<Table.Cell class="text-right"
-											><Skeleton class="ml-auto h-4 w-[50px]" /></Table.Cell
-										>
-									</Table.Row>
-								{/each}
-							{:else}
-								{@const pageRows = isPaginated
-									? sorted
-									: sorted.slice((currentPage - 1) * perPage, currentPage * perPage)}
-
-								{#if pageRows.length === 0}
-									<Table.Row>
-										<Table.Cell colspan={isAdmin ? 4 : 3} class="h-[300px] text-center">
-											<EmptyState
-												icon={UserCircle}
-												title="No users found"
-												description="There are no registered users to display at the moment."
-											/>
-										</Table.Cell>
-									</Table.Row>
-								{:else}
-									{#each pageRows as account, i (account.id)}
-										<Table.Row
-											class="hover:bg-muted/50 border-b-0 transition-colors"
-										>
-											<Table.Cell class="py-3">
-												<a
-													href={`/account/${account.id}`}
-													class="flex items-center gap-3 decoration-primary/50 underline-offset-4 hover:underline"
-												>
-													<div
-														class="border-border h-8 w-8 shrink-0 overflow-hidden rounded-full border"
-													>
-														<GeneratedAvatar seed={account.name} class="h-full w-full" />
-													</div>
-														<span class="text-foreground font-semibold">
-															{truncateName(account.name)}
-														</span>
-												</a>
-											</Table.Cell>
-
-											<Table.Cell>
-												{#if account.country}
-													{@const country = getCountryByIso3(account.country)}
-													<div class="flex items-center gap-2">
-														<div
-															class="bg-background relative flex h-6 w-8 shrink-0 items-center justify-center overflow-hidden rounded border shadow-sm"
-														>
-															{#if country?.iso2}
-																<CountryFlag
-																	country={country.iso2}
-																	width={32}
-																	height={32}
-																	class="h-full w-full object-cover"
-																/>
-															{:else}
-																<Globe class="text-muted-foreground h-4 w-4" />
-															{/if}
-														</div>
-														<span class="text-foreground text-sm font-medium">
-															{country?.label ?? account.country}
-														</span>
-													</div>
-												{:else}
-													<span class="text-muted-foreground text-sm italic">Not specified</span>
-												{/if}
-											</Table.Cell>
-
-											{#if isAdmin}
-												<Table.Cell>
-													<span
-														class={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${getRoleBadgeVariant(account.role)}`}
-													>
-														{account.role ?? 'Player'}
-													</span>
-												</Table.Cell>
-											{/if}
-
-											<Table.Cell class="text-right">
-												<div
-													class="font-mono text-sm font-medium tabular-nums leading-none tracking-tight"
-												>
-													{account.score?.toLocaleString() ?? 0} pts
-												</div>
-											</Table.Cell>
-										</Table.Row>
-									{/each}
-								{/if}
-							{/if}
-						</Table.Body>
-					</Table.Root>
-				</div>
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Pagination -->
-		{#if count > perPage}
-			<Pagination.Root
-				{count}
-				{perPage}
-				page={currentPage}
-				onPageChange={handlePageChange}
-				siblingCount={1}
-				class="mt-4"
-			>
-				{#snippet children({ pages, currentPage: pageNum })}
-					<div class="flex w-full justify-center overflow-x-auto py-4" id="pagination-controls">
-						<Pagination.Content class="gap-4">
-							<Pagination.Item class="mx-2">
-								<Pagination.PrevButton class="h-9 w-9" />
-							</Pagination.Item>
-
-							{#each pages as page (page.key)}
-								{#if page.type === 'ellipsis'}
-									<Pagination.Item>
-										<Pagination.Ellipsis />
-									</Pagination.Item>
-								{:else}
-									<Pagination.Item>
-										<Pagination.Link
-											{page}
-											isActive={pageNum === page.value}
-											class="data-[selected]:bg-foreground data-[selected]:text-background h-9 w-9 transition-all data-[selected]:shadow-md"
-										>
-											{page.value}
-										</Pagination.Link>
-									</Pagination.Item>
-								{/if}
-							{/each}
-
-							<Pagination.Item class="mx-2">
-								<Pagination.NextButton class="h-9 w-9" />
-							</Pagination.Item>
-						</Pagination.Content>
-					</div>
-				{/snippet}
-			</Pagination.Root>
-		{/if}
-	{/if}
-</div>
-{/if}
+<DirectoryTable
+	rows={pageRows}
+	loading={usersQuery.isLoading}
+	error={usersQuery.error?.message ?? null}
+	errorTitle="Error loading users"
+	entityLabel="User"
+	hrefPrefix="/account/"
+	showRole={isAdmin}
+	emptyIcon={UserCircle}
+	emptyTitle="No users found"
+	emptyDescription="There are no registered users to display at the moment."
+	{count}
+	{perPage}
+	{currentPage}
+	onPageChange={handlePageChange}
+/>

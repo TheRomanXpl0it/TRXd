@@ -13,15 +13,20 @@
 	let resettingPassword = $state(false);
 
 	async function handleChangePassword() {
-		if (!user || !newPassword) return;
-		if (newPassword !== confirmPassword) {
+		const trimmed = newPassword.trim();
+		if (!user || !trimmed) return;
+		if (trimmed.length < 8) {
+			showError(null, 'Password must be at least 8 characters.');
+			return;
+		}
+		if (trimmed !== confirmPassword.trim()) {
 			showError(null, 'Passwords do not match.');
 			return;
 		}
 
 		resettingPassword = true;
 		try {
-			await resetUserPassword(user.id, newPassword.trim());
+			await resetUserPassword(user.id, trimmed);
 			showSuccess('Password updated successfully.');
 			newPassword = '';
 			confirmPassword = '';

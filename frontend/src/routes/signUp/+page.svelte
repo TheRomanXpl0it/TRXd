@@ -12,14 +12,18 @@
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 	import { authState, loadUser } from '@/stores/auth';
+	import { useQueryClient } from '@tanstack/svelte-query';
 	import { siteContent } from '$lib/site-content';
 	import { onMount } from 'svelte';
 	import { UserPlus } from '@lucide/svelte';
 	import {
 		clearPendingSignup,
+		clearVerificationTokenFromUrl,
 		readPendingSignup,
 		savePendingSignup
 	} from '$lib/registration';
+
+	const queryClient = useQueryClient();
 
 	let name = $state('');
 	let email = $state('');
@@ -36,13 +40,6 @@
 	const isVerificationStep = $derived(
 		emailVerificationEnabled && (verificationRequested || token.trim().length > 0)
 	);
-
-	function clearVerificationTokenFromUrl() {
-		if (typeof window === 'undefined') return;
-		const nextUrl = new URL(window.location.href);
-		nextUrl.searchParams.delete('token');
-		window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
-	}
 
 	function syncPendingSignup() {
 		const pending = readPendingSignup();
@@ -90,14 +87,6 @@
 		return null;
 	}
 
-	function startVerificationStep() {
-		errorMsg = null;
-		verificationRequested = true;
-		if (email.trim()) {
-			verificationEmail = email.trim();
-		}
-	}
-
 	function resetVerificationStep() {
 		errorMsg = null;
 		token = '';
@@ -135,6 +124,7 @@
 			}
 
 			await loadUser();
+			queryClient.clear();
 			toast.success(
 				emailVerificationEnabled ? 'Email verified. Welcome aboard!' : 'Welcome aboard!'
 			);

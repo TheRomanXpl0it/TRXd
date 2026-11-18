@@ -36,11 +36,13 @@
 	const minutes = Array.from({ length: 60 }, (_, index) => String(index).padStart(2, '0'));
 
 	let {
+		id = undefined,
 		value = $bindable(''),
 		placeholder = 'Select date and time',
 		invalid = false,
 		class: className = ''
 	}: {
+		id?: string;
 		value?: string | boolean;
 		placeholder?: string;
 		invalid?: boolean;
@@ -211,6 +213,7 @@
 		{#snippet child({ props })}
 			<Button
 				{...props}
+				{id}
 				variant="outline"
 				class={cn(
 					'h-9 w-full justify-between font-normal',

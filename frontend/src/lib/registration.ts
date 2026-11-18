@@ -35,3 +35,10 @@ export function clearPendingSignup() {
 	if (typeof window === 'undefined') return;
 	sessionStorage.removeItem(PENDING_SIGNUP_KEY);
 }
+
+export function clearVerificationTokenFromUrl() {
+	if (typeof window === 'undefined') return;
+	const nextUrl = new URL(window.location.href);
+	nextUrl.searchParams.delete('token');
+	window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+}

@@ -169,6 +169,7 @@
 		{#if countdown > 0}
 			<div class="flex flex-col gap-2 sm:flex-row sm:items-center">
 				<button
+					type="button"
 					class="flex h-11 w-full min-w-0 items-center justify-center gap-3 overflow-hidden rounded-lg bg-green-600 px-4 text-xs font-bold text-white shadow-sm transition-all hover:bg-green-700 active:scale-[0.99] sm:flex-1"
 					onclick={() => copyToClipboard(connectionString)}
 					title="Click to copy connection address"
@@ -186,10 +187,12 @@
 							class="bg-muted/40 border-border/60 flex h-11 flex-1 shrink-0 items-center gap-2 rounded-lg border px-3 text-green-600 sm:flex-none dark:text-green-500"
 						>
 							<button
+								type="button"
 								onclick={renew}
 								disabled={renewingInstance}
 								class="hover:text-green-700 disabled:opacity-50 dark:hover:text-green-400"
 								title="Renew Instance"
+								aria-label="Renew Instance"
 							>
 								{#if renewingInstance}
 									<Spinner class="h-4 w-4" />
@@ -219,10 +222,12 @@
 					{/if}
 
 					<button
+						type="button"
 						onclick={destroyInstance}
 						disabled={destroyingInstance}
 						class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-red-600 text-white shadow-sm transition-all hover:bg-red-700 active:scale-[0.95] disabled:opacity-50"
 						title="Stop Instance"
+						aria-label="Stop Instance"
 					>
 						{#if destroyingInstance}
 							<Spinner class="h-4 w-4" />
@@ -235,6 +240,7 @@
 		{:else}
 			<!-- Idle State: Start Instance (Blue) -->
 			<button
+				type="button"
 				onclick={createInstance}
 				disabled={creatingInstance}
 				class="flex h-12 w-full items-center justify-center gap-3 rounded-lg bg-blue-600 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-sm transition-all hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50"

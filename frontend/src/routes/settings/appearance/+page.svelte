@@ -5,6 +5,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { Sun, Moon, Laptop, LayoutGrid, SquareSplitHorizontal } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
+	import { siteContent } from '$lib/site-content';
 
 	type ThemeId = 'light' | 'dark' | 'system';
 	type LayoutId = 'normal' | 'sidebar';
@@ -58,9 +59,12 @@
 </script>
 
 <div class="space-y-6">
-	<div>
-		<h2 class="text-2xl font-bold tracking-tight">Appearance</h2>
-		<p class="text-muted-foreground">Customize how the platform looks and feels.</p>
+	<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+		<div>
+			<h2 class="text-2xl font-bold tracking-tight">Appearance</h2>
+			<p class="text-muted-foreground">{$siteContent.settings.appearanceDescription}</p>
+		</div>
+		<Button type="button" onclick={applySettings} disabled={!hasChanges}>Apply changes</Button>
 	</div>
 
 	<Card.Root>
@@ -72,6 +76,7 @@
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 				{#each themes as theme}
 					<button
+						type="button"
 						onclick={() => selectTheme(theme.id)}
 						class="flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 p-4 transition-all {selectedTheme ===
 						theme.id
@@ -99,6 +104,7 @@
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 				{#each layouts as layout}
 					<button
+						type="button"
 						onclick={() => (selectedLayout = layout.id)}
 						class="flex cursor-pointer items-start gap-4 rounded-xl border-2 p-4 text-left transition-all {selectedLayout ===
 						layout.id
@@ -120,8 +126,5 @@
 				{/each}
 			</div>
 		</Card.Content>
-		<Card.Footer class="flex justify-end">
-			<Button onclick={applySettings} disabled={!hasChanges}>Apply</Button>
-		</Card.Footer>
 	</Card.Root>
 </div>

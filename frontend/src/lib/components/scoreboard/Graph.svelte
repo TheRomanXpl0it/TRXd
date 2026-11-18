@@ -154,7 +154,9 @@
 			.filter((team) => team.total > 0)
 			.sort(
 				(a, b) =>
-					b.total - a.total || a.lastSolve - b.lastSolve || Number(a.id ?? 0) - Number(b.id ?? 0)
+					b.total - a.total ||
+					a.lastSolve - b.lastSolve ||
+					String(a.id ?? '').localeCompare(String(b.id ?? ''), undefined, { numeric: true })
 			);
 
 		const limitDate = toDate(timeMax);
@@ -254,8 +256,8 @@
 		}))
 	);
 
-	const textColor = $derived('var(--muted-foreground)');
-	const gridColor = $derived('var(--border)');
+	const textColor = 'var(--muted-foreground)';
+	const gridColor = 'var(--border)';
 	const clipPathId = `score-history-clip-${Math.random().toString(36).slice(2, 9)}`;
 
 	function clamp(value: number, min: number, max: number) {
@@ -342,37 +344,48 @@
 			return;
 		}
 
-		const source =
+		const seriesList =
 			highlightedTeam === null
-				? flatChartData
-				: (chartData.find((series) => series.id === highlightedTeam)?.data ?? flatChartData);
+				? chartData
+				: chartData.filter((series) => series.id === highlightedTeam);
 
 		let point: ChartPoint | null = null;
 		let bestDistance = Infinity;
 		let bestX = 0;
 		let bestY = 0;
 
-		for (const candidate of source) {
-			const px = clamp(xFor(candidate.date), chartLeft, chartRight);
-			const py = yFor(candidate.value);
-			const distance = Math.hypot(x - px, y - py);
-			if (distance < bestDistance) {
-				bestDistance = distance;
-				point = candidate;
-				bestX = px;
-				bestY = py;
+		for (const series of seriesList) {
+			const pts = series.data;
+			for (let i = 0; i < pts.length; i++) {
+				const candidate = pts[i];
+				const px = clamp(xFor(candidate.date), chartLeft, chartRight);
+				const py = yFor(candidate.value);
+
+				// Check both the vertex and the horizontal step segment leading into the next point
+				const nextPx =
+					i + 1 < pts.length ? clamp(xFor(pts[i + 1].date), chartLeft, chartRight) : px;
+				const segDist =
+					x >= px && x <= nextPx ? Math.abs(y - py) : Math.hypot(x - px, y - py);
+
+				if (segDist < bestDistance) {
+					bestDistance = segDist;
+					point = candidate;
+					bestX = x >= px && x <= nextPx ? x : px;
+					bestY = py;
+				}
 			}
 		}
 
-		hovered = point
-			? {
-					point,
-					x: bestX,
-					y: bestY,
-					cursorX: x,
-					cursorY: y
-				}
-			: null;
+		hovered =
+			point && bestDistance <= 48
+				? {
+						point,
+						x: bestX,
+						y: bestY,
+						cursorX: x,
+						cursorY: y
+					}
+				: null;
 	}
 
 	function handlePointerLeave() {
@@ -482,7 +495,9 @@
 							>
 								{hovered.point.name}
 							</div>
-							<div class="ml-auto font-mono text-base font-black">{hovered.point.value}</div>
+							<div class="ml-auto font-mono text-base font-black">
+								{formatScore(hovered.point.value)}
+							</div>
 						</div>
 					</div>
 				{/if}
@@ -540,11 +555,11 @@
 	}
 
 	.custom-scrollbar::-webkit-scrollbar-thumb {
-		background: hsl(var(--muted-foreground) / 0.2);
+		background: color-mix(in oklch, var(--muted-foreground) 20%, transparent);
 		border-radius: 10px;
 	}
 
 	.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-		background: hsl(var(--muted-foreground) / 0.4);
+		background: color-mix(in oklch, var(--muted-foreground) 40%, transparent);
 	}
 </style>

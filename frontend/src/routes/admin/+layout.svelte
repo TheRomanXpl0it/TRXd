@@ -16,6 +16,7 @@
 		ChevronDown
 	} from '@lucide/svelte';
 	import { page } from '$app/stores';
+	import { siteContent } from '$lib/site-content';
 
 	interface Props {
 		children?: import('svelte').Snippet;
@@ -107,6 +108,8 @@
 <svelte:head>
 	{#if ready && !isAllowed}
 		<title>404 Not Found</title>
+	{:else if activeItem}
+		<title>{activeItem.title} | {$siteContent.brand.adminTitleSuffix}</title>
 	{/if}
 </svelte:head>
 

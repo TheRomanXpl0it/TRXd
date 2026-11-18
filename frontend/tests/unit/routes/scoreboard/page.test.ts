@@ -6,7 +6,7 @@ import { authState } from '$lib/stores/auth';
 import { createQuery } from '@tanstack/svelte-query';
 
 // Mock the scoreboard API functions
-vi.mock('@/scoreboard', () => ({
+vi.mock('$lib/scoreboard', () => ({
 	getScoreboard: vi.fn(() => Promise.resolve({ data: [], pagination: { total: 0 } })),
 	getGraphData: vi.fn(() => Promise.resolve([]))
 }));

@@ -8,6 +8,7 @@
 	} from '$lib/challenges';
 	import { onMount } from 'svelte';
 	import { authState } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 	import { uiStore } from '$lib/stores/ui.svelte';
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { Button } from '$lib/components/ui/button';
@@ -213,14 +214,15 @@
 		if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
 
 		// Target sort order in this category (fallback to 1-based index)
-		const newOrder = typeof targetChall.sort_order === 'number'
-			? targetChall.sort_order
-			: (toIndex + 1);
+		const newOrder =
+			typeof targetChall.sort_order === 'number' && targetChall.sort_order > 0
+				? targetChall.sort_order
+				: toIndex + 1;
 
-		if (sourceOrder !== undefined && sourceOrder === newOrder) return;
+		if (typeof sourceOrder === 'number' && sourceOrder > 0 && sourceOrder === newOrder) return;
 
-		const prevChallenges = [...challenges];
-		const updatedCategoryItems = [...categoryItems];
+		const prevChallenges = challenges;
+		const updatedCategoryItems = categoryItems.map((c) => ({ ...c }));
 		const [moved] = updatedCategoryItems.splice(fromIndex, 1);
 		updatedCategoryItems.splice(toIndex, 0, moved);
 
@@ -258,6 +260,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Challenges | {$siteContent.brand.adminTitleSuffix}</title>
+</svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
@@ -487,6 +493,7 @@
 															variant="ghost"
 															size="icon"
 															class="text-muted-foreground hover:text-primary h-7 w-7 transition-colors"
+															aria-label="Edit {chall.name}"
 															onclick={() => openEdit(chall)}
 														>
 															<Pencil class="h-3.5 w-3.5" />
@@ -495,6 +502,7 @@
 															variant="ghost"
 															size="icon"
 															class="text-muted-foreground hover:text-destructive h-7 w-7 transition-colors"
+															aria-label="Delete {chall.name}"
 															onclick={() => removeChallenge(chall.id)}
 														>
 															<Trash2 class="h-3.5 w-3.5" />

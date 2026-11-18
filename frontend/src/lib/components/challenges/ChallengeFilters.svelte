@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button } from '@/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { X, Eye, EyeOff, LockKeyhole } from '@lucide/svelte';
@@ -25,6 +25,7 @@
 
 	function clearFilters() {
 		filterTags = [];
+		search = '';
 	}
 </script>
 
@@ -55,21 +56,24 @@
 			<!-- 1. Hidden challenges toggle (authors/admins only, eye icon only) -->
 			<Tooltip.Root>
 				<Tooltip.Trigger>
-					<Button
-						variant={showHidden ? 'outline' : 'secondary'}
-						size="icon"
-						class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
-						onclick={() => (showHidden = !showHidden)}
-						aria-label={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
-						title={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
-						data-testid="toggle-hidden-challenges"
-					>
-						{#if showHidden}
-							<Eye class="h-4 w-4 shrink-0" aria-hidden="true" />
-						{:else}
-							<EyeOff class="h-4 w-4 shrink-0 opacity-40" aria-hidden="true" />
-						{/if}
-					</Button>
+					{#snippet child({ props })}
+						<Button
+							{...props}
+							variant={showHidden ? 'outline' : 'secondary'}
+							size="icon"
+							class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
+							onclick={() => (showHidden = !showHidden)}
+							aria-label={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
+							title={showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}
+							data-testid="toggle-hidden-challenges"
+						>
+							{#if showHidden}
+								<Eye class="h-4 w-4 shrink-0" aria-hidden="true" />
+							{:else}
+								<EyeOff class="h-4 w-4 shrink-0 opacity-40" aria-hidden="true" />
+							{/if}
+						</Button>
+					{/snippet}
 				</Tooltip.Trigger>
 				<Tooltip.Content>{showHidden ? 'Hide hidden challenges' : 'Show hidden challenges'}</Tooltip.Content>
 			</Tooltip.Root>
@@ -77,20 +81,23 @@
 			<!-- 2. Author tags toggle (authors/admins only) -->
 			<Tooltip.Root>
 				<Tooltip.Trigger>
-					<Button
-						variant={uiStore.showAuthorTags ? 'outline' : 'secondary'}
-						size="icon"
-						class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
-						onclick={() => uiStore.toggleAuthorTags()}
-						aria-label={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
-						title={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
-						data-testid="toggle-author-tags"
-					>
-						<LockKeyhole
-							class="h-4 w-4 shrink-0 {uiStore.showAuthorTags ? '' : 'opacity-40'}"
-							aria-hidden="true"
-						/>
-					</Button>
+					{#snippet child({ props })}
+						<Button
+							{...props}
+							variant={uiStore.showAuthorTags ? 'outline' : 'secondary'}
+							size="icon"
+							class="h-9 w-9 md:h-10 md:w-10 shrink-0 cursor-pointer"
+							onclick={() => uiStore.toggleAuthorTags()}
+							aria-label={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
+							title={uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}
+							data-testid="toggle-author-tags"
+						>
+							<LockKeyhole
+								class="h-4 w-4 shrink-0 {uiStore.showAuthorTags ? '' : 'opacity-40'}"
+								aria-hidden="true"
+							/>
+						</Button>
+					{/snippet}
 				</Tooltip.Trigger>
 				<Tooltip.Content>{uiStore.showAuthorTags ? 'Hide author tags' : 'Show author tags'}</Tooltip.Content>
 			</Tooltip.Root>

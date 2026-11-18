@@ -50,7 +50,7 @@
 		"jsdom": "^27.1.0",
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
-		"prettier-plugin-tailwindcss": "^0.6.14",
+		"prettier-plugin-tailwindcss": "^0.8.1",
 		"svelte": "^5.39.5",
 		"svelte-check": "^4.3.2",
 		"svelte-sonner": "^1.0.5",
@@ -63,7 +63,6 @@
 		"vitest": "^4.0.8"
 	},
 	"dependencies": {
-		"@sveltejs/svelte-virtual-list": "^3.0.1",
 		"@tanstack/svelte-query": "^6.0.5",
 		"country-flag-icons": "^1.5.21",
 		"dompurify": "^3.3.0",

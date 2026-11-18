@@ -2,6 +2,7 @@
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
 	import { logout } from '$lib/auth';
 	import { clearUser } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
@@ -17,6 +18,10 @@
 		})();
 	});
 </script>
+
+<svelte:head>
+	<title>Sign out - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 <div class="flex h-[50vh] flex-col items-center justify-center gap-3 text-muted-foreground">
 	<Spinner />

@@ -4,17 +4,16 @@
 	import { authState } from '$lib/stores/auth';
 	import type { Solve } from '$lib/types';
 	import EmptyState from '$lib/components/ui/empty-state.svelte';
+	import { formatDate, truncateText } from '$lib/utils/formatting';
 
 	let { solves = [] }: { solves?: Solve[] } = $props();
 
-	const t = (s: Solve) => new Date(s.timestamp).getTime();
+	const timestampOf = (s: Solve) => {
+		const ms = new Date(s.timestamp).getTime();
+		return Number.isNaN(ms) ? 0 : ms;
+	};
 
-	function truncateName(name: string, maxLength = 32): string {
-		if (!name || name.length <= maxLength) return name;
-		return name.slice(0, maxLength) + '...';
-	}
-
-	let sortedSolves = $derived(solves.slice().sort((a, b) => t(a) - t(b)));
+	let sortedSolves = $derived(solves.slice().sort((a, b) => timestampOf(a) - timestampOf(b)));
 </script>
 
 {#if sortedSolves.length === 0}
@@ -66,13 +65,13 @@
 								href={authState.userMode ? '/account/' + s.id : '/team/' + s.id}
 								class="cursor-pointer font-medium hover:underline"
 							>
-								{truncateName(s.name)}
+								{truncateText(s.name)}
 							</a>
 						</Table.Cell>
 						<Table.Cell
 							class="text-muted-foreground whitespace-nowrap py-2 text-right font-mono text-xs"
 						>
-							{new Date(t(s)).toLocaleString('en-GB')}
+							{formatDate(s.timestamp)}
 						</Table.Cell>
 					</Table.Row>
 				{/each}

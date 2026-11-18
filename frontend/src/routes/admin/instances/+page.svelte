@@ -2,6 +2,7 @@
 	import { getInstances, adminStopInstance } from '$lib/instances';
 	import { onMount } from 'svelte';
 	import { authState } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 	import { Button } from '$lib/components/ui/button';
 	import { Trash2, RefreshCw } from '@lucide/svelte';
 	import { showSuccess, showError } from '$lib/utils/toast';
@@ -76,6 +77,10 @@
 		});
 	}
 </script>
+
+<svelte:head>
+	<title>Instances | {$siteContent.brand.adminTitleSuffix}</title>
+</svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
@@ -189,6 +194,7 @@
 											variant="ghost"
 											size="icon"
 											class="text-muted-foreground hover:text-destructive h-8 w-8 transition-colors"
+											aria-label="Stop instance for {inst.team_name} - {inst.chall_name}"
 											onclick={() => stop(inst.team_id, inst.chall_id)}
 											disabled={stopping[`${inst.team_id}-${inst.chall_id}`]}
 										>

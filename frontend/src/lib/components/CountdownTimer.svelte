@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { Clock } from '@lucide/svelte';
 
 	let { endTime, label = '' }: { endTime: string | null; label?: string } = $props();
@@ -7,29 +6,25 @@
 	let timeLeft = $state(0);
 	let isRunning = $state(false);
 
-	function calculateTimeLeft() {
-		if (!endTime) return 0;
-		const end = new Date(endTime).getTime();
-		const now = Date.now();
-		return Math.max(0, Math.floor((end - now) / 1000));
-	}
-
 	$effect(() => {
-		if (endTime) {
-			timeLeft = calculateTimeLeft();
-			isRunning = timeLeft > 0;
+		const target = endTime ? new Date(endTime).getTime() : NaN;
+		if (!endTime || Number.isNaN(target)) {
+			timeLeft = 0;
+			isRunning = false;
+			return;
 		}
-	});
 
-	onMount(() => {
+		const update = () => {
+			const remaining = Math.max(0, Math.floor((target - Date.now()) / 1000));
+			timeLeft = remaining;
+			isRunning = remaining > 0;
+			return remaining > 0;
+		};
+
+		if (!update()) return;
+
 		const interval = setInterval(() => {
-			if (endTime) {
-				timeLeft = calculateTimeLeft();
-				if (timeLeft <= 0) {
-					isRunning = false;
-					clearInterval(interval);
-				}
-			}
+			if (!update()) clearInterval(interval);
 		}, 1000);
 
 		return () => clearInterval(interval);

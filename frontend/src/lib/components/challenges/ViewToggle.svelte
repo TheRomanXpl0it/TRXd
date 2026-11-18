@@ -21,35 +21,41 @@
 >
 	<Tooltip.Root>
 		<Tooltip.Trigger>
-			<Button
-				variant="ghost"
-				size="icon"
-				class="{btnClass} rounded-sm {uiStore.challengeView === 'normal'
-					? 'bg-muted text-foreground shadow-xs'
-					: 'text-muted-foreground hover:text-foreground'}"
-				onclick={() => uiStore.setChallengeView('normal')}
-				aria-label="Grid view"
-				data-testid="toggle-view-grid"
-			>
-				<LayoutGrid class={iconClass} />
-			</Button>
+			{#snippet child({ props })}
+				<Button
+					{...props}
+					variant="ghost"
+					size="icon"
+					class="{btnClass} rounded-sm {uiStore.challengeView === 'normal'
+						? 'bg-muted text-foreground shadow-xs'
+						: 'text-muted-foreground hover:text-foreground'}"
+					onclick={() => uiStore.setChallengeView('normal')}
+					aria-label="Grid view"
+					data-testid="toggle-view-grid"
+				>
+					<LayoutGrid class={iconClass} />
+				</Button>
+			{/snippet}
 		</Tooltip.Trigger>
 		<Tooltip.Content>Grid view</Tooltip.Content>
 	</Tooltip.Root>
 	<Tooltip.Root>
 		<Tooltip.Trigger>
-			<Button
-				variant="ghost"
-				size="icon"
-				class="{btnClass} rounded-sm {uiStore.challengeView === 'sidebar'
-					? 'bg-muted text-foreground shadow-xs'
-					: 'text-muted-foreground hover:text-foreground'}"
-				onclick={() => uiStore.setChallengeView('sidebar')}
-				aria-label="Split view"
-				data-testid="toggle-view-sidebar"
-			>
-				<SquareSplitHorizontal class={iconClass} />
-			</Button>
+			{#snippet child({ props })}
+				<Button
+					{...props}
+					variant="ghost"
+					size="icon"
+					class="{btnClass} rounded-sm {uiStore.challengeView === 'sidebar'
+						? 'bg-muted text-foreground shadow-xs'
+						: 'text-muted-foreground hover:text-foreground'}"
+					onclick={() => uiStore.setChallengeView('sidebar')}
+					aria-label="Split view"
+					data-testid="toggle-view-sidebar"
+				>
+					<SquareSplitHorizontal class={iconClass} />
+				</Button>
+			{/snippet}
 		</Tooltip.Trigger>
 		<Tooltip.Content>Split view</Tooltip.Content>
 	</Tooltip.Root>

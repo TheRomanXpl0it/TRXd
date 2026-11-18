@@ -23,12 +23,12 @@
 	let flag = $state('');
 	let submittingFlag = $state(false);
 	let flagError = $state(false);
-	let flagInputElement = $state<any>();
 
 	$effect(() => {
 		if (challenge?.id) {
 			flag = '';
 			flagError = false;
+			locallySolved = false;
 		}
 	});
 
@@ -108,7 +108,6 @@
 					/>
 				{/if}
 				<Input
-					bind:this={flagInputElement}
 					class={`h-11 pl-10 text-sm sm:text-base ${flagError ? 'border-red-500 focus-visible:ring-red-500' : ''}`}
 					placeholder={$siteContent.challenges.flagPlaceholder || 'TRX{...}'}
 					bind:value={flag}
@@ -124,7 +123,6 @@
 
 			<Button
 				type="submit"
-				color="primary"
 				class="h-11 shrink-0 px-6 sm:px-8"
 				disabled={submittingFlag || !flag.trim() || flagError}
 				aria-label="Submit flag"

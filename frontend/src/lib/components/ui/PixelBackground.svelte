@@ -28,11 +28,17 @@
 
 	let COLS = 0;
 	let ROWS = 0;
+	let viewportW = 0;
+	let viewportH = 0;
+	let isDarkTheme = false;
+	let prefersReducedMotion = false;
 	let grid: any[] = [];
 	let nextGrid: any[] = [];
 	let recentActivity: number[] = [];
 	let lastTime = 0;
-	let animationFrame: number;
+	let animationFrame: number | null = null;
+	let themeObserver: MutationObserver | null = null;
+	let motionMedia: MediaQueryList | null = null;
 
 	const PATTERNS = [
 		{
@@ -129,10 +135,8 @@
 	];
 
 	function getThemeColorsByTheme(t: string) {
-		const isDark = document.documentElement.classList.contains('dark');
-
 		if (t === 'finished') {
-			if (isDark) {
+			if (isDarkTheme) {
 				return {
 					alive: '#a1a1aa', // zinc-400
 					aliveLight: '#d4d4d8', // zinc-300
@@ -147,7 +151,7 @@
 		}
 
 		// Success/Teal theme (default)
-		if (isDark) {
+		if (isDarkTheme) {
 			return {
 				alive: '#14b8a6', // teal-500
 				aliveLight: '#2dd4bf', // teal-400
@@ -200,13 +204,13 @@
 	function resizeCanvas() {
 		if (!canvas) return;
 		const dpr = Math.min(window.devicePixelRatio || 1, 2);
-		const vw = window.innerWidth;
-		const vh = window.innerHeight;
+		viewportW = window.innerWidth;
+		viewportH = window.innerHeight;
 
-		canvas.style.width = vw + 'px';
-		canvas.style.height = vh + 'px';
-		canvas.width = Math.floor(vw * dpr);
-		canvas.height = Math.floor(vh * dpr);
+		canvas.style.width = viewportW + 'px';
+		canvas.style.height = viewportH + 'px';
+		canvas.width = Math.floor(viewportW * dpr);
+		canvas.height = Math.floor(viewportH * dpr);
 
 		if (!ctx) ctx = canvas.getContext('2d', { alpha: true });
 		if (!ctx) return;
@@ -214,8 +218,8 @@
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
 		ctx.scale(dpr, dpr);
 
-		const newCols = Math.ceil(vw / TARGET_CELL_SIZE);
-		const newRows = Math.ceil(vh / TARGET_CELL_SIZE);
+		const newCols = Math.ceil(viewportW / TARGET_CELL_SIZE);
+		const newRows = Math.ceil(viewportH / TARGET_CELL_SIZE);
 
 		if (newCols === COLS && newRows === ROWS && grid.length) return;
 
@@ -355,15 +359,15 @@
 	}
 
 	function drawGrid() {
-		if (!ctx) return;
+		if (!ctx || !COLS || !ROWS) return;
 
 		const tealColors = getThemeColorsByTheme('default');
 		const grayColors = getThemeColorsByTheme('finished');
 
-		const cellW = Math.ceil(window.innerWidth / COLS);
-		const cellH = Math.ceil(window.innerHeight / ROWS);
+		const cellW = Math.ceil(viewportW / COLS);
+		const cellH = Math.ceil(viewportH / ROWS);
 
-		ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+		ctx.clearRect(0, 0, viewportW, viewportH);
 
 		for (let y = 0; y < ROWS; y++) {
 			for (let x = 0; x < COLS; x++) {
@@ -427,6 +431,10 @@
 	}
 
 	function animate(time: number) {
+		if (document.hidden || prefersReducedMotion) {
+			animationFrame = null;
+			return;
+		}
 		const interval = 1000 / FPS;
 		const delta = time - lastTime;
 		if (delta >= interval) {
@@ -437,16 +445,66 @@
 		animationFrame = requestAnimationFrame(animate);
 	}
 
-	onMount(() => {
-		resizeCanvas();
+	function startAnimation() {
+		if (document.hidden || prefersReducedMotion || animationFrame !== null) return;
+		lastTime = performance.now();
 		animationFrame = requestAnimationFrame(animate);
+	}
+
+	function stopAnimation() {
+		if (animationFrame !== null) {
+			cancelAnimationFrame(animationFrame);
+			animationFrame = null;
+		}
+	}
+
+	function handleVisibilityChange() {
+		if (document.hidden) {
+			stopAnimation();
+		} else {
+			startAnimation();
+		}
+	}
+
+	function handleMotionChange(e: MediaQueryListEvent) {
+		prefersReducedMotion = e.matches;
+		if (prefersReducedMotion) {
+			stopAnimation();
+			drawGrid();
+		} else {
+			startAnimation();
+		}
+	}
+
+	onMount(() => {
+		isDarkTheme = document.documentElement.classList.contains('dark');
+		themeObserver = new MutationObserver(() => {
+			isDarkTheme = document.documentElement.classList.contains('dark');
+			drawGrid();
+		});
+		themeObserver.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['class']
+		});
+
+		motionMedia = window.matchMedia?.('(prefers-reduced-motion: reduce)') ?? null;
+		prefersReducedMotion = motionMedia?.matches ?? false;
+		motionMedia?.addEventListener?.('change', handleMotionChange);
+
+		resizeCanvas();
+		drawGrid();
+		startAnimation();
 		window.addEventListener('resize', resizeCanvas);
+		document.addEventListener('visibilitychange', handleVisibilityChange);
 	});
 
 	onDestroy(() => {
 		if (typeof window !== 'undefined') {
 			window.removeEventListener('resize', resizeCanvas);
-			cancelAnimationFrame(animationFrame);
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			motionMedia?.removeEventListener?.('change', handleMotionChange);
+			themeObserver?.disconnect();
+			stopAnimation();
 		}
 	});
 </script>

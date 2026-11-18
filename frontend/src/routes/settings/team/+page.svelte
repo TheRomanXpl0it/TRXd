@@ -9,6 +9,7 @@
 	import { ShieldHalf, Link as LinkIcon, Users, Check } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { copyToClipboard } from '$lib/utils/clipboard';
+	import NotFound from '$lib/components/NotFound.svelte';
 
 	let user = $derived(authState.user);
 
@@ -20,15 +21,20 @@
 	let inviteCopied = $state(false);
 
 	async function handleChangePassword() {
-		if (!user?.team_id || !newPassword) return;
-		if (newPassword !== confirmPassword) {
+		const trimmed = newPassword.trim();
+		if (!user?.team_id || !trimmed) return;
+		if (trimmed.length < 8) {
+			showError(null, 'Password must be at least 8 characters.');
+			return;
+		}
+		if (trimmed !== confirmPassword.trim()) {
 			showError(null, 'Passwords do not match.');
 			return;
 		}
 
 		resettingPassword = true;
 		try {
-			await resetTeamPassword(user.team_id, newPassword.trim());
+			await resetTeamPassword(user.team_id, trimmed);
 			showSuccess('Team password updated.');
 			newPassword = '';
 			confirmPassword = '';
@@ -56,6 +62,9 @@
 	}
 </script>
 
+{#if authState.userMode}
+	<NotFound status={404} />
+{:else}
 <div class="space-y-6">
 	<div>
 		<h2 class="text-2xl font-bold tracking-tight">Team settings</h2>
@@ -157,3 +166,4 @@
 		</form>
 	{/if}
 </div>
+{/if}

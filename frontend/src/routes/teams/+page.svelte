@@ -1,23 +1,15 @@
 <script lang="ts">
-	import * as Table from '$lib/components/ui/table/index.js';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
-	import { getTeams } from '@/team';
+	import { getTeams } from '$lib/team';
 	import { goto } from '$app/navigation';
 	import { page as pageStore } from '$app/stores';
-	import ErrorMessage from '$lib/components/ui/error-message.svelte';
 	import { createQuery } from '@tanstack/svelte-query';
 	import { authState } from '$lib/stores/auth';
-	import EmptyState from '$lib/components/ui/empty-state.svelte';
-	import { Users, Globe } from '@lucide/svelte';
-	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
-	import CountryFlag from '$lib/components/ui/country-flag.svelte';
+	import { Users } from '@lucide/svelte';
 	import { siteContent } from '$lib/site-content';
-	import { getCountryByIso3 } from '$lib/utils/countries';
 	import NotFound from '$lib/components/NotFound.svelte';
+	import DirectoryTable from '$lib/components/DirectoryTable.svelte';
 
-	let perPage = $state(20);
+	const perPage = 20;
 
 	function parsePageParam(value: string | null): number {
 		if (!value) return 1;
@@ -35,30 +27,14 @@
 		enabled: !authState.userMode
 	}));
 
-	// Handle both PaginatedResponse and flat array (fallback)
 	const rawData = $derived(teamsQuery.data);
 	const isPaginated = $derived(!!rawData?.pagination);
 	const teamsData = $derived(Array.isArray(rawData) ? rawData : (rawData?.data ?? []));
-	const totalCount = $derived(isPaginated ? (rawData?.pagination?.total ?? 0) : teamsData.length);
-
-	const loading = $derived(teamsQuery.isLoading);
-	const error = $derived(teamsQuery.error?.message ?? null);
-
-	function truncateName(name: string, maxLength = 32): string {
-		if (!name || name.length <= maxLength) return name;
-		return name.slice(0, maxLength) + '...';
-	}
-
-	// Sort alphabetically by name
-	const sorted = $derived(
-		(Array.isArray(teamsData) ? [...teamsData] : []).sort((a, b) =>
-			(a?.name || '').localeCompare(b?.name || '')
-		)
+	const count = $derived(isPaginated ? (rawData?.pagination?.total ?? 0) : teamsData.length);
+	const pageRows = $derived(
+		isPaginated ? teamsData : teamsData.slice((currentPage - 1) * perPage, currentPage * perPage)
 	);
-	const count = $derived(totalCount);
-	const totalPages = $derived(Math.ceil(count / perPage));
 
-	// Keep pagination state synchronized with URL for browser history navigation.
 	$effect(() => {
 		const pageFromUrl = parsePageParam($pageStore.url.searchParams.get('page'));
 		if (currentPage !== pageFromUrl) {
@@ -68,7 +44,6 @@
 
 	function handlePageChange(newPage: number) {
 		currentPage = newPage;
-		// Sync URL
 		const nextUrl = new URL($pageStore.url);
 		if (newPage > 1) {
 			nextUrl.searchParams.set('page', String(newPage));
@@ -80,12 +55,11 @@
 		if (nextHref !== currentHref) {
 			goto(nextHref, { replaceState: true, noScroll: true, keepFocus: true });
 		}
-		// Scroll to pagination
 		setTimeout(() => {
-			const paginationEl = document.getElementById('pagination-controls');
-			if (paginationEl) {
-				paginationEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-			}
+			document.getElementById('directory-table')?.scrollIntoView({
+				behavior: 'smooth',
+				block: 'start'
+			});
 		}, 0);
 	}
 </script>
@@ -101,166 +75,19 @@
 {#if authState.userMode}
 	<NotFound status={404} />
 {:else}
-<div class="mx-auto max-w-5xl space-y-6 py-8">
-	{#if error}
-		<ErrorMessage title="Error loading teams" message={error} />
-	{:else}
-		<Card.Root class="overflow-hidden border-0 shadow-sm">
-			<Card.Content class="p-0">
-				<div class="relative mx-4 overflow-auto sm:mx-6">
-					<Table.Root>
-						<Table.Header class="bg-transparent [&_tr]:border-b-0">
-							<Table.Row class="hover:bg-transparent">
-								<Table.Head
-									class="text-muted-foreground/70 w-[400px] bg-transparent text-[10px] font-bold uppercase tracking-wider"
-									>Team</Table.Head
-								>
-								<Table.Head
-									class="text-muted-foreground/70 bg-transparent text-[10px] font-bold uppercase tracking-wider"
-									>Country</Table.Head
-								>
-								<Table.Head
-									class="text-muted-foreground/70 bg-transparent text-right text-[10px] font-bold uppercase tracking-wider"
-									>Score</Table.Head
-								>
-							</Table.Row>
-						</Table.Header>
-						<Table.Body>
-							{#if loading && teamsData.length === 0}
-								{#each Array(5) as _}
-									<Table.Row>
-										<Table.Cell>
-											<Skeleton class="h-4 w-[150px]" />
-										</Table.Cell>
-										<Table.Cell><Skeleton class="h-5 w-[100px]" /></Table.Cell>
-										<Table.Cell class="text-right"
-											><Skeleton class="ml-auto h-4 w-[50px]" /></Table.Cell
-										>
-									</Table.Row>
-								{/each}
-							{:else}
-								{@const pageRows = isPaginated
-									? sorted
-									: sorted.slice((currentPage - 1) * perPage, currentPage * perPage)}
-
-								{#if pageRows.length === 0}
-									<Table.Row>
-										<Table.Cell colspan={3} class="h-[300px] text-center">
-											<EmptyState
-												icon={Users}
-												title="No teams found"
-												description="There are no teams to display at the moment."
-											/>
-										</Table.Cell>
-									</Table.Row>
-								{:else}
-									{#each pageRows as team, i (team.id)}
-										<Table.Row
-											class="hover:bg-muted/50 border-b-0 transition-colors"
-										>
-											<Table.Cell class="py-3">
-												<a
-													href={`/team/${team.id}`}
-													class="flex items-center gap-3 decoration-primary/50 underline-offset-4 hover:underline"
-												>
-													<div
-														class="border-border h-8 w-8 shrink-0 overflow-hidden rounded-full border"
-													>
-														<GeneratedAvatar seed={team.name} class="h-full w-full" />
-													</div>
-														<span class="text-foreground font-semibold">
-															{truncateName(team.name)}
-														</span>
-												</a>
-											</Table.Cell>
-
-											<Table.Cell>
-												{#if team.country}
-													{@const country = getCountryByIso3(team.country)}
-													<div class="flex items-center gap-2">
-														<div
-															class="bg-background relative flex h-6 w-8 shrink-0 items-center justify-center overflow-hidden rounded border shadow-sm"
-														>
-															{#if country?.iso2}
-																<CountryFlag
-																	country={country.iso2}
-																	width={32}
-																	height={32}
-																	class="h-full w-full object-cover"
-																/>
-															{:else}
-																<Globe class="text-muted-foreground h-4 w-4" />
-															{/if}
-														</div>
-														<span class="text-foreground text-sm font-medium">
-															{country?.label ?? team.country}
-														</span>
-													</div>
-												{:else}
-													<span class="text-muted-foreground text-sm italic">Not specified</span>
-												{/if}
-											</Table.Cell>
-
-											<Table.Cell class="text-right">
-												<div
-													class="font-mono text-sm font-medium tabular-nums leading-none tracking-tight"
-												>
-													{team.score?.toLocaleString() ?? 0} pts
-												</div>
-											</Table.Cell>
-										</Table.Row>
-									{/each}
-								{/if}
-							{/if}
-						</Table.Body>
-					</Table.Root>
-				</div>
-			</Card.Content>
-		</Card.Root>
-
-		<!-- Pagination -->
-		{#if totalPages > 1}
-			<Pagination.Root
-				{count}
-				{perPage}
-				page={currentPage}
-				onPageChange={handlePageChange}
-				siblingCount={1}
-				class="mt-4"
-			>
-				{#snippet children({ pages, currentPage: pageNum })}
-					<div class="flex w-full justify-center overflow-x-auto py-4" id="pagination-controls">
-						<Pagination.Content class="gap-4">
-							<Pagination.Item class="mx-2">
-								<Pagination.PrevButton class="h-9 w-9" />
-							</Pagination.Item>
-
-							{#each pages as page (page.key)}
-								{#if page.type === 'ellipsis'}
-									<Pagination.Item>
-										<Pagination.Ellipsis />
-									</Pagination.Item>
-								{:else}
-									<Pagination.Item>
-										<Pagination.Link
-											{page}
-											isActive={pageNum === page.value}
-											class="data-[selected]:bg-foreground data-[selected]:text-background h-9 w-9 transition-all data-[selected]:shadow-md"
-										>
-											{page.value}
-										</Pagination.Link>
-									</Pagination.Item>
-								{/if}
-							{/each}
-
-							<Pagination.Item class="mx-2">
-								<Pagination.NextButton class="h-9 w-9" />
-							</Pagination.Item>
-						</Pagination.Content>
-					</div>
-				{/snippet}
-			</Pagination.Root>
-		{/if}
-	{/if}
-</div>
+	<DirectoryTable
+		rows={pageRows}
+		loading={teamsQuery.isLoading}
+		error={teamsQuery.error?.message ?? null}
+		errorTitle="Error loading teams"
+		entityLabel="Team"
+		hrefPrefix="/team/"
+		emptyIcon={Users}
+		emptyTitle="No teams found"
+		emptyDescription="There are no teams to display at the moment."
+		{count}
+		{perPage}
+		{currentPage}
+		onPageChange={handlePageChange}
+	/>
 {/if}

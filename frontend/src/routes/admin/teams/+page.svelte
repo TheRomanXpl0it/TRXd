@@ -2,6 +2,7 @@
 	import { getTeamByEmail, getTeamByName, resetTeamPassword } from '$lib/team';
 	import { Button } from '$lib/components/ui/button';
 	import { authState } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 	import { Input } from '$lib/components/ui/input';
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
@@ -20,6 +21,7 @@
 	let generatedPassword = $state('');
 	let showResetDialog = $state(false);
 	let resetting = $state(false);
+	let searchRequestId = 0;
 
 	$effect(() => {
 		if (!showResetDialog) {
@@ -30,6 +32,8 @@
 	$effect(() => {
 		const q = query;
 		if (!q.trim()) {
+			searchRequestId += 1;
+			loading = false;
 			results = [];
 			searched = false;
 			return;
@@ -40,30 +44,26 @@
 	});
 
 	async function search() {
-		if (!query.trim()) return;
+		const q = query.trim();
+		if (!q) return;
+		const reqId = ++searchRequestId;
 		loading = true;
 		results = [];
 		searched = true;
 
 		try {
-			const q = query.trim();
-			let teams: any[] = [];
-
-			if (searchType === 'email') {
-				teams = await getTeamByEmail(q);
-			} else {
-				teams = await getTeamByName(q);
-			}
-
+			const teams = searchType === 'email' ? await getTeamByEmail(q) : await getTeamByName(q);
+			if (reqId !== searchRequestId) return;
 			results = teams;
 		} catch (err: any) {
+			if (reqId !== searchRequestId) return;
 			const msg: string = err?.message?.toLowerCase() ?? '';
 			const isNotFound =
 				msg.includes('not found') || msg.includes('invalid') || msg.includes('404');
 			if (!isNotFound) showError(err, 'Failed to search teams');
 			results = [];
 		} finally {
-			loading = false;
+			if (reqId === searchRequestId) loading = false;
 		}
 	}
 
@@ -88,6 +88,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Manage teams | {$siteContent.brand.adminTitleSuffix}</title>
+</svelte:head>
 
 <div class="space-y-6">
 	<div>

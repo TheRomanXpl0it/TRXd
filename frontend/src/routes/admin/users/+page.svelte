@@ -2,6 +2,7 @@
 	import { resetUserPassword, getUserByEmail, getUserByName, updateUserRole } from '$lib/user';
 	import { Button } from '$lib/components/ui/button';
 	import { authState } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import * as Card from '$lib/components/ui/card';
@@ -24,6 +25,7 @@
 	let showResetDialog = $state(false);
 	let resetting = $state(false);
 	let changingRoleIds = $state<Set<number>>(new Set());
+	let searchRequestId = 0;
 
 	const userMode = $derived(authState.userMode);
 	const lookupSubject = $derived(userMode ? 'team name' : 'name');
@@ -60,6 +62,8 @@
 	$effect(() => {
 		const q = query; // track reactively
 		if (!q.trim()) {
+			searchRequestId += 1;
+			loading = false;
 			results = [];
 			searched = false;
 			return;
@@ -69,27 +73,25 @@
 	});
 
 	async function search() {
-		if (!query.trim()) return;
+		const q = query.trim();
+		if (!q) return;
+		const reqId = ++searchRequestId;
 		loading = true;
 		results = [];
 		searched = true;
 		try {
-			const q = query.trim();
-			let users: any[] = [];
-			if (searchType === 'email') {
-				users = await getUserByEmail(q);
-			} else {
-				users = await getUserByName(q);
-			}
+			const users = searchType === 'email' ? await getUserByEmail(q) : await getUserByName(q);
+			if (reqId !== searchRequestId) return;
 			results = users;
 		} catch (err: any) {
+			if (reqId !== searchRequestId) return;
 			const msg: string = err?.message?.toLowerCase() ?? '';
 			const isNotFound =
 				msg.includes('not found') || msg.includes('invalid') || msg.includes('404');
 			if (!isNotFound) showError(err, 'Failed to search users');
 			results = [];
 		} finally {
-			loading = false;
+			if (reqId === searchRequestId) loading = false;
 		}
 	}
 
@@ -101,8 +103,10 @@
 
 	async function handleReset() {
 		if (!selectedUser || !newPassword.trim() || resetTargetId === null) return;
-
-		if (!confirm(`Are you sure you want to change the password for ${selectedUser.name}?`)) return;
+		if (newPassword.trim().length < 8) {
+			showError(null, 'Password must be at least 8 characters long.');
+			return;
+		}
 
 		resetting = true;
 		try {
@@ -139,6 +143,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Manage users | {$siteContent.brand.adminTitleSuffix}</title>
+</svelte:head>
 
 <div class="space-y-6">
 	<div>
@@ -361,6 +369,7 @@
 			<div class="space-y-2">
 				<Label for="new-password">New password</Label>
 				<Input id="new-password" type="password" bind:value={newPassword} placeholder="••••••••" />
+				<p class="text-muted-foreground text-xs">Minimum 8 characters</p>
 			</div>
 		</div>
 		<Dialog.Footer>
@@ -368,7 +377,7 @@
 			<Button
 				variant="destructive"
 				onclick={handleReset}
-				disabled={resetting || !newPassword.trim() || resetTargetId === null}
+				disabled={resetting || newPassword.trim().length < 8 || resetTargetId === null}
 			>
 				{#if resetting}
 					<Spinner class="mr-2 h-4 w-4" />

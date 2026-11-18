@@ -9,16 +9,20 @@
 	import { login } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { authState, loadUser } from '$lib/stores/auth';
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import { onMount } from 'svelte';
 	import { Lock } from '@lucide/svelte';
 	import { siteContent } from '$lib/site-content';
 
 	// --- State (Svelte 5 runes) ----------------------------------------------
 
+	const queryClient = useQueryClient();
+
 	let email = $state('');
 	let password = $state('');
 	let remember = $state(false);
 
-	$effect(() => {
+	onMount(() => {
 		if (typeof localStorage !== 'undefined') {
 			const saved = localStorage.getItem('trxd_remember_email');
 			if (saved) {
@@ -77,6 +81,7 @@
 			}
 
 			await loadUser();
+			queryClient.clear();
 
 			if (remember && typeof localStorage !== 'undefined') {
 				localStorage.setItem('trxd_remember_email', email);
@@ -89,7 +94,12 @@
 			const redirectParam = typeof window !== 'undefined'
 				? new URL(window.location.href).searchParams.get('redirect')
 				: null;
-			if (redirectParam && redirectParam.startsWith('/')) {
+			if (
+				redirectParam &&
+				redirectParam.startsWith('/') &&
+				!redirectParam.startsWith('//') &&
+				!redirectParam.startsWith('/\\')
+			) {
 				goto(redirectParam);
 				return;
 			}

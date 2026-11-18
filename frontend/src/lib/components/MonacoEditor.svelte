@@ -73,13 +73,24 @@
 
 	$effect(() => {
 		if (!editor || !monacoLib) return;
+		const model = editor.getModel();
+		if (model && language) {
+			monacoLib.editor.setModelLanguage(model, language);
+		}
+	});
+
+	$effect(() => {
+		if (!editor || !monacoLib) return;
 		if (value === undefined || value === null) return;
 
 		const currentValue = editor.getValue();
 		if (currentValue !== value) {
 			isUpdatingFromProp = true;
-			editor.setValue(value);
-			isUpdatingFromProp = false;
+			try {
+				editor.setValue(value);
+			} finally {
+				isUpdatingFromProp = false;
+			}
 		}
 	});
 

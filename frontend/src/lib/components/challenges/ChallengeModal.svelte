@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
-	import { Button } from '@/components/ui/button';
+	import { Button } from '$lib/components/ui/button';
 	import { Download, Droplet, Info, Pen, Trash2, Trophy, UserCog } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import InstanceControls from './InstanceControls.svelte';
@@ -9,7 +9,11 @@
 	import Markdown from '$lib/components/Markdown.svelte';
 	import { getSolves } from '$lib/challenges';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
-	import { formatConnectionString } from '$lib/utils/connection';
+	import {
+		getAttachmentHref,
+		getChallengeConnectionString,
+		isDynamicChallenge
+	} from '$lib/utils/connection';
 	import { copyToClipboard as copy } from '$lib/utils/clipboard';
 	import type { Solve } from '$lib/types';
 	import AuthorTags from './AuthorTags.svelte';
@@ -110,29 +114,8 @@
 		}
 	}
 
-	const isDynamicType = $derived(
-		challenge?.instance_type === 'Container' ||
-			challenge?.instance_type === 'Compose' ||
-			!!challenge?.image ||
-			!!challenge?.compose ||
-			!!challenge?.ghost
-	);
-
-	const connectionString = $derived.by(() => {
-		// Dynamic challenges handle their own connection info via InstanceControls
-		if (isDynamicType || challenge?.instance) return '';
-
-		const h = challenge?.host || '';
-		const p = challenge?.port;
-
-		if (!h) return '';
-
-		return formatConnectionString({
-			host: h,
-			port: p,
-			connType: challenge?.conn_type
-		});
-	});
+	const isDynamicType = $derived(isDynamicChallenge(challenge));
+	const connectionString = $derived(getChallengeConnectionString(challenge));
 </script>
 
 <Dialog.Root bind:open>
@@ -250,9 +233,14 @@
 
 		<div class="mb-6 flex justify-center border-b pb-4">
 			<div
+				role="tablist"
+				aria-label="Challenge views"
 				class="bg-muted text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1"
 			>
 				<button
+					type="button"
+					role="tab"
+					aria-selected={activeTab === 'details'}
 					class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 					'details'
 						? 'bg-background text-foreground shadow-sm'
@@ -263,6 +251,9 @@
 					Details
 				</button>
 				<button
+					type="button"
+					role="tab"
+					aria-selected={activeTab === 'solves'}
 					class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 					'solves'
 						? 'bg-background text-foreground shadow-sm'
@@ -295,7 +286,7 @@
 					<div class="flex flex-wrap gap-2">
 						{#each challenge.attachments as attachment}
 							<a
-								href={`/attachments/${challenge.id || challenge.chall_id}/${attachment.replace(/^\/+/, '')}`}
+								href={getAttachmentHref(challenge.id || challenge.chall_id, attachment)}
 								target="_blank"
 								rel="noopener noreferrer"
 								class="border-input bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex h-9 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2"
@@ -360,14 +351,16 @@
 			{/if}
 
 			<!-- Submit Flag -->
-			<FlagSubmission
-				{challenge}
-				{submissionsClosed}
-				onSolved={() => {
-					if (challenge) challenge.solved = true;
-					if (onSolved) onSolved();
-				}}
-			/>
+			{#key challenge?.id}
+				<FlagSubmission
+					{challenge}
+					{submissionsClosed}
+					onSolved={() => {
+						if (challenge) challenge.solved = true;
+						if (onSolved) onSolved();
+					}}
+				/>
+			{/key}
 		{:else if activeTab === 'solves'}
 			<section class="mb-2" aria-labelledby="solves-heading">
 				<h3 id="solves-heading" class="sr-only">Challenge solves</h3>

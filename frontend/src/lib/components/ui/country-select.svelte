@@ -3,7 +3,6 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { cn } from '$lib/utils.js';
-	import VirtualList from '@sveltejs/svelte-virtual-list';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import { Search } from '@lucide/svelte';
@@ -121,36 +120,8 @@
 					<Search class="mb-2 h-8 w-8 opacity-20" />
 					<p class="text-xs">No countries found</p>
 				</div>
-			{:else if filteredCountries.length > 20}
-				<div class="h-[300px] p-1">
-					<VirtualList items={filteredCountries} let:item height="300px">
-						<button
-							type="button"
-							role="option"
-							aria-selected={value === item.value}
-							class="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none"
-							onclick={() => selectItem(item)}
-						>
-							<div class="flex w-full items-center gap-2">
-								<div class="flex h-4 w-4 items-center justify-center">
-									{#if value === item.value}
-										<CheckIcon class="h-4 w-4" />
-									{/if}
-								</div>
-								<CountryFlag
-									country={item.iso2}
-									width={20}
-									height={14}
-									class="h-3.5 w-5 rounded-[2px] object-cover shadow-sm"
-								/>
-								<span class="truncate">{item.label}</span>
-								<span class="text-muted-foreground ml-auto text-xs opacity-50">{item.value}</span>
-							</div>
-						</button>
-					</VirtualList>
-				</div>
 			{:else}
-				<div class="max-h-[300px] overflow-y-auto p-1">
+				<div role="listbox" class="max-h-[300px] overflow-y-auto p-1">
 					{#each filteredCountries as item (item.value)}
 						<button
 							type="button"

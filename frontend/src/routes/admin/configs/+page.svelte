@@ -7,6 +7,7 @@
 	import { Textarea } from '$lib/components/ui/textarea';
 	import DateTimePicker from '$lib/components/ui/date-time-picker.svelte';
 	import { authState, loadUser } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import * as Card from '$lib/components/ui/card';
@@ -48,6 +49,7 @@
 
 	let configs = $state<Config[]>([]);
 	let form = $state<Record<string, FormValue>>({});
+	let initialValues = $state<Record<string, string>>({});
 	let visibleSecrets = $state<Record<string, boolean>>({});
 	let activeTab = $state('');
 	let fetchedOnce = $state(false);
@@ -61,10 +63,7 @@
 	const hasChanges = $derived(
 		configs.some((config) => {
 			const key = config.key;
-			const current = form[key];
-			const next = toConfigValue(config, current);
-			const prev = String(config.value ?? '');
-			return next !== prev;
+			return toConfigValue(config, form[key]) !== (initialValues[key] ?? '');
 		})
 	);
 
@@ -264,11 +263,15 @@
 			const list = Array.isArray(res) ? (res as Config[]) : [];
 			configs = list;
 			const nextForm: Record<string, FormValue> = {};
+			const nextInitial: Record<string, string> = {};
 			for (const c of list) {
 				if (!c || typeof c !== 'object') continue;
-				nextForm[c.key] = toFormValue(c);
+				const formVal = toFormValue(c);
+				nextForm[c.key] = formVal;
+				nextInitial[c.key] = toConfigValue(c, formVal);
 			}
 			form = nextForm;
+			initialValues = nextInitial;
 		} catch (e: any) {
 			error = e?.message ?? 'Failed to load configs';
 		} finally {
@@ -306,12 +309,27 @@
 			for (const config of configs) {
 				const key = config.key;
 				const value = toConfigValue(config, form[key]);
-				const prev = String(config.value ?? '');
-				if (value !== prev) {
+				if (value !== (initialValues[key] ?? '')) {
 					changes.push({ ...config, value });
 				}
 			}
-			await Promise.all(changes.map((change) => updateConfigs(change)));
+			const results = await Promise.allSettled(changes.map((change) => updateConfigs(change)));
+			const failures: any[] = [];
+			results.forEach((result, idx) => {
+				if (result.status === 'fulfilled') {
+					const saved = changes[idx];
+					initialValues[saved.key] = String(saved.value ?? '');
+				} else {
+					failures.push(result.reason);
+				}
+			});
+			if (failures.length > 0) {
+				showError(failures[0], 'Failed to save configuration.');
+				if (failures.length < changes.length) {
+					loadUser(true).catch(() => {});
+				}
+				return;
+			}
 			showSuccess('Configuration updated successfully.');
 			loadUser(true).catch(() => {});
 			await loadConfigs(); // Reload to sync state
@@ -322,6 +340,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Configuration | {$siteContent.brand.adminTitleSuffix}</title>
+</svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
@@ -380,6 +402,7 @@
 								group.key
 									? 'bg-background text-foreground shadow-sm'
 									: 'hover:bg-background/50 hover:text-foreground'}"
+								aria-pressed={activeTab === group.key}
 								onclick={() => (activeTab = group.key)}
 								type="button"
 							>
@@ -404,7 +427,10 @@
 							>
 								<div class="flex items-start justify-between gap-3">
 									<div class="min-w-0 flex-1">
-										<Label class="block truncate text-sm font-bold">{getDisplayName(c)}</Label>
+										<Label
+											for={normalizedType === 'bool' || normalizedType === 'date' ? undefined : c.key}
+											class="block truncate text-sm font-bold"
+										>{getDisplayName(c)}</Label>
 										<p class="text-muted-foreground mt-1 font-mono text-[11px]">{c.key}</p>
 										{#if c.description}
 											<p class="text-muted-foreground mt-2 text-xs leading-relaxed">
@@ -444,6 +470,7 @@
 										</div>
 									{:else if normalizedType === 'date'}
 										<DateTimePicker
+											id={c.key}
 											bind:value={form[c.key]}
 											{invalid}
 											class="h-9"
@@ -454,6 +481,7 @@
 										{/if}
 									{:else if normalizedType === 'text'}
 										<Textarea
+											id={c.key}
 											value={String(form[c.key] ?? '')}
 											oninput={(event) => (form[c.key] = event.currentTarget.value)}
 											rows={8}
@@ -464,6 +492,7 @@
 									{:else}
 										<div class="relative">
 											<Input
+												id={c.key}
 												type={getInputType(c, visibleSecrets[c.key])}
 												bind:value={form[c.key]}
 												class={c.secret ? 'h-9 pr-10' : 'h-9'}

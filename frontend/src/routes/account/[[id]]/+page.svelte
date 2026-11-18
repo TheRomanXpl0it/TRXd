@@ -25,12 +25,14 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import GeneratedAvatar from '$lib/components/ui/avatar/generated-avatar.svelte';
 	import RadarChart from '$lib/components/RadarChart.svelte';
+	import CategoryBreakdown from '$lib/components/CategoryBreakdown.svelte';
 	import CountryFlag from '$lib/components/ui/country-flag.svelte';
 	import { getCountryByIso3 } from '$lib/utils/countries';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import { formatDateTime24h } from '$lib/utils/formatting';
+	import { siteContent } from '$lib/site-content';
 
-	let activeTab = $state<'overview' | 'solves' | 'achievements'>('overview');
+	let activeTab = $state<'overview' | 'solves'>('overview');
 
 	// Derive currentUserId from params/user
 	const currentUserId = $derived.by(() => {
@@ -137,6 +139,9 @@
 			await loadUser(true);
 			await userQuery.refetch();
 			queryClient.invalidateQueries({ queryKey: ['user'] });
+			queryClient.invalidateQueries({ queryKey: ['scoreboard'] });
+			queryClient.invalidateQueries({ queryKey: ['users'] });
+			queryClient.invalidateQueries({ queryKey: ['team'] });
 			showSuccess('Profile updated successfully.');
 			editProfileOpen = false;
 		} catch (err: any) {
@@ -146,6 +151,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>{userVerboseData?.name ? `${userVerboseData.name} - ` : 'Account - '}{$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 {#if !authState.ready || loading}
 	<div class="mx-auto max-w-5xl space-y-6 px-4 sm:px-6 lg:px-8 py-8">
@@ -322,13 +331,11 @@
 						<div class="flex flex-wrap gap-2">
 							{#each displayBadges as badge}
 								<Tooltip.Root>
-									<Tooltip.Trigger>
-										<span
-											class="bg-primary/10 text-primary inline-flex cursor-help items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-										>
-											<Medal class="mr-1 h-3 w-3" />
-											{badge.name}
-										</span>
+									<Tooltip.Trigger
+										class="bg-primary/10 text-primary inline-flex cursor-help items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+									>
+										<Medal class="mr-1 h-3 w-3" />
+										{badge.name}
 									</Tooltip.Trigger>
 									<Tooltip.Content>
 										<p>{badge.description}</p>
@@ -344,9 +351,14 @@
 		<!-- Tabs Control -->
 		<div class="flex justify-center">
 			<div
+				role="tablist"
+				aria-label="Account sections"
 				class="bg-muted text-muted-foreground inline-flex h-10 items-center justify-center gap-1 rounded-lg p-1"
 			>
 				<button
+					type="button"
+					role="tab"
+					aria-selected={activeTab === 'overview'}
 					class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 					'overview'
 						? 'bg-background text-foreground shadow-sm'
@@ -356,6 +368,9 @@
 					Overview
 				</button>
 				<button
+					type="button"
+					role="tab"
+					aria-selected={activeTab === 'solves'}
 					class="ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center whitespace-nowrap rounded-md px-6 py-1.5 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 {activeTab ===
 					'solves'
 						? 'bg-background text-foreground shadow-sm'
@@ -383,50 +398,10 @@
 				{#if !notStarted}
 					<!-- Stats and Breakdown Section (Right, 4 cols) -->
 					<div class="flex flex-col gap-4 lg:col-span-4">
-						<!-- Category Breakdown -->
-						<Card.Root class="bg-card flex-1 border-0 shadow-sm">
-							<Card.Header class="pb-2">
-								<Card.Title class="text-muted-foreground text-sm font-medium uppercase tracking-wider"
-									>Category Breakdown</Card.Title
-								>
-							</Card.Header>
-							<Card.Content>
-								{#if userVerboseData?.total_category_challenges && userVerboseData.total_category_challenges.length > 0}
-									{@const categories = (() => {
-										const solveCounts: Record<string, number> = {};
-										for (const s of userVerboseData.solves || []) {
-											if (s.category) solveCounts[s.category] = (solveCounts[s.category] || 0) + 1;
-										}
-										return userVerboseData.total_category_challenges
-											.map((tc) => ({
-												cat: tc.category,
-												count: solveCounts[tc.category] || 0,
-												total: tc.count || 1,
-												pct: Math.round(((solveCounts[tc.category] || 0) / (tc.count || 1)) * 100)
-											}))
-											.sort((a, b) => b.pct - a.pct || b.count - a.count);
-									})()}
-									<div class="grid gap-4 sm:grid-cols-2">
-										{#each categories as c}
-											<div class="space-y-1">
-												<div class="flex justify-between text-xs font-semibold">
-													<span class="text-foreground/90">{c.cat}</span>
-													<span class={c.pct === 100 ? "text-primary font-bold" : "text-muted-foreground"}>
-														{c.count} / {c.total} ({c.pct}%)
-													</span>
-												</div>
-												<div class="bg-muted h-1.5 w-full overflow-hidden rounded-full">
-													<div class="bg-primary h-full transition-all duration-500" style="width: {c.pct}%"></div>
-												</div>
-											</div>
-										{/each}
-									</div>
-								{:else}
-									<p class="text-muted-foreground text-sm">No solves yet.</p>
-								{/if}
-							</Card.Content>
-						</Card.Root>
-
+						<CategoryBreakdown
+							solves={userVerboseData?.solves}
+							totalCategoryChallenges={userVerboseData?.total_category_challenges}
+						/>
 					</div>
 				{/if}
 			</div>

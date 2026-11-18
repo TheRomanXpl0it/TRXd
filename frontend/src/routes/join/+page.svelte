@@ -5,6 +5,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import { loadUser, authState } from '$lib/stores/auth';
 	import { joinTeamWithToken } from '$lib/team';
+	import { siteContent } from '$lib/site-content';
 
 	let { data } = $props();
 
@@ -26,6 +27,10 @@
 		}
 	});
 </script>
+
+<svelte:head>
+	<title>Join team - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 <div class="flex min-h-[60vh] flex-col items-center justify-center p-8 text-center">
 	<Spinner class="mb-4 h-12 w-12 text-primary" />

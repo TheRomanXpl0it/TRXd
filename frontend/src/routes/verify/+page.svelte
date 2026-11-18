@@ -6,11 +6,19 @@
 	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
 	import { completeVerifiedRegistration } from '$lib/auth';
 	import { authState, loadUser } from '@/stores/auth';
-	import { clearPendingSignup, readPendingSignup } from '$lib/registration';
+	import { useQueryClient } from '@tanstack/svelte-query';
+	import {
+		clearPendingSignup,
+		clearVerificationTokenFromUrl,
+		readPendingSignup
+	} from '$lib/registration';
+	import { siteContent } from '$lib/site-content';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { UserPlus } from '@lucide/svelte';
+
+	const queryClient = useQueryClient();
 
 	let name = $state('');
 	let email = $state('');
@@ -20,13 +28,6 @@
 
 	let loading = $state(false);
 	let errorMsg = $state<string | null>(null);
-
-	function clearVerificationTokenFromUrl() {
-		if (typeof window === 'undefined') return;
-		const nextUrl = new URL(window.location.href);
-		nextUrl.searchParams.delete('token');
-		window.history.replaceState({}, '', `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
-	}
 
 	function syncPendingSignup() {
 		const pending = readPendingSignup();
@@ -73,6 +74,7 @@
 			clearVerificationTokenFromUrl();
 
 			await loadUser();
+			queryClient.clear();
 			toast.success('Email verified. Welcome aboard!');
 			if (authState.userMode || authState.user?.team_id) {
 				goto('/challenges');
@@ -88,6 +90,10 @@
 		}
 	}
 </script>
+
+<svelte:head>
+	<title>Verify email - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 <div class="flex min-h-[80vh] items-center justify-center px-4 py-12">
 	<Card.Root

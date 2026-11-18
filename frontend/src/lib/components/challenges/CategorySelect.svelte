@@ -6,7 +6,6 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { cn } from '$lib/utils.js';
-	import VirtualList from '@sveltejs/svelte-virtual-list';
 
 	type Item = { value: string; label: string };
 
@@ -68,6 +67,7 @@
 		{#snippet child({ props })}
 			<Button
 				{...props}
+				id={id || undefined}
 				variant="outline"
 				role="combobox"
 				aria-expanded={open}
@@ -79,30 +79,20 @@
 		{/snippet}
 	</Popover.Trigger>
 
-	<Popover.Content class={cn(widthClass, 'p-0')} {id}>
+	<Popover.Content class={cn(widthClass, 'p-0')}>
 		<div class="p-2">
 			<Input placeholder={searchPlaceholder} bind:value={searchValue} class="h-9" />
 		</div>
 
 		{#if filteredItems.length === 0}
 			<div class="text-muted-foreground border-t py-6 text-center text-sm">No results.</div>
-		{:else if filteredItems.length > 20}
-			<div class="h-[300px] border-t" data-command-group data-value={groupLabel}>
-				<VirtualList items={filteredItems} let:item height="300px">
-					<button
-						type="button"
-						role="option"
-						aria-selected={value === item.value}
-						class="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50"
-						onclick={() => selectItem(item)}
-					>
-						<CheckIcon class={cn('h-4 w-4', value !== item.value && 'text-transparent')} />
-						{item.label}
-					</button>
-				</VirtualList>
-			</div>
 		{:else}
-			<div class="border-t" data-command-group data-value={groupLabel}>
+			<div
+				role="listbox"
+				class="max-h-[300px] overflow-y-auto border-t p-1"
+				data-command-group
+				data-value={groupLabel}
+			>
 				{#each filteredItems as item (item.value)}
 					<button
 						type="button"

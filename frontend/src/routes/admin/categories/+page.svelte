@@ -5,6 +5,7 @@
 	import { Spinner } from '$lib/components/ui/spinner/index.js';
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
+	import * as Dialog from '$lib/components/ui/dialog';
 	import { showSuccess, showError } from '$lib/utils/toast';
 	import { getCategories, createCategory, deleteCategory, updateCategory } from '$lib/categories';
 	import { useQueryClient } from '@tanstack/svelte-query';
@@ -17,6 +18,10 @@
 	let error = $state<string | null>(null);
 	let creating = $state(false);
 	let categoryName = $state('');
+	let renameDialogOpen = $state(false);
+	let renameOriginal = $state('');
+	let renameValue = $state('');
+	let renaming = $state(false);
 
 	const queryClient = useQueryClient();
 
@@ -68,18 +73,29 @@
 		}
 	}
 
-	async function handleRename(name: string) {
-		const newName = prompt(`Enter new name for category "${name}":`, name);
-		if (!newName || !newName.trim() || newName === name) return;
+	function openRename(name: string) {
+		renameOriginal = name;
+		renameValue = name;
+		renameDialogOpen = true;
+	}
 
+	async function submitRename(e: SubmitEvent) {
+		e.preventDefault();
+		const trimmed = renameValue.trim();
+		if (!trimmed || trimmed === renameOriginal || renaming) return;
+
+		renaming = true;
 		try {
-			await updateCategory(name, newName.trim());
-			showSuccess(`Category renamed to "${newName.trim()}".`);
+			await updateCategory(renameOriginal, trimmed);
+			showSuccess(`Category renamed to "${trimmed}".`);
+			renameDialogOpen = false;
 			queryClient.invalidateQueries({ queryKey: ['categories'] });
 			queryClient.invalidateQueries({ queryKey: ['challenges'] });
 			await loadCategories();
 		} catch (err: any) {
 			showError(err, 'Failed to rename category.');
+		} finally {
+			renaming = false;
 		}
 	}
 
@@ -170,7 +186,7 @@
 											variant="ghost"
 											size="icon"
 											class="text-muted-foreground hover:text-primary h-7 w-7 transition-colors"
-											onclick={() => handleRename(name)}
+											onclick={() => openRename(name)}
 											aria-label={`Rename ${name}`}
 										>
 											<Pencil class="h-3.5 w-3.5" />
@@ -194,3 +210,39 @@
 		</Card.Root>
 	{/if}
 </div>
+
+<Dialog.Root bind:open={renameDialogOpen}>
+	<Dialog.Content class="sm:max-w-[400px]">
+		<form onsubmit={submitRename}>
+			<Dialog.Header>
+				<Dialog.Title>Rename category</Dialog.Title>
+				<Dialog.Description>
+					Enter a new name for category <span class="text-foreground font-semibold">{renameOriginal}</span>.
+				</Dialog.Description>
+			</Dialog.Header>
+			<div class="py-4">
+				<Label for="rename-category-input" class="sr-only">New category name</Label>
+				<Input
+					id="rename-category-input"
+					bind:value={renameValue}
+					disabled={renaming}
+					placeholder="Category name"
+				/>
+			</div>
+			<Dialog.Footer>
+				<Button type="button" variant="ghost" onclick={() => (renameDialogOpen = false)}>
+					Cancel
+				</Button>
+				<Button
+					type="submit"
+					disabled={renaming || !renameValue.trim() || renameValue.trim() === renameOriginal}
+				>
+					{#if renaming}
+						<Spinner class="mr-2 h-4 w-4" />
+					{/if}
+					Rename
+				</Button>
+			</Dialog.Footer>
+		</form>
+	</Dialog.Content>
+</Dialog.Root>

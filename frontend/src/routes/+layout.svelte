@@ -4,7 +4,7 @@
 	import { ModeWatcher } from 'mode-watcher';
 	import Layout from '$lib/components/Layout.svelte';
 	import { siteContent } from '$lib/site-content';
-	import { authState, loadUser } from '$lib/stores/auth';
+	import { authState } from '$lib/stores/auth';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import { page } from '$app/state';
@@ -21,8 +21,6 @@
 			}
 		}
 	});
-
-	loadUser(false);
 </script>
 
 <svelte:head>

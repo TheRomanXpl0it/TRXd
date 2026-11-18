@@ -9,9 +9,11 @@
 	import { Users, ArrowLeft } from '@lucide/svelte';
 	import { authState, loadUser } from '$lib/stores/auth';
 	import { siteContent } from '$lib/site-content';
+	import NotFound from '$lib/components/NotFound.svelte';
+	import Spinner from '$lib/components/ui/spinner/spinner.svelte';
 
 	$effect(() => {
-		if (authState.ready && authState.user?.team_id) {
+		if (authState.ready && !authState.userMode && authState.user?.team_id) {
 			goto('/team');
 		}
 	});
@@ -32,7 +34,7 @@
 
 		joinLoading = true;
 		try {
-			await joinTeam(joinName, joinPassword);
+			await joinTeam(joinName.trim(), joinPassword);
 			await loadUser(true);
 			toast.success('Team joined, welcome aboard!');
 			goto('/team');
@@ -46,9 +48,16 @@
 </script>
 
 <svelte:head>
-	<title>Join team | {$siteContent.brand.shortName}</title>
+	{#if authState.userMode}
+		<title>404 Not Found</title>
+	{:else}
+		<title>Join team | {$siteContent.brand.shortName}</title>
+	{/if}
 </svelte:head>
 
+{#if authState.userMode}
+	<NotFound status={404} />
+{:else}
 <div class="flex min-h-[80vh] flex-col items-center justify-center px-4 py-12">
 	<div class="mx-auto mb-4 w-full max-w-md sm:max-w-[420px]">
 		<Button variant="ghost" onclick={() => goto('/team')} class="gap-2">
@@ -111,9 +120,7 @@
 					size="lg"
 				>
 					{#if joinLoading}
-						<span
-							class="border-background mr-2 h-4 w-4 animate-spin rounded-full border-2 border-t-transparent"
-						></span>
+						<Spinner class="mr-2 h-4 w-4" />
 						Joining...
 					{:else}
 						Join Team
@@ -141,3 +148,4 @@
 		</form>
 	</Card.Root>
 </div>
+{/if}

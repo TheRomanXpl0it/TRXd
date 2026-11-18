@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { getChallenges, groupByCategory, updateChallengeOrder } from '$lib/challenges';
-	import { authState } from '$lib/stores/auth';
+	import { authState, loadUser } from '$lib/stores/auth';
 	import { untrack } from 'svelte';
 	import { createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import { getConfigs } from '$lib/config';
@@ -51,22 +51,23 @@
 			fixedOrderEnabled = false;
 		}
 	});
+	let selectedId = $state<number | null>(null);
+	let countdownEnds: Record<string, number> = $state({});
+	let now = $state(Date.now());
+	const lastSyncedTimeouts: Record<string, number> = {};
+
 	const upcoming = $derived.by(() => {
 		if (!authState.ready || !authState.startTime) return false;
-		return new Date(authState.startTime).getTime() > Date.now();
+		return new Date(authState.startTime).getTime() > now;
 	});
 	const ended = $derived.by(() => {
 		if (!authState.ready || !authState.endTime) return false;
-		return new Date(authState.endTime).getTime() < Date.now();
+		return new Date(authState.endTime).getTime() < now;
 	});
 	const submissionsClosed = $derived(ended && !isAdmin);
 	const isMissingTeam = $derived(
 		authState.ready && authState.user && !authState.userMode && !authState.user?.team_id && !isAdmin
 	);
-
-	let selectedId = $state<number | null>(null);
-	let countdownEnds: Record<string, number> = $state({});
-	let now = $state(Date.now());
 
 	let search = $state('');
 	let debouncedSearch = $state('');
@@ -78,7 +79,7 @@
 	const challengesQuery = createQuery(() => ({
 		queryKey: ['challenges'],
 		queryFn: getChallenges,
-		enabled: authState.ready && !!authState.user,
+		enabled: authState.ready && !!authState.user && !isMissingTeam && (!upcoming || isAdmin),
 		refetchInterval: 30000
 	}));
 
@@ -90,6 +91,10 @@
 
 	const filteredChallenges = $derived.by(() => {
 		let list = [...challenges];
+
+		if (challengeView === 'sidebar') {
+			return list;
+		}
 
 		if (isAdmin && !showHidden) {
 			list = list.filter((c) => !c.hidden);
@@ -145,15 +150,28 @@
 		untrack(() => {
 			let changed = false;
 			const nextEnds: Record<string, number> = { ...countdownEnds };
+			const seenIds = new Set<string>();
 
 			for (const c of currentChallenges) {
+				const key = String(c.id);
+				seenIds.add(key);
 				if (typeof c?.timeout === 'number' && c.timeout > 0) {
-					if (nextEnds[c.id] === undefined) {
-						nextEnds[c.id] = Date.now() + c.timeout * 1000;
+					if (nextEnds[key] === undefined || lastSyncedTimeouts[key] !== c.timeout) {
+						nextEnds[key] = Date.now() + c.timeout * 1000;
+						lastSyncedTimeouts[key] = c.timeout;
 						changed = true;
 					}
-				} else if (nextEnds[c.id] !== undefined) {
-					delete nextEnds[c.id];
+				} else if (nextEnds[key] !== undefined) {
+					delete nextEnds[key];
+					delete lastSyncedTimeouts[key];
+					changed = true;
+				}
+			}
+
+			for (const key of Object.keys(nextEnds)) {
+				if (!seenIds.has(key)) {
+					delete nextEnds[key];
+					delete lastSyncedTimeouts[key];
 					changed = true;
 				}
 			}
@@ -163,16 +181,18 @@
 	});
 
 	// Handle errors
+	let lastHandledError: unknown = null;
 	$effect(() => {
-		if (challengesQuery.error) {
-			if (challengesQuery.error.message === 'Not started yet') {
-				// This is handled in the UI
-				return;
-			}
-			toast.error(challengesQuery.error.message || 'You need to join a team first!');
-			if (challengesQuery.error.message?.toLowerCase().includes('team')) {
-				goto('/team');
-			}
+		const err = challengesQuery.error;
+		if (!err || err === lastHandledError) return;
+		lastHandledError = err;
+
+		if (err.message === 'Not started yet') {
+			return;
+		}
+		if (err.message?.toLowerCase().includes('team')) {
+			toast.error(err.message);
+			goto('/team');
 		}
 	});
 
@@ -247,7 +267,6 @@
 		}
 
 		const sourceId = draggedChall.id;
-		const sourceOrder = draggedChall.sort_order;
 		const targetId = targetChall.id;
 		handleDragEnd();
 
@@ -255,15 +274,14 @@
 		const toIndex = categoryItems.findIndex((c) => c.id === targetId);
 		if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
 
-		const newOrder = typeof targetChall.sort_order === 'number'
-			? targetChall.sort_order
-			: (toIndex + 1);
-
-		if (sourceOrder !== undefined && sourceOrder === newOrder) return;
+		const newOrder =
+			typeof targetChall.sort_order === 'number' && targetChall.sort_order > 0
+				? targetChall.sort_order
+				: toIndex + 1;
 
 		const prevData = queryClient.getQueryData<Challenge[]>(['challenges']);
 		if (prevData) {
-			const updated = [...prevData];
+			const updated = prevData.map((c) => ({ ...c }));
 			const fromIdx = updated.findIndex((c) => c.id === sourceId);
 			const toIdx = updated.findIndex((c) => c.id === targetId);
 			if (fromIdx !== -1 && toIdx !== -1) {
@@ -320,16 +338,24 @@
 	});
 
 	function updateCountdown(id: string | number, newCountdown: number) {
+		const key = String(id);
 		if (newCountdown <= 0) {
-			delete countdownEnds[id];
+			delete countdownEnds[key];
+			delete lastSyncedTimeouts[key];
 		} else {
-			countdownEnds[id] = Date.now() + newCountdown * 1000;
+			countdownEnds[key] = Date.now() + newCountdown * 1000;
+			lastSyncedTimeouts[key] = newCountdown;
 		}
 	}
 
 	function handleChallengeSolved() {
 		// Refetch challenges to get updated data
 		challengesQuery.refetch();
+	}
+
+	async function handleCompetitionStart() {
+		await loadUser(true).catch(() => {});
+		queryClient.invalidateQueries({ queryKey: ['challenges'] });
 	}
 </script>
 
@@ -345,12 +371,12 @@
 			bind:showHidden
 			canSeeHidden={isAdmin}
 			{allTags}
-			activeFiltersCount={filterTags.length}
+			activeFiltersCount={filterTags.length + (search.trim() ? 1 : 0)}
 		/>
 	</div>
 {/if}
 
-{#if submissionsClosed}
+{#if submissionsClosed && challengeView !== 'sidebar'}
 	<div
 		class="mb-6 rounded-xl border border-amber-300/60 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 dark:border-amber-600/40 dark:bg-amber-950/25 dark:text-amber-100"
 	>
@@ -378,7 +404,7 @@
 		</div>
 	</div>
 {:else if upcoming && !isAdmin}
-	<WaitingPage startTime={authState.startTime} />
+	<WaitingPage startTime={authState.startTime} onStart={handleCompetitionStart} />
 {:else if loading}
 	<div class="flex flex-col items-center justify-center py-12">
 		<div
@@ -396,19 +422,28 @@
 {:else if challengeView === 'sidebar'}
 	<div
 		id="challenges-split-view"
-		class="-my-6 flex h-[calc(100dvh-5rem)] min-h-0 w-full flex-col overflow-hidden py-6"
+		class="-my-6 flex h-[calc(100dvh-5rem)] min-h-0 w-full flex-col gap-4 overflow-hidden py-6"
 	>
-		<SidebarChallengeView
-			{grouped}
-			onSolved={handleChallengeSolved}
-			onOpenChallenge={openChallenge}
-			{countdowns}
-			onCountdownUpdate={updateCountdown}
-			{submissionsClosed}
-			bind:showHidden
-			bind:filterTags
-			{allTags}
-		/>
+		{#if submissionsClosed}
+			<div
+				class="shrink-0 rounded-xl border border-amber-300/60 bg-amber-50/90 px-4 py-3 text-sm text-amber-950 dark:border-amber-600/40 dark:bg-amber-950/25 dark:text-amber-100"
+			>
+				Flag submissions are closed. Challenges and instances remain available for post-CTF access.
+			</div>
+		{/if}
+		<div class="min-h-0 flex-1">
+			<SidebarChallengeView
+				{grouped}
+				onSolved={handleChallengeSolved}
+				{countdowns}
+				onCountdownUpdate={updateCountdown}
+				{submissionsClosed}
+				bind:search
+				bind:showHidden
+				bind:filterTags
+				{allTags}
+			/>
+		</div>
 	</div>
 {:else}
 	<div class="space-y-10 pb-20">

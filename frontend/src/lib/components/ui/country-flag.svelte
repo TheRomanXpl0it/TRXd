@@ -1,8 +1,9 @@
 <script lang="ts">
 	const flags = import.meta.glob('/node_modules/country-flag-icons/3x2/*.svg', {
+		eager: true,
 		query: '?url',
 		import: 'default'
-	}) as Record<string, () => Promise<string>>;
+	}) as Record<string, string>;
 
 	const normalizeCode = (iso2: string) => {
 		const code = iso2?.trim().toUpperCase() ?? '';
@@ -23,9 +24,6 @@
 		height?: number | string;
 	} = $props();
 
-	let flagUrl = $state('');
-	let loadId = 0;
-
 	const widthValue = $derived(cssSize(width));
 	const heightValue = $derived(cssSize(height));
 	const widthAttr = $derived(typeof width === 'number' ? width : undefined);
@@ -38,18 +36,9 @@
 	const fallbackStyle = $derived(
 		className ? undefined : `width: ${widthValue}; height: ${heightValue};`
 	);
-
-	$effect(() => {
+	const flagUrl = $derived.by(() => {
 		const code = normalizeCode(country);
-		const loader = flags[`/node_modules/country-flag-icons/3x2/${code}.svg`];
-		const currentLoad = ++loadId;
-		flagUrl = '';
-
-		if (!loader) return;
-
-		loader().then((url) => {
-			if (currentLoad === loadId) flagUrl = url;
-		});
+		return code ? (flags[`/node_modules/country-flag-icons/3x2/${code}.svg`] ?? '') : '';
 	});
 </script>
 

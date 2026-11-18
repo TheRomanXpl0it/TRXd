@@ -2,7 +2,12 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { ArrowLeft, KeyRound, UserPlus } from '@lucide/svelte';
+	import { siteContent } from '$lib/site-content';
 </script>
+
+<svelte:head>
+	<title>Forgot password - {$siteContent.brand.browserTitle}</title>
+</svelte:head>
 
 <div class="flex min-h-[80vh] items-center justify-center px-4 py-12">
 	<Card.Root

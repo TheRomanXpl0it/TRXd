@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getSubmissions, deleteSubmission } from '$lib/challenges';
 	import { authState } from '$lib/stores/auth';
+	import { siteContent } from '$lib/site-content';
 	import { formatTimeAgo } from '$lib/utils/time';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
@@ -64,13 +65,11 @@
 			deleting[id] = false;
 		}
 	}
-	
-	$effect(() => {
-		if (currentPage !== paginationInfo.page && !loading) {
-			loadSubmissions(currentPage);
-		}
-	});
 </script>
+
+<svelte:head>
+	<title>Submissions | {$siteContent.brand.adminTitleSuffix}</title>
+</svelte:head>
 
 <div class="space-y-6">
 	<div class="flex items-center justify-between">
@@ -140,7 +139,7 @@
 								<Table.Cell class="max-w-[120px] truncate">
 									{#if sub.team_id}
 										<a
-											href={authState.userMode ? `/account/${sub.user_id || sub.team_id}` : `/team/${sub.team_id}`}
+											href={authState.userMode ? `/account/${sub.team_id || sub.user_id}` : `/team/${sub.team_id}`}
 											class="text-inherit no-underline hover:underline cursor-pointer"
 										>
 											{sub.team_name}
@@ -166,7 +165,13 @@
 										<code class="px-1.5 py-0.5 rounded bg-muted/50 text-[10px] text-muted-foreground truncate w-full {expandedFlags[sub.id] ? 'break-all whitespace-normal' : ''}">
 											{sub.flag}
 										</code>
-										<Button variant="ghost" size="icon" class="h-6 w-6 shrink-0" onclick={() => expandedFlags[sub.id] = !expandedFlags[sub.id]}>
+										<Button
+											variant="ghost"
+											size="icon"
+											class="h-6 w-6 shrink-0"
+											aria-label={expandedFlags[sub.id] ? 'Collapse flag' : 'Expand flag'}
+											onclick={() => expandedFlags[sub.id] = !expandedFlags[sub.id]}
+										>
 											{#if expandedFlags[sub.id]}
 												<EyeOff class="h-3 w-3" />
 											{:else}
@@ -198,6 +203,7 @@
 										variant="ghost"
 										size="icon"
 										class="text-muted-foreground hover:text-destructive transition-colors h-8 w-8"
+										aria-label="Delete submission {sub.id}"
 										onclick={() => remove(sub.id)}
 										disabled={deleting[sub.id]}
 									>
@@ -218,7 +224,7 @@
 		
 		{#if paginationInfo.pages > 1}
 			<div class="mt-4 flex justify-center">
-				<Pagination.Root {count} {perPage} bind:page={currentPage} siblingCount={1}>
+				<Pagination.Root {count} {perPage} page={currentPage} onPageChange={(p) => loadSubmissions(p)} siblingCount={1}>
 					{#snippet children({ pages, currentPage })}
 						<Pagination.Content>
 							<Pagination.Item>
